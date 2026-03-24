@@ -86,6 +86,10 @@
   <data name="UserDeleted" xml:space="preserve"><value>User '{0}' deleted.</value></data>
   <data name="UserDeleteFailed" xml:space="preserve"><value>Failed to delete user.</value></data>
 
+  <!-- Game Info -->
+  <data name="GameInfo" xml:space="preserve"><value>Game Info</value></data>
+  <data name="GameInfoSubtitle" xml:space="preserve"><value>Learn how the Metro Mania coding challenge works.</value></data>
+
   <!-- Not Found -->
   <data name="PageNotFound" xml:space="preserve"><value>Page Not Found</value></data>
   <data name="NotFoundMessage" xml:space="preserve"><value>Sorry, the content you are looking for does not exist.</value></data>

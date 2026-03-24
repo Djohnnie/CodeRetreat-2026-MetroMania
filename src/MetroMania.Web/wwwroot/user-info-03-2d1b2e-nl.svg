@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <rect width="1280" height="720" fill="#2d1b2e" />
+
+  <!-- Section title -->
+  <text x="640" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e94560">
+    De Uitdaging
+  </text>
+
+  <!-- Bot icon placeholder -->
+  <rect x="540" y="130" width="200" height="140" rx="20" fill="none" stroke="#4ecca3" stroke-width="4" />
+  <circle cx="590" cy="190" r="16" fill="#4ecca3" />
+  <circle cx="690" cy="190" r="16" fill="#4ecca3" />
+  <rect x="580" y="230" width="120" height="10" rx="5" fill="#4ecca3" />
+  <text x="640" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#a0a0c0">
+    Jouw Bot
+  </text>
+
+  <!-- Arrow down -->
+  <polygon points="640,320 660,350 650,350 650,380 630,380 630,350 620,350" fill="#e94560" />
+
+  <!-- Challenge items -->
+  <rect x="140" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
+  <text x="290" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#e94560">
+    ⚡ Verbinden
+  </text>
+  <text x="290" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    Teken metrolijnen tussen
+  </text>
+  <text x="290" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    stations op strategische wijze
+  </text>
+
+  <rect x="490" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
+  <text x="640" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#4ecca3">
+    🚇 Vervoeren
+  </text>
+  <text x="640" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    Breng passagiers naar hun
+  </text>
+  <text x="640" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    bijpassende stationstype
+  </text>
+
+  <rect x="840" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
+  <text x="990" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#f9a825">
+    🏆 Overleven
+  </text>
+  <text x="990" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    Houd het netwerk draaiende
+  </text>
+  <text x="990" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    terwijl de vraag groeit
+  </text>
+
+  <!-- Bottom tagline -->
+  <text x="640" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#e0e0f0">
+    Kan jouw bot de stad in beweging houden?
+  </text>
+
+  <!-- Slide indicator -->
+  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
+    Dia 3 van 3 — Jouw Missie
+  </text>
+</svg>

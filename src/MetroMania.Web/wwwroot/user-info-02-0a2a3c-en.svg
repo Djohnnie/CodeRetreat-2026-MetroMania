@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <rect width="1280" height="720" fill="#0a2a3c" />
+
+  <!-- Section title -->
+  <text x="640" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e94560">
+    How It Works
+  </text>
+
+  <!-- Circle station -->
+  <circle cx="220" cy="220" r="40" fill="none" stroke="#e94560" stroke-width="4" />
+  <text x="220" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#a0a0c0">
+    Circle Station
+  </text>
+
+  <!-- Square station -->
+  <rect x="580" y="180" width="80" height="80" fill="none" stroke="#4ecca3" stroke-width="4" />
+  <text x="620" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#a0a0c0">
+    Square Station
+  </text>
+
+  <!-- Triangle station -->
+  <polygon points="1020,180 1060,260 980,260" fill="none" stroke="#f9a825" stroke-width="4" />
+  <text x="1020" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#a0a0c0">
+    Triangle Station
+  </text>
+
+  <!-- Metro lines connecting stations -->
+  <line x1="260" y1="220" x2="580" y2="220" stroke="#e94560" stroke-width="6" stroke-linecap="round" />
+  <line x1="660" y1="220" x2="980" y2="220" stroke="#4ecca3" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Passengers -->
+  <circle cx="400" cy="205" r="10" fill="#e94560" />
+  <circle cx="430" cy="205" r="10" fill="#4ecca3" />
+  <circle cx="800" cy="205" r="10" fill="#f9a825" />
+
+  <!-- Description box -->
+  <rect x="140" y="360" width="1000" height="200" rx="16" fill="#0f3460" opacity="0.5" />
+  <text x="640" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
+    Stations appear as different shapes on the map.
+  </text>
+  <text x="640" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
+    Passengers spawn at stations and want to reach a station
+  </text>
+  <text x="640" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
+    matching their type. Connect stations with metro lines
+  </text>
+  <text x="640" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
+    to transport them to their destination!
+  </text>
+
+  <!-- Slide indicator -->
+  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
+    Slide 2 of 3 — Game Mechanics
+  </text>
+</svg>

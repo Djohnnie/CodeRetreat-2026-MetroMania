@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <rect width="1280" height="720" fill="#1a1a2e" />
+
+  <!-- Decorative metro lines -->
+  <line x1="0" y1="200" x2="1280" y2="200" stroke="#e94560" stroke-width="4" opacity="0.3" />
+  <line x1="0" y1="520" x2="1280" y2="520" stroke="#0f3460" stroke-width="4" opacity="0.3" />
+  <circle cx="300" cy="200" r="12" fill="#e94560" opacity="0.5" />
+  <circle cx="640" cy="200" r="12" fill="#e94560" opacity="0.5" />
+  <circle cx="980" cy="200" r="12" fill="#e94560" opacity="0.5" />
+
+  <!-- Title -->
+  <text x="640" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#e94560">
+    Metro Mania
+  </text>
+
+  <!-- Subtitle -->
+  <text x="640" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#a0a0c0">
+    Bouw je bot. Verbind de stad. Houd passagiers in beweging.
+  </text>
+
+  <!-- Slide indicator -->
+  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
+    Dia 1 van 3 — Introductie
+  </text>
+
+  <!-- Decorative station shapes -->
+  <circle cx="440" cy="480" r="24" fill="none" stroke="#e94560" stroke-width="3" />
+  <rect x="606" y="456" width="48" height="48" fill="none" stroke="#0f3460" stroke-width="3" />
+  <polygon points="840,456 864,504 816,504" fill="none" stroke="#e94560" stroke-width="3" />
+</svg>

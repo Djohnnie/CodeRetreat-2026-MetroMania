@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <rect width="1280" height="720" fill="#2d1b2e" />
+
+  <!-- Section title -->
+  <text x="640" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e94560">
+    The Challenge
+  </text>
+
+  <!-- Bot icon placeholder -->
+  <rect x="540" y="130" width="200" height="140" rx="20" fill="none" stroke="#4ecca3" stroke-width="4" />
+  <circle cx="590" cy="190" r="16" fill="#4ecca3" />
+  <circle cx="690" cy="190" r="16" fill="#4ecca3" />
+  <rect x="580" y="230" width="120" height="10" rx="5" fill="#4ecca3" />
+  <text x="640" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#a0a0c0">
+    Your Bot
+  </text>
+
+  <!-- Arrow down -->
+  <polygon points="640,320 660,350 650,350 650,380 630,380 630,350 620,350" fill="#e94560" />
+
+  <!-- Challenge items -->
+  <rect x="140" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
+  <text x="290" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#e94560">
+    ⚡ Connect
+  </text>
+  <text x="290" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    Draw metro lines between
+  </text>
+  <text x="290" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    stations strategically
+  </text>
+
+  <rect x="490" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
+  <text x="640" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#4ecca3">
+    🚇 Transport
+  </text>
+  <text x="640" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    Move passengers to their
+  </text>
+  <text x="640" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    matching station type
+  </text>
+
+  <rect x="840" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
+  <text x="990" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#f9a825">
+    🏆 Survive
+  </text>
+  <text x="990" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    Keep the network alive
+  </text>
+  <text x="990" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
+    as demand grows
+  </text>
+
+  <!-- Bottom tagline -->
+  <text x="640" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#e0e0f0">
+    Can your bot keep the city moving?
+  </text>
+
+  <!-- Slide indicator -->
+  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
+    Slide 3 of 3 — Your Mission
+  </text>
+</svg>

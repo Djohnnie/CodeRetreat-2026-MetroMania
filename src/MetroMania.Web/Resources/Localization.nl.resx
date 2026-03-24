@@ -86,6 +86,10 @@
   <data name="UserDeleted" xml:space="preserve"><value>Gebruiker '{0}' verwijderd.</value></data>
   <data name="UserDeleteFailed" xml:space="preserve"><value>Verwijderen van gebruiker mislukt.</value></data>
 
+  <!-- Game Info -->
+  <data name="GameInfo" xml:space="preserve"><value>Spel Info</value></data>
+  <data name="GameInfoSubtitle" xml:space="preserve"><value>Ontdek hoe de Metro Mania codeeruitdaging werkt.</value></data>
+
   <!-- Not Found -->
   <data name="PageNotFound" xml:space="preserve"><value>Pagina niet gevonden</value></data>
   <data name="NotFoundMessage" xml:space="preserve"><value>De pagina die je zoekt bestaat helaas niet.</value></data>

@@ -1,0 +1,277 @@
+@page "/info"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Markdig
+@using Markdig.Syntax
+@using Markdig.Syntax.Inlines
+@using Markdig.Extensions.Tables
+@using System.Globalization
+@using System.Text.RegularExpressions
+@inject IWebHostEnvironment Env
+@inject IStringLocalizer<Localization> Loc
+
+<PageTitle>MetroMania - @Loc["GameInfo"]</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">Metro Mania</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["GameInfoSubtitle"]</MudText>
+
+@* ── Carousel ── *@
+<MudPaper Elevation="0" Class="mb-6" Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; overflow: hidden;">
+    <MudCarousel Class="mud-width-full" Style="height: 420px;" ShowArrows="true" ShowBullets="true"
+                 EnableSwipeGesture="true" AutoCycle="false" TData="object">
+        @foreach (var slide in _slides)
+        {
+            <MudCarouselItem>
+                <div class="d-flex justify-center align-center"
+                     style="height: 100%; background-color: @slide.BackgroundColor;">
+                    <MudImage Src="@slide.FileName" Alt="@slide.FileName"
+                              Style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                </div>
+            </MudCarouselItem>
+        }
+    </MudCarousel>
+</MudPaper>
+
+@* ── Markdown content ── *@
+@if (_blocks is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudPaper Elevation="0" Class="pa-6" Style="border: 1px solid var(--mud-palette-lines-default);">
+        @foreach (var block in _blocks)
+        {
+            @RenderBlock(block)
+        }
+    </MudPaper>
+}
+
+@code {
+    private MarkdownDocument? _blocks;
+    private string _lang = "en";
+    private List<SlideInfo> _slides = [];
+
+    private record SlideInfo(string FileName, string BackgroundColor);
+
+    // Matches: user-info-{number}-{hex}-{lang}.svg
+    private static readonly Regex SlideFilePattern = new(
+        @"^user-info-\d+-(?<color>[0-9a-fA-F]{6})-(?<lang>[a-z]{2})\.svg$",
+        RegexOptions.Compiled);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName is "nl" ? "nl" : "en";
+
+        // Discover slides dynamically from wwwroot filenames
+        _slides = Directory.GetFiles(Env.WebRootPath, "user-info-*.svg")
+            .Select(f => Path.GetFileName(f))
+            .Select(f => (FileName: f, Match: SlideFilePattern.Match(f)))
+            .Where(x => x.Match.Success && x.Match.Groups["lang"].Value == _lang)
+            .OrderBy(x => x.FileName)
+            .Select(x => new SlideInfo(x.FileName, $"#{x.Match.Groups["color"].Value}"))
+            .ToList();
+
+        var path = Path.Combine(Env.WebRootPath, $"user-manual-{_lang}.md");
+        var markdown = await File.ReadAllTextAsync(path);
+        var pipeline = new MarkdownPipelineBuilder().UsePipeTables().Build();
+        _blocks = Markdown.Parse(markdown, pipeline);
+    }
+
+    private RenderFragment RenderBlock(Markdig.Syntax.Block block) => builder =>
+    {
+        switch (block)
+        {
+            case HeadingBlock heading:
+                var typo = heading.Level switch
+                {
+                    1 => Typo.h3,
+                    2 => Typo.h4,
+                    3 => Typo.h5,
+                    4 => Typo.h6,
+                    _ => Typo.subtitle1
+                };
+                builder.OpenComponent<MudText>(0);
+                builder.AddAttribute(1, nameof(MudText.Typo), typo);
+                builder.AddAttribute(2, nameof(MudText.Class), heading.Level <= 2 ? "mb-3 mt-4" : "mb-2 mt-4");
+                builder.AddAttribute(3, nameof(MudText.Style), "font-weight: 600;");
+                builder.AddAttribute(4, nameof(MudText.ChildContent), (RenderFragment)(inner =>
+                {
+                    RenderInlines(inner, heading.Inline);
+                }));
+                builder.CloseComponent();
+                break;
+
+            case ParagraphBlock paragraph:
+                builder.OpenComponent<MudText>(0);
+                builder.AddAttribute(1, nameof(MudText.Typo), Typo.body1);
+                builder.AddAttribute(2, nameof(MudText.Class), "mb-3");
+                builder.AddAttribute(3, nameof(MudText.ChildContent), (RenderFragment)(inner =>
+                {
+                    RenderInlines(inner, paragraph.Inline);
+                }));
+                builder.CloseComponent();
+                break;
+
+            case ListBlock list:
+                builder.OpenComponent<MudList<string>>(0);
+                builder.AddAttribute(1, nameof(MudList<string>.Class), "mb-3");
+                builder.AddAttribute(2, nameof(MudList<string>.Dense), true);
+                builder.AddAttribute(3, nameof(MudList<string>.ChildContent), (RenderFragment)(listBuilder =>
+                {
+                    foreach (var item in list)
+                    {
+                        if (item is ListItemBlock listItem)
+                        {
+                            listBuilder.OpenComponent<MudListItem<string>>(0);
+                            listBuilder.AddAttribute(1, nameof(MudListItem<string>.Icon), Icons.Material.Filled.ChevronRight);
+                            listBuilder.AddAttribute(2, nameof(MudListItem<string>.IconColor), Color.Primary);
+                            listBuilder.AddAttribute(3, nameof(MudListItem<string>.ChildContent), (RenderFragment)(itemBuilder =>
+                            {
+                                foreach (var sub in listItem)
+                                {
+                                    if (sub is ParagraphBlock p)
+                                    {
+                                        RenderInlines(itemBuilder, p.Inline);
+                                    }
+                                }
+                            }));
+                            listBuilder.CloseComponent();
+                        }
+                    }
+                }));
+                builder.CloseComponent();
+                break;
+
+            case QuoteBlock quote:
+                builder.OpenComponent<MudAlert>(0);
+                builder.AddAttribute(1, nameof(MudAlert.Severity), Severity.Info);
+                builder.AddAttribute(2, nameof(MudAlert.Variant), Variant.Outlined);
+                builder.AddAttribute(3, nameof(MudAlert.Dense), true);
+                builder.AddAttribute(4, nameof(MudAlert.Class), "mb-3");
+                builder.AddAttribute(5, nameof(MudAlert.ChildContent), (RenderFragment)(alertBuilder =>
+                {
+                    foreach (var child in quote)
+                    {
+                        if (child is ParagraphBlock p)
+                        {
+                            RenderInlines(alertBuilder, p.Inline);
+                        }
+                    }
+                }));
+                builder.CloseComponent();
+                break;
+
+            case Table table:
+                RenderTable(builder, table);
+                break;
+
+            case ThematicBreakBlock:
+                builder.OpenComponent<MudDivider>(0);
+                builder.AddAttribute(1, nameof(MudDivider.Class), "my-4");
+                builder.CloseComponent();
+                break;
+        }
+    };
+
+    private void RenderTable(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder, Table table)
+    {
+        var headerRow = table.OfType<TableRow>().FirstOrDefault(r => r.IsHeader);
+        var bodyRows = table.OfType<TableRow>().Where(r => !r.IsHeader).ToList();
+
+        builder.OpenComponent<MudSimpleTable>(0);
+        builder.AddAttribute(1, nameof(MudSimpleTable.Hover), true);
+        builder.AddAttribute(2, nameof(MudSimpleTable.Dense), true);
+        builder.AddAttribute(3, nameof(MudSimpleTable.Bordered), true);
+        builder.AddAttribute(4, nameof(MudSimpleTable.Class), "mb-3");
+        builder.AddAttribute(5, nameof(MudSimpleTable.ChildContent), (RenderFragment)(tableBuilder =>
+        {
+            if (headerRow is not null)
+            {
+                tableBuilder.OpenElement(0, "thead");
+                tableBuilder.OpenElement(1, "tr");
+                foreach (var cell in headerRow.OfType<TableCell>())
+                {
+                    tableBuilder.OpenElement(2, "th");
+                    foreach (var child in cell)
+                    {
+                        if (child is ParagraphBlock p) RenderInlines(tableBuilder, p.Inline);
+                    }
+                    tableBuilder.CloseElement();
+                }
+                tableBuilder.CloseElement();
+                tableBuilder.CloseElement();
+            }
+
+            tableBuilder.OpenElement(0, "tbody");
+            foreach (var row in bodyRows)
+            {
+                tableBuilder.OpenElement(1, "tr");
+                foreach (var cell in row.OfType<TableCell>())
+                {
+                    tableBuilder.OpenElement(2, "td");
+                    foreach (var child in cell)
+                    {
+                        if (child is ParagraphBlock p) RenderInlines(tableBuilder, p.Inline);
+                    }
+                    tableBuilder.CloseElement();
+                }
+                tableBuilder.CloseElement();
+            }
+            tableBuilder.CloseElement();
+        }));
+        builder.CloseComponent();
+    }
+
+    private static void RenderInlines(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder, ContainerInline? inlines)
+    {
+        if (inlines is null) return;
+
+        foreach (var inline in inlines)
+        {
+            switch (inline)
+            {
+                case LiteralInline literal:
+                    builder.AddContent(0, literal.Content.ToString());
+                    break;
+                case EmphasisInline emphasis:
+                    var tag = emphasis.DelimiterCount == 2 ? "strong" : "em";
+                    builder.OpenElement(0, tag);
+                    RenderInlines(builder, emphasis);
+                    builder.CloseElement();
+                    break;
+                case CodeInline code:
+                    builder.OpenElement(0, "code");
+                    builder.AddContent(1, code.Content);
+                    builder.CloseElement();
+                    break;
+                case LinkInline link:
+                    if (link.IsImage)
+                    {
+                        builder.OpenComponent<MudImage>(0);
+                        builder.AddAttribute(1, nameof(MudImage.Src), link.Url);
+                        builder.AddAttribute(2, nameof(MudImage.Alt), link.FirstChild?.ToString() ?? "");
+                        builder.AddAttribute(3, nameof(MudImage.Fluid), true);
+                        builder.AddAttribute(4, nameof(MudImage.Class), "my-2");
+                        builder.CloseComponent();
+                    }
+                    else
+                    {
+                        builder.OpenElement(0, "a");
+                        builder.AddAttribute(1, "href", link.Url);
+                        builder.AddAttribute(2, "target", "_blank");
+                        builder.AddAttribute(3, "rel", "noopener noreferrer");
+                        RenderInlines(builder, link);
+                        builder.CloseElement();
+                    }
+                    break;
+                case LineBreakInline:
+                    builder.OpenElement(0, "br");
+                    builder.CloseElement();
+                    break;
+            }
+        }
+    }
+}
