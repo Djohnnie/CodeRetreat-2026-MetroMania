@@ -73,9 +73,13 @@
             <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
                 @Loc["Dashboard"]
             </MudNavLink>
-            <MudNavLink Href="/info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Info">
-                @Loc["GameInfo"]
-            </MudNavLink>
+            <AuthorizeView>
+                <Authorized>
+                    <MudNavLink Href="/info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Info">
+                        @Loc["GameInfo"]
+                    </MudNavLink>
+                </Authorized>
+            </AuthorizeView>
             <AuthorizeView Roles="Admin">
                 <Authorized>
                     <MudNavLink Href="/admin/users" Icon="@Icons.Material.Filled.People">
