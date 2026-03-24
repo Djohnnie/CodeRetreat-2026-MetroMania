@@ -5,6 +5,7 @@
 @using MetroMania.Application.Levels.Commands
 @using MetroMania.Application.Levels.Queries
 @inject IMediator Mediator
+@inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 
 <PageTitle>MetroMania - @Loc["Levels"]</PageTitle>
@@ -37,8 +38,17 @@
                       Required="true" RequiredError="@Loc["TitleRequired"]" Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
         <MudTextField @bind-Value="_editDescription" Label="@Loc["LevelDescription"]" Variant="Variant.Outlined"
-                      Lines="3" Class="mb-4"
+                      Lines="3" Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
+        <div class="d-flex gap-3 mb-4">
+            <MudNumericField @bind-Value="_editGridWidth" Label="@Loc["GridWidth"]" Variant="Variant.Outlined"
+                             Min="3" Max="30" Style="max-width: 150px;"
+                             Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.SwapHoriz" />
+            <MudText Typo="Typo.h6" Class="align-self-center" Style="font-weight: 300;">x</MudText>
+            <MudNumericField @bind-Value="_editGridHeight" Label="@Loc["GridHeight"]" Variant="Variant.Outlined"
+                             Min="3" Max="30" Style="max-width: 150px;"
+                             Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.SwapVert" />
+        </div>
         <div class="d-flex gap-2">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveLevel"
                        Disabled="_saving || string.IsNullOrWhiteSpace(_editTitle)"
@@ -75,6 +85,7 @@ else
             <HeaderContent>
                 <MudTh Style="width: 60px;">@Loc["Order"]</MudTh>
                 <MudTh>@Loc["LevelTitle"]</MudTh>
+                <MudTh>@Loc["GridSize"]</MudTh>
                 <MudTh>@Loc["LevelDescription"]</MudTh>
                 <MudTh Style="text-align: right;">@Loc["Actions"]</MudTh>
             </HeaderContent>
@@ -87,12 +98,22 @@ else
                 <MudTd DataLabel="@Loc["LevelTitle"]">
                     <MudText Style="font-weight: 600;">@context.Title</MudText>
                 </MudTd>
+                <MudTd DataLabel="@Loc["GridSize"]">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info">
+                        @context.GridWidth x @context.GridHeight
+                    </MudChip>
+                </MudTd>
                 <MudTd DataLabel="@Loc["LevelDescription"]">
-                    <MudText Typo="Typo.body2" Color="Color.Secondary" Style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         @context.Description
                     </MudText>
                 </MudTd>
                 <MudTd DataLabel="@Loc["Actions"]" Style="text-align: right; white-space: nowrap;">
+                    <MudTooltip Text="@Loc["EditGrid"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.GridOn" Color="Color.Primary" Size="Size.Small"
+                                       Disabled="_editing"
+                                       OnClick="@(() => Navigation.NavigateTo($"/admin/levels/{context.Id}"))" />
+                    </MudTooltip>
                     <MudTooltip Text="@Loc["MoveUp"]">
                         <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small"
                                        Disabled="@(context.SortOrder == 0 || _editing)"
@@ -124,12 +145,13 @@ else
     private string? _message;
     private Severity _messageSeverity = Severity.Info;
 
-    // Edit state
     private bool _editing;
     private bool _saving;
     private Guid? _editId;
     private string _editTitle = string.Empty;
     private string _editDescription = string.Empty;
+    private int _editGridWidth = 10;
+    private int _editGridHeight = 8;
 
     protected override async Task OnInitializedAsync()
     {
@@ -146,6 +168,8 @@ else
         _editId = null;
         _editTitle = string.Empty;
         _editDescription = string.Empty;
+        _editGridWidth = 10;
+        _editGridHeight = 8;
         _editing = true;
     }
 
@@ -154,6 +178,8 @@ else
         _editId = level.Id;
         _editTitle = level.Title;
         _editDescription = level.Description;
+        _editGridWidth = level.GridWidth;
+        _editGridHeight = level.GridHeight;
         _editing = true;
     }
 
@@ -170,12 +196,12 @@ else
 
         if (_editId is null)
         {
-            await Mediator.Send(new CreateLevelCommand(_editTitle.Trim(), _editDescription.Trim()));
+            await Mediator.Send(new CreateLevelCommand(_editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight));
             _message = Loc["LevelCreated"].Value;
         }
         else
         {
-            await Mediator.Send(new UpdateLevelCommand(_editId.Value, _editTitle.Trim(), _editDescription.Trim()));
+            await Mediator.Send(new UpdateLevelCommand(_editId.Value, _editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight));
             _message = Loc["LevelUpdated"].Value;
         }
 

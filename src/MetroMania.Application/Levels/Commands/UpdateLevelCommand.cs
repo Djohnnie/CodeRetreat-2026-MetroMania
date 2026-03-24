@@ -4,7 +4,7 @@ using MetroMania.Domain.Interfaces;
 
 namespace MetroMania.Application.Levels.Commands;
 
-public record UpdateLevelCommand(Guid Id, string Title, string Description) : IRequest<LevelDto?>;
+public record UpdateLevelCommand(Guid Id, string Title, string Description, int GridWidth, int GridHeight) : IRequest<LevelDto?>;
 
 public class UpdateLevelCommandHandler(ILevelRepository levelRepository)
     : IRequestHandler<UpdateLevelCommand, LevelDto?>
@@ -16,8 +16,10 @@ public class UpdateLevelCommandHandler(ILevelRepository levelRepository)
 
         level.Title = request.Title;
         level.Description = request.Description;
+        level.GridWidth = request.GridWidth;
+        level.GridHeight = request.GridHeight;
         await levelRepository.UpdateAsync(level);
 
-        return new LevelDto(level.Id, level.Title, level.Description, level.SortOrder, level.CreatedAt);
+        return new LevelDto(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight, level.SortOrder, level.CreatedAt, level.LevelData.Stations);
     }
 }

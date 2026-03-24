@@ -119,4 +119,19 @@
   <data name="LevelDeleteFailed" xml:space="preserve"><value>Verwijderen van level mislukt.</value></data>
   <data name="TitleRequired" xml:space="preserve"><value>Titel is verplicht</value></data>
   <data name="NoLevelsYet" xml:space="preserve"><value>Nog geen levels. Klik op "Level toevoegen" om het eerste level aan te maken.</value></data>
+  <data name="GridSize" xml:space="preserve"><value>Raster</value></data>
+  <data name="GridWidth" xml:space="preserve"><value>Breedte</value></data>
+  <data name="GridHeight" xml:space="preserve"><value>Hoogte</value></data>
+  <data name="EditGrid" xml:space="preserve"><value>Raster bewerken</value></data>
+  <data name="EditGridSubtitle" xml:space="preserve"><value>Klik op een stationstype en klik vervolgens op een tegel om het te plaatsen. Klik opnieuw om te verwijderen.</value></data>
+  <data name="StationTypes" xml:space="preserve"><value>Stations</value></data>
+  <data name="Beginner" xml:space="preserve"><value>Beginner</value></data>
+  <data name="Advanced" xml:space="preserve"><value>Geavanceerd</value></data>
+  <data name="Eraser" xml:space="preserve"><value>Wisser</value></data>
+  <data name="Circle" xml:space="preserve"><value>Cirkel</value></data>
+  <data name="Rectangle" xml:space="preserve"><value>Rechthoek</value></data>
+  <data name="Triangle" xml:space="preserve"><value>Driehoek</value></data>
+  <data name="Diamond" xml:space="preserve"><value>Ruit</value></data>
+  <data name="Cross" xml:space="preserve"><value>Kruis</value></data>
+  <data name="Ruby" xml:space="preserve"><value>Robijn</value></data>
 </root>

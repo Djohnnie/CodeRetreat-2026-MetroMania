@@ -12,6 +12,6 @@ public class GetAllLevelsQueryHandler(ILevelRepository levelRepository)
     public async Task<List<LevelDto>> Handle(GetAllLevelsQuery request, CancellationToken cancellationToken)
     {
         var levels = await levelRepository.GetAllAsync();
-        return levels.Select(l => new LevelDto(l.Id, l.Title, l.Description, l.SortOrder, l.CreatedAt)).ToList();
+        return levels.Select(l => new LevelDto(l.Id, l.Title, l.Description, l.GridWidth, l.GridHeight, l.SortOrder, l.CreatedAt, l.LevelData.Stations)).ToList();
     }
 }

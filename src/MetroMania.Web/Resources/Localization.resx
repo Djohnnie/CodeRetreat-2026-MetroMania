@@ -119,4 +119,19 @@
   <data name="LevelDeleteFailed" xml:space="preserve"><value>Failed to delete level.</value></data>
   <data name="TitleRequired" xml:space="preserve"><value>Title is required</value></data>
   <data name="NoLevelsYet" xml:space="preserve"><value>No levels yet. Click "Add Level" to create the first one.</value></data>
+  <data name="GridSize" xml:space="preserve"><value>Grid</value></data>
+  <data name="GridWidth" xml:space="preserve"><value>Width</value></data>
+  <data name="GridHeight" xml:space="preserve"><value>Height</value></data>
+  <data name="EditGrid" xml:space="preserve"><value>Edit grid</value></data>
+  <data name="EditGridSubtitle" xml:space="preserve"><value>Click a station type, then click a tile to place it. Click again to remove.</value></data>
+  <data name="StationTypes" xml:space="preserve"><value>Stations</value></data>
+  <data name="Beginner" xml:space="preserve"><value>Beginner</value></data>
+  <data name="Advanced" xml:space="preserve"><value>Advanced</value></data>
+  <data name="Eraser" xml:space="preserve"><value>Eraser</value></data>
+  <data name="Circle" xml:space="preserve"><value>Circle</value></data>
+  <data name="Rectangle" xml:space="preserve"><value>Rectangle</value></data>
+  <data name="Triangle" xml:space="preserve"><value>Triangle</value></data>
+  <data name="Diamond" xml:space="preserve"><value>Diamond</value></data>
+  <data name="Cross" xml:space="preserve"><value>Cross</value></data>
+  <data name="Ruby" xml:space="preserve"><value>Ruby</value></data>
 </root>

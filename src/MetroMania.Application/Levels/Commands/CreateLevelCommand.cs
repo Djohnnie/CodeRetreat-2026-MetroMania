@@ -5,7 +5,7 @@ using MetroMania.Domain.Interfaces;
 
 namespace MetroMania.Application.Levels.Commands;
 
-public record CreateLevelCommand(string Title, string Description) : IRequest<LevelDto>;
+public record CreateLevelCommand(string Title, string Description, int GridWidth, int GridHeight) : IRequest<LevelDto>;
 
 public class CreateLevelCommandHandler(ILevelRepository levelRepository)
     : IRequestHandler<CreateLevelCommand, LevelDto>
@@ -19,10 +19,12 @@ public class CreateLevelCommandHandler(ILevelRepository levelRepository)
             Id = Guid.NewGuid(),
             Title = request.Title,
             Description = request.Description,
+            GridWidth = request.GridWidth,
+            GridHeight = request.GridHeight,
             SortOrder = maxOrder + 1
         };
 
         await levelRepository.AddAsync(level);
-        return new LevelDto(level.Id, level.Title, level.Description, level.SortOrder, level.CreatedAt);
+        return new LevelDto(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight, level.SortOrder, level.CreatedAt, level.LevelData.Stations);
     }
 }
