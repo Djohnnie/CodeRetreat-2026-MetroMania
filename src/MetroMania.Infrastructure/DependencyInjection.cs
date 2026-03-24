@@ -16,6 +16,7 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ILevelRepository, LevelRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;

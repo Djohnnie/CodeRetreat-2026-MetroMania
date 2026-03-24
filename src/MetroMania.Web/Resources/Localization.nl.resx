@@ -99,4 +99,24 @@
 
   <!-- Language -->
   <data name="Language" xml:space="preserve"><value>Taal</value></data>
+
+  <!-- Level Editor -->
+  <data name="Levels" xml:space="preserve"><value>Levels</value></data>
+  <data name="LevelEditorSubtitle" xml:space="preserve"><value>Maak, bewerk, herorden en verwijder levels.</value></data>
+  <data name="LevelTitle" xml:space="preserve"><value>Titel</value></data>
+  <data name="LevelDescription" xml:space="preserve"><value>Beschrijving</value></data>
+  <data name="Order" xml:space="preserve"><value>Volgorde</value></data>
+  <data name="AddLevel" xml:space="preserve"><value>Level toevoegen</value></data>
+  <data name="EditLevel" xml:space="preserve"><value>Level bewerken</value></data>
+  <data name="SaveLevel" xml:space="preserve"><value>Opslaan</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Annuleren</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Omhoog</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Omlaag</value></data>
+  <data name="Edit" xml:space="preserve"><value>Bewerken</value></data>
+  <data name="LevelCreated" xml:space="preserve"><value>Level aangemaakt.</value></data>
+  <data name="LevelUpdated" xml:space="preserve"><value>Level bijgewerkt.</value></data>
+  <data name="LevelDeleted" xml:space="preserve"><value>Level verwijderd.</value></data>
+  <data name="LevelDeleteFailed" xml:space="preserve"><value>Verwijderen van level mislukt.</value></data>
+  <data name="TitleRequired" xml:space="preserve"><value>Titel is verplicht</value></data>
+  <data name="NoLevelsYet" xml:space="preserve"><value>Nog geen levels. Klik op "Level toevoegen" om het eerste level aan te maken.</value></data>
 </root>

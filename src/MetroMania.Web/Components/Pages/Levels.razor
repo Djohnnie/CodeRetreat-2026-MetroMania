@@ -1,0 +1,202 @@
+@page "/admin/levels"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@using MediatR
+@using MetroMania.Application.DTOs
+@using MetroMania.Application.Levels.Commands
+@using MetroMania.Application.Levels.Queries
+@inject IMediator Mediator
+@inject IStringLocalizer<Localization> Loc
+
+<PageTitle>MetroMania - @Loc["Levels"]</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.Layers" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["Levels"]</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@Loc["LevelEditorSubtitle"]</MudText>
+
+@if (!string.IsNullOrEmpty(_message))
+{
+    <MudAlert Severity="_messageSeverity" Class="mb-4" Variant="Variant.Outlined" Dense="true"
+              ShowCloseIcon="true" CloseIconClicked="() => _message = null">@_message</MudAlert>
+}
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+           OnClick="StartCreate" Class="mb-4" Style="text-transform: none; font-weight: 600;"
+           Disabled="_editing">
+    @Loc["AddLevel"]
+</MudButton>
+
+@if (_editing)
+{
+    <MudPaper Class="pa-5 mb-4" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">
+            @(_editId is null ? Loc["AddLevel"] : Loc["EditLevel"])
+        </MudText>
+        <MudTextField @bind-Value="_editTitle" Label="@Loc["LevelTitle"]" Variant="Variant.Outlined"
+                      Required="true" RequiredError="@Loc["TitleRequired"]" Class="mb-3"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
+        <MudTextField @bind-Value="_editDescription" Label="@Loc["LevelDescription"]" Variant="Variant.Outlined"
+                      Lines="3" Class="mb-4"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
+        <div class="d-flex gap-2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveLevel"
+                       Disabled="_saving || string.IsNullOrWhiteSpace(_editTitle)"
+                       Style="text-transform: none; font-weight: 600;">
+                @if (_saving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @Loc["SaveLevel"]
+            </MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="CancelEdit"
+                       Style="text-transform: none;">
+                @Loc["Cancel"]
+            </MudButton>
+        </div>
+    </MudPaper>
+}
+
+@if (_levels is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_levels.Count == 0)
+{
+    <MudPaper Class="pa-8 text-center" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <MudIcon Icon="@Icons.Material.Filled.Layers" Style="font-size: 3rem;" Color="Color.Secondary" />
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-3">@Loc["NoLevelsYet"]</MudText>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        <MudTable Items="_levels" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh Style="width: 60px;">@Loc["Order"]</MudTh>
+                <MudTh>@Loc["LevelTitle"]</MudTh>
+                <MudTh>@Loc["LevelDescription"]</MudTh>
+                <MudTh Style="text-align: right;">@Loc["Actions"]</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="@Loc["Order"]">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
+                        @(context.SortOrder + 1)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="@Loc["LevelTitle"]">
+                    <MudText Style="font-weight: 600;">@context.Title</MudText>
+                </MudTd>
+                <MudTd DataLabel="@Loc["LevelDescription"]">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        @context.Description
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="@Loc["Actions"]" Style="text-align: right; white-space: nowrap;">
+                    <MudTooltip Text="@Loc["MoveUp"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small"
+                                       Disabled="@(context.SortOrder == 0 || _editing)"
+                                       OnClick="() => MoveLevel(context.Id, -1)" />
+                    </MudTooltip>
+                    <MudTooltip Text="@Loc["MoveDown"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small"
+                                       Disabled="@(context.SortOrder == _levels!.Count - 1 || _editing)"
+                                       OnClick="() => MoveLevel(context.Id, 1)" />
+                    </MudTooltip>
+                    <MudTooltip Text="@Loc["Edit"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small"
+                                       Disabled="_editing"
+                                       OnClick="() => StartEdit(context)" />
+                    </MudTooltip>
+                    <MudTooltip Text="@Loc["Delete"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                       Disabled="_editing"
+                                       OnClick="() => DeleteLevel(context.Id)" />
+                    </MudTooltip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    private List<LevelDto>? _levels;
+    private string? _message;
+    private Severity _messageSeverity = Severity.Info;
+
+    // Edit state
+    private bool _editing;
+    private bool _saving;
+    private Guid? _editId;
+    private string _editTitle = string.Empty;
+    private string _editDescription = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLevels();
+    }
+
+    private async Task LoadLevels()
+    {
+        _levels = await Mediator.Send(new GetAllLevelsQuery());
+    }
+
+    private void StartCreate()
+    {
+        _editId = null;
+        _editTitle = string.Empty;
+        _editDescription = string.Empty;
+        _editing = true;
+    }
+
+    private void StartEdit(LevelDto level)
+    {
+        _editId = level.Id;
+        _editTitle = level.Title;
+        _editDescription = level.Description;
+        _editing = true;
+    }
+
+    private void CancelEdit()
+    {
+        _editing = false;
+        _editId = null;
+    }
+
+    private async Task SaveLevel()
+    {
+        if (string.IsNullOrWhiteSpace(_editTitle)) return;
+        _saving = true;
+
+        if (_editId is null)
+        {
+            await Mediator.Send(new CreateLevelCommand(_editTitle.Trim(), _editDescription.Trim()));
+            _message = Loc["LevelCreated"].Value;
+        }
+        else
+        {
+            await Mediator.Send(new UpdateLevelCommand(_editId.Value, _editTitle.Trim(), _editDescription.Trim()));
+            _message = Loc["LevelUpdated"].Value;
+        }
+
+        _messageSeverity = Severity.Success;
+        _editing = false;
+        _editId = null;
+        _saving = false;
+        await LoadLevels();
+    }
+
+    private async Task MoveLevel(Guid id, int direction)
+    {
+        await Mediator.Send(new ReorderLevelCommand(id, direction));
+        await LoadLevels();
+    }
+
+    private async Task DeleteLevel(Guid id)
+    {
+        var success = await Mediator.Send(new DeleteLevelCommand(id));
+        _message = success ? Loc["LevelDeleted"].Value : Loc["LevelDeleteFailed"].Value;
+        _messageSeverity = success ? Severity.Success : Severity.Error;
+        await LoadLevels();
+    }
+}

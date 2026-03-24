@@ -6,6 +6,7 @@ namespace MetroMania.Infrastructure.Persistence;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<Level> Levels => Set<Level>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,6 +19,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Role).HasConversion<string>();
             entity.Property(e => e.ApprovalStatus).HasConversion<string>();
             entity.Property(e => e.Language).HasMaxLength(10).HasDefaultValue("en");
+        });
+
+        modelBuilder.Entity<Level>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(2000);
+            entity.HasIndex(e => e.SortOrder);
         });
     }
 }

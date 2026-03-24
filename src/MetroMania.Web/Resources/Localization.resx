@@ -99,4 +99,24 @@
 
   <!-- Language -->
   <data name="Language" xml:space="preserve"><value>Language</value></data>
+
+  <!-- Level Editor -->
+  <data name="Levels" xml:space="preserve"><value>Levels</value></data>
+  <data name="LevelEditorSubtitle" xml:space="preserve"><value>Create, edit, reorder, and remove levels.</value></data>
+  <data name="LevelTitle" xml:space="preserve"><value>Title</value></data>
+  <data name="LevelDescription" xml:space="preserve"><value>Description</value></data>
+  <data name="Order" xml:space="preserve"><value>Order</value></data>
+  <data name="AddLevel" xml:space="preserve"><value>Add Level</value></data>
+  <data name="EditLevel" xml:space="preserve"><value>Edit Level</value></data>
+  <data name="SaveLevel" xml:space="preserve"><value>Save</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="LevelCreated" xml:space="preserve"><value>Level created.</value></data>
+  <data name="LevelUpdated" xml:space="preserve"><value>Level updated.</value></data>
+  <data name="LevelDeleted" xml:space="preserve"><value>Level deleted.</value></data>
+  <data name="LevelDeleteFailed" xml:space="preserve"><value>Failed to delete level.</value></data>
+  <data name="TitleRequired" xml:space="preserve"><value>Title is required</value></data>
+  <data name="NoLevelsYet" xml:space="preserve"><value>No levels yet. Click "Add Level" to create the first one.</value></data>
 </root>
