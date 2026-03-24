@@ -134,4 +134,7 @@
   <data name="Diamond" xml:space="preserve"><value>Diamond</value></data>
   <data name="Cross" xml:space="preserve"><value>Cross</value></data>
   <data name="Ruby" xml:space="preserve"><value>Ruby</value></data>
+  <data name="BackgroundColor" xml:space="preserve"><value>Background</value></data>
+  <data name="WaterColor" xml:space="preserve"><value>Water</value></data>
+  <data name="Water" xml:space="preserve"><value>Water</value></data>
 </root>

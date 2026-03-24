@@ -25,6 +25,6 @@ public class CreateLevelCommandHandler(ILevelRepository levelRepository)
         };
 
         await levelRepository.AddAsync(level);
-        return new LevelDto(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight, level.SortOrder, level.CreatedAt, level.LevelData.Stations);
+        return LevelDto.FromEntity(level);
     }
 }

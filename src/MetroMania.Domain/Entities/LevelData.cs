@@ -7,7 +7,10 @@ namespace MetroMania.Domain.Entities;
 /// </summary>
 public class LevelData
 {
+    public string BackgroundColor { get; set; } = "#e8f5e9";
+    public string WaterColor { get; set; } = "#90caf9";
     public List<StationPlacement> Stations { get; set; } = [];
+    public List<WaterTile> WaterTiles { get; set; } = [];
 }
 
 /// <summary>
@@ -18,4 +21,13 @@ public class StationPlacement
     public int GridX { get; set; }
     public int GridY { get; set; }
     public StationType StationType { get; set; }
+}
+
+/// <summary>
+/// Represents a water tile on the level grid.
+/// </summary>
+public class WaterTile
+{
+    public int GridX { get; set; }
+    public int GridY { get; set; }
 }

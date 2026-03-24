@@ -10,9 +10,14 @@ public record LevelDto(
     int GridHeight,
     int SortOrder,
     DateTime CreatedAt,
-    List<StationPlacement> Stations)
+    string BackgroundColor,
+    string WaterColor,
+    List<StationPlacement> Stations,
+    List<WaterTile> WaterTiles)
 {
     public static LevelDto FromEntity(Level level) =>
         new(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight,
-            level.SortOrder, level.CreatedAt, level.LevelData.Stations);
+            level.SortOrder, level.CreatedAt,
+            level.LevelData.BackgroundColor, level.LevelData.WaterColor,
+            level.LevelData.Stations, level.LevelData.WaterTiles);
 }

@@ -6,9 +6,11 @@
 @using MetroMania.Application.Levels.Queries
 @using MetroMania.Domain.Entities
 @using MetroMania.Domain.Enums
+@using MudBlazor.Utilities
 @inject IMediator Mediator
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
+@implements IDisposable
 
 <PageTitle>MetroMania - @Loc["EditGrid"]</PageTitle>
 
@@ -28,6 +30,42 @@ else
     </div>
     <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@Loc["EditGridSubtitle"]</MudText>
 
+    <!-- Color pickers -->
+    <div class="d-flex justify-center mb-4">
+        <MudPaper Class="pa-3 d-flex align-center gap-4 flex-wrap" Elevation="0"
+                  Style="border: 1px solid var(--mud-palette-lines-default); display: inline-flex;">
+            <div class="d-flex align-center gap-2">
+                <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["BackgroundColor"]:</MudText>
+                <MudColorPicker Value="_backgroundColor"
+                                ValueChanged="OnBackgroundColorChanged"
+                                Placeholder="@Loc["BackgroundColor"]"
+                                PickerVariant="PickerVariant.Inline"
+                                DisableAlpha="true"
+                                DisableToolbar="true"
+                                DisablePreview="true"
+                                DisableModeSwitch="true"
+                                ColorPickerMode="ColorPickerMode.HEX"
+                                Style="max-width: 140px;"
+                                Variant="Variant.Outlined" />
+            </div>
+            <MudDivider Vertical="true" FlexItem="true" />
+            <div class="d-flex align-center gap-2">
+                <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["WaterColor"]:</MudText>
+                <MudColorPicker Value="_waterColor"
+                                ValueChanged="OnWaterColorChanged"
+                                Placeholder="@Loc["WaterColor"]"
+                                PickerVariant="PickerVariant.Inline"
+                                DisableAlpha="true"
+                                DisableToolbar="true"
+                                DisablePreview="true"
+                                DisableModeSwitch="true"
+                                ColorPickerMode="ColorPickerMode.HEX"
+                                Style="max-width: 140px;"
+                                Variant="Variant.Outlined" />
+            </div>
+        </MudPaper>
+    </div>
+
     <!-- Station toolbar -->
     <div class="d-flex justify-center mb-4">
         <MudPaper Class="pa-3 d-flex align-center gap-2 flex-wrap" Elevation="0"
@@ -38,8 +76,8 @@ else
             @foreach (var st in _beginnerTypes)
             {
                 <MudTooltip Text="@Loc[st.ToString()]">
-                    <MudButton Variant="@(_selectedType == st && !_eraseMode ? Variant.Filled : Variant.Outlined)"
-                               Color="@(_selectedType == st && !_eraseMode ? Color.Primary : Color.Default)"
+                    <MudButton Variant="@(_toolMode == ToolMode.Station && _selectedType == st ? Variant.Filled : Variant.Outlined)"
+                               Color="@(_toolMode == ToolMode.Station && _selectedType == st ? Color.Primary : Color.Default)"
                                Size="Size.Small" OnClick="() => SelectType(st)"
                                Style="min-width: 40px; text-transform: none;">
                         <svg width="20" height="20" viewBox="0 0 20 20">@GetStationSvg(st)</svg>
@@ -53,8 +91,8 @@ else
             @foreach (var st in _advancedTypes)
             {
                 <MudTooltip Text="@Loc[st.ToString()]">
-                    <MudButton Variant="@(_selectedType == st && !_eraseMode ? Variant.Filled : Variant.Outlined)"
-                               Color="@(_selectedType == st && !_eraseMode ? Color.Primary : Color.Default)"
+                    <MudButton Variant="@(_toolMode == ToolMode.Station && _selectedType == st ? Variant.Filled : Variant.Outlined)"
+                               Color="@(_toolMode == ToolMode.Station && _selectedType == st ? Color.Primary : Color.Default)"
                                Size="Size.Small" OnClick="() => SelectType(st)"
                                Style="min-width: 40px; text-transform: none;">
                         <svg width="20" height="20" viewBox="0 0 20 20">@GetStationSvg(st)</svg>
@@ -64,10 +102,19 @@ else
 
             <MudDivider Vertical="true" FlexItem="true" Class="mx-2" />
 
+            <MudTooltip Text="@Loc["Water"]">
+                <MudButton Variant="@(_toolMode == ToolMode.Water ? Variant.Filled : Variant.Outlined)"
+                           Color="@(_toolMode == ToolMode.Water ? Color.Info : Color.Default)"
+                           Size="Size.Small" OnClick="SelectWater"
+                           Style="min-width: 40px; text-transform: none;">
+                    <MudIcon Icon="@Icons.Material.Filled.Water" Size="Size.Small" />
+                </MudButton>
+            </MudTooltip>
+
             <MudTooltip Text="@Loc["Eraser"]">
-                <MudButton Variant="@(_eraseMode ? Variant.Filled : Variant.Outlined)"
-                           Color="@(_eraseMode ? Color.Error : Color.Default)"
-                           Size="Size.Small" OnClick="ToggleEraser"
+                <MudButton Variant="@(_toolMode == ToolMode.Eraser ? Variant.Filled : Variant.Outlined)"
+                           Color="@(_toolMode == ToolMode.Eraser ? Color.Error : Color.Default)"
+                           Size="Size.Small" OnClick="SelectEraser"
                            Style="min-width: 40px; text-transform: none;">
                     <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
                 </MudButton>
@@ -78,7 +125,7 @@ else
     <!-- Centered grid -->
     <div class="d-flex justify-center">
         <MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); display: inline-block;">
-            <div style="display: inline-grid; grid-template-columns: repeat(@_level.GridWidth, @(TileSize)px); gap: 2px;">
+            <div style="display: inline-grid; grid-template-columns: repeat(@_level.GridWidth, @(TileSize)px); gap: 2px; background: @GetBackgroundHex();">
                 @for (var y = 0; y < _level.GridHeight; y++)
                 {
                     @for (var x = 0; x < _level.GridWidth; x++)
@@ -86,13 +133,20 @@ else
                         var cx = x;
                         var cy = y;
                         var station = GetStationAt(cx, cy);
-                        <div class="grid-tile @(station is not null ? "grid-tile-filled" : "")"
-                             style="width: @(TileSize)px; height: @(TileSize)px;"
+                        var isWater = IsWaterAt(cx, cy);
+                        <div class="grid-tile @(station is not null ? "grid-tile-filled" : "") @(isWater ? "grid-tile-water" : "")"
+                             style="width: @(TileSize)px; height: @(TileSize)px; background: @(isWater ? GetWaterHex() : GetBackgroundHex());"
                              @onclick="() => OnTileClick(cx, cy)">
                             @if (station is not null)
                             {
                                 <svg width="@(TileSize - 8)" height="@(TileSize - 8)" viewBox="0 0 20 20">
                                     @GetStationSvg(station.StationType)
+                                </svg>
+                            }
+                            @if (isWater)
+                            {
+                                <svg width="@(TileSize - 12)" height="@(TileSize - 12)" viewBox="0 0 24 24" style="opacity: 0.4;">
+                                    <path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2C20 10.48 17.33 6.55 12 2z" fill="white"/>
                                 </svg>
                             }
                         </div>
@@ -110,19 +164,18 @@ else
         justify-content: center;
         border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.15s, transform 0.1s;
-        background: var(--mud-palette-surface);
-        border: 1px solid var(--mud-palette-lines-default);
+        transition: background-color 0.15s, transform 0.1s, opacity 0.15s;
+        border: 1px solid rgba(0, 0, 0, 0.08);
     }
     .grid-tile:hover {
-        background-color: color-mix(in srgb, var(--mud-palette-primary) 12%, transparent);
+        opacity: 0.75;
         transform: scale(1.05);
-    }
-    .grid-tile-filled {
-        background: var(--mud-palette-background);
     }
     .grid-tile-filled:hover {
         opacity: 0.85;
+    }
+    .grid-tile-water {
+        border-color: rgba(0, 0, 0, 0.12);
     }
 </style>
 
@@ -133,10 +186,19 @@ else
     private const string StationColor = "#6366f1";
     private const string StationStroke = "#4338ca";
 
+    private enum ToolMode { Station, Water, Eraser }
+
     private LevelDto? _level;
     private List<StationPlacement> _stations = [];
+    private List<WaterTile> _waterTiles = [];
     private StationType _selectedType = StationType.Circle;
-    private bool _eraseMode;
+    private ToolMode _toolMode = ToolMode.Station;
+
+    private MudColor _backgroundColor = new("#e8f5e9");
+    private MudColor _waterColor = new("#90caf9");
+
+    private CancellationTokenSource? _debounceCts;
+    private readonly SemaphoreSlim _saveLock = new(1, 1);
 
     private static readonly StationType[] _beginnerTypes = [StationType.Circle, StationType.Rectangle, StationType.Triangle];
     private static readonly StationType[] _advancedTypes = [StationType.Diamond, StationType.Cross, StationType.Ruby];
@@ -145,59 +207,143 @@ else
     {
         _level = await Mediator.Send(new GetLevelQuery(LevelId));
         if (_level is not null)
+        {
             _stations = _level.Stations.Select(s => new StationPlacement
             {
                 GridX = s.GridX,
                 GridY = s.GridY,
                 StationType = s.StationType
             }).ToList();
+            _waterTiles = _level.WaterTiles.Select(w => new WaterTile
+            {
+                GridX = w.GridX,
+                GridY = w.GridY
+            }).ToList();
+            _backgroundColor = new MudColor(_level.BackgroundColor);
+            _waterColor = new MudColor(_level.WaterColor);
+        }
     }
 
     private StationPlacement? GetStationAt(int x, int y) =>
         _stations.FirstOrDefault(s => s.GridX == x && s.GridY == y);
 
+    private bool IsWaterAt(int x, int y) =>
+        _waterTiles.Any(w => w.GridX == x && w.GridY == y);
+
     private void SelectType(StationType type)
     {
         _selectedType = type;
-        _eraseMode = false;
+        _toolMode = ToolMode.Station;
     }
 
-    private void ToggleEraser()
+    private void SelectWater() => _toolMode = ToolMode.Water;
+    private void SelectEraser() => _toolMode = ToolMode.Eraser;
+
+    private string GetBackgroundHex() =>
+        $"#{_backgroundColor.R:X2}{_backgroundColor.G:X2}{_backgroundColor.B:X2}";
+
+    private string GetWaterHex() =>
+        $"#{_waterColor.R:X2}{_waterColor.G:X2}{_waterColor.B:X2}";
+
+    private async Task OnBackgroundColorChanged(MudColor color)
     {
-        _eraseMode = !_eraseMode;
+        _backgroundColor = color;
+        await DebouncedSaveLevelData();
+    }
+
+    private async Task OnWaterColorChanged(MudColor color)
+    {
+        _waterColor = color;
+        await DebouncedSaveLevelData();
     }
 
     private async Task OnTileClick(int x, int y)
     {
         if (_level is null) return;
 
-        var existing = GetStationAt(x, y);
+        var existingStation = GetStationAt(x, y);
+        var isWater = IsWaterAt(x, y);
 
-        if (_eraseMode)
+        switch (_toolMode)
         {
-            if (existing is not null)
-                _stations.Remove(existing);
-        }
-        else if (existing is not null && existing.StationType == _selectedType)
-        {
-            // Toggle off
-            _stations.Remove(existing);
-        }
-        else
-        {
-            if (existing is not null)
-                _stations.Remove(existing);
+            case ToolMode.Eraser:
+                if (existingStation is not null)
+                    _stations.Remove(existingStation);
+                if (isWater)
+                    _waterTiles.RemoveAll(w => w.GridX == x && w.GridY == y);
+                break;
 
-            _stations.Add(new StationPlacement
+            case ToolMode.Water:
+                if (isWater)
+                {
+                    // Toggle off
+                    _waterTiles.RemoveAll(w => w.GridX == x && w.GridY == y);
+                }
+                else if (existingStation is null)
+                {
+                    // Only place water on empty tiles
+                    _waterTiles.Add(new WaterTile { GridX = x, GridY = y });
+                }
+                break;
+
+            case ToolMode.Station:
+                if (isWater)
+                    break; // Cannot place stations on water
+
+                if (existingStation is not null && existingStation.StationType == _selectedType)
+                {
+                    _stations.Remove(existingStation);
+                }
+                else
+                {
+                    if (existingStation is not null)
+                        _stations.Remove(existingStation);
+
+                    _stations.Add(new StationPlacement
+                    {
+                        GridX = x,
+                        GridY = y,
+                        StationType = _selectedType
+                    });
+                }
+                break;
+        }
+
+        await SaveLevelData();
+    }
+
+    private async Task DebouncedSaveLevelData()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts = new CancellationTokenSource();
+        var token = _debounceCts.Token;
+
+        try
+        {
+            await Task.Delay(300, token);
+            await SaveLevelData();
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task SaveLevelData()
+    {
+        await _saveLock.WaitAsync();
+        try
+        {
+            var data = new LevelData
             {
-                GridX = x,
-                GridY = y,
-                StationType = _selectedType
-            });
+                BackgroundColor = GetBackgroundHex(),
+                WaterColor = GetWaterHex(),
+                Stations = _stations,
+                WaterTiles = _waterTiles
+            };
+            await Mediator.Send(new UpdateGridDataCommand(LevelId, data));
         }
-
-        // Persist to database
-        await Mediator.Send(new UpdateGridDataCommand(LevelId, _stations));
+        finally
+        {
+            _saveLock.Release();
+        }
     }
 
     private void GoBack() => Navigation.NavigateTo("/admin/levels");
@@ -212,4 +358,11 @@ else
         StationType.Ruby => new MarkupString($"""<polygon points="10,1 17,6 14,18 6,18 3,6" fill="{StationColor}" stroke="{StationStroke}" stroke-width="1.5"/>"""),
         _ => new MarkupString("")
     };
+
+    public void Dispose()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _saveLock.Dispose();
+    }
 }

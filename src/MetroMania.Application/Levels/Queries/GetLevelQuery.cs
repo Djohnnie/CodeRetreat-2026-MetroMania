@@ -13,6 +13,6 @@ public class GetLevelQueryHandler(ILevelRepository levelRepository)
     {
         var level = await levelRepository.GetByIdAsync(request.Id);
         if (level is null) return null;
-        return new LevelDto(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight, level.SortOrder, level.CreatedAt, level.LevelData.Stations);
+        return LevelDto.FromEntity(level);
     }
 }

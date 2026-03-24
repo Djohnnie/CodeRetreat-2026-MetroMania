@@ -3,7 +3,7 @@
 @using MetroMania.Application.Auth.Queries
 @using MetroMania.Web.Services
 @inject IMediator Mediator
-@inject CookieAuthStateProvider AuthStateProvider
+@inject LoginTicketService LoginTickets
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 
@@ -76,8 +76,9 @@
             var result = await Mediator.Send(new LoginQuery(_model.Name, _model.Password));
             if (result.Success && result.User is not null)
             {
-                await AuthStateProvider.LoginAsync(result.User.Id);
-                Navigation.NavigateTo("/", forceLoad: true);
+                var ticket = LoginTickets.CreateTicket(result.User.Id);
+                Navigation.NavigateTo($"/api/auth/login-callback?ticket={ticket}", forceLoad: true);
+                return;
             }
             else
             {

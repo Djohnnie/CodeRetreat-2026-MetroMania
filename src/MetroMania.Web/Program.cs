@@ -1,8 +1,12 @@
 using System.Globalization;
+using System.Security.Claims;
+using MetroMania.Domain.Enums;
+using MetroMania.Domain.Interfaces;
 using MetroMania.Infrastructure;
 using MetroMania.Infrastructure.Persistence;
 using MetroMania.Web.Components;
 using MetroMania.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +31,16 @@ builder.Services.AddMudServices();
 builder.Services.AddLocalization();
 
 // Auth
-builder.Services.AddAuthorizationCore();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<LoginTicketService>();
+builder.Services.AddAuthentication("BlazorServer")
+    .AddCookie("BlazorServer", options =>
+    {
+        options.LoginPath = "/login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<CookieAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<CookieAuthStateProvider>());
@@ -62,7 +75,48 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
+
+// Auth endpoints
+app.MapGet("/api/auth/login-callback", async (HttpContext context, string ticket,
+    LoginTicketService ticketService, IServiceProvider sp) =>
+{
+    var userId = ticketService.RedeemTicket(ticket);
+    if (userId is null)
+        return Results.Redirect("/login");
+
+    using var scope = sp.CreateScope();
+    var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+    var user = await userRepo.GetByIdAsync(userId.Value);
+
+    if (user is null || user.ApprovalStatus != ApprovalStatus.Approved)
+        return Results.Redirect("/login");
+
+    var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new(ClaimTypes.Name, user.Name),
+        new(ClaimTypes.Role, user.Role.ToString())
+    };
+    var identity = new ClaimsIdentity(claims, "BlazorServer");
+    var principal = new ClaimsPrincipal(identity);
+
+    await context.SignInAsync("BlazorServer", principal, new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+    });
+
+    return Results.Redirect("/");
+});
+
+app.MapGet("/api/auth/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync("BlazorServer");
+    return Results.Redirect("/login");
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

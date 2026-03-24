@@ -2,23 +2,28 @@ using System.Security.Claims;
 using MetroMania.Domain.Enums;
 using MetroMania.Domain.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace MetroMania.Web.Services;
 
-public class CookieAuthStateProvider(ProtectedSessionStorage sessionStorage, IServiceProvider serviceProvider)
-    : AuthenticationStateProvider
+public class CookieAuthStateProvider : AuthenticationStateProvider
 {
-    private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+    private readonly ClaimsPrincipal? _initialHttpUser;
+    private readonly IServiceProvider _serviceProvider;
+
+    public CookieAuthStateProvider(IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+        _initialHttpUser = httpContextAccessor.HttpContext?.User;
+    }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        try
+        if (_initialHttpUser?.Identity?.IsAuthenticated == true)
         {
-            var result = await sessionStorage.GetAsync<string>("userId");
-            if (result.Success && Guid.TryParse(result.Value, out var userId))
+            var userIdStr = _initialHttpUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdStr, out var userId))
             {
-                using var scope = serviceProvider.CreateScope();
+                using var scope = _serviceProvider.CreateScope();
                 var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
                 var user = await userRepo.GetByIdAsync(userId);
 
@@ -32,30 +37,12 @@ public class CookieAuthStateProvider(ProtectedSessionStorage sessionStorage, ISe
                         new("IsDarkMode", user.IsDarkMode.ToString()),
                         new("Language", user.Language)
                     };
-                    var identity = new ClaimsIdentity(claims, "MetroManiaAuth");
-                    _currentUser = new ClaimsPrincipal(identity);
+                    var identity = new ClaimsIdentity(claims, "BlazorServer");
+                    return new AuthenticationState(new ClaimsPrincipal(identity));
                 }
             }
         }
-        catch (InvalidOperationException)
-        {
-            // ProtectedSessionStorage is not available during prerendering
-        }
 
-        return new AuthenticationState(_currentUser);
-    }
-
-    public async Task LoginAsync(Guid userId)
-    {
-        await sessionStorage.SetAsync("userId", userId.ToString());
-        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-    }
-
-    public async Task LogoutAsync()
-    {
-        await sessionStorage.DeleteAsync("userId");
-        _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-        NotifyAuthenticationStateChanged(
-            Task.FromResult(new AuthenticationState(_currentUser)));
+        return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
     }
 }

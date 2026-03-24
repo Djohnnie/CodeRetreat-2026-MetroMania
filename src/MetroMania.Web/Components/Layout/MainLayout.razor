@@ -5,7 +5,7 @@
 @using MediatR
 @using System.Security.Claims
 @using System.Globalization
-@inject CookieAuthStateProvider AuthStateProvider
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IMediator Mediator
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -212,9 +212,8 @@
             $"document.cookie = '.AspNetCore.Culture={cookieValue};path=/;max-age=31536000;samesite=lax'");
     }
 
-    private async Task LogoutAsync()
+    private void LogoutAsync()
     {
-        await AuthStateProvider.LogoutAsync();
-        Navigation.NavigateTo("/login", forceLoad: true);
+        Navigation.NavigateTo("/api/auth/logout", forceLoad: true);
     }
 }
