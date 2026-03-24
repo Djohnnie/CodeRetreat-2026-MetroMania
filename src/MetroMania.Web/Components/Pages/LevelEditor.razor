@@ -142,6 +142,7 @@ else
                                 <svg width="@(TileSize - 8)" height="@(TileSize - 8)" viewBox="0 0 20 20">
                                     @GetStationSvg(station.StationType)
                                 </svg>
+                                <span class="spawn-order-badge">@station.SpawnOrder</span>
                             }
                             @if (isWater)
                             {
@@ -155,10 +156,47 @@ else
             </div>
         </MudPaper>
     </div>
+
+    <!-- Station properties dialog -->
+    <MudDialog @bind-Visible="_showStationDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
+        <TitleContent>
+            <div class="d-flex align-center gap-2">
+                <svg width="24" height="24" viewBox="0 0 20 20">@GetStationSvg(_editShape)</svg>
+                <MudText Typo="Typo.h6" Style="font-weight: 600;">@Loc["StationProperties"]</MudText>
+            </div>
+        </TitleContent>
+        <DialogContent>
+            <MudNumericField @bind-Value="_editSpawnOrder" Label="@Loc["SpawnOrder"]"
+                             Variant="Variant.Outlined" Min="0" Class="mb-3" />
+            <MudNumericField @bind-Value="_editSpawnDelayDays" Label="@Loc["SpawnDelay"]"
+                             Variant="Variant.Outlined" Min="0" Class="mb-3" />
+            <MudSelect @bind-Value="_editShape" Label="@Loc["Shape"]"
+                       Variant="Variant.Outlined" Class="mb-3">
+                @foreach (var st in Enum.GetValues<StationType>())
+                {
+                    <MudSelectItem Value="st">
+                        <div class="d-flex align-center gap-2">
+                            <svg width="20" height="20" viewBox="0 0 20 20">@GetStationSvg(st)</svg>
+                            @Loc[st.ToString()]
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+            <MudNumericField @bind-Value="_editSpawnFrequencyMinutes" Label="@Loc["SpawnFrequency"]"
+                             Variant="Variant.Outlined" Min="1" Class="mb-3" />
+            <MudTextField Value="@_editSpawnSeed.ToString()" Label="@Loc["SpawnSeed"]"
+                          Variant="Variant.Outlined" ReadOnly="true" Class="mb-3" />
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelStationDialog" Variant="Variant.Text">@Loc["Cancel"]</MudButton>
+            <MudButton OnClick="SaveStationProperties" Variant="Variant.Filled" Color="Color.Primary">@Loc["Save"]</MudButton>
+        </DialogActions>
+    </MudDialog>
 }
 
 <style>
     .grid-tile {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -166,6 +204,17 @@ else
         cursor: pointer;
         transition: background-color 0.15s, transform 0.1s, opacity 0.15s;
         border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .spawn-order-badge {
+        position: absolute;
+        bottom: 1px;
+        right: 2px;
+        font-size: 10px;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 0 3px rgba(0,0,0,0.7);
+        line-height: 1;
+        pointer-events: none;
     }
     .grid-tile:hover {
         opacity: 0.75;
@@ -187,6 +236,8 @@ else
     private const string StationStroke = "#4338ca";
 
     private enum ToolMode { Station, Water, Eraser }
+
+    private static readonly Random _rng = new();
 
     private LevelDto? _level;
     private List<StationPlacement> _stations = [];
@@ -212,7 +263,12 @@ else
             {
                 GridX = s.GridX,
                 GridY = s.GridY,
-                StationType = s.StationType
+                StationType = s.StationType,
+                SpawnOrder = s.SpawnOrder,
+                SpawnDelayDays = s.SpawnDelayDays,
+                Shape = s.Shape,
+                SpawnFrequencyMinutes = s.SpawnFrequencyMinutes,
+                SpawnSeed = s.SpawnSeed
             }).ToList();
             _waterTiles = _level.WaterTiles.Select(w => new WaterTile
             {
@@ -257,6 +313,14 @@ else
         await DebouncedSaveLevelData();
     }
 
+    private StationPlacement? _editingStation;
+    private bool _showStationDialog;
+    private int _editSpawnOrder;
+    private int _editSpawnDelayDays;
+    private StationType _editShape;
+    private int _editSpawnFrequencyMinutes;
+    private int _editSpawnSeed;
+
     private async Task OnTileClick(int x, int y)
     {
         if (_level is null) return;
@@ -268,7 +332,10 @@ else
         {
             case ToolMode.Eraser:
                 if (existingStation is not null)
+                {
                     _stations.Remove(existingStation);
+                    RenumberSpawnOrders();
+                }
                 if (isWater)
                     _waterTiles.RemoveAll(w => w.GridX == x && w.GridY == y);
                 break;
@@ -276,40 +343,72 @@ else
             case ToolMode.Water:
                 if (isWater)
                 {
-                    // Toggle off
                     _waterTiles.RemoveAll(w => w.GridX == x && w.GridY == y);
                 }
                 else if (existingStation is null)
                 {
-                    // Only place water on empty tiles
                     _waterTiles.Add(new WaterTile { GridX = x, GridY = y });
                 }
                 break;
 
             case ToolMode.Station:
                 if (isWater)
-                    break; // Cannot place stations on water
+                    break;
 
-                if (existingStation is not null && existingStation.StationType == _selectedType)
+                if (existingStation is not null)
                 {
-                    _stations.Remove(existingStation);
+                    OpenStationDialog(existingStation);
+                    return; // Don't save yet — dialog handles it
                 }
                 else
                 {
-                    if (existingStation is not null)
-                        _stations.Remove(existingStation);
-
                     _stations.Add(new StationPlacement
                     {
                         GridX = x,
                         GridY = y,
-                        StationType = _selectedType
+                        StationType = _selectedType,
+                        Shape = _selectedType,
+                        SpawnOrder = (_stations.Count > 0 ? _stations.Max(s => s.SpawnOrder) : 0) + 1,
+                        SpawnFrequencyMinutes = 5,
+                        SpawnSeed = _rng.Next()
                     });
                 }
                 break;
         }
 
         await SaveLevelData();
+    }
+
+    private void OpenStationDialog(StationPlacement station)
+    {
+        _editingStation = station;
+        _editSpawnOrder = station.SpawnOrder;
+        _editSpawnDelayDays = station.SpawnDelayDays;
+        _editShape = station.StationType;
+        _editSpawnFrequencyMinutes = station.SpawnFrequencyMinutes;
+        _editSpawnSeed = station.SpawnSeed;
+        _showStationDialog = true;
+    }
+
+    private async Task SaveStationProperties()
+    {
+        if (_editingStation is not null)
+        {
+            _editingStation.SpawnOrder = _editSpawnOrder;
+            _editingStation.SpawnDelayDays = _editSpawnDelayDays;
+            _editingStation.Shape = _editShape;
+            _editingStation.StationType = _editShape;
+            _editingStation.SpawnFrequencyMinutes = _editSpawnFrequencyMinutes;
+        }
+        _showStationDialog = false;
+        _editingStation = null;
+        await SaveLevelData();
+    }
+
+    private void CancelStationDialog()
+    {
+        _showStationDialog = false;
+        _editingStation = null;
     }
 
     private async Task DebouncedSaveLevelData()
@@ -347,6 +446,15 @@ else
     }
 
     private void GoBack() => Navigation.NavigateTo("/admin/levels");
+
+    private void RenumberSpawnOrders()
+    {
+        var ordered = _stations.OrderBy(s => s.SpawnOrder).ToList();
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            ordered[i].SpawnOrder = i + 1;
+        }
+    }
 
     private static MarkupString GetStationSvg(StationType type) => type switch
     {

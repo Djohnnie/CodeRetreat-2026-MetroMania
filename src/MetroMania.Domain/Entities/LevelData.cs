@@ -21,6 +21,15 @@ public class StationPlacement
     public int GridX { get; set; }
     public int GridY { get; set; }
     public StationType StationType { get; set; }
+    public int SpawnOrder { get; set; }
+    public int SpawnDelayDays { get; set; }
+    public StationType Shape { get; set; }
+    public int SpawnFrequencyMinutes { get; set; } = 5;
+
+    /// <summary>
+    /// Seed for deterministic passenger spawning so every playthrough is identical.
+    /// </summary>
+    public int SpawnSeed { get; set; }
 }
 
 /// <summary>
