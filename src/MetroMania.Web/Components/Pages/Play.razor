@@ -1,0 +1,235 @@
+@page "/play"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using MediatR
+@using MetroMania.Application.DTOs
+@using MetroMania.Application.Submissions.Commands
+@using MetroMania.Application.Submissions.Queries
+@using System.Security.Claims
+@inject IJSRuntime JS
+@inject IStringLocalizer<Localization> Loc
+@inject IMediator Mediator
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>MetroMania - @Loc["Play"]</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.SportsEsports" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["Play"]</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["PlaySubtitle"]</MudText>
+
+<MudPaper Elevation="0" Class="pa-4" Style="border: 1px solid var(--mud-palette-lines-default);">
+    <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">@Loc["BotCode"]</MudText>
+
+    <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 8px; overflow: hidden;">
+        @if (_isReady)
+        {
+            <StandaloneCodeEditor @ref="_editor"
+                                  Id="bot-code-editor"
+                                  ConstructionOptions="EditorConstructionOptions"
+                                  OnDidInit="OnEditorInit" />
+        }
+        else
+        {
+            <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            </div>
+        }
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                   OnClick="SubmitCode" Disabled="_submitting">
+            @if (_submitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @Loc["Submit"]
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.ContentPaste"
+                   OnClick="PasteFromClipboard">
+            @Loc["Paste"]
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.Clear"
+                   OnClick="ClearCode">
+            @Loc["Clear"]
+        </MudButton>
+    </div>
+</MudPaper>
+
+<MudText Typo="Typo.h6" Class="mt-8 mb-3" Style="font-weight: 600;">
+    <MudIcon Icon="@Icons.Material.Filled.History" Class="mr-1" Style="vertical-align: middle;" />
+    @Loc["SubmissionHistory"]
+</MudText>
+
+@if (_submissions.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
+        @Loc["NoSubmissionsYet"]
+    </MudAlert>
+}
+else
+{
+    <MudExpansionPanels MultiExpansion="true" Elevation="0" Class="mb-4"
+                        Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 8px;">
+        @foreach (var submission in _submissions)
+        {
+            <MudExpansionPanel Style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+                <TitleContent>
+                    <div class="d-flex align-center justify-space-between" style="width: 100%;">
+                        <div class="d-flex align-center gap-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Primary" />
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">
+                                @Loc["Submission"] #@submission.Version
+                            </MudText>
+                        </div>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @submission.SubmittedAt.ToLocalTime().ToString("g")
+                        </MudText>
+                    </div>
+                </TitleContent>
+                <ChildContent>
+                    <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 6px; overflow: hidden; max-height: 300px; overflow-y: auto;">
+                        <pre style="margin: 0; padding: 12px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: var(--mud-palette-background-default); white-space: pre-wrap; word-break: break-word;">@submission.Code</pre>
+                    </div>
+                    <div class="d-flex justify-end mt-3">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.RestorePage"
+                                   OnClick="() => RevertToSubmission(submission)">
+                            @Loc["RevertToThis"]
+                        </MudButton>
+                    </div>
+                </ChildContent>
+            </MudExpansionPanel>
+        }
+    </MudExpansionPanels>
+}
+
+@code {
+    private StandaloneCodeEditor _editor = null!;
+    private bool _isReady;
+    private bool _previousDarkMode;
+    private bool _submitting;
+    private Guid _userId;
+    private List<SubmissionDto> _submissions = [];
+
+    [CascadingParameter(Name = "IsDarkMode")]
+    private bool IsDarkMode { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (Guid.TryParse(userIdClaim, out var uid))
+        {
+            _userId = uid;
+            _submissions = await Mediator.Send(new GetUserSubmissionsQuery(_userId));
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _previousDarkMode = IsDarkMode;
+            _isReady = true;
+            StateHasChanged();
+            await Task.Delay(100);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_isReady && IsDarkMode != _previousDarkMode)
+        {
+            _previousDarkMode = IsDarkMode;
+            await BlazorMonaco.Editor.Global.SetTheme(JS, IsDarkMode ? "vs-dark" : "vs");
+        }
+    }
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+        {
+            AutomaticLayout = true,
+            Language = "csharp",
+            Theme = IsDarkMode ? "vs-dark" : "vs",
+            Value = "// Write your bot code here\n",
+            FontSize = 14,
+            FontFamily = "'Cascadia Code', 'Fira Code', 'Consolas', monospace",
+            Minimap = new EditorMinimapOptions { Enabled = false },
+            ScrollBeyondLastLine = false,
+            RenderLineHighlight = "all",
+            Padding = new EditorPaddingOptions { Top = 10, Bottom = 10 },
+            TabSize = 4,
+            InsertSpaces = true
+        };
+    }
+
+    private async Task OnEditorInit()
+    {
+        await UpdateEditorHeight();
+    }
+
+    private async Task UpdateEditorHeight()
+    {
+        var model = await _editor.GetModel();
+        var lineCount = await model.GetLineCount();
+        var height = Math.Clamp(lineCount * 20 + 20, 300, 600);
+        await JS.InvokeVoidAsync("eval",
+            $"document.getElementById('bot-code-editor').style.height = '{height}px'");
+    }
+
+    private async Task SubmitCode()
+    {
+        if (_userId == Guid.Empty) return;
+
+        var code = await _editor.GetValue();
+        if (string.IsNullOrWhiteSpace(code)) return;
+
+        _submitting = true;
+        try
+        {
+            await Mediator.Send(new SubmitCodeCommand(_userId, code));
+            _submissions = await Mediator.Send(new GetUserSubmissionsQuery(_userId));
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+
+    private async Task PasteFromClipboard()
+    {
+        try
+        {
+            var text = await JS.InvokeAsync<string>("navigator.clipboard.readText");
+            if (!string.IsNullOrEmpty(text))
+            {
+                await _editor.SetValue(text);
+                await UpdateEditorHeight();
+            }
+        }
+        catch
+        {
+            // Clipboard API may be blocked by browser permissions
+        }
+    }
+
+    private async Task ClearCode()
+    {
+        await _editor.SetValue(string.Empty);
+        await UpdateEditorHeight();
+    }
+
+    private async Task RevertToSubmission(SubmissionDto submission)
+    {
+        await _editor.SetValue(submission.Code);
+        await UpdateEditorHeight();
+    }
+}

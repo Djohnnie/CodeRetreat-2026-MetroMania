@@ -16,6 +16,8 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+<CascadingValue Value="_isDarkMode" Name="IsDarkMode">
+
 <MudLayout>
     <MudAppBar Elevation="0" Dense="true" Class="appbar-blur">
         <MudIconButton Icon="@(_drawerOpen ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
@@ -78,6 +80,9 @@
                     <MudNavLink Href="/info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Info">
                         @Loc["GameInfo"]
                     </MudNavLink>
+                    <MudNavLink Href="/play" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SportsEsports">
+                        @Loc["Play"]
+                    </MudNavLink>
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView Roles="Admin">
@@ -99,6 +104,7 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+</CascadingValue>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.

@@ -90,6 +90,19 @@
   <data name="GameInfo" xml:space="preserve"><value>Spel Info</value></data>
   <data name="GameInfoSubtitle" xml:space="preserve"><value>Ontdek hoe de Metro Mania codeeruitdaging werkt.</value></data>
 
+  <!-- Play -->
+  <data name="Play" xml:space="preserve"><value>Spelen</value></data>
+  <data name="PlaySubtitle" xml:space="preserve"><value>Dien je C# bot-code in om het spel te spelen.</value></data>
+  <data name="BotCode" xml:space="preserve"><value>Bot Code (C#)</value></data>
+  <data name="BotCodePlaceholder" xml:space="preserve"><value>Plak of typ hier je C# bot-code...</value></data>
+  <data name="Paste" xml:space="preserve"><value>Plakken</value></data>
+  <data name="Clear" xml:space="preserve"><value>Wissen</value></data>
+  <data name="Submit" xml:space="preserve"><value>Indienen</value></data>
+  <data name="SubmissionHistory" xml:space="preserve"><value>Inzendingsgeschiedenis</value></data>
+  <data name="NoSubmissionsYet" xml:space="preserve"><value>Nog geen inzendingen. Dien je bot-code in om je geschiedenis hier te zien.</value></data>
+  <data name="Submission" xml:space="preserve"><value>Inzending</value></data>
+  <data name="RevertToThis" xml:space="preserve"><value>Terugzetten naar deze versie</value></data>
+
   <!-- Not Found -->
   <data name="PageNotFound" xml:space="preserve"><value>Pagina niet gevonden</value></data>
   <data name="NotFoundMessage" xml:space="preserve"><value>De pagina die je zoekt bestaat helaas niet.</value></data>

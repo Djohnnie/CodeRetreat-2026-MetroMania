@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Level> Levels => Set<Level>();
+    public DbSet<Submission> Submissions => Set<Submission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,6 +47,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                         (a, b) => JsonSerializer.Serialize(a, JsonOptions) == JsonSerializer.Serialize(b, JsonOptions),
                         v => JsonSerializer.Serialize(v, JsonOptions).GetHashCode(),
                         v => JsonSerializer.Deserialize<LevelData>(JsonSerializer.Serialize(v, JsonOptions), JsonOptions)!));
+        });
+
+        modelBuilder.Entity<Submission>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Code).IsRequired();
+            entity.HasIndex(e => new { e.UserId, e.Version }).IsUnique();
+            entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
