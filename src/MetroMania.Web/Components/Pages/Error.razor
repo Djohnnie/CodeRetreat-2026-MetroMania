@@ -1,18 +1,19 @@
 ﻿@page "/Error"
 @using System.Diagnostics
+@inject IStringLocalizer<Localization> Loc
 
-<PageTitle>Error</PageTitle>
+<PageTitle>@Loc["Error"]</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
     <MudAlert Severity="Severity.Error">
-        <MudText Typo="Typo.h5">Error</MudText>
-        <MudText Typo="Typo.body1">An error occurred while processing your request.</MudText>
+        <MudText Typo="Typo.h5">@Loc["Error"]</MudText>
+        <MudText Typo="Typo.body1">@Loc["ErrorMessage"]</MudText>
         @if (ShowRequestId)
         {
-            <MudText Typo="Typo.caption" Class="mt-2">Request ID: @RequestId</MudText>
+            <MudText Typo="Typo.caption" Class="mt-2">@Loc["RequestId"]: @RequestId</MudText>
         }
     </MudAlert>
-    <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Back to Home</MudButton>
+    <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">@Loc["BackToHome"]</MudButton>
 </MudContainer>
 
 @code{

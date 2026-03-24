@@ -6,14 +6,15 @@
 @using MetroMania.Application.Users.Queries
 @using MetroMania.Domain.Enums
 @inject IMediator Mediator
+@inject IStringLocalizer<Localization> Loc
 
-<PageTitle>MetroMania - User Management</PageTitle>
+<PageTitle>MetroMania - @Loc["UserManagement"]</PageTitle>
 
 <div class="d-flex align-center mb-1">
     <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-2" Color="Color.Primary" />
-    <MudText Typo="Typo.h4" Style="font-weight: 700;">User Management</MudText>
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["UserManagement"]</MudText>
 </div>
-<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">Approve, reject, or remove user accounts.</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["UserMgmtSubtitle"]</MudText>
 
 @if (!string.IsNullOrEmpty(_message))
 {
@@ -30,14 +31,14 @@ else
     <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
         <MudTable Items="_users" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
             <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>Role</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>Registered</MudTh>
-                <MudTh Style="text-align: right;">Actions</MudTh>
+                <MudTh>@Loc["Name"]</MudTh>
+                <MudTh>@Loc["Role"]</MudTh>
+                <MudTh>@Loc["Status"]</MudTh>
+                <MudTh>@Loc["Registered"]</MudTh>
+                <MudTh Style="text-align: right;">@Loc["Actions"]</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Name">
+                <MudTd DataLabel="@Loc["Name"]">
                     <div class="d-flex align-center">
                         <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">
                             @context.Name[0].ToString().ToUpper()
@@ -45,44 +46,44 @@ else
                         @context.Name
                     </div>
                 </MudTd>
-                <MudTd DataLabel="Role">
+                <MudTd DataLabel="@Loc["Role"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
                              Color="@(context.Role == UserRole.Admin ? Color.Primary : Color.Default)">
                         @context.Role
                     </MudChip>
                 </MudTd>
-                <MudTd DataLabel="Status">
+                <MudTd DataLabel="@Loc["Status"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="@GetStatusColor(context.ApprovalStatus)">
                         @context.ApprovalStatus
                     </MudChip>
                 </MudTd>
-                <MudTd DataLabel="Registered">
+                <MudTd DataLabel="@Loc["Registered"]">
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                         @context.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                     </MudText>
                 </MudTd>
-                <MudTd DataLabel="Actions" Style="text-align: right;">
+                <MudTd DataLabel="@Loc["Actions"]" Style="text-align: right;">
                     @if (context.ApprovalStatus == ApprovalStatus.Pending)
                     {
-                        <MudTooltip Text="Approve">
+                        <MudTooltip Text="@Loc["Approve"]">
                             <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small"
                                            OnClick="() => ApproveUser(context.Id)" />
                         </MudTooltip>
-                        <MudTooltip Text="Reject">
+                        <MudTooltip Text="@Loc["Reject"]">
                             <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small"
                                            OnClick="() => RejectUser(context.Id)" />
                         </MudTooltip>
                     }
                     else if (context.ApprovalStatus == ApprovalStatus.Rejected)
                     {
-                        <MudTooltip Text="Approve">
+                        <MudTooltip Text="@Loc["Approve"]">
                             <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small"
                                            OnClick="() => ApproveUser(context.Id)" />
                         </MudTooltip>
                     }
                     @if (context.Role != UserRole.Admin)
                     {
-                        <MudTooltip Text="Delete">
+                        <MudTooltip Text="@Loc["Delete"]">
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
                                            OnClick="() => DeleteUser(context.Id, context.Name)" />
                         </MudTooltip>
@@ -119,7 +120,7 @@ else
     private async Task ApproveUser(Guid userId)
     {
         var success = await Mediator.Send(new ApproveUserCommand(userId, ApprovalStatus.Approved));
-        _message = success ? "User approved successfully." : "Failed to approve user.";
+        _message = success ? Loc["UserApproved"].Value : Loc["UserApproveFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadUsers();
     }
@@ -127,7 +128,7 @@ else
     private async Task RejectUser(Guid userId)
     {
         var success = await Mediator.Send(new ApproveUserCommand(userId, ApprovalStatus.Rejected));
-        _message = success ? "User rejected." : "Failed to reject user.";
+        _message = success ? Loc["UserRejected"].Value : Loc["UserRejectFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadUsers();
     }
@@ -135,7 +136,7 @@ else
     private async Task DeleteUser(Guid userId, string name)
     {
         var success = await Mediator.Send(new DeleteUserCommand(userId));
-        _message = success ? $"User '{name}' deleted." : "Failed to delete user.";
+        _message = success ? string.Format(Loc["UserDeleted"], name) : Loc["UserDeleteFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadUsers();
     }

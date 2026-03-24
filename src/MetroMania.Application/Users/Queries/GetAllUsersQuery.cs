@@ -12,6 +12,6 @@ public class GetAllUsersQueryHandler(IUserRepository userRepository)
     public async Task<List<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
         var users = await userRepository.GetAllAsync();
-        return users.Select(u => new UserDto(u.Id, u.Name, u.Role, u.ApprovalStatus, u.IsDarkMode, u.CreatedAt)).ToList();
+        return users.Select(u => new UserDto(u.Id, u.Name, u.Role, u.ApprovalStatus, u.IsDarkMode, u.Language, u.CreatedAt)).ToList();
     }
 }

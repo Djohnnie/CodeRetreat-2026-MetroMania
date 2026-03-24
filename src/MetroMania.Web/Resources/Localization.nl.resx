@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+
+  <!-- App -->
+  <data name="AppName" xml:space="preserve"><value>MetroMania</value></data>
+
+  <!-- Nav / Layout -->
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="UserManagement" xml:space="preserve"><value>Gebruikersbeheer</value></data>
+  <data name="Login" xml:space="preserve"><value>Inloggen</value></data>
+  <data name="Register" xml:space="preserve"><value>Registreren</value></data>
+  <data name="Logout" xml:space="preserve"><value>Uitloggen</value></data>
+  <data name="SwitchToLight" xml:space="preserve"><value>Naar lichte modus</value></data>
+  <data name="SwitchToDark" xml:space="preserve"><value>Naar donkere modus</value></data>
+
+  <!-- Home - Authenticated -->
+  <data name="WelcomeUser" xml:space="preserve"><value>Welkom, {0}!</value></data>
+  <data name="DashboardOverview" xml:space="preserve"><value>Hier is je dashboardoverzicht.</value></data>
+  <data name="TransitDescription" xml:space="preserve"><value>Je dashboard voor OV-beheer. Gebruik het navigatiemenu om functies te openen.</value></data>
+  <data name="YourProfile" xml:space="preserve"><value>Je profiel</value></data>
+  <data name="Role" xml:space="preserve"><value>Rol</value></data>
+  <data name="Administration" xml:space="preserve"><value>Beheer</value></data>
+  <data name="ManageUsers" xml:space="preserve"><value>Gebruikers beheren</value></data>
+
+  <!-- Home - Not Authenticated -->
+  <data name="WelcomeGuest" xml:space="preserve"><value>Log in of registreer om verder te gaan.</value></data>
+
+  <!-- Login page -->
+  <data name="WelcomeBack" xml:space="preserve"><value>Welkom terug</value></data>
+  <data name="SignInSubtitle" xml:space="preserve"><value>Log in op je account</value></data>
+  <data name="Username" xml:space="preserve"><value>Gebruikersnaam</value></data>
+  <data name="UsernameRequired" xml:space="preserve"><value>Gebruikersnaam is verplicht</value></data>
+  <data name="Password" xml:space="preserve"><value>Wachtwoord</value></data>
+  <data name="PasswordRequired" xml:space="preserve"><value>Wachtwoord is verplicht</value></data>
+  <data name="SignIn" xml:space="preserve"><value>Inloggen</value></data>
+  <data name="NoAccountPrompt" xml:space="preserve"><value>Nog geen account?</value></data>
+  <data name="CreateOne" xml:space="preserve"><value>Maak er een aan</value></data>
+  <data name="LoginFailed" xml:space="preserve"><value>Inloggen mislukt.</value></data>
+  <data name="ErrorOccurred" xml:space="preserve"><value>Er is een fout opgetreden: {0}</value></data>
+
+  <!-- Register page -->
+  <data name="CreateAccount" xml:space="preserve"><value>Account aanmaken</value></data>
+  <data name="JoinApp" xml:space="preserve"><value>Word lid van MetroMania</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>Wachtwoord bevestigen</value></data>
+  <data name="ConfirmPasswordRequired" xml:space="preserve"><value>Bevestig je wachtwoord</value></data>
+  <data name="CreateAccountBtn" xml:space="preserve"><value>Account aanmaken</value></data>
+  <data name="HasAccountPrompt" xml:space="preserve"><value>Heb je al een account?</value></data>
+  <data name="SignInLink" xml:space="preserve"><value>Inloggen</value></data>
+  <data name="GoToLogin" xml:space="preserve"><value>Ga naar inloggen</value></data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve"><value>Wachtwoorden komen niet overeen.</value></data>
+  <data name="RegistrationFailed" xml:space="preserve"><value>Registratie mislukt.</value></data>
+  <data name="RegSuccessAdmin" xml:space="preserve"><value>Registratie geslaagd! Je bent de eerste gebruiker en hebt beheerderstoegang gekregen. Je kunt nu inloggen.</value></data>
+  <data name="RegSuccessPending" xml:space="preserve"><value>Registratie geslaagd! Je account wacht op goedkeuring door een beheerder.</value></data>
+
+  <!-- User Management -->
+  <data name="UserMgmtSubtitle" xml:space="preserve"><value>Gebruikersaccounts goedkeuren, afwijzen of verwijderen.</value></data>
+  <data name="Name" xml:space="preserve"><value>Naam</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Registered" xml:space="preserve"><value>Geregistreerd</value></data>
+  <data name="Actions" xml:space="preserve"><value>Acties</value></data>
+  <data name="Approve" xml:space="preserve"><value>Goedkeuren</value></data>
+  <data name="Reject" xml:space="preserve"><value>Afwijzen</value></data>
+  <data name="Delete" xml:space="preserve"><value>Verwijderen</value></data>
+  <data name="UserApproved" xml:space="preserve"><value>Gebruiker succesvol goedgekeurd.</value></data>
+  <data name="UserApproveFailed" xml:space="preserve"><value>Goedkeuren van gebruiker mislukt.</value></data>
+  <data name="UserRejected" xml:space="preserve"><value>Gebruiker afgewezen.</value></data>
+  <data name="UserRejectFailed" xml:space="preserve"><value>Afwijzen van gebruiker mislukt.</value></data>
+  <data name="UserDeleted" xml:space="preserve"><value>Gebruiker '{0}' verwijderd.</value></data>
+  <data name="UserDeleteFailed" xml:space="preserve"><value>Verwijderen van gebruiker mislukt.</value></data>
+
+  <!-- Not Found -->
+  <data name="PageNotFound" xml:space="preserve"><value>Pagina niet gevonden</value></data>
+  <data name="NotFoundMessage" xml:space="preserve"><value>De pagina die je zoekt bestaat helaas niet.</value></data>
+  <data name="BackToDashboard" xml:space="preserve"><value>Terug naar dashboard</value></data>
+
+  <!-- Error -->
+  <data name="Error" xml:space="preserve"><value>Fout</value></data>
+  <data name="ErrorMessage" xml:space="preserve"><value>Er is een fout opgetreden bij het verwerken van je verzoek.</value></data>
+  <data name="RequestId" xml:space="preserve"><value>Verzoek-ID</value></data>
+  <data name="BackToHome" xml:space="preserve"><value>Terug naar home</value></data>
+
+  <!-- Language -->
+  <data name="Language" xml:space="preserve"><value>Taal</value></data>
+</root>

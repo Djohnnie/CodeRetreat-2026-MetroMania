@@ -1,8 +1,10 @@
+using System.Globalization;
 using MetroMania.Infrastructure;
 using MetroMania.Infrastructure.Persistence;
 using MetroMania.Web.Components;
 using MetroMania.Web.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
@@ -20,6 +22,9 @@ builder.Services.AddMediatR(cfg =>
 
 // MudBlazor
 builder.Services.AddMudServices();
+
+// Localization
+builder.Services.AddLocalization();
 
 // Auth
 builder.Services.AddAuthorizationCore();
@@ -47,6 +52,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Culture middleware
+var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("nl") };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();

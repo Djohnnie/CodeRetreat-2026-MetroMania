@@ -3,8 +3,9 @@
 @using MetroMania.Application.Auth.Commands
 @inject IMediator Mediator
 @inject NavigationManager Navigation
+@inject IStringLocalizer<Localization> Loc
 
-<PageTitle>MetroMania - Register</PageTitle>
+<PageTitle>MetroMania - @Loc["Register"]</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraSmall">
     <MudPaper Class="pa-8 mt-8" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
@@ -12,8 +13,8 @@
             <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Rounded="true">
                 <MudIcon Icon="@Icons.Material.Filled.PersonAdd" />
             </MudAvatar>
-            <MudText Typo="Typo.h5" Class="mt-3" Style="font-weight: 600;">Create account</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">Join MetroMania</MudText>
+            <MudText Typo="Typo.h5" Class="mt-3" Style="font-weight: 600;">@Loc["CreateAccount"]</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc["JoinApp"]</MudText>
         </div>
 
         @if (!string.IsNullOrEmpty(_error))
@@ -30,22 +31,22 @@
             <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
                        Size="Size.Large" EndIcon="@Icons.Material.Filled.Login"
                        Style="text-transform: none; font-weight: 600;">
-                Go to Login
+                @Loc["GoToLogin"]
             </MudButton>
         }
         else
         {
             <EditForm Model="_model" OnValidSubmit="HandleRegister" FormName="register">
                 <DataAnnotationsValidator />
-                <MudTextField @bind-Value="_model.Name" Label="Username" Variant="Variant.Outlined"
-                              Required="true" RequiredError="Username is required" Class="mb-4"
+                <MudTextField @bind-Value="_model.Name" Label="@Loc["Username"]" Variant="Variant.Outlined"
+                              Required="true" RequiredError="@Loc["UsernameRequired"]" Class="mb-4"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
-                <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined"
-                              InputType="InputType.Password" Required="true" RequiredError="Password is required"
+                <MudTextField @bind-Value="_model.Password" Label="@Loc["Password"]" Variant="Variant.Outlined"
+                              InputType="InputType.Password" Required="true" RequiredError="@Loc["PasswordRequired"]"
                               Class="mb-4" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
-                <MudTextField @bind-Value="_model.ConfirmPassword" Label="Confirm Password" Variant="Variant.Outlined"
+                <MudTextField @bind-Value="_model.ConfirmPassword" Label="@Loc["ConfirmPassword"]" Variant="Variant.Outlined"
                               InputType="InputType.Password" Required="true"
-                              RequiredError="Please confirm your password" Class="mb-5"
+                              RequiredError="@Loc["ConfirmPasswordRequired"]" Class="mb-5"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
                 <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
                            FullWidth="true" Disabled="_loading" Size="Size.Large"
@@ -54,14 +55,14 @@
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                     }
-                    Create Account
+                    @Loc["CreateAccountBtn"]
                 </MudButton>
             </EditForm>
 
             <MudDivider Class="my-4" />
 
             <MudText Typo="Typo.body2" Align="Align.Center">
-                Already have an account? <MudLink Href="/login">Sign in</MudLink>
+                @Loc["HasAccountPrompt"] <MudLink Href="/login">@Loc["SignInLink"]</MudLink>
             </MudText>
         }
     </MudPaper>
@@ -96,7 +97,7 @@
 
         if (_model.Password != _model.ConfirmPassword)
         {
-            _error = "Passwords do not match.";
+            _error = Loc["PasswordsDoNotMatch"].Value;
             _loading = false;
             return;
         }
@@ -108,17 +109,17 @@
             {
                 _registrationSuccess = true;
                 _successMessage = result.User.ApprovalStatus == Domain.Enums.ApprovalStatus.Approved
-                    ? "Registration successful! You are the first user and have been granted admin access. You can now log in."
-                    : "Registration successful! Your account is pending approval by an administrator.";
+                    ? Loc["RegSuccessAdmin"].Value
+                    : Loc["RegSuccessPending"].Value;
             }
             else
             {
-                _error = result.Error ?? "Registration failed.";
+                _error = result.Error ?? Loc["RegistrationFailed"].Value;
             }
         }
         catch (Exception ex)
         {
-            _error = $"An error occurred: {ex.Message}";
+            _error = string.Format(Loc["ErrorOccurred"], ex.Message);
         }
         finally
         {

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+
+  <!-- App -->
+  <data name="AppName" xml:space="preserve"><value>MetroMania</value></data>
+
+  <!-- Nav / Layout -->
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="UserManagement" xml:space="preserve"><value>User Management</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+  <data name="Register" xml:space="preserve"><value>Register</value></data>
+  <data name="Logout" xml:space="preserve"><value>Logout</value></data>
+  <data name="SwitchToLight" xml:space="preserve"><value>Switch to light mode</value></data>
+  <data name="SwitchToDark" xml:space="preserve"><value>Switch to dark mode</value></data>
+
+  <!-- Home - Authenticated -->
+  <data name="WelcomeUser" xml:space="preserve"><value>Welcome, {0}!</value></data>
+  <data name="DashboardOverview" xml:space="preserve"><value>Here's your dashboard overview.</value></data>
+  <data name="TransitDescription" xml:space="preserve"><value>Your transit management dashboard. Use the navigation menu to access features.</value></data>
+  <data name="YourProfile" xml:space="preserve"><value>Your Profile</value></data>
+  <data name="Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Administration" xml:space="preserve"><value>Administration</value></data>
+  <data name="ManageUsers" xml:space="preserve"><value>Manage Users</value></data>
+
+  <!-- Home - Not Authenticated -->
+  <data name="WelcomeGuest" xml:space="preserve"><value>Please log in or register to continue.</value></data>
+
+  <!-- Login page -->
+  <data name="WelcomeBack" xml:space="preserve"><value>Welcome back</value></data>
+  <data name="SignInSubtitle" xml:space="preserve"><value>Sign in to your account</value></data>
+  <data name="Username" xml:space="preserve"><value>Username</value></data>
+  <data name="UsernameRequired" xml:space="preserve"><value>Username is required</value></data>
+  <data name="Password" xml:space="preserve"><value>Password</value></data>
+  <data name="PasswordRequired" xml:space="preserve"><value>Password is required</value></data>
+  <data name="SignIn" xml:space="preserve"><value>Sign In</value></data>
+  <data name="NoAccountPrompt" xml:space="preserve"><value>Don't have an account?</value></data>
+  <data name="CreateOne" xml:space="preserve"><value>Create one</value></data>
+  <data name="LoginFailed" xml:space="preserve"><value>Login failed.</value></data>
+  <data name="ErrorOccurred" xml:space="preserve"><value>An error occurred: {0}</value></data>
+
+  <!-- Register page -->
+  <data name="CreateAccount" xml:space="preserve"><value>Create account</value></data>
+  <data name="JoinApp" xml:space="preserve"><value>Join MetroMania</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>Confirm Password</value></data>
+  <data name="ConfirmPasswordRequired" xml:space="preserve"><value>Please confirm your password</value></data>
+  <data name="CreateAccountBtn" xml:space="preserve"><value>Create Account</value></data>
+  <data name="HasAccountPrompt" xml:space="preserve"><value>Already have an account?</value></data>
+  <data name="SignInLink" xml:space="preserve"><value>Sign in</value></data>
+  <data name="GoToLogin" xml:space="preserve"><value>Go to Login</value></data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve"><value>Passwords do not match.</value></data>
+  <data name="RegistrationFailed" xml:space="preserve"><value>Registration failed.</value></data>
+  <data name="RegSuccessAdmin" xml:space="preserve"><value>Registration successful! You are the first user and have been granted admin access. You can now log in.</value></data>
+  <data name="RegSuccessPending" xml:space="preserve"><value>Registration successful! Your account is pending approval by an administrator.</value></data>
+
+  <!-- User Management -->
+  <data name="UserMgmtSubtitle" xml:space="preserve"><value>Approve, reject, or remove user accounts.</value></data>
+  <data name="Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Registered" xml:space="preserve"><value>Registered</value></data>
+  <data name="Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Approve" xml:space="preserve"><value>Approve</value></data>
+  <data name="Reject" xml:space="preserve"><value>Reject</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="UserApproved" xml:space="preserve"><value>User approved successfully.</value></data>
+  <data name="UserApproveFailed" xml:space="preserve"><value>Failed to approve user.</value></data>
+  <data name="UserRejected" xml:space="preserve"><value>User rejected.</value></data>
+  <data name="UserRejectFailed" xml:space="preserve"><value>Failed to reject user.</value></data>
+  <data name="UserDeleted" xml:space="preserve"><value>User '{0}' deleted.</value></data>
+  <data name="UserDeleteFailed" xml:space="preserve"><value>Failed to delete user.</value></data>
+
+  <!-- Not Found -->
+  <data name="PageNotFound" xml:space="preserve"><value>Page Not Found</value></data>
+  <data name="NotFoundMessage" xml:space="preserve"><value>Sorry, the content you are looking for does not exist.</value></data>
+  <data name="BackToDashboard" xml:space="preserve"><value>Back to Dashboard</value></data>
+
+  <!-- Error -->
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
+  <data name="ErrorMessage" xml:space="preserve"><value>An error occurred while processing your request.</value></data>
+  <data name="RequestId" xml:space="preserve"><value>Request ID</value></data>
+  <data name="BackToHome" xml:space="preserve"><value>Back to Home</value></data>
+
+  <!-- Language -->
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+</root>

@@ -29,7 +29,8 @@ public class CookieAuthStateProvider(ProtectedSessionStorage sessionStorage, ISe
                         new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new(ClaimTypes.Name, user.Name),
                         new(ClaimTypes.Role, user.Role.ToString()),
-                        new("IsDarkMode", user.IsDarkMode.ToString())
+                        new("IsDarkMode", user.IsDarkMode.ToString()),
+                        new("Language", user.Language)
                     };
                     var identity = new ClaimsIdentity(claims, "MetroManiaAuth");
                     _currentUser = new ClaimsPrincipal(identity);

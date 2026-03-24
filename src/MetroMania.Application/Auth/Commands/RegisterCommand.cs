@@ -34,7 +34,7 @@ public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHas
 
         await userRepository.AddAsync(user);
 
-        var dto = new UserDto(user.Id, user.Name, user.Role, user.ApprovalStatus, user.IsDarkMode, user.CreatedAt);
+        var dto = new UserDto(user.Id, user.Name, user.Role, user.ApprovalStatus, user.IsDarkMode, user.Language, user.CreatedAt);
         return new RegisterResult(true, null, dto);
     }
 }

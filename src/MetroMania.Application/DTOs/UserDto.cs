@@ -8,4 +8,5 @@ public record UserDto(
     UserRole Role,
     ApprovalStatus ApprovalStatus,
     bool IsDarkMode,
+    string Language,
     DateTime CreatedAt);

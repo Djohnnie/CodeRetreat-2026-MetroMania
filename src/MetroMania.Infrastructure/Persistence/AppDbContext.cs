@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.PasswordHash).IsRequired();
             entity.Property(e => e.Role).HasConversion<string>();
             entity.Property(e => e.ApprovalStatus).HasConversion<string>();
+            entity.Property(e => e.Language).HasMaxLength(10).HasDefaultValue("en");
         });
     }
 }

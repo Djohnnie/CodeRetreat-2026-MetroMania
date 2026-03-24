@@ -1,13 +1,14 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IStringLocalizer<Localization> Loc
 
-<PageTitle>MetroMania - Dashboard</PageTitle>
+<PageTitle>MetroMania - @Loc["Dashboard"]</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <MudText Typo="Typo.h4" Class="mb-1" Style="font-weight: 700;">Welcome, @context.User.Identity?.Name!</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">Here's your dashboard overview.</MudText>
+        <MudText Typo="Typo.h4" Class="mb-1" Style="font-weight: 700;">@string.Format(Loc["WelcomeUser"], context.User.Identity?.Name)</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["DashboardOverview"]</MudText>
         <MudGrid Spacing="4">
             <MudItem xs="12" sm="6" md="4">
                 <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
@@ -15,10 +16,10 @@
                         <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
                             <MudIcon Icon="@Icons.Material.Filled.Train" />
                         </MudAvatar>
-                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">MetroMania</MudText>
+                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["AppName"]</MudText>
                     </div>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        Your transit management dashboard. Use the navigation menu to access features.
+                        @Loc["TransitDescription"]
                     </MudText>
                 </MudPaper>
             </MudItem>
@@ -28,10 +29,10 @@
                         <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
                             <MudIcon Icon="@Icons.Material.Filled.Person" />
                         </MudAvatar>
-                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">Your Profile</MudText>
+                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["YourProfile"]</MudText>
                     </div>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        Role: <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</MudChip>
+                        @Loc["Role"]: <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</MudChip>
                     </MudText>
                 </MudPaper>
             </MudItem>
@@ -43,11 +44,11 @@
                                 <MudAvatar Color="Color.Warning" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
                                     <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
                                 </MudAvatar>
-                                <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">Administration</MudText>
+                                <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["Administration"]</MudText>
                             </div>
                             <MudButton Href="/admin/users" Variant="Variant.Outlined" Color="Color.Primary"
                                        Size="Size.Small" EndIcon="@Icons.Material.Filled.ArrowForward">
-                                Manage Users
+                                @Loc["ManageUsers"]
                             </MudButton>
                         </MudPaper>
                     </MudItem>
@@ -58,16 +59,16 @@
     <NotAuthorized>
         <div class="d-flex flex-column align-center justify-center" style="min-height: 60vh;">
             <MudIcon Icon="@Icons.Material.Filled.Train" Style="font-size: 4rem;" Color="Color.Primary" />
-            <MudText Typo="Typo.h3" Class="mt-4" Style="font-weight: 700;">MetroMania</MudText>
-            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">Please log in or register to continue.</MudText>
+            <MudText Typo="Typo.h3" Class="mt-4" Style="font-weight: 700;">@Loc["AppName"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">@Loc["WelcomeGuest"]</MudText>
             <div>
                 <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" Class="mr-3"
                            Size="Size.Large" EndIcon="@Icons.Material.Filled.Login">
-                    Login
+                    @Loc["Login"]
                 </MudButton>
                 <MudButton Href="/register" Variant="Variant.Outlined" Color="Color.Primary"
                            Size="Size.Large" EndIcon="@Icons.Material.Filled.PersonAdd">
-                    Register
+                    @Loc["Register"]
                 </MudButton>
             </div>
         </div>

@@ -5,8 +5,9 @@
 @inject IMediator Mediator
 @inject CookieAuthStateProvider AuthStateProvider
 @inject NavigationManager Navigation
+@inject IStringLocalizer<Localization> Loc
 
-<PageTitle>MetroMania - Login</PageTitle>
+<PageTitle>MetroMania - @Loc["Login"]</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraSmall">
     <MudPaper Class="pa-8 mt-8" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
@@ -14,8 +15,8 @@
             <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Rounded="true">
                 <MudIcon Icon="@Icons.Material.Filled.Login" />
             </MudAvatar>
-            <MudText Typo="Typo.h5" Class="mt-3" Style="font-weight: 600;">Welcome back</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">Sign in to your account</MudText>
+            <MudText Typo="Typo.h5" Class="mt-3" Style="font-weight: 600;">@Loc["WelcomeBack"]</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc["SignInSubtitle"]</MudText>
         </div>
 
         @if (!string.IsNullOrEmpty(_error))
@@ -26,11 +27,11 @@
 
         <EditForm Model="_model" OnValidSubmit="HandleLogin" FormName="login">
             <DataAnnotationsValidator />
-            <MudTextField @bind-Value="_model.Name" Label="Username" Variant="Variant.Outlined"
-                          Required="true" RequiredError="Username is required" Class="mb-4"
+            <MudTextField @bind-Value="_model.Name" Label="@Loc["Username"]" Variant="Variant.Outlined"
+                          Required="true" RequiredError="@Loc["UsernameRequired"]" Class="mb-4"
                           Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
-            <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined"
-                          InputType="InputType.Password" Required="true" RequiredError="Password is required"
+            <MudTextField @bind-Value="_model.Password" Label="@Loc["Password"]" Variant="Variant.Outlined"
+                          InputType="InputType.Password" Required="true" RequiredError="@Loc["PasswordRequired"]"
                           Class="mb-5" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
                        FullWidth="true" Disabled="_loading" Size="Size.Large"
@@ -39,14 +40,14 @@
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                 }
-                Sign In
+                @Loc["SignIn"]
             </MudButton>
         </EditForm>
 
         <MudDivider Class="my-4" />
 
         <MudText Typo="Typo.body2" Align="Align.Center">
-            Don't have an account? <MudLink Href="/register">Create one</MudLink>
+            @Loc["NoAccountPrompt"] <MudLink Href="/register">@Loc["CreateOne"]</MudLink>
         </MudText>
     </MudPaper>
 </MudContainer>
@@ -80,12 +81,12 @@
             }
             else
             {
-                _error = result.Error ?? "Login failed.";
+                _error = result.Error ?? Loc["LoginFailed"].Value;
             }
         }
         catch (Exception ex)
         {
-            _error = $"An error occurred: {ex.Message}";
+            _error = string.Format(Loc["ErrorOccurred"], ex.Message);
         }
         finally
         {
