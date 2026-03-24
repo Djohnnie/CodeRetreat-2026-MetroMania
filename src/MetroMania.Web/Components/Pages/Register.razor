@@ -1,0 +1,128 @@
+@page "/register"
+@using MediatR
+@using MetroMania.Application.Auth.Commands
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+
+<PageTitle>MetroMania - Register</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall">
+    <MudPaper Class="pa-8 mt-8" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <div class="d-flex flex-column align-center mb-4">
+            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Rounded="true">
+                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" />
+            </MudAvatar>
+            <MudText Typo="Typo.h5" Class="mt-3" Style="font-weight: 600;">Create account</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Join MetroMania</MudText>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" Variant="Variant.Outlined" Dense="true"
+                      ShowCloseIcon="true" CloseIconClicked="() => _error = null">@_error</MudAlert>
+        }
+
+        @if (_registrationSuccess)
+        {
+            <MudAlert Severity="Severity.Success" Class="mb-4" Variant="Variant.Outlined">
+                @_successMessage
+            </MudAlert>
+            <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                       Size="Size.Large" EndIcon="@Icons.Material.Filled.Login"
+                       Style="text-transform: none; font-weight: 600;">
+                Go to Login
+            </MudButton>
+        }
+        else
+        {
+            <EditForm Model="_model" OnValidSubmit="HandleRegister" FormName="register">
+                <DataAnnotationsValidator />
+                <MudTextField @bind-Value="_model.Name" Label="Username" Variant="Variant.Outlined"
+                              Required="true" RequiredError="Username is required" Class="mb-4"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
+                <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined"
+                              InputType="InputType.Password" Required="true" RequiredError="Password is required"
+                              Class="mb-4" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+                <MudTextField @bind-Value="_model.ConfirmPassword" Label="Confirm Password" Variant="Variant.Outlined"
+                              InputType="InputType.Password" Required="true"
+                              RequiredError="Please confirm your password" Class="mb-5"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                           FullWidth="true" Disabled="_loading" Size="Size.Large"
+                           Style="text-transform: none; font-weight: 600;">
+                    @if (_loading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    }
+                    Create Account
+                </MudButton>
+            </EditForm>
+
+            <MudDivider Class="my-4" />
+
+            <MudText Typo="Typo.body2" Align="Align.Center">
+                Already have an account? <MudLink Href="/login">Sign in</MudLink>
+            </MudText>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private RegisterModel _model = new();
+    private string? _error;
+    private string? _successMessage;
+    private bool _loading;
+    private bool _registrationSuccess;
+
+    private class RegisterModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(3, ErrorMessage = "Username must be at least 3 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        public string Password { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Compare(nameof(Password), ErrorMessage = "Passwords do not match")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    private async Task HandleRegister()
+    {
+        _loading = true;
+        _error = null;
+
+        if (_model.Password != _model.ConfirmPassword)
+        {
+            _error = "Passwords do not match.";
+            _loading = false;
+            return;
+        }
+
+        try
+        {
+            var result = await Mediator.Send(new RegisterCommand(_model.Name, _model.Password));
+            if (result.Success && result.User is not null)
+            {
+                _registrationSuccess = true;
+                _successMessage = result.User.ApprovalStatus == Domain.Enums.ApprovalStatus.Approved
+                    ? "Registration successful! You are the first user and have been granted admin access. You can now log in."
+                    : "Registration successful! Your account is pending approval by an administrator.";
+            }
+            else
+            {
+                _error = result.Error ?? "Registration failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

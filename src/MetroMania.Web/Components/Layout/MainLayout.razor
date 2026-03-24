@@ -1,0 +1,155 @@
+﻿@inherits LayoutComponentBase
+@using MetroMania.Web.Services
+@using MetroMania.Application.Theme.Commands
+@using MediatR
+@using System.Security.Claims
+@inject CookieAuthStateProvider AuthStateProvider
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+
+<MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Dense="true" Class="appbar-blur">
+        <MudIconButton Icon="@(_drawerOpen ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
+                       Color="Color.Inherit" Edge="Edge.Start"
+                       OnClick="ToggleDrawer"
+                       Class="hamburger-btn" />
+        <MudIcon Icon="@Icons.Material.Filled.Train" Class="ml-2" />
+        <MudText Typo="Typo.h6" Class="ml-2" Style="font-weight: 600; letter-spacing: 0.5px;">MetroMania</MudText>
+        <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <MudTooltip Text="@(_isDarkMode ? "Switch to light mode" : "Switch to dark mode")">
+                    <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                                   Color="Color.Inherit" OnClick="ToggleTheme"
+                                   Class="theme-toggle-btn" />
+                </MudTooltip>
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
+                         Class="mx-1" Icon="@Icons.Material.Filled.Person">
+                    @context.User.Identity?.Name
+                </MudChip>
+                <MudTooltip Text="Logout">
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="LogoutAsync" />
+                </MudTooltip>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">Login</MudButton>
+                <MudButton Href="/register" Color="Color.Inherit" Variant="Variant.Text">Register</MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" ClipMode="DrawerClipMode.Always"
+               Class="drawer-animate" Variant="DrawerVariant.Responsive">
+        <MudNavMenu Class="mt-2">
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                Dashboard
+            </MudNavLink>
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <MudNavLink Href="/admin/users" Icon="@Icons.Material.Filled.People">
+                        User Management
+                    </MudNavLink>
+                </Authorized>
+            </AuthorizeView>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="pt-16 px-4">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-4 page-enter">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private MudThemeProvider _themeProvider = null!;
+    private bool _isDarkMode;
+    private bool _drawerOpen = true;
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#2563eb",
+            Secondary = "#f59e0b",
+            AppbarBackground = "rgba(255, 255, 255, 0.8)",
+            AppbarText = "#1e293b",
+            Background = "#f8fafc",
+            Surface = "#ffffff",
+            DrawerBackground = "#ffffff",
+            DrawerText = "#334155",
+            TableStriped = "#f1f5f9"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#60a5fa",
+            Secondary = "#fbbf24",
+            AppbarBackground = "rgba(15, 23, 42, 0.85)",
+            AppbarText = "#e2e8f0",
+            Background = "#0f172a",
+            Surface = "#1e293b",
+            DrawerBackground = "#1e293b",
+            DrawerText = "#cbd5e1",
+            TableStriped = "#1e293b"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["'Inter'", "'Roboto'", "'Helvetica'", "'Arial'", "sans-serif"]
+            }
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "12px"
+        }
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                var darkClaim = user.FindFirst("IsDarkMode")?.Value;
+                _isDarkMode = darkClaim == "True";
+            }
+            else
+            {
+                _isDarkMode = false;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+
+    private async Task ToggleTheme()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (Guid.TryParse(userIdStr, out var userId))
+        {
+            _isDarkMode = await Mediator.Send(new ToggleThemeCommand(userId));
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthStateProvider.LogoutAsync();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

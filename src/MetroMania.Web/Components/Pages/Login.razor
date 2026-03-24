@@ -1,0 +1,95 @@
+@page "/login"
+@using MediatR
+@using MetroMania.Application.Auth.Queries
+@using MetroMania.Web.Services
+@inject IMediator Mediator
+@inject CookieAuthStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>MetroMania - Login</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall">
+    <MudPaper Class="pa-8 mt-8" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+        <div class="d-flex flex-column align-center mb-4">
+            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Rounded="true">
+                <MudIcon Icon="@Icons.Material.Filled.Login" />
+            </MudAvatar>
+            <MudText Typo="Typo.h5" Class="mt-3" Style="font-weight: 600;">Welcome back</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Sign in to your account</MudText>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" Variant="Variant.Outlined" Dense="true"
+                      ShowCloseIcon="true" CloseIconClicked="() => _error = null">@_error</MudAlert>
+        }
+
+        <EditForm Model="_model" OnValidSubmit="HandleLogin" FormName="login">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="_model.Name" Label="Username" Variant="Variant.Outlined"
+                          Required="true" RequiredError="Username is required" Class="mb-4"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
+            <MudTextField @bind-Value="_model.Password" Label="Password" Variant="Variant.Outlined"
+                          InputType="InputType.Password" Required="true" RequiredError="Password is required"
+                          Class="mb-5" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                       FullWidth="true" Disabled="_loading" Size="Size.Large"
+                       Style="text-transform: none; font-weight: 600;">
+                @if (_loading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                Sign In
+            </MudButton>
+        </EditForm>
+
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.body2" Align="Align.Center">
+            Don't have an account? <MudLink Href="/register">Create one</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private LoginModel _model = new();
+    private string? _error;
+    private bool _loading;
+
+    private class LoginModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Name { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task HandleLogin()
+    {
+        _loading = true;
+        _error = null;
+
+        try
+        {
+            var result = await Mediator.Send(new LoginQuery(_model.Name, _model.Password));
+            if (result.Success && result.User is not null)
+            {
+                await AuthStateProvider.LoginAsync(result.User.Id);
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                _error = result.Error ?? "Login failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

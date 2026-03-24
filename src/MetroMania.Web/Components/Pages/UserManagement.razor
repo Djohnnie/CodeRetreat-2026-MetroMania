@@ -1,0 +1,142 @@
+@page "/admin/users"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@using MediatR
+@using MetroMania.Application.DTOs
+@using MetroMania.Application.Users.Commands
+@using MetroMania.Application.Users.Queries
+@using MetroMania.Domain.Enums
+@inject IMediator Mediator
+
+<PageTitle>MetroMania - User Management</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">User Management</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">Approve, reject, or remove user accounts.</MudText>
+
+@if (!string.IsNullOrEmpty(_message))
+{
+    <MudAlert Severity="_messageSeverity" Class="mb-4" Variant="Variant.Outlined" Dense="true"
+              ShowCloseIcon="true" CloseIconClicked="() => _message = null">@_message</MudAlert>
+}
+
+@if (_users is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        <MudTable Items="_users" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Role</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Registered</MudTh>
+                <MudTh Style="text-align: right;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">
+                            @context.Name[0].ToString().ToUpper()
+                        </MudAvatar>
+                        @context.Name
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Role">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Color="@(context.Role == UserRole.Admin ? Color.Primary : Color.Default)">
+                        @context.Role
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="@GetStatusColor(context.ApprovalStatus)">
+                        @context.ApprovalStatus
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Registered">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        @context.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="Actions" Style="text-align: right;">
+                    @if (context.ApprovalStatus == ApprovalStatus.Pending)
+                    {
+                        <MudTooltip Text="Approve">
+                            <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small"
+                                           OnClick="() => ApproveUser(context.Id)" />
+                        </MudTooltip>
+                        <MudTooltip Text="Reject">
+                            <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small"
+                                           OnClick="() => RejectUser(context.Id)" />
+                        </MudTooltip>
+                    }
+                    else if (context.ApprovalStatus == ApprovalStatus.Rejected)
+                    {
+                        <MudTooltip Text="Approve">
+                            <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small"
+                                           OnClick="() => ApproveUser(context.Id)" />
+                        </MudTooltip>
+                    }
+                    @if (context.Role != UserRole.Admin)
+                    {
+                        <MudTooltip Text="Delete">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                           OnClick="() => DeleteUser(context.Id, context.Name)" />
+                        </MudTooltip>
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    private List<UserDto>? _users;
+    private string? _message;
+    private Severity _messageSeverity = Severity.Info;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        _users = await Mediator.Send(new GetAllUsersQuery());
+    }
+
+    private Color GetStatusColor(ApprovalStatus status) => status switch
+    {
+        ApprovalStatus.Approved => Color.Success,
+        ApprovalStatus.Pending => Color.Warning,
+        ApprovalStatus.Rejected => Color.Error,
+        _ => Color.Default
+    };
+
+    private async Task ApproveUser(Guid userId)
+    {
+        var success = await Mediator.Send(new ApproveUserCommand(userId, ApprovalStatus.Approved));
+        _message = success ? "User approved successfully." : "Failed to approve user.";
+        _messageSeverity = success ? Severity.Success : Severity.Error;
+        await LoadUsers();
+    }
+
+    private async Task RejectUser(Guid userId)
+    {
+        var success = await Mediator.Send(new ApproveUserCommand(userId, ApprovalStatus.Rejected));
+        _message = success ? "User rejected." : "Failed to reject user.";
+        _messageSeverity = success ? Severity.Success : Severity.Error;
+        await LoadUsers();
+    }
+
+    private async Task DeleteUser(Guid userId, string name)
+    {
+        var success = await Mediator.Send(new DeleteUserCommand(userId));
+        _message = success ? $"User '{name}' deleted." : "Failed to delete user.";
+        _messageSeverity = success ? Severity.Success : Severity.Error;
+        await LoadUsers();
+    }
+}

@@ -416,3 +416,11 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# SQLite database files
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Launch settings
+launchSettings.json

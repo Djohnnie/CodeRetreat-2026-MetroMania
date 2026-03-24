@@ -1,0 +1,75 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>MetroMania - Dashboard</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <MudText Typo="Typo.h4" Class="mb-1" Style="font-weight: 700;">Welcome, @context.User.Identity?.Name!</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">Here's your dashboard overview.</MudText>
+        <MudGrid Spacing="4">
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+                    <div class="d-flex align-center mb-3">
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
+                            <MudIcon Icon="@Icons.Material.Filled.Train" />
+                        </MudAvatar>
+                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">MetroMania</MudText>
+                    </div>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Your transit management dashboard. Use the navigation menu to access features.
+                    </MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+                    <div class="d-flex align-center mb-3">
+                        <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" />
+                        </MudAvatar>
+                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">Your Profile</MudText>
+                    </div>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Role: <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</MudChip>
+                    </MudText>
+                </MudPaper>
+            </MudItem>
+            <AuthorizeView Roles="Admin">
+                <Authorized Context="adminContext">
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+                            <div class="d-flex align-center mb-3">
+                                <MudAvatar Color="Color.Warning" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
+                                    <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
+                                </MudAvatar>
+                                <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">Administration</MudText>
+                            </div>
+                            <MudButton Href="/admin/users" Variant="Variant.Outlined" Color="Color.Primary"
+                                       Size="Size.Small" EndIcon="@Icons.Material.Filled.ArrowForward">
+                                Manage Users
+                            </MudButton>
+                        </MudPaper>
+                    </MudItem>
+                </Authorized>
+            </AuthorizeView>
+        </MudGrid>
+    </Authorized>
+    <NotAuthorized>
+        <div class="d-flex flex-column align-center justify-center" style="min-height: 60vh;">
+            <MudIcon Icon="@Icons.Material.Filled.Train" Style="font-size: 4rem;" Color="Color.Primary" />
+            <MudText Typo="Typo.h3" Class="mt-4" Style="font-weight: 700;">MetroMania</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">Please log in or register to continue.</MudText>
+            <div>
+                <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" Class="mr-3"
+                           Size="Size.Large" EndIcon="@Icons.Material.Filled.Login">
+                    Login
+                </MudButton>
+                <MudButton Href="/register" Variant="Variant.Outlined" Color="Color.Primary"
+                           Size="Size.Large" EndIcon="@Icons.Material.Filled.PersonAdd">
+                    Register
+                </MudButton>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
