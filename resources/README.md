@@ -4,535 +4,548 @@ This folder contains all SVG tile assets used for the top-down, tile-based level
 
 Source files (`.afdesign`) are Affinity Designer projects. The `.svg` exports are what the application uses at runtime.
 
+---
+
 ## Tile System Overview
 
-The level grid is made up of **background (grass)** tiles, **water** tiles, and **station** tiles. Water tiles use an **auto-tiling** system: the correct water tile variant is selected based on which of the four cardinal neighbors (North, East, South, West) are also water tiles.
+The level grid is made up of **background** tiles, **water** tiles, and **station** tiles. Water tiles use an **auto-tiling** system: the correct water tile variant is selected based on which of the **eight surrounding neighbors** are also water tiles.
 
 ### Compass Directions
 
-The directional suffixes in filenames refer to cardinal neighbors of the tile:
-
-| Direction | Meaning |
-|-----------|---------|
-| **N** | The tile directly **above** (North) is also a water tile |
-| **E** | The tile directly **to the right** (East) is also a water tile |
-| **S** | The tile directly **below** (South) is also a water tile |
-| **W** | The tile directly **to the left** (West) is also a water tile |
-
-A suffix like `NE` means the neighbors to the North **and** East are both water. A suffix like `WNE` means West, North, and East are all water. The directions always appear in clockwise order: W → N → E → S.
-
-### Corner Tiles: Outer vs Inner
-
-There are two sets of corner tiles (31–34 and 35–38) that share the same directional suffixes. They serve different purposes:
-
-- **Outer corners (31–34):** Used at the **outside bend** of a water body, where the water turns a corner. Only the two indicated perpendicular neighbors are water. The tile shows water along two edges meeting at a corner, with land (grass) filling the opposite corner. Approximately 50% of the tile is water.
-
-- **Inner corners (35–38):** Used at the **inside bend** of a water body, where a large expanse of water has a small diagonal land intrusion. These tiles are mostly water (~75% coverage) with a small triangular land area cutting into one corner. They handle the concave indentations that appear when the water body wraps around a protruding piece of land.
-
-**Example — when to use each:**
+Each tile has up to 8 neighbors, named using compass directions in clockwise order:
 
 ```
-Outer corner (31-water-NE):       Inner corner (36-water-ES):
-
-    . W .                              W W W
-    . W W                              W W W
-    . . .                              W W .
-
-The bottom-left tile of the        The bottom-center tile of the
-L-shaped water uses an outer       large water body uses an inner
-corner because the water turns     corner because the land intrudes
-outward at that point.             diagonally into the water.
+ NW  N  NE
+  W  ·  E
+ SW  S  SE
 ```
 
----
+| Direction | Position | Type |
+|-----------|----------|------|
+| **N** | Above | Cardinal |
+| **NE** | Above-right | Diagonal |
+| **E** | Right | Cardinal |
+| **SE** | Below-right | Diagonal |
+| **S** | Below | Cardinal |
+| **SW** | Below-left | Diagonal |
+| **W** | Left | Cardinal |
+| **NW** | Above-left | Diagonal |
 
-## Tile Reference
+### Naming Convention
 
-All tiles are listed below in order of their numeric prefix.
+Water tiles are named by listing **which neighbors are water**, in clockwise order:
 
----
+- `water.svg` — no water neighbors at all
+- `water-N.svg` — only the tile above is water
+- `water-N-NE-E-SE-S-SW-W-NW.svg` — all 8 neighbors are water
 
-### 01 — Background
+**Rule for diagonals:** A diagonal direction (NE, SE, SW, NW) is only relevant when **both** of its adjacent cardinal neighbors are water. For example, NE is only included when both N and E are water. If either N or E is land, the NE diagonal has no visual effect and is omitted from the name.
 
-<img src="01-background.svg" width="64" alt="01-background" />
+This yields **47 visually distinct water tiles**.
 
-| File | `01-background.svg` |
-|------|---------------------|
+### Tile Categories
 
-The **base grass/land tile**.This is the default tile used for every cell in the grid before any water or stations are placed. It represents flat, open terrain — a plain green/grass surface. Every cell that is not water and does not contain a station renders this tile.
-
-**Usage:** Place this tile at every grid position as the base layer. Water tiles and station tiles are drawn on top of or instead of this tile.
-
----
-
-### 10 — Water: Full
-
-<img src="10-water-full.svg" width="64" alt="10-water-full" />
-
-| File | `10-water-full.svg` |
-|------|----------------------|
-
-A **fully surrounded water tile**where **all four** cardinal neighbors (North, East, South, and West) are also water tiles. This tile shows water filling the entire square with no visible land edges or shoreline — it is pure, uninterrupted water.
-
-**Usage:** Use this tile when a water cell is completely surrounded by other water cells on all four sides. This is the interior tile for any large body of water.
-
-**Neighbor conditions:**
-- North: Water ✔
-- East: Water ✔
-- South: Water ✔
-- West: Water ✔
-
----
-
-### 11 — Water: No Neighbours
-
-<img src="11-water-no-neighbours.svg" width="64" alt="11-water-no-neighbours" />
-
-| File | `11-water-no-neighbours.svg` |
-|------|-------------------------------|
-
-An **isolated water tile**where **none** of the four cardinal neighbors are water. This tile shows a small body of water (like a pond or puddle) entirely surrounded by land/shoreline on all four sides.
-
-**Usage:** Use this tile when a single water cell stands alone with no adjacent water cells in any cardinal direction. It renders as a self-contained water feature with shoreline on every edge.
-
-**Neighbor conditions:**
-- North: Land ✔
-- East: Land ✔
-- South: Land ✔
-- West: Land ✔
+| Category | Description | Count |
+|----------|-------------|-------|
+| Background | Land/grass tile | 1 |
+| Water — no cardinals | Isolated water tile | 1 |
+| Water — 1 cardinal | Single-edge water | 4 |
+| Water — 2 opposite cardinals | Straight channel | 2 |
+| Water — 2 adjacent cardinals | Outer corners (±diagonal) | 8 |
+| Water — 3 cardinals | T-junctions (±diagonals) | 16 |
+| Water — 4 cardinals | Interior water (±diagonals) | 16 |
+| Stations | Player station shapes | 6 |
+| **Total** | | **54** |
 
 ---
 
-### 12 — Water: West–East
+## Background Tile
 
-<img src="12-water-WE.svg" width="64" alt="12-water-WE" />
+### `background.svg`
 
-| File | `12-water-WE.svg` |
-|------|---------------------|
-
-A **horizontal water channel**tile where the **West** and **East** neighbors are water, but the **North** and **South** neighbors are land. The tile shows water flowing left-to-right with shoreline along the top and bottom edges.
-
-**Usage:** Use this tile for horizontal stretches of a river or canal. It connects water to the left and right while presenting land borders above and below.
-
-**Neighbor conditions:**
-- North: Land ✔
-- East: Water ✔
-- South: Land ✔
-- West: Water ✔
+<img src="background.svg" width="64">
+The default land/grass tile. Drawn first in every grid cell. All water tiles are layered on top of this tile. The embedded color `rgb(255,227,214)` is replaced at runtime with the level's custom background color.
 
 ---
 
-### 13 — Water: North–South
+## Station Tiles
 
-<img src="13-water-NS.svg" width="64" alt="13-water-NS" />
+Station tiles are overlaid on top of background (or water) tiles. Each station type has a distinct geometric shape.
 
-| File | `13-water-NS.svg` |
-|------|---------------------|
+### `station-circle.svg`
 
-A **vertical water channel**tile where the **North** and **South** neighbors are water, but the **East** and **West** neighbors are land. The tile shows water flowing top-to-bottom with shoreline along the left and right edges.
+<img src="station-circle.svg" width="64">
+**Circle station** — Maps to `StationType.Circle`. The most basic station shape. A filled circle centered in the tile.
 
-**Usage:** Use this tile for vertical stretches of a river or canal. It connects water above and below while presenting land borders to the left and right.
+### `station-square.svg`
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Land ✔
-- South: Water ✔
-- West: Land ✔
+<img src="station-square.svg" width="64">
+**Square station** — Maps to `StationType.Rectangle`. A filled square/rectangle centered in the tile.
 
----
+### `station-triangle.svg`
 
-### 14 — Water: West–North–East
+<img src="station-triangle.svg" width="64">
+**Triangle station** — Maps to `StationType.Triangle`. A filled equilateral triangle centered in the tile.
 
-<img src="14-water-WNE.svg" width="64" alt="14-water-WNE" />
+### `station-diamond.svg`
 
-| File | `14-water-WNE.svg` |
-|------|----------------------|
+<img src="station-diamond.svg" width="64">
+**Diamond station** — Maps to `StationType.Diamond`. A 45°-rotated square (diamond) centered in the tile.
 
-A **T-junction water tile open to the south**where the **West**, **North**, and **East** neighbors are water, but the **South** neighbor is land. The tile shows water covering three sides with a shoreline only along the bottom edge. Think of it as a wide channel with a land bank on the southern side.
+### `station-polygon.svg`
 
-**Usage:** Use this tile when water extends in three directions (left, up, and right) but meets land below. This creates a T-shaped or bay-like formation where the southern edge is the shore.
+<img src="station-polygon.svg" width="64">
+**Cross/Polygon station** — Maps to `StationType.Cross`. A plus/cross shape centered in the tile.
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Water ✔
-- South: Land ✔
-- West: Water ✔
+### `station-star.svg`
+
+<img src="station-star.svg" width="64">
+**Star station** — Maps to `StationType.Ruby`. A pentagon/star shape centered in the tile.
 
 ---
 
-### 15 — Water: North–East–South
+## Water Tiles
 
-<img src="15-water-NES.svg" width="64" alt="15-water-NES" />
+Water tiles use the embedded color `rgb(182,227,243)` which is replaced at runtime with the level's custom water color. Transparent areas show the background tile underneath.
 
-| File | `15-water-NES.svg` |
-|------|----------------------|
+Each tile's name lists which neighbors are water. The auto-tiling system checks all 8 neighbors and selects the matching tile. If the exact tile doesn't exist yet, it falls back to the version with all relevant diagonals treated as water.
 
-A **T-junction water tile open to the west**where the **North**, **East**, and **South** neighbors are water, but the **West** neighbor is land. The tile shows water on three sides with a shoreline only along the left edge.
+### No Cardinal Water Neighbors (1 tile)
 
-**Usage:** Use this tile when water extends upward, to the right, and downward, but meets land to the left. This is the left-bank edge of a wide water body or a T-junction where the western edge is shore.
+#### `water.svg`
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Water ✔
-- South: Water ✔
-- West: Land ✔
+<img src="water.svg" width="64">
+**Isolated water tile.** No neighboring tiles are water. This tile is completely surrounded by land on all sides. Appears as a small rounded water body in the center of the tile.
+
+**Neighbors:** None are water.
 
 ---
 
-### 16 — Water: East–South–West
+### 1 Cardinal Water Neighbor (4 tiles)
 
-<img src="16-water-ESW.svg" width="64" alt="16-water-ESW" />
+#### `water-N.svg`
 
-| File | `16-water-ESW.svg` |
-|------|----------------------|
+<img src="water-N.svg" width="64">
+**Water extends north.** Only the tile directly above (N) is water. The water body opens upward and is enclosed on the east, south, and west sides by land.
 
-A **T-junction water tile open to the north**where the **East**, **South**, and **West** neighbors are water, but the **North** neighbor is land. The tile shows water on three sides with a shoreline only along the top edge.
+**Neighbors:** N = water. E, S, W = land. Diagonals irrelevant.
 
-**Usage:** Use this tile when water extends to the right, downward, and to the left, but meets land above. This is the top-bank edge of a wide water body or a T-junction where the northern edge is shore.
+#### `water-E.svg`
 
-**Neighbor conditions:**
-- North: Land ✔
-- East: Water ✔
-- South: Water ✔
-- West: Water ✔
+<img src="water-E.svg" width="64">
+**Water extends east.** Only the tile to the right (E) is water. The water body opens rightward and is enclosed on the north, south, and west sides by land.
 
----
+**Neighbors:** E = water. N, S, W = land. Diagonals irrelevant.
 
-### 17 — Water: South–West–North
+#### `water-S.svg`
 
-<img src="17-water-SWN.svg" width="64" alt="17-water-SWN" />
+<img src="water-S.svg" width="64">
+**Water extends south.** Only the tile directly below (S) is water. The water body opens downward and is enclosed on the north, east, and west sides by land.
 
-| File | `17-water-SWN.svg` |
-|------|----------------------|
+**Neighbors:** S = water. N, E, W = land. Diagonals irrelevant.
 
-A **T-junction water tile open to the east**where the **South**, **West**, and **North** neighbors are water, but the **East** neighbor is land. The tile shows water on three sides with a shoreline only along the right edge.
+#### `water-W.svg`
 
-**Usage:** Use this tile when water extends downward, to the left, and upward, but meets land to the right. This is the right-bank edge of a wide water body or a T-junction where the eastern edge is shore.
+<img src="water-W.svg" width="64">
+**Water extends west.** Only the tile to the left (W) is water. The water body opens leftward and is enclosed on the north, east, and south sides by land.
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Land ✔
-- South: Water ✔
-- West: Water ✔
+**Neighbors:** W = water. N, E, S = land. Diagonals irrelevant.
 
 ---
 
-### 18 — Water: North
+### 2 Opposite Cardinal Water Neighbors (2 tiles)
 
-<img src="18-water-N.svg" width="64" alt="18-water-N" />
+#### `water-N-S.svg`
 
-| File | `18-water-N.svg` |
-|------|--------------------|
+<img src="water-N-S.svg" width="64">
+**Vertical water channel.** The tiles above (N) and below (S) are water. Water flows through the tile vertically, with land on the east and west sides. Used for north-south river stretches.
 
-A **dead-end water tile pointing north**where only the **North** neighbor is water. The tile shows water connecting upward with shoreline on the east, south, and west edges. This is the southern terminus of a water channel — the water ends here and does not continue in any other direction.
+**Neighbors:** N, S = water. E, W = land. Diagonals irrelevant (no adjacent cardinal pairs both water).
 
-**Usage:** Use this tile at the bottom end of a vertical water channel or as the southern tip of a narrow water finger extending downward from a larger body.
+#### `water-E-W.svg`
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Land ✔
-- South: Land ✔
-- West: Land ✔
+<img src="water-E-W.svg" width="64">
+**Horizontal water channel.** The tiles to the right (E) and left (W) are water. Water flows through the tile horizontally, with land on the north and south sides. Used for east-west river stretches.
 
----
-
-### 19 — Water: East
-
-<img src="19-water-E.svg" width="64" alt="19-water-E" />
-
-| File | `19-water-E.svg` |
-|------|--------------------|
-
-A **dead-end water tile pointing east**where only the **East** neighbor is water. The tile shows water connecting to the right with shoreline on the north, south, and west edges. This is the western terminus of a water channel — the water ends here and does not continue left, up, or down.
-
-**Usage:** Use this tile at the left end of a horizontal water channel or as the western tip of a narrow water finger extending leftward from a larger body.
-
-**Neighbor conditions:**
-- North: Land ✔
-- East: Water ✔
-- South: Land ✔
-- West: Land ✔
+**Neighbors:** E, W = water. N, S = land. Diagonals irrelevant (no adjacent cardinal pairs both water).
 
 ---
 
-### 20 — Water: South
+### 2 Adjacent Cardinal Water Neighbors (8 tiles)
 
-<img src="20-water-S.svg" width="64" alt="20-water-S" />
+When two adjacent cardinal neighbors are water, the diagonal between them becomes relevant. If the diagonal is also water, the corner has a smooth fill. If the diagonal is land, there is a concave inner corner notch.
 
-| File | `20-water-S.svg` |
-|------|--------------------|
+#### `water-N-NE-E.svg` ✅
 
-A **dead-end water tile pointing south**where only the **South** neighbor is water. The tile shows water connecting downward with shoreline on the north, east, and west edges. This is the northern terminus of a water channel — the water ends here and does not continue in any other direction.
+<img src="water-N-NE-E.svg" width="64">
+**Smooth outer corner — top-right.** The tiles above (N), diagonally above-right (NE), and to the right (E) are water. Water fills the top-right quadrant smoothly. Land is to the south and west.
 
-**Usage:** Use this tile at the top end of a vertical water channel or as the northern tip of a narrow water finger extending upward from a larger body.
+**Neighbors:** N, NE, E = water. SE, S, SW, W, NW = land.
 
-**Neighbor conditions:**
-- North: Land ✔
-- East: Land ✔
-- South: Water ✔
-- West: Land ✔
+#### `water-N-E.svg` ✅
 
----
+<img src="water-N-E.svg" width="64">
+**Inner corner — top-right.** The tiles above (N) and to the right (E) are water, but the diagonal between them (NE) is land. This creates a concave notch at the top-right corner where land intrudes between two water bodies.
 
-### 21 — Water: West
+**Neighbors:** N, E = water. NE = land. SE, S, SW, W, NW = land.
 
-<img src="21-water-W.svg" width="64" alt="21-water-W" />
+#### `water-E-SE-S.svg` ✅
 
-| File | `21-water-W.svg` |
-|------|--------------------|
+<img src="water-E-SE-S.svg" width="64">
+**Smooth outer corner — bottom-right.** The tiles to the right (E), diagonally below-right (SE), and below (S) are water. Water fills the bottom-right quadrant smoothly. Land is to the north and west.
 
-A **dead-end water tile pointing west**where only the **West** neighbor is water. The tile shows water connecting to the left with shoreline on the north, east, and south edges. This is the eastern terminus of a water channel — the water ends here and does not continue right, up, or down.
+**Neighbors:** E, SE, S = water. N, NE, SW, W, NW = land.
 
-**Usage:** Use this tile at the right end of a horizontal water channel or as the eastern tip of a narrow water finger extending rightward from a larger body.
+#### `water-E-S.svg` ✅
 
-**Neighbor conditions:**
-- North: Land ✔
-- East: Land ✔
-- South: Land ✔
-- West: Water ✔
+<img src="water-E-S.svg" width="64">
+**Inner corner — bottom-right.** The tiles to the right (E) and below (S) are water, but the diagonal between them (SE) is land. This creates a concave notch at the bottom-right corner.
 
----
+**Neighbors:** E, S = water. SE = land. N, NE, SW, W, NW = land.
 
-### 31 — Water: Outer Corner North–East
+#### `water-S-SW-W.svg` ✅
 
-<img src="31-water-NE.svg" width="64" alt="31-water-NE" />
+<img src="water-S-SW-W.svg" width="64">
+**Smooth outer corner — bottom-left.** The tiles below (S), diagonally below-left (SW), and to the left (W) are water. Water fills the bottom-left quadrant smoothly. Land is to the north and east.
 
-| File | `31-water-NE.svg` |
-|------|---------------------|
+**Neighbors:** S, SW, W = water. N, NE, E, SE, NW = land.
 
-An **outer corner water tile** where the **North** and **East**neighbors are water, but the **South** and **West** neighbors are land. The water flows along the top and right edges of the tile, meeting at the top-right corner. The bottom-left portion of the tile is land/grass. Approximately half the tile area is water.
+#### `water-S-W.svg` ✅
 
-**Usage:** Use this tile at the outside bend of a water body where the water turns from going northward to going eastward (or vice versa). This is the **south-west corner** of an L-shaped or rectangular water body — the water bends around the top-right and land fills the bottom-left.
+<img src="water-S-W.svg" width="64">
+**Inner corner — bottom-left.** The tiles below (S) and to the left (W) are water, but the diagonal between them (SW) is land. This creates a concave notch at the bottom-left corner.
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Water ✔
-- South: Land ✔
-- West: Land ✔
+**Neighbors:** S, W = water. SW = land. N, NE, E, SE, NW = land.
 
----
+#### `water-N-W-NW.svg` ✅
 
-### 32 — Water: Outer Corner East–South
+<img src="water-N-W-NW.svg" width="64">
+**Smooth outer corner — top-left.** The tiles above (N), to the left (W), and diagonally above-left (NW) are water. Water fills the top-left quadrant smoothly. Land is to the east and south.
 
-<img src="32-water-ES.svg" width="64" alt="32-water-ES" />
+**Neighbors:** N, W, NW = water. NE, E, SE, S, SW = land.
 
-| File | `32-water-ES.svg` |
-|------|---------------------|
+#### `water-N-W.svg` ✅
 
-An **outer corner water tile** where the **East** and **South**neighbors are water, but the **North** and **West** neighbors are land. The water flows along the right and bottom edges of the tile, meeting at the bottom-right corner. The top-left portion of the tile is land/grass.
+<img src="water-N-W.svg" width="64">
+**Inner corner — top-left.** The tiles above (N) and to the left (W) are water, but the diagonal between them (NW) is land. This creates a concave notch at the top-left corner.
 
-**Usage:** Use this tile at the outside bend of a water body where the water turns from going eastward to going southward (or vice versa). This is the **north-west corner** of an L-shaped or rectangular water body — the water bends around the bottom-right and land fills the top-left.
-
-**Neighbor conditions:**
-- North: Land ✔
-- East: Water ✔
-- South: Water ✔
-- West: Land ✔
+**Neighbors:** N, W = water. NW = land. NE, E, SE, S, SW = land.
 
 ---
 
-### 33 — Water: Outer Corner South–West
+### 3 Cardinal Water Neighbors (16 tiles)
 
-<img src="33-water-SW.svg" width="64" alt="33-water-SW" />
+T-junction tiles where water flows in three cardinal directions. Each T-junction has two relevant diagonals (between each pair of adjacent water cardinals). The presence or absence of each diagonal creates 4 variants per T-junction orientation.
 
-| File | `33-water-SW.svg` |
-|------|---------------------|
+#### Missing S (water flows N, E, W)
 
-An **outer corner water tile** where the **South** and **West**neighbors are water, but the **North** and **East** neighbors are land. The water flows along the bottom and left edges of the tile, meeting at the bottom-left corner. The top-right portion of the tile is land/grass.
+##### `water-N-NE-E-W-NW.svg` ✅
 
-**Usage:** Use this tile at the outside bend of a water body where the water turns from going southward to going westward (or vice versa). This is the **north-east corner** of an L-shaped or rectangular water body — the water bends around the bottom-left and land fills the top-right.
+<img src="water-N-NE-E-W-NW.svg" width="64">
+**T-junction open to north, east, west — all diagonals smooth.** Water fills the top portion of the tile. Land is only to the south. Both diagonal corners (NE, NW) are smoothly filled.
 
-**Neighbor conditions:**
-- North: Land ✔
-- East: Land ✔
-- South: Water ✔
-- West: Water ✔
+**Neighbors:** N, NE, E, W, NW = water. SE, S, SW = land.
 
----
+##### `water-N-NE-E-W.svg` ✅
 
-### 34 — Water: Outer Corner West–North
+<img src="water-N-NE-E-W.svg" width="64">
+**T-junction open to N, E, W — NW corner notch.** Same as above but the NW diagonal is land, creating a concave corner at top-left.
 
-<img src="34-water-WN.svg" width="64" alt="34-water-WN" />
+**Neighbors:** N, NE, E, W = water. NW, SE, S, SW = land.
 
-| File | `34-water-WN.svg` |
-|------|---------------------|
+##### `water-N-E-W-NW.svg` ✅
 
-An **outer corner water tile** where the **West** and **North**neighbors are water, but the **East** and **South** neighbors are land. The water flows along the left and top edges of the tile, meeting at the top-left corner. The bottom-right portion of the tile is land/grass.
+<img src="water-N-E-W-NW.svg" width="64">
+**T-junction open to N, E, W — NE corner notch.** Same as base but the NE diagonal is land, creating a concave corner at top-right.
 
-**Usage:** Use this tile at the outside bend of a water body where the water turns from going westward to going northward (or vice versa). This is the **south-east corner** of an L-shaped or rectangular water body — the water bends around the top-left and land fills the bottom-right.
+**Neighbors:** N, E, W, NW = water. NE, SE, S, SW = land.
 
-**Neighbor conditions:**
-- North: Water ✔
-- East: Land ✔
-- South: Land ✔
-- West: Water ✔
+##### `water-N-E-W.svg` ✅
 
----
+<img src="water-N-E-W.svg" width="64">
+**T-junction open to N, E, W — both corner notches.** Both NE and NW diagonals are land. Both top corners have concave notches.
 
-### 35 — Water: Inner Corner North–East
+**Neighbors:** N, E, W = water. NE, SE, S, SW, NW = land.
 
-<img src="35-water-NE.svg" width="64" alt="35-water-NE" />
+#### Missing W (water flows N, E, S)
 
-| File | `35-water-NE.svg` |
-|------|---------------------|
+##### `water-N-NE-E-SE-S.svg` ✅
 
-An **inner corner water tile** for the **North–East** diagonal.This tile is mostly water (~75% coverage) with a small triangular land intrusion cutting into the **south-west corner** of the tile.
+<img src="water-N-NE-E-SE-S.svg" width="64">
+**T-junction open to north, east, south — all diagonals smooth.** Water fills the right portion of the tile. Land is only to the west. Both diagonal corners (NE, SE) are smoothly filled.
 
-**Usage:** Use this tile when a water cell has water neighbors on most or all cardinal sides, but needs a concave land notch in the south-west corner. This occurs at the inside bend of a water body where land protrudes diagonally into the water. It is the diagonal complement to the outer corner tile 31.
+**Neighbors:** N, NE, E, SE, S = water. SW, W, NW = land.
 
----
+##### `water-N-NE-E-S.svg` ✅
 
-### 36 — Water: Inner Corner East–South
+<img src="water-N-NE-E-S.svg" width="64">
+**T-junction open to N, E, S — SE corner notch.** The SE diagonal is land, creating a concave corner at bottom-right.
 
-<img src="36-water-ES.svg" width="64" alt="36-water-ES" />
+**Neighbors:** N, NE, E, S = water. SE, SW, W, NW = land.
 
-| File | `36-water-ES.svg` |
-|------|---------------------|
+##### `water-N-E-SE-S.svg` ✅
 
-An **inner corner water tile** for the **East–South** diagonal.This tile is mostly water (~75% coverage) with a small triangular land intrusion cutting into the **north-west corner** of the tile.
+<img src="water-N-E-SE-S.svg" width="64">
+**T-junction open to N, E, S — NE corner notch.** The NE diagonal is land, creating a concave corner at top-right.
 
-**Usage:** Use this tile when a water cell has water neighbors on most or all cardinal sides, but needs a concave land notch in the north-west corner. This handles the inside bend where a piece of land protrudes diagonally from the north-west into a large water body. It is the diagonal complement to the outer corner tile 32.
+**Neighbors:** N, E, SE, S = water. NE, SW, W, NW = land.
 
-**Typical context:** The current tile and most of its neighbors are water, but the diagonal neighbor to the north-west is land, creating a small visible land intrusion at that corner.
+##### `water-N-E-S.svg` ✅
 
----
+<img src="water-N-E-S.svg" width="64">
+**T-junction open to N, E, S — both corner notches.** Both NE and SE diagonals are land.
 
-### 37 — Water: Inner Corner South–West
+**Neighbors:** N, E, S = water. NE, SE, SW, W, NW = land.
 
-<img src="37-water-SW.svg" width="64" alt="37-water-SW" />
+#### Missing N (water flows E, S, W)
 
-| File | `37-water-SW.svg` |
-|------|---------------------|
+##### `water-E-SE-S-SW-W.svg` ✅
 
-An **inner corner water tile** for the **South–West** diagonal.This tile is mostly water (~75% coverage) with a small triangular land intrusion cutting into the **north-east corner** of the tile.
+<img src="water-E-SE-S-SW-W.svg" width="64">
+**T-junction open to east, south, west — all diagonals smooth.** Water fills the bottom portion of the tile. Land is only to the north. Both diagonal corners (SE, SW) are smoothly filled.
 
-**Usage:** Use this tile when a water cell has water neighbors on most or all cardinal sides, but needs a concave land notch in the north-east corner. This handles the inside bend where land protrudes diagonally from the north-east into a large water body. It is the diagonal complement to the outer corner tile 33.
+**Neighbors:** E, SE, S, SW, W = water. N, NE, NW = land.
 
-**Typical context:** The current tile and most of its neighbors are water, but the diagonal neighbor to the north-east is land, creating a small visible land intrusion at that corner.
+##### `water-E-SE-S-W.svg` ✅
 
----
+<img src="water-E-SE-S-W.svg" width="64">
+**T-junction open to E, S, W — SW corner notch.** The SW diagonal is land.
 
-### 38 — Water: Inner Corner West–North
+**Neighbors:** E, SE, S, W = water. N, NE, SW, NW = land.
 
-<img src="38-water-WN.svg" width="64" alt="38-water-WN" />
+##### `water-E-S-SW-W.svg` ✅
 
-| File | `38-water-WN.svg` |
-|------|---------------------|
+<img src="water-E-S-SW-W.svg" width="64">
+**T-junction open to E, S, W — SE corner notch.** The SE diagonal is land.
 
-An **inner corner water tile** for the **West–North** diagonal.This tile is mostly water (~75% coverage) with a small triangular land intrusion cutting into the **south-east corner** of the tile.
+**Neighbors:** E, S, SW, W = water. N, NE, SE, NW = land.
 
-**Usage:** Use this tile when a water cell has water neighbors on most or all cardinal sides, but needs a concave land notch in the south-east corner. This handles the inside bend where land protrudes diagonally from the south-east into a large water body. It is the diagonal complement to the outer corner tile 34.
+##### `water-E-S-W.svg` ✅
 
-**Typical context:** The current tile and most of its neighbors are water, but the diagonal neighbor to the south-east is land, creating a small visible land intrusion at that corner.
+<img src="water-E-S-W.svg" width="64">
+**T-junction open to E, S, W — both corner notches.** Both SE and SW diagonals are land.
 
----
+**Neighbors:** E, S, W = water. N, NE, SE, SW, NW = land.
 
-### 91 — Station: Circle
+#### Missing E (water flows N, S, W)
 
-<img src="91-station-circle.svg" width="64" alt="91-station-circle" />
+##### `water-N-S-SW-W-NW.svg` ✅
 
-| File | `91-station-circle.svg` |
-|------|--------------------------|
+<img src="water-N-S-SW-W-NW.svg" width="64">
+**T-junction open to north, south, west — all diagonals smooth.** Water fills the left portion of the tile. Land is only to the east. Both diagonal corners (SW, NW) are smoothly filled.
 
-A **circle-shaped station marker**.Stations are points of interest on the map where metro lines must connect. This tile displays a prominent circular icon representing a station of the **Circle** type.
+**Neighbors:** N, S, SW, W, NW = water. NE, E, SE = land.
 
-**Usage:** Place on the grid to mark a Circle-type station. In gameplay, players must route metro lines to connect to this station. Corresponds to `StationType.Circle` in the domain model.
+##### `water-N-S-SW-W.svg` ✅
 
----
+<img src="water-N-S-SW-W.svg" width="64">
+**T-junction open to N, S, W — NW corner notch.** The NW diagonal is land.
 
-### 92 — Station: Square
+**Neighbors:** N, S, SW, W = water. NE, E, SE, NW = land.
 
-<img src="92-station-square.svg" width="64" alt="92-station-square" />
+##### `water-N-S-W-NW.svg` ✅
 
-| File | `92-station-square.svg` |
-|------|--------------------------|
+<img src="water-N-S-W-NW.svg" width="64">
+**T-junction open to N, S, W — SW corner notch.** The SW diagonal is land.
 
-A **square-shaped station marker**.This tile displays a prominent square/rectangle icon representing a station of the **Rectangle** type.
+**Neighbors:** N, S, W, NW = water. NE, E, SE, SW = land.
 
-**Usage:** Place on the grid to mark a Rectangle-type station. Players must ensure their metro network serves this station. Corresponds to `StationType.Rectangle` in the domain model.
+##### `water-N-S-W.svg` ✅
 
----
+<img src="water-N-S-W.svg" width="64">
+**T-junction open to N, S, W — both corner notches.** Both SW and NW diagonals are land.
 
-### 93 — Station: Triangle
-
-<img src="93-station-triangle.svg" width="64" alt="93-station-triangle" />
-
-| File | `93-station-triangle.svg` |
-|------|----------------------------|
-
-A **triangle-shaped station marker**.This tile displays a prominent triangular icon representing a station of the **Triangle** type.
-
-**Usage:** Place on the grid to mark a Triangle-type station. Players must connect their metro lines to this station. Corresponds to `StationType.Triangle` in the domain model.
+**Neighbors:** N, S, W = water. NE, E, SE, SW, NW = land.
 
 ---
 
-### 94 — Station: Diamond
+### 4 Cardinal Water Neighbors (16 tiles)
 
-<img src="94-station-diamond.svg" width="64" alt="94-station-diamond" />
+All four cardinal neighbors are water. The tile is "interior" water. Each of the four diagonals can independently be water or land, creating 16 distinct tiles. When a diagonal is land, it creates a small concave inner corner notch at that position.
 
-| File | `94-station-diamond.svg` |
-|------|---------------------------|
+#### All diagonals water
 
-A **diamond-shaped station marker**.This tile displays a prominent diamond (rotated square) icon representing a station of the **Diamond** type.
+##### `water-N-NE-E-SE-S-SW-W-NW.svg` ✅
 
-**Usage:** Place on the grid to mark a Diamond-type station. Players must include this station in their metro network. Corresponds to `StationType.Diamond` in the domain model.
+<img src="water-N-NE-E-SE-S-SW-W-NW.svg" width="64">
+**Full water — all 8 neighbors are water.** The tile is completely filled with water. No land is visible. Used for interior water body areas.
 
----
+**Neighbors:** All 8 = water.
 
-### 95 — Station: Polygon
+#### 3 diagonals water (1 land)
 
-<img src="95-station-polygon.svg" width="64" alt="95-station-polygon" />
+##### `water-N-E-SE-S-SW-W-NW.svg` ✅
 
-| File | `95-station-polygon.svg` |
-|------|---------------------------|
+<img src="water-N-E-SE-S-SW-W-NW.svg" width="64">
+**All water except NE diagonal.** A small concave inner corner notch appears at the top-right where a single land tile intrudes diagonally.
 
-A **polygon-shaped station marker**(likely pentagonal or hexagonal). This tile displays a multi-sided polygon icon representing a station of the **Cross** type.
+**Neighbors:** N, E, SE, S, SW, W, NW = water. **NE = land.**
 
-**Usage:** Place on the grid to mark a Cross-type station. Corresponds to `StationType.Cross` in the domain model.
+##### `water-N-NE-E-S-SW-W-NW.svg` ✅
 
----
+<img src="water-N-NE-E-S-SW-W-NW.svg" width="64">
+**All water except SE diagonal.** A small concave inner corner notch appears at the bottom-right.
 
-### 96 — Station: Star
+**Neighbors:** N, NE, E, S, SW, W, NW = water. **SE = land.**
 
-<img src="96-station-star.svg" width="64" alt="96-station-star" />
+##### `water-N-NE-E-SE-S-W-NW.svg` ✅
 
-| File | `96-station-star.svg` |
-|------|------------------------|
+<img src="water-N-NE-E-SE-S-W-NW.svg" width="64">
+**All water except SW diagonal.** A small concave inner corner notch appears at the bottom-left.
 
-A **star-shaped station marker**.This tile displays a prominent star icon representing a station of the **Ruby** type — the most distinctive and recognizable station shape.
+**Neighbors:** N, NE, E, SE, S, W, NW = water. **SW = land.**
 
-**Usage:** Place on the grid to mark a Ruby-type station. Players must connect their metro lines to this station. Corresponds to `StationType.Ruby` in the domain model.
+##### `water-N-NE-E-SE-S-SW-W.svg` ✅
+
+<img src="water-N-NE-E-SE-S-SW-W.svg" width="64">
+**All water except NW diagonal.** A small concave inner corner notch appears at the top-left.
+
+**Neighbors:** N, NE, E, SE, S, SW, W = water. **NW = land.**
+
+#### 2 diagonals water (2 land)
+
+##### `water-N-NE-E-SE-S-W.svg` ✅
+
+<img src="water-N-NE-E-SE-S-W.svg" width="64">
+**NE and SE water, SW and NW land.** Inner corner notches at both the bottom-left and top-left.
+
+**Neighbors:** N, NE, E, SE, S, W = water. **SW, NW = land.**
+
+##### `water-N-NE-E-S-SW-W.svg` ✅
+
+<img src="water-N-NE-E-S-SW-W.svg" width="64">
+**NE and SW water, SE and NW land.** Inner corner notches at the bottom-right and top-left (opposite corners).
+
+**Neighbors:** N, NE, E, S, SW, W = water. **SE, NW = land.**
+
+##### `water-N-NE-E-S-W-NW.svg` ✅
+
+<img src="water-N-NE-E-S-W-NW.svg" width="64">
+**NE and NW water, SE and SW land.** Inner corner notches at both the bottom-right and bottom-left.
+
+**Neighbors:** N, NE, E, S, W, NW = water. **SE, SW = land.**
+
+##### `water-N-E-SE-S-SW-W.svg` ✅
+
+<img src="water-N-E-SE-S-SW-W.svg" width="64">
+**SE and SW water, NE and NW land.** Inner corner notches at both the top-right and top-left.
+
+**Neighbors:** N, E, SE, S, SW, W = water. **NE, NW = land.**
+
+##### `water-N-E-SE-S-W-NW.svg` ✅
+
+<img src="water-N-E-SE-S-W-NW.svg" width="64">
+**SE and NW water, NE and SW land.** Inner corner notches at the top-right and bottom-left (opposite corners).
+
+**Neighbors:** N, E, SE, S, W, NW = water. **NE, SW = land.**
+
+##### `water-N-E-S-SW-W-NW.svg` ✅
+
+<img src="water-N-E-S-SW-W-NW.svg" width="64">
+**SW and NW water, NE and SE land.** Inner corner notches at both the top-right and bottom-right.
+
+**Neighbors:** N, E, S, SW, W, NW = water. **NE, SE = land.**
+
+#### 1 diagonal water (3 land)
+
+##### `water-N-NE-E-S-W.svg` ✅
+
+<img src="water-N-NE-E-S-W.svg" width="64">
+**Only NE water.** Inner corner notches at SE, SW, and NW. Only the top-right corner is smooth.
+
+**Neighbors:** N, NE, E, S, W = water. **SE, SW, NW = land.**
+
+##### `water-N-E-SE-S-W.svg` ✅
+
+<img src="water-N-E-SE-S-W.svg" width="64">
+**Only SE water.** Inner corner notches at NE, SW, and NW. Only the bottom-right corner is smooth.
+
+**Neighbors:** N, E, SE, S, W = water. **NE, SW, NW = land.**
+
+##### `water-N-E-S-SW-W.svg` ✅
+
+<img src="water-N-E-S-SW-W.svg" width="64">
+**Only SW water.** Inner corner notches at NE, SE, and NW. Only the bottom-left corner is smooth.
+
+**Neighbors:** N, E, S, SW, W = water. **NE, SE, NW = land.**
+
+##### `water-N-E-S-W-NW.svg` ✅
+
+<img src="water-N-E-S-W-NW.svg" width="64">
+**Only NW water.** Inner corner notches at NE, SE, and SW. Only the top-left corner is smooth.
+
+**Neighbors:** N, E, S, W, NW = water. **NE, SE, SW = land.**
+
+#### 0 diagonals water (all 4 land)
+
+##### `water-N-E-S-W.svg` ✅
+
+<img src="water-N-E-S-W.svg" width="64">
+**All four cardinals water, all four diagonals land.** Inner corner notches at all four corners. This creates a distinctive "pinched" water tile. Each corner has a small land intrusion.
+
+**Neighbors:** N, E, S, W = water. **NE, SE, SW, NW = all land.**
 
 ---
 
 ## Quick Reference Table
 
-| # | Preview | File | Type | Description |
-|---|---------|------|------|-------------|
-| 01 | <img src="01-background.svg" width="32" /> | `01-background.svg` | Background | Default grass/land tile |
-| 10 | <img src="10-water-full.svg" width="32" /> | `10-water-full.svg` | Water | All four neighbors are water |
-| 11 | <img src="11-water-no-neighbours.svg" width="32" /> | `11-water-no-neighbours.svg` | Water | No neighbors are water (isolated pond) |
-| 12 | <img src="12-water-WE.svg" width="32" /> | `12-water-WE.svg` | Water | Horizontal channel (West and East are water) |
-| 13 | <img src="13-water-NS.svg" width="32" /> | `13-water-NS.svg` | Water | Vertical channel (North and South are water) |
-| 14 | <img src="14-water-WNE.svg" width="32" /> | `14-water-WNE.svg` | Water | T-junction open south (West, North, East are water) |
-| 15 | <img src="15-water-NES.svg" width="32" /> | `15-water-NES.svg` | Water | T-junction open west (North, East, South are water) |
-| 16 | <img src="16-water-ESW.svg" width="32" /> | `16-water-ESW.svg` | Water | T-junction open north (East, South, West are water) |
-| 17 | <img src="17-water-SWN.svg" width="32" /> | `17-water-SWN.svg` | Water | T-junction open east (South, West, North are water) |
-| 18 | <img src="18-water-N.svg" width="32" /> | `18-water-N.svg` | Water | Dead-end pointing north |
-| 19 | <img src="19-water-E.svg" width="32" /> | `19-water-E.svg` | Water | Dead-end pointing east |
-| 20 | <img src="20-water-S.svg" width="32" /> | `20-water-S.svg` | Water | Dead-end pointing south |
-| 21 | <img src="21-water-W.svg" width="32" /> | `21-water-W.svg` | Water | Dead-end pointing west |
-| 31 | <img src="31-water-NE.svg" width="32" /> | `31-water-NE.svg` | Water | Outer corner: North + East |
-| 32 | <img src="32-water-ES.svg" width="32" /> | `32-water-ES.svg` | Water | Outer corner: East + South |
-| 33 | <img src="33-water-SW.svg" width="32" /> | `33-water-SW.svg` | Water | Outer corner: South + West |
-| 34 | <img src="34-water-WN.svg" width="32" /> | `34-water-WN.svg` | Water | Outer corner: West + North |
-| 35 | <img src="35-water-NE.svg" width="32" /> | `35-water-NE.svg` | Water | Inner corner: North + East |
-| 36 | <img src="36-water-ES.svg" width="32" /> | `36-water-ES.svg` | Water | Inner corner: East + South |
-| 37 | <img src="37-water-SW.svg" width="32" /> | `37-water-SW.svg` | Water | Inner corner: South + West |
-| 38 | <img src="38-water-WN.svg" width="32" /> | `38-water-WN.svg` | Water | Inner corner: West + North |
-| 91 | <img src="91-station-circle.svg" width="32" /> | `91-station-circle.svg` | Station | Circle station (`StationType.Circle`) |
-| 92 | <img src="92-station-square.svg" width="32" /> | `92-station-square.svg` | Station | Square station (`StationType.Rectangle`) |
-| 93 | <img src="93-station-triangle.svg" width="32" /> | `93-station-triangle.svg` | Station | Triangle station (`StationType.Triangle`) |
-| 94 | <img src="94-station-diamond.svg" width="32" /> | `94-station-diamond.svg` | Station | Diamond station (`StationType.Diamond`) |
-| 95 | <img src="95-station-polygon.svg" width="32" /> | `95-station-polygon.svg` | Station | Polygon station (`StationType.Cross`) |
-| 96 | <img src="96-station-star.svg" width="32" /> | `96-station-star.svg` | Station | Star station (`StationType.Ruby`) |
+### All Tiles (47 water + 1 background + 6 stations = 54)
+
+| Preview | Filename | Water Neighbors |
+|---------|----------|-----------------|
+| <img src="background.svg" width="32"> | `background.svg` | — (land tile) |
+| <img src="water.svg" width="32"> | `water.svg` | None |
+| <img src="water-N.svg" width="32"> | `water-N.svg` | N |
+| <img src="water-E.svg" width="32"> | `water-E.svg` | E |
+| <img src="water-S.svg" width="32"> | `water-S.svg` | S |
+| <img src="water-W.svg" width="32"> | `water-W.svg` | W |
+| <img src="water-N-S.svg" width="32"> | `water-N-S.svg` | N, S |
+| <img src="water-E-W.svg" width="32"> | `water-E-W.svg` | E, W |
+| <img src="water-N-NE-E.svg" width="32"> | `water-N-NE-E.svg` | N, NE, E |
+| <img src="water-N-E.svg" width="32"> | `water-N-E.svg` | N, E (NE land) |
+| <img src="water-E-SE-S.svg" width="32"> | `water-E-SE-S.svg` | E, SE, S |
+| <img src="water-E-S.svg" width="32"> | `water-E-S.svg` | E, S (SE land) |
+| <img src="water-S-SW-W.svg" width="32"> | `water-S-SW-W.svg` | S, SW, W |
+| <img src="water-S-W.svg" width="32"> | `water-S-W.svg` | S, W (SW land) |
+| <img src="water-N-W-NW.svg" width="32"> | `water-N-W-NW.svg` | N, W, NW |
+| <img src="water-N-W.svg" width="32"> | `water-N-W.svg` | N, W (NW land) |
+| <img src="water-N-NE-E-W-NW.svg" width="32"> | `water-N-NE-E-W-NW.svg` | N, NE, E, W, NW |
+| <img src="water-N-NE-E-W.svg" width="32"> | `water-N-NE-E-W.svg` | N, NE, E, W |
+| <img src="water-N-E-W-NW.svg" width="32"> | `water-N-E-W-NW.svg` | N, E, W, NW |
+| <img src="water-N-E-W.svg" width="32"> | `water-N-E-W.svg` | N, E, W |
+| <img src="water-N-NE-E-SE-S.svg" width="32"> | `water-N-NE-E-SE-S.svg` | N, NE, E, SE, S |
+| <img src="water-N-NE-E-S.svg" width="32"> | `water-N-NE-E-S.svg` | N, NE, E, S |
+| <img src="water-N-E-SE-S.svg" width="32"> | `water-N-E-SE-S.svg` | N, E, SE, S |
+| <img src="water-N-E-S.svg" width="32"> | `water-N-E-S.svg` | N, E, S |
+| <img src="water-E-SE-S-SW-W.svg" width="32"> | `water-E-SE-S-SW-W.svg` | E, SE, S, SW, W |
+| <img src="water-E-SE-S-W.svg" width="32"> | `water-E-SE-S-W.svg` | E, SE, S, W |
+| <img src="water-E-S-SW-W.svg" width="32"> | `water-E-S-SW-W.svg` | E, S, SW, W |
+| <img src="water-E-S-W.svg" width="32"> | `water-E-S-W.svg` | E, S, W |
+| <img src="water-N-S-SW-W-NW.svg" width="32"> | `water-N-S-SW-W-NW.svg` | N, S, SW, W, NW |
+| <img src="water-N-S-SW-W.svg" width="32"> | `water-N-S-SW-W.svg` | N, S, SW, W |
+| <img src="water-N-S-W-NW.svg" width="32"> | `water-N-S-W-NW.svg` | N, S, W, NW |
+| <img src="water-N-S-W.svg" width="32"> | `water-N-S-W.svg` | N, S, W |
+| <img src="water-N-NE-E-SE-S-SW-W-NW.svg" width="32"> | `water-N-NE-E-SE-S-SW-W-NW.svg` | All 8 |
+| <img src="water-N-E-SE-S-SW-W-NW.svg" width="32"> | `water-N-E-SE-S-SW-W-NW.svg` | All except NE |
+| <img src="water-N-NE-E-S-SW-W-NW.svg" width="32"> | `water-N-NE-E-S-SW-W-NW.svg` | All except SE |
+| <img src="water-N-NE-E-SE-S-W-NW.svg" width="32"> | `water-N-NE-E-SE-S-W-NW.svg` | All except SW |
+| <img src="water-N-NE-E-SE-S-SW-W.svg" width="32"> | `water-N-NE-E-SE-S-SW-W.svg` | All except NW |
+| <img src="water-N-NE-E-SE-S-W.svg" width="32"> | `water-N-NE-E-SE-S-W.svg` | NE+SE, SW+NW land |
+| <img src="water-N-NE-E-S-SW-W.svg" width="32"> | `water-N-NE-E-S-SW-W.svg` | NE+SW, SE+NW land |
+| <img src="water-N-NE-E-S-W-NW.svg" width="32"> | `water-N-NE-E-S-W-NW.svg` | NE+NW, SE+SW land |
+| <img src="water-N-E-SE-S-SW-W.svg" width="32"> | `water-N-E-SE-S-SW-W.svg` | SE+SW, NE+NW land |
+| <img src="water-N-E-SE-S-W-NW.svg" width="32"> | `water-N-E-SE-S-W-NW.svg` | SE+NW, NE+SW land |
+| <img src="water-N-E-S-SW-W-NW.svg" width="32"> | `water-N-E-S-SW-W-NW.svg` | SW+NW, NE+SE land |
+| <img src="water-N-NE-E-S-W.svg" width="32"> | `water-N-NE-E-S-W.svg` | Only NE diag |
+| <img src="water-N-E-SE-S-W.svg" width="32"> | `water-N-E-SE-S-W.svg` | Only SE diag |
+| <img src="water-N-E-S-SW-W.svg" width="32"> | `water-N-E-S-SW-W.svg` | Only SW diag |
+| <img src="water-N-E-S-W-NW.svg" width="32"> | `water-N-E-S-W-NW.svg` | Only NW diag |
+| <img src="water-N-E-S-W.svg" width="32"> | `water-N-E-S-W.svg` | All 4 diags land |
+| <img src="station-circle.svg" width="32"> | `station-circle.svg` | — (Circle) |
+| <img src="station-square.svg" width="32"> | `station-square.svg` | — (Rectangle) |
+| <img src="station-triangle.svg" width="32"> | `station-triangle.svg` | — (Triangle) |
+| <img src="station-diamond.svg" width="32"> | `station-diamond.svg` | — (Diamond) |
+| <img src="station-polygon.svg" width="32"> | `station-polygon.svg` | — (Cross) |
+| <img src="station-star.svg" width="32"> | `station-star.svg` | — (Ruby) |
+
+> **All 47 water tile variants are now included.** The auto-tiling system selects the correct tile based on all 8 neighbors — no fallback needed.

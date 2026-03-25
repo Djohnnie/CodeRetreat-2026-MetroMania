@@ -137,18 +137,18 @@ else
                         var isWater = IsWaterAt(cx, cy);
                         <div class="grid-tile" style="width: @(TileSize)px; height: @(TileSize)px;"
                              @onclick="() => OnTileClick(cx, cy)">
-                            @((MarkupString)GetTileSvg("01-background"))
+                            @((MarkupString)GetTileSvg("background"))
                             @if (isWater)
                             {
                                 bool n = IsWaterAt(cx, cy - 1);
                                 bool e = IsWaterAt(cx + 1, cy);
                                 bool s = IsWaterAt(cx, cy + 1);
                                 bool w = IsWaterAt(cx - 1, cy);
-                                @((MarkupString)GetTileSvg(GetWaterTileName(n, e, s, w)))
-                                @foreach (var overlay in GetInnerCornerOverlays(cx, cy, n, e, s, w))
-                                {
-                                    @((MarkupString)GetTileSvg(overlay))
-                                }
+                                bool ne = n && e && IsWaterAt(cx + 1, cy - 1);
+                                bool se = e && s && IsWaterAt(cx + 1, cy + 1);
+                                bool sw = s && w && IsWaterAt(cx - 1, cy + 1);
+                                bool nw = w && n && IsWaterAt(cx - 1, cy - 1);
+                                @((MarkupString)GetTileSvg(GetWaterTileName(n, ne, e, se, s, sw, w, nw)))
                             }
                             @if (station is not null)
                             {
@@ -305,7 +305,8 @@ else
         _stations.FirstOrDefault(s => s.GridX == x && s.GridY == y);
 
     private bool IsWaterAt(int x, int y) =>
-        _waterSet.Contains((x, y));
+        x < 0 || y < 0 || x >= _level!.GridWidth || y >= _level.GridHeight
+        || _waterSet.Contains((x, y));
 
     private void RebuildWaterSet() =>
         _waterSet = new HashSet<(int X, int Y)>(_waterTiles.Select(w => (w.GridX, w.GridY)));
@@ -541,47 +542,68 @@ else
         }
     }
 
-    private string GetTileSvg(string tileName) =>
-        _colorizedSvgCache.TryGetValue(tileName, out var svg) ? svg : "";
-
-    private static string GetWaterTileName(bool n, bool e, bool s, bool w) => (n, e, s, w) switch
+    private string GetTileSvg(string tileName)
     {
-        (true, true, true, true) => "10-water-full",
-        (false, false, false, false) => "11-water-no-neighbours",
-        (false, true, false, true) => "12-water-WE",
-        (true, false, true, false) => "13-water-NS",
-        (true, true, false, true) => "14-water-WNE",
-        (true, true, true, false) => "15-water-NES",
-        (false, true, true, true) => "16-water-ESW",
-        (true, false, true, true) => "17-water-SWN",
-        (true, false, false, false) => "18-water-N",
-        (false, true, false, false) => "19-water-E",
-        (false, false, true, false) => "20-water-S",
-        (false, false, false, true) => "21-water-W",
-        (true, true, false, false) => "31-water-NE",
-        (false, true, true, false) => "32-water-ES",
-        (false, false, true, true) => "33-water-SW",
-        (true, false, false, true) => "34-water-WN"
-    };
+        if (_colorizedSvgCache.TryGetValue(tileName, out var svg))
+            return svg;
 
-    private List<string> GetInnerCornerOverlays(int x, int y, bool n, bool e, bool s, bool w)
+        // Fallback: use the "all relevant diags water" version
+        var fallback = GetFallbackTileName(tileName);
+        if (fallback is not null && _colorizedSvgCache.TryGetValue(fallback, out svg))
+            return svg;
+
+        return "";
+    }
+
+    /// <summary>
+    /// Rebuilds tile name with all relevant diagonals set to water (the base tile).
+    /// </summary>
+    private static string? GetFallbackTileName(string tileName)
     {
-        var overlays = new List<string>();
-        if (n && e && !IsWaterAt(x + 1, y - 1)) overlays.Add("37-water-SW");
-        if (e && s && !IsWaterAt(x + 1, y + 1)) overlays.Add("38-water-WN");
-        if (s && w && !IsWaterAt(x - 1, y + 1)) overlays.Add("35-water-NE");
-        if (w && n && !IsWaterAt(x - 1, y - 1)) overlays.Add("36-water-ES");
-        return overlays;
+        if (!tileName.StartsWith("water"))
+            return null;
+
+        var suffix = tileName == "water" ? "" : tileName["water-".Length..];
+        var parts = suffix.Length > 0 ? suffix.Split('-') : [];
+        var dirs = new HashSet<string>(parts);
+
+        bool n = dirs.Contains("N"), e = dirs.Contains("E"),
+             s = dirs.Contains("S"), w = dirs.Contains("W");
+
+        var fb = new List<string>(8);
+        if (n) fb.Add("N");
+        if (n && e) fb.Add("NE");
+        if (e) fb.Add("E");
+        if (e && s) fb.Add("SE");
+        if (s) fb.Add("S");
+        if (s && w) fb.Add("SW");
+        if (w) fb.Add("W");
+        if (w && n) fb.Add("NW");
+        return fb.Count == 0 ? "water" : "water-" + string.Join("-", fb);
+    }
+
+    private static string GetWaterTileName(bool n, bool ne, bool e, bool se, bool s, bool sw, bool w, bool nw)
+    {
+        var parts = new List<string>(8);
+        if (n) parts.Add("N");
+        if (n && e && ne) parts.Add("NE");
+        if (e) parts.Add("E");
+        if (e && s && se) parts.Add("SE");
+        if (s) parts.Add("S");
+        if (s && w && sw) parts.Add("SW");
+        if (w) parts.Add("W");
+        if (w && n && nw) parts.Add("NW");
+        return parts.Count == 0 ? "water" : "water-" + string.Join("-", parts);
     }
 
     private static string GetStationTileSvgName(StationType type) => type switch
     {
-        StationType.Circle => "91-station-circle",
-        StationType.Rectangle => "92-station-square",
-        StationType.Triangle => "93-station-triangle",
-        StationType.Diamond => "94-station-diamond",
-        StationType.Cross => "95-station-polygon",
-        StationType.Ruby => "96-station-star",
+        StationType.Circle => "station-circle",
+        StationType.Rectangle => "station-square",
+        StationType.Triangle => "station-triangle",
+        StationType.Diamond => "station-diamond",
+        StationType.Cross => "station-polygon",
+        StationType.Ruby => "station-star",
         _ => ""
     };
 

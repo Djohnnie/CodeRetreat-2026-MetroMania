@@ -71,31 +71,28 @@ public class MetroManiaRenderer
                 float px = x * TileSize;
                 float py = y * TileSize;
 
-                // Always draw background first so it shows through transparent areas
-                DrawTile(canvas, tileCache, "01-background", px, py, colorMap);
+                DrawTile(canvas, tileCache, "background", px, py, colorMap);
 
                 if (waterSet.Contains((x, y)))
                 {
-                    bool n = waterSet.Contains((x, y - 1));
-                    bool e = waterSet.Contains((x + 1, y));
-                    bool s = waterSet.Contains((x, y + 1));
-                    bool w = waterSet.Contains((x - 1, y));
+                    // Treat out-of-bounds neighbors as water so edges blend seamlessly
+                    bool IsWaterOrEdge(int nx, int ny) =>
+                        nx < 0 || ny < 0 || nx >= level.GridWidth || ny >= level.GridHeight
+                        || waterSet.Contains((nx, ny));
 
-                    string tileName = GetWaterTileName(n, e, s, w);
+                    bool n = IsWaterOrEdge(x, y - 1);
+                    bool e = IsWaterOrEdge(x + 1, y);
+                    bool s = IsWaterOrEdge(x, y + 1);
+                    bool w = IsWaterOrEdge(x - 1, y);
+                    bool ne = n && e && IsWaterOrEdge(x + 1, y - 1);
+                    bool se = e && s && IsWaterOrEdge(x + 1, y + 1);
+                    bool sw = s && w && IsWaterOrEdge(x - 1, y + 1);
+                    bool nw = w && n && IsWaterOrEdge(x - 1, y - 1);
+
+                    string tileName = GetWaterTileName(n, ne, e, se, s, sw, w, nw);
                     DrawTile(canvas, tileCache, tileName, px, py, colorMap);
-
-                    // Inner corner overlays for any tile with adjacent water neighbors
-                    if (n && e && !waterSet.Contains((x + 1, y - 1))) // NE diagonal is land
-                        DrawTile(canvas, tileCache, "37-water-SW", px, py, colorMap);
-                    if (e && s && !waterSet.Contains((x + 1, y + 1))) // SE diagonal is land
-                        DrawTile(canvas, tileCache, "38-water-WN", px, py, colorMap);
-                    if (s && w && !waterSet.Contains((x - 1, y + 1))) // SW diagonal is land
-                        DrawTile(canvas, tileCache, "35-water-NE", px, py, colorMap);
-                    if (w && n && !waterSet.Contains((x - 1, y - 1))) // NW diagonal is land
-                        DrawTile(canvas, tileCache, "36-water-ES", px, py, colorMap);
                 }
 
-                // Station overlay
                 if (snapshot.Stations.TryGetValue(new Location(x, y), out var station))
                 {
                     string stationTile = GetStationTileName(station.Type);
@@ -154,12 +151,21 @@ public class MetroManiaRenderer
     private SKPicture LoadSvgPicture(string tileName, Dictionary<string, string> colorMap)
     {
         var path = Path.Combine(_svgResourcesPath, $"{tileName}.svg");
+
+        // If the exact tile doesn't exist, fall back to the cardinal-only version
+        // (with all relevant diagonals treated as water)
+        if (!File.Exists(path))
+        {
+            var fallback = GetFallbackTileName(tileName);
+            if (fallback is not null)
+                path = Path.Combine(_svgResourcesPath, $"{fallback}.svg");
+        }
+
         if (!File.Exists(path))
             throw new FileNotFoundException($"SVG tile not found: {path}");
 
         var svgText = File.ReadAllText(path);
 
-        // Replace hardcoded tile colors with the level's custom colors
         foreach (var (sourceColor, targetColor) in colorMap)
             svgText = svgText.Replace(sourceColor, targetColor);
 
@@ -168,34 +174,51 @@ public class MetroManiaRenderer
         return svg.Picture ?? throw new InvalidOperationException($"Failed to load SVG picture from: {path}");
     }
 
-    private static string GetWaterTileName(bool n, bool e, bool s, bool w) => (n, e, s, w) switch
+    /// <summary>
+    /// Falls back to the "all relevant diagonals water" version of the same cardinal combination.
+    /// </summary>
+    private static string? GetFallbackTileName(string tileName)
     {
-        (true, true, true, true) => "10-water-full",
-        (false, false, false, false) => "11-water-no-neighbours",
-        (false, true, false, true) => "12-water-WE",
-        (true, false, true, false) => "13-water-NS",
-        (true, true, false, true) => "14-water-WNE",
-        (true, true, true, false) => "15-water-NES",
-        (false, true, true, true) => "16-water-ESW",
-        (true, false, true, true) => "17-water-SWN",
-        (true, false, false, false) => "18-water-N",
-        (false, true, false, false) => "19-water-E",
-        (false, false, true, false) => "20-water-S",
-        (false, false, false, true) => "21-water-W",
-        (true, true, false, false) => "31-water-NE",
-        (false, true, true, false) => "32-water-ES",
-        (false, false, true, true) => "33-water-SW",
-        (true, false, false, true) => "34-water-WN"
-    };
+        // Parse which directions are present in the tile name
+        if (!tileName.StartsWith("water"))
+            return null;
+
+        var suffix = tileName == "water" ? "" : tileName["water-".Length..];
+        var parts = suffix.Length > 0 ? suffix.Split('-') : [];
+        var dirs = new HashSet<string>(parts);
+
+        bool n = dirs.Contains("N"), e = dirs.Contains("E"),
+             s = dirs.Contains("S"), w = dirs.Contains("W");
+
+        // Rebuild with all relevant diagonals present
+        return BuildWaterTileName(n, n && e, e, e && s, s, s && w, w, w && n);
+    }
+
+    private static string GetWaterTileName(bool n, bool ne, bool e, bool se, bool s, bool sw, bool w, bool nw)
+        => BuildWaterTileName(n, ne, e, se, s, sw, w, nw);
+
+    private static string BuildWaterTileName(bool n, bool ne, bool e, bool se, bool s, bool sw, bool w, bool nw)
+    {
+        var parts = new List<string>(8);
+        if (n) parts.Add("N");
+        if (n && e && ne) parts.Add("NE");
+        if (e) parts.Add("E");
+        if (e && s && se) parts.Add("SE");
+        if (s) parts.Add("S");
+        if (s && w && sw) parts.Add("SW");
+        if (w) parts.Add("W");
+        if (w && n && nw) parts.Add("NW");
+        return parts.Count == 0 ? "water" : "water-" + string.Join("-", parts);
+    }
 
     private static string GetStationTileName(StationType type) => type switch
     {
-        StationType.Circle => "91-station-circle",
-        StationType.Rectangle => "92-station-square",
-        StationType.Triangle => "93-station-triangle",
-        StationType.Diamond => "94-station-diamond",
-        StationType.Cross => "95-station-polygon",
-        StationType.Ruby => "96-station-star",
+        StationType.Circle => "station-circle",
+        StationType.Rectangle => "station-square",
+        StationType.Triangle => "station-triangle",
+        StationType.Diamond => "station-diamond",
+        StationType.Cross => "station-polygon",
+        StationType.Ruby => "station-star",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown station type")
     };
 }
