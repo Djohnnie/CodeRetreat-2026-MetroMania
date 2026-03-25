@@ -14,7 +14,7 @@ public static class SubmissionEndpoints
         {
             var overviews = await mediator.Send(new GetAllSubmissionOverviewsQuery());
             return Results.Ok(overviews);
-        });
+        }).RequireAuthorization("Admin");
 
         group.MapGet("/users/{userId:guid}", async (Guid userId, IMediator mediator) =>
         {

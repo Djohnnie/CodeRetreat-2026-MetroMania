@@ -27,13 +27,13 @@ public static class UserEndpoints
         {
             var success = await mediator.Send(new ApproveUserCommand(id, request.NewStatus));
             return Results.Ok(success);
-        });
+        }).RequireAuthorization("Admin");
 
         group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             var success = await mediator.Send(new DeleteUserCommand(id));
             return Results.Ok(success);
-        });
+        }).RequireAuthorization("Admin");
 
         return app;
     }

@@ -64,9 +64,9 @@ MetroMania.Web             → Blazor UI, auth services, pages, layout, HttpClie
 - **Auto-migration:** The database is migrated on API startup.
 - **Endpoint organization:** Each domain area has its own static class with a `Map*Endpoints()` extension method in the `Endpoints/` folder:
   - `AuthEndpoints.cs` — `POST /api/auth/login`, `POST /api/auth/register` (anonymous — no JWT required)
-  - `UserEndpoints.cs` — `GET /api/users`, `GET /api/users/{id}`, `POST /api/users/{id}/approve`, `DELETE /api/users/{id}` (JWT required)
-  - `LevelEndpoints.cs` — `GET /api/levels`, `GET /api/levels/{id}`, `POST /api/levels`, `PUT /api/levels/{id}`, `DELETE /api/levels/{id}`, `POST /api/levels/{id}/reorder`, `PUT /api/levels/{id}/grid-data` (JWT required)
-  - `SubmissionEndpoints.cs` — `GET /api/submissions/overviews`, `GET /api/submissions/users/{userId}`, `POST /api/submissions` (JWT required)
+  - `UserEndpoints.cs` — `GET /api/users`, `GET /api/users/{id}` (authenticated), `POST /api/users/{id}/approve`, `DELETE /api/users/{id}` (**Admin only**)
+  - `LevelEndpoints.cs` — `GET /api/levels`, `GET /api/levels/{id}` (authenticated), `POST /api/levels`, `PUT /api/levels/{id}`, `DELETE /api/levels/{id}`, `POST /api/levels/{id}/reorder`, `PUT /api/levels/{id}/grid-data` (**Admin only** for mutations)
+  - `SubmissionEndpoints.cs` — `GET /api/submissions/overviews` (**Admin only**), `GET /api/submissions/users/{userId}`, `POST /api/submissions` (authenticated)
   - `ThemeEndpoints.cs` — `POST /api/theme/toggle` (JWT required)
   - `LanguageEndpoints.cs` — `POST /api/language/change` (JWT required)
 - **Request records** are defined in each endpoint file (e.g., `LoginRequest`, `CreateLevelRequest`).

@@ -1,12 +1,11 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using MetroMania.Application.Auth.Commands;
 using MetroMania.Application.Auth.Queries;
 using MetroMania.Application.DTOs;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MetroMania.Web.Services;
 

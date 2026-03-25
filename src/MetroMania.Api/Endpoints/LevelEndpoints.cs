@@ -28,32 +28,32 @@ public static class LevelEndpoints
             var level = await mediator.Send(new CreateLevelCommand(
                 request.Title, request.Description, request.GridWidth, request.GridHeight));
             return Results.Created($"/api/levels/{level.Id}", level);
-        });
+        }).RequireAuthorization("Admin");
 
         group.MapPut("/{id:guid}", async (Guid id, UpdateLevelRequest request, IMediator mediator) =>
         {
             var level = await mediator.Send(new UpdateLevelCommand(
                 id, request.Title, request.Description, request.GridWidth, request.GridHeight));
             return level is not null ? Results.Ok(level) : Results.NotFound();
-        });
+        }).RequireAuthorization("Admin");
 
         group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             var success = await mediator.Send(new DeleteLevelCommand(id));
             return Results.Ok(success);
-        });
+        }).RequireAuthorization("Admin");
 
         group.MapPost("/{id:guid}/reorder", async (Guid id, ReorderLevelRequest request, IMediator mediator) =>
         {
             var success = await mediator.Send(new ReorderLevelCommand(id, request.Direction));
             return Results.Ok(success);
-        });
+        }).RequireAuthorization("Admin");
 
         group.MapPut("/{id:guid}/grid-data", async (Guid id, UpdateGridDataRequest request, IMediator mediator) =>
         {
             var level = await mediator.Send(new UpdateGridDataCommand(id, request.LevelData));
             return level is not null ? Results.Ok(level) : Results.NotFound();
-        });
+        }).RequireAuthorization("Admin");
 
         return app;
     }
