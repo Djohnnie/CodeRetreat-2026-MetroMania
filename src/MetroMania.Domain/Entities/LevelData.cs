@@ -9,22 +9,21 @@ public class LevelData
 {
     public string BackgroundColor { get; set; } = "#e8f5e9";
     public string WaterColor { get; set; } = "#90caf9";
-    public List<StationPlacement> Stations { get; set; } = [];
-    public List<WaterTile> WaterTiles { get; set; } = [];
+    public List<MetroStation> Stations { get; set; } = [];
+    public List<Water> WaterTiles { get; set; } = [];
 }
 
 /// <summary>
 /// Represents a station placed on a level grid.
 /// </summary>
-public class StationPlacement
+public class MetroStation
 {
     public int GridX { get; set; }
     public int GridY { get; set; }
     public StationType StationType { get; set; }
     public int SpawnOrder { get; set; }
     public int SpawnDelayDays { get; set; }
-    public StationType Shape { get; set; }
-    public int SpawnFrequencyMinutes { get; set; } = 5;
+    public int PassengerSpawnFrequencyInHours { get; set; } = 5;
 
     /// <summary>
     /// Seed for deterministic passenger spawning so every playthrough is identical.
@@ -35,7 +34,7 @@ public class StationPlacement
 /// <summary>
 /// Represents a water tile on the level grid.
 /// </summary>
-public class WaterTile
+public class Water
 {
     public int GridX { get; set; }
     public int GridY { get; set; }

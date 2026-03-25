@@ -162,7 +162,6 @@
   <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Frequency (minutes)</value></data>
   <data name="SpawnSeed" xml:space="preserve"><value>Spawn Seed</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
-  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
 
   <!-- Submission Management -->
   <data name="Submissions" xml:space="preserve"><value>Submissions</value></data>

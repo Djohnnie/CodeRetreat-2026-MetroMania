@@ -1,9 +1,21 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/MetroMania.Api/MetroMania.Api.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/1. Application/">
     <Project Path="src/MetroMania.Application/MetroMania.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/2. Domain/">
     <Project Path="src/MetroMania.Domain/MetroMania.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/3. Infrastructure/">
+    <Project Path="src/MetroMania.Api/MetroMania.Api.csproj" />
     <Project Path="src/MetroMania.Infrastructure/MetroMania.Infrastructure.csproj" />
     <Project Path="src/MetroMania.Web/MetroMania.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/4. Tests/">
+    <Project Path="src/MetroMania.Engine.Tests/MetroMania.Engine.Tests.csproj" />
+  </Folder>
+  <Folder Name="/src/9. Other/">
+    <Project Path="src/MetroMania.Demo/MetroMania.Demo.csproj" />
+    <Project Path="src/MetroMania.Engine/MetroMania.Engine.csproj" />
   </Folder>
 </Solution>

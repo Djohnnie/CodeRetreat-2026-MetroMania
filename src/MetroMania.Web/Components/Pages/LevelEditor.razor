@@ -42,10 +42,6 @@ else
                                 ValueChanged="OnBackgroundColorChanged"
                                 Placeholder="@Loc["BackgroundColor"]"
                                 PickerVariant="PickerVariant.Inline"
-                                DisableAlpha="true"
-                                DisableToolbar="true"
-                                DisablePreview="true"
-                                DisableModeSwitch="true"
                                 ColorPickerMode="ColorPickerMode.HEX"
                                 Style="max-width: 140px;"
                                 Variant="Variant.Outlined" />
@@ -57,10 +53,6 @@ else
                                 ValueChanged="OnWaterColorChanged"
                                 Placeholder="@Loc["WaterColor"]"
                                 PickerVariant="PickerVariant.Inline"
-                                DisableAlpha="true"
-                                DisableToolbar="true"
-                                DisablePreview="true"
-                                DisableModeSwitch="true"
                                 ColorPickerMode="ColorPickerMode.HEX"
                                 Style="max-width: 140px;"
                                 Variant="Variant.Outlined" />
@@ -184,7 +176,7 @@ else
                     </MudSelectItem>
                 }
             </MudSelect>
-            <MudNumericField @bind-Value="_editSpawnFrequencyMinutes" Label="@Loc["SpawnFrequency"]"
+            <MudNumericField @bind-Value="_editPassengerSpawnFrequencyInHours" Label="@Loc["SpawnFrequency"]"
                              Variant="Variant.Outlined" Min="1" Class="mb-3" />
             <MudTextField Value="@_editSpawnSeed.ToString()" Label="@Loc["SpawnSeed"]"
                           Variant="Variant.Outlined" ReadOnly="true" Class="mb-3" />
@@ -242,8 +234,8 @@ else
     private static readonly Random _rng = new();
 
     private LevelDto? _level;
-    private List<StationPlacement> _stations = [];
-    private List<WaterTile> _waterTiles = [];
+    private List<MetroStation> _stations = [];
+    private List<Water> _waterTiles = [];
     private StationType _selectedType = StationType.Circle;
     private ToolMode _toolMode = ToolMode.Station;
 
@@ -261,18 +253,17 @@ else
         _level = await ApiClient.GetLevelAsync(LevelId);
         if (_level is not null)
         {
-            _stations = _level.Stations.Select(s => new StationPlacement
+            _stations = _level.Stations.Select(s => new MetroStation
             {
                 GridX = s.GridX,
                 GridY = s.GridY,
                 StationType = s.StationType,
                 SpawnOrder = s.SpawnOrder,
                 SpawnDelayDays = s.SpawnDelayDays,
-                Shape = s.Shape,
-                SpawnFrequencyMinutes = s.SpawnFrequencyMinutes,
+                PassengerSpawnFrequencyInHours = s.PassengerSpawnFrequencyInHours,
                 SpawnSeed = s.SpawnSeed
             }).ToList();
-            _waterTiles = _level.WaterTiles.Select(w => new WaterTile
+            _waterTiles = _level.WaterTiles.Select(w => new Water
             {
                 GridX = w.GridX,
                 GridY = w.GridY
@@ -282,7 +273,7 @@ else
         }
     }
 
-    private StationPlacement? GetStationAt(int x, int y) =>
+    private MetroStation? GetStationAt(int x, int y) =>
         _stations.FirstOrDefault(s => s.GridX == x && s.GridY == y);
 
     private bool IsWaterAt(int x, int y) =>
@@ -315,12 +306,12 @@ else
         await DebouncedSaveLevelData();
     }
 
-    private StationPlacement? _editingStation;
+    private MetroStation? _editingStation;
     private bool _showStationDialog;
     private int _editSpawnOrder;
     private int _editSpawnDelayDays;
     private StationType _editShape;
-    private int _editSpawnFrequencyMinutes;
+    private int _editPassengerSpawnFrequencyInHours;
     private int _editSpawnSeed;
 
     private async Task OnTileClick(int x, int y)
@@ -349,7 +340,7 @@ else
                 }
                 else if (existingStation is null)
                 {
-                    _waterTiles.Add(new WaterTile { GridX = x, GridY = y });
+                    _waterTiles.Add(new Water { GridX = x, GridY = y });
                 }
                 break;
 
@@ -364,14 +355,13 @@ else
                 }
                 else
                 {
-                    _stations.Add(new StationPlacement
+                    _stations.Add(new MetroStation
                     {
                         GridX = x,
                         GridY = y,
                         StationType = _selectedType,
-                        Shape = _selectedType,
-                        SpawnOrder = (_stations.Count > 0 ? _stations.Max(s => s.SpawnOrder) : 0) + 1,
-                        SpawnFrequencyMinutes = 5,
+                        SpawnOrder= (_stations.Count > 0 ? _stations.Max(s => s.SpawnOrder) : 0) + 1,
+                        PassengerSpawnFrequencyInHours = 5,
                         SpawnSeed = _rng.Next()
                     });
                 }
@@ -381,13 +371,13 @@ else
         await SaveLevelData();
     }
 
-    private void OpenStationDialog(StationPlacement station)
+    private void OpenStationDialog(MetroStation station)
     {
         _editingStation = station;
         _editSpawnOrder = station.SpawnOrder;
         _editSpawnDelayDays = station.SpawnDelayDays;
         _editShape = station.StationType;
-        _editSpawnFrequencyMinutes = station.SpawnFrequencyMinutes;
+        _editPassengerSpawnFrequencyInHours = station.PassengerSpawnFrequencyInHours;
         _editSpawnSeed = station.SpawnSeed;
         _showStationDialog = true;
     }
@@ -398,9 +388,8 @@ else
         {
             _editingStation.SpawnOrder = _editSpawnOrder;
             _editingStation.SpawnDelayDays = _editSpawnDelayDays;
-            _editingStation.Shape = _editShape;
             _editingStation.StationType = _editShape;
-            _editingStation.SpawnFrequencyMinutes = _editSpawnFrequencyMinutes;
+            _editingStation.PassengerSpawnFrequencyInHours = _editPassengerSpawnFrequencyInHours;
         }
         _showStationDialog = false;
         _editingStation = null;

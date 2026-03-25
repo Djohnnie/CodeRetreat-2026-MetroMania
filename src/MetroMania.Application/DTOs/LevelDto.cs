@@ -12,8 +12,8 @@ public record LevelDto(
     DateTime CreatedAt,
     string BackgroundColor,
     string WaterColor,
-    List<StationPlacement> Stations,
-    List<WaterTile> WaterTiles)
+    List<MetroStation> Stations,
+    List<Water> WaterTiles)
 {
     public static LevelDto FromEntity(Level level) =>
         new(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight,
