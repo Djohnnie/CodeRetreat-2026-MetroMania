@@ -12,6 +12,7 @@ public record LevelDto(
     DateTime CreatedAt,
     string BackgroundColor,
     string WaterColor,
+    int Seed,
     List<MetroStation> Stations,
     List<Water> WaterTiles)
 {
@@ -19,5 +20,6 @@ public record LevelDto(
         new(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight,
             level.SortOrder, level.CreatedAt,
             level.LevelData.BackgroundColor, level.LevelData.WaterColor,
+            level.LevelData.Seed,
             level.LevelData.Stations, level.LevelData.WaterTiles);
 }

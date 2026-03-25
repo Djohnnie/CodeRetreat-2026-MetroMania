@@ -19,6 +19,7 @@ public class MetroManiaEngineTests
             GridHeight = 1,
             LevelData = new LevelData
             {
+                Seed = 123,
                 Stations =
                 [
                     new MetroStation
@@ -28,7 +29,7 @@ public class MetroManiaEngineTests
                         StationType = StationType.Triangle,
                         SpawnOrder = 1,
                         SpawnDelayDays = 1,
-                        PassengerSpawnFrequencyInHours = 24
+                        PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }]
                     }
                 ]
             }

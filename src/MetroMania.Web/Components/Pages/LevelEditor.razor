@@ -57,6 +57,12 @@ else
                                 Style="max-width: 140px;"
                                 Variant="Variant.Outlined" />
             </div>
+            <MudDivider Vertical="true" FlexItem="true" />
+            <div class="d-flex align-center gap-2">
+                <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["Seed"]:</MudText>
+                <MudNumericField Value="_seed" ValueChanged="OnSeedChanged" T="int"
+                                 Variant="Variant.Outlined" Style="max-width: 140px;" />
+            </div>
         </MudPaper>
     </div>
 
@@ -176,10 +182,28 @@ else
                     </MudSelectItem>
                 }
             </MudSelect>
-            <MudNumericField @bind-Value="_editPassengerSpawnFrequencyInHours" Label="@Loc["SpawnFrequency"]"
-                             Variant="Variant.Outlined" Min="1" Class="mb-3" />
-            <MudTextField Value="@_editSpawnSeed.ToString()" Label="@Loc["SpawnSeed"]"
-                          Variant="Variant.Outlined" ReadOnly="true" Class="mb-3" />
+            <MudText Typo="Typo.subtitle2" Class="mb-2">@Loc["SpawnFrequency"]</MudText>
+            <MudTable Items="_editSpawnPhases" Dense="true" Elevation="0" Class="mb-3" Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 4px;">
+                <HeaderContent>
+                    <MudTh>@Loc["AfterDays"]</MudTh>
+                    <MudTh>@Loc["FrequencyInHours"]</MudTh>
+                    <MudTh Style="width: 48px;"></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudNumericField @bind-Value="context.AfterDays" Min="0" Variant="Variant.Text" Margin="Margin.Dense" />
+                    </MudTd>
+                    <MudTd>
+                        <MudNumericField @bind-Value="context.FrequencyInHours" Min="1" Variant="Variant.Text" Margin="Margin.Dense" />
+                    </MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => _editSpawnPhases.Remove(context)" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Variant="Variant.Text"
+                       OnClick='() => _editSpawnPhases.Add(new PassengerSpawnPhase { AfterDays = _editSpawnPhases.Count > 0 ? _editSpawnPhases.Max(p => p.AfterDays) + 3 : 0, FrequencyInHours = _editSpawnPhases.Count > 0 ? Math.Max(1, _editSpawnPhases.Last().FrequencyInHours / 2) : 8 })'
+                       Class="mb-3">@Loc["AddPhase"]</MudButton>
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="CancelStationDialog" Variant="Variant.Text">@Loc["Cancel"]</MudButton>
@@ -231,8 +255,6 @@ else
 
     private enum ToolMode { Station, Water, Eraser }
 
-    private static readonly Random _rng = new();
-
     private LevelDto? _level;
     private List<MetroStation> _stations = [];
     private List<Water> _waterTiles = [];
@@ -241,6 +263,7 @@ else
 
     private MudColor _backgroundColor = new("#e8f5e9");
     private MudColor _waterColor = new("#90caf9");
+    private int _seed;
 
     private CancellationTokenSource? _debounceCts;
     private readonly SemaphoreSlim _saveLock = new(1, 1);
@@ -260,8 +283,7 @@ else
                 StationType = s.StationType,
                 SpawnOrder = s.SpawnOrder,
                 SpawnDelayDays = s.SpawnDelayDays,
-                PassengerSpawnFrequencyInHours = s.PassengerSpawnFrequencyInHours,
-                SpawnSeed = s.SpawnSeed
+                PassengerSpawnPhases = s.PassengerSpawnPhases.Select(p => new PassengerSpawnPhase { AfterDays = p.AfterDays, FrequencyInHours = p.FrequencyInHours }).ToList(),
             }).ToList();
             _waterTiles = _level.WaterTiles.Select(w => new Water
             {
@@ -270,6 +292,7 @@ else
             }).ToList();
             _backgroundColor = new MudColor(_level.BackgroundColor);
             _waterColor = new MudColor(_level.WaterColor);
+            _seed = _level.Seed;
         }
     }
 
@@ -306,13 +329,18 @@ else
         await DebouncedSaveLevelData();
     }
 
+    private async Task OnSeedChanged(int seed)
+    {
+        _seed = seed;
+        await DebouncedSaveLevelData();
+    }
+
     private MetroStation? _editingStation;
     private bool _showStationDialog;
     private int _editSpawnOrder;
     private int _editSpawnDelayDays;
     private StationType _editShape;
-    private int _editPassengerSpawnFrequencyInHours;
-    private int _editSpawnSeed;
+    private List<PassengerSpawnPhase> _editSpawnPhases = [];
 
     private async Task OnTileClick(int x, int y)
     {
@@ -361,8 +389,7 @@ else
                         GridY = y,
                         StationType = _selectedType,
                         SpawnOrder= (_stations.Count > 0 ? _stations.Max(s => s.SpawnOrder) : 0) + 1,
-                        PassengerSpawnFrequencyInHours = 5,
-                        SpawnSeed = _rng.Next()
+                        PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }],
                     });
                 }
                 break;
@@ -377,8 +404,7 @@ else
         _editSpawnOrder = station.SpawnOrder;
         _editSpawnDelayDays = station.SpawnDelayDays;
         _editShape = station.StationType;
-        _editPassengerSpawnFrequencyInHours = station.PassengerSpawnFrequencyInHours;
-        _editSpawnSeed = station.SpawnSeed;
+        _editSpawnPhases = station.PassengerSpawnPhases.Select(p => new PassengerSpawnPhase { AfterDays = p.AfterDays, FrequencyInHours = p.FrequencyInHours }).ToList();
         _showStationDialog = true;
     }
 
@@ -389,7 +415,7 @@ else
             _editingStation.SpawnOrder = _editSpawnOrder;
             _editingStation.SpawnDelayDays = _editSpawnDelayDays;
             _editingStation.StationType = _editShape;
-            _editingStation.PassengerSpawnFrequencyInHours = _editPassengerSpawnFrequencyInHours;
+            _editingStation.PassengerSpawnPhases = _editSpawnPhases.OrderBy(p => p.AfterDays).ToList();
         }
         _showStationDialog = false;
         _editingStation = null;
@@ -425,6 +451,7 @@ else
             {
                 BackgroundColor = GetBackgroundHex(),
                 WaterColor = GetWaterHex(),
+                Seed = _seed,
                 Stations = _stations,
                 WaterTiles = _waterTiles
             };

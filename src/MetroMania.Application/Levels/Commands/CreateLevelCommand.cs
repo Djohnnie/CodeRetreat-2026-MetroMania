@@ -21,7 +21,8 @@ public class CreateLevelCommandHandler(ILevelRepository levelRepository)
             Description = request.Description,
             GridWidth = request.GridWidth,
             GridHeight = request.GridHeight,
-            SortOrder = maxOrder + 1
+            SortOrder = maxOrder + 1,
+            LevelData = new LevelData { Seed = Random.Shared.Next() }
         };
 
         await levelRepository.AddAsync(level);

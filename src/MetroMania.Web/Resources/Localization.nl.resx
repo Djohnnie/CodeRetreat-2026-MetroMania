@@ -159,8 +159,11 @@
   <data name="SpawnOrder" xml:space="preserve"><value>Spawn Volgorde</value></data>
   <data name="SpawnDelay" xml:space="preserve"><value>Spawn Vertraging (dagen)</value></data>
   <data name="Shape" xml:space="preserve"><value>Vorm</value></data>
-  <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Frequentie (minuten)</value></data>
-  <data name="SpawnSeed" xml:space="preserve"><value>Spawn Seed</value></data>
+  <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Fases</value></data>
+  <data name="AfterDays" xml:space="preserve"><value>Na Dagen</value></data>
+  <data name="FrequencyInHours" xml:space="preserve"><value>Elke N Uren</value></data>
+  <data name="AddPhase" xml:space="preserve"><value>Fase Toevoegen</value></data>
+  <data name="Seed" xml:space="preserve"><value>Seed</value></data>
   <data name="Save" xml:space="preserve"><value>Opslaan</value></data>
 
   <!-- Submission Management -->

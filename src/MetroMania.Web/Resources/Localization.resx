@@ -159,8 +159,11 @@
   <data name="SpawnOrder" xml:space="preserve"><value>Spawn Order</value></data>
   <data name="SpawnDelay" xml:space="preserve"><value>Spawn Delay (days)</value></data>
   <data name="Shape" xml:space="preserve"><value>Shape</value></data>
-  <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Frequency (minutes)</value></data>
-  <data name="SpawnSeed" xml:space="preserve"><value>Spawn Seed</value></data>
+  <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Phases</value></data>
+  <data name="AfterDays" xml:space="preserve"><value>After Days</value></data>
+  <data name="FrequencyInHours" xml:space="preserve"><value>Every N Hours</value></data>
+  <data name="AddPhase" xml:space="preserve"><value>Add Phase</value></data>
+  <data name="Seed" xml:space="preserve"><value>Seed</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
 
   <!-- Submission Management -->
