@@ -84,18 +84,15 @@ public class MetroManiaRenderer
                     string tileName = GetWaterTileName(n, e, s, w);
                     DrawTile(canvas, tileCache, tileName, px, py, colorMap);
 
-                    // Inner corner overlays for full-water tiles
-                    if (n && e && s && w)
-                    {
-                        if (!waterSet.Contains((x + 1, y - 1))) // NE diagonal is land
-                            DrawTile(canvas, tileCache, "37-water-SW", px, py, colorMap);
-                        if (!waterSet.Contains((x + 1, y + 1))) // SE diagonal is land
-                            DrawTile(canvas, tileCache, "38-water-WN", px, py, colorMap);
-                        if (!waterSet.Contains((x - 1, y + 1))) // SW diagonal is land
-                            DrawTile(canvas, tileCache, "35-water-NE", px, py, colorMap);
-                        if (!waterSet.Contains((x - 1, y - 1))) // NW diagonal is land
-                            DrawTile(canvas, tileCache, "36-water-ES", px, py, colorMap);
-                    }
+                    // Inner corner overlays for any tile with adjacent water neighbors
+                    if (n && e && !waterSet.Contains((x + 1, y - 1))) // NE diagonal is land
+                        DrawTile(canvas, tileCache, "37-water-SW", px, py, colorMap);
+                    if (e && s && !waterSet.Contains((x + 1, y + 1))) // SE diagonal is land
+                        DrawTile(canvas, tileCache, "38-water-WN", px, py, colorMap);
+                    if (s && w && !waterSet.Contains((x - 1, y + 1))) // SW diagonal is land
+                        DrawTile(canvas, tileCache, "35-water-NE", px, py, colorMap);
+                    if (w && n && !waterSet.Contains((x - 1, y - 1))) // NW diagonal is land
+                        DrawTile(canvas, tileCache, "36-water-ES", px, py, colorMap);
                 }
 
                 // Station overlay

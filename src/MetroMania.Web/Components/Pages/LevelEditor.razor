@@ -8,6 +8,7 @@
 @inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
+@inject IWebHostEnvironment Env
 @implements IDisposable
 
 <PageTitle>MetroMania - @Loc["EditGrid"]</PageTitle>
@@ -125,7 +126,7 @@ else
     <!-- Centered grid -->
     <div class="d-flex justify-center">
         <MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); display: inline-block;">
-            <div style="display: inline-grid; grid-template-columns: repeat(@_level.GridWidth, @(TileSize)px); gap: 2px; background: @GetBackgroundHex();">
+            <div style="display: inline-grid; grid-template-columns: repeat(@_level.GridWidth, @(TileSize)px); gap: 0;">
                 @for (var y = 0; y < _level.GridHeight; y++)
                 {
                     @for (var x = 0; x < _level.GridWidth; x++)
@@ -134,21 +135,25 @@ else
                         var cy = y;
                         var station = GetStationAt(cx, cy);
                         var isWater = IsWaterAt(cx, cy);
-                        <div class="grid-tile @(station is not null ? "grid-tile-filled" : "") @(isWater ? "grid-tile-water" : "")"
-                             style="width: @(TileSize)px; height: @(TileSize)px; background: @(isWater ? GetWaterHex() : GetBackgroundHex());"
+                        <div class="grid-tile" style="width: @(TileSize)px; height: @(TileSize)px;"
                              @onclick="() => OnTileClick(cx, cy)">
-                            @if (station is not null)
-                            {
-                                <svg width="@(TileSize - 8)" height="@(TileSize - 8)" viewBox="0 0 20 20">
-                                    @GetStationSvg(station.StationType)
-                                </svg>
-                                <span class="spawn-order-badge">@station.SpawnOrder</span>
-                            }
+                            @((MarkupString)GetTileSvg("01-background"))
                             @if (isWater)
                             {
-                                <svg width="@(TileSize - 12)" height="@(TileSize - 12)" viewBox="0 0 24 24" style="opacity: 0.4;">
-                                    <path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2C20 10.48 17.33 6.55 12 2z" fill="white"/>
-                                </svg>
+                                bool n = IsWaterAt(cx, cy - 1);
+                                bool e = IsWaterAt(cx + 1, cy);
+                                bool s = IsWaterAt(cx, cy + 1);
+                                bool w = IsWaterAt(cx - 1, cy);
+                                @((MarkupString)GetTileSvg(GetWaterTileName(n, e, s, w)))
+                                @foreach (var overlay in GetInnerCornerOverlays(cx, cy, n, e, s, w))
+                                {
+                                    @((MarkupString)GetTileSvg(overlay))
+                                }
+                            }
+                            @if (station is not null)
+                            {
+                                @((MarkupString)GetTileSvg(GetStationTileSvgName(station.StationType)))
+                                <span class="spawn-order-badge">@station.SpawnOrder</span>
                             }
                         </div>
                     }
@@ -215,13 +220,14 @@ else
 <style>
     .grid-tile {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.15s, transform 0.1s, opacity 0.15s;
-        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: opacity 0.15s, transform 0.1s;
+        overflow: hidden;
+    }
+    .grid-tile:hover {
+        opacity: 0.75;
+        transform: scale(1.05);
+        z-index: 1;
     }
     .spawn-order-badge {
         position: absolute;
@@ -233,16 +239,7 @@ else
         text-shadow: 0 0 3px rgba(0,0,0,0.7);
         line-height: 1;
         pointer-events: none;
-    }
-    .grid-tile:hover {
-        opacity: 0.75;
-        transform: scale(1.05);
-    }
-    .grid-tile-filled:hover {
-        opacity: 0.85;
-    }
-    .grid-tile-water {
-        border-color: rgba(0, 0, 0, 0.12);
+        z-index: 2;
     }
 </style>
 
@@ -252,12 +249,15 @@ else
     private const int TileSize = 48;
     private const string StationColor = "#6366f1";
     private const string StationStroke = "#4338ca";
+    private const string SourceBackgroundColor = "rgb(255,227,214)";
+    private const string SourceWaterColor = "rgb(182,227,243)";
 
     private enum ToolMode { Station, Water, Eraser }
 
     private LevelDto? _level;
     private List<MetroStation> _stations = [];
     private List<Water> _waterTiles = [];
+    private HashSet<(int X, int Y)> _waterSet = [];
     private StationType _selectedType = StationType.Circle;
     private ToolMode _toolMode = ToolMode.Station;
 
@@ -270,6 +270,9 @@ else
 
     private static readonly StationType[] _beginnerTypes = [StationType.Circle, StationType.Rectangle, StationType.Triangle];
     private static readonly StationType[] _advancedTypes = [StationType.Diamond, StationType.Cross, StationType.Ruby];
+
+    private Dictionary<string, string> _rawSvgCache = new();
+    private Dictionary<string, string> _colorizedSvgCache = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -290,9 +293,11 @@ else
                 GridX = w.GridX,
                 GridY = w.GridY
             }).ToList();
+            RebuildWaterSet();
             _backgroundColor = new MudColor(_level.BackgroundColor);
             _waterColor = new MudColor(_level.WaterColor);
             _seed = _level.Seed;
+            LoadTileSvgs();
         }
     }
 
@@ -300,7 +305,10 @@ else
         _stations.FirstOrDefault(s => s.GridX == x && s.GridY == y);
 
     private bool IsWaterAt(int x, int y) =>
-        _waterTiles.Any(w => w.GridX == x && w.GridY == y);
+        _waterSet.Contains((x, y));
+
+    private void RebuildWaterSet() =>
+        _waterSet = new HashSet<(int X, int Y)>(_waterTiles.Select(w => (w.GridX, w.GridY)));
 
     private void SelectType(StationType type)
     {
@@ -320,12 +328,14 @@ else
     private async Task OnBackgroundColorChanged(MudColor color)
     {
         _backgroundColor = color;
+        RebuildColorizedCache();
         await DebouncedSaveLevelData();
     }
 
     private async Task OnWaterColorChanged(MudColor color)
     {
         _waterColor = color;
+        RebuildColorizedCache();
         await DebouncedSaveLevelData();
     }
 
@@ -358,7 +368,10 @@ else
                     RenumberSpawnOrders();
                 }
                 if (isWater)
+                {
                     _waterTiles.RemoveAll(w => w.GridX == x && w.GridY == y);
+                    RebuildWaterSet();
+                }
                 break;
 
             case ToolMode.Water:
@@ -370,6 +383,7 @@ else
                 {
                     _waterTiles.Add(new Water { GridX = x, GridY = y });
                 }
+                RebuildWaterSet();
                 break;
 
             case ToolMode.Station:
@@ -481,6 +495,94 @@ else
         StationType.Cross => new MarkupString($"""<polygon points="7,2 13,2 13,7 18,7 18,13 13,13 13,18 7,18 7,13 2,13 2,7 7,7" fill="{StationColor}" stroke="{StationStroke}" stroke-width="1"/>"""),
         StationType.Ruby => new MarkupString($"""<polygon points="10,1 17,6 14,18 6,18 3,6" fill="{StationColor}" stroke="{StationStroke}" stroke-width="1.5"/>"""),
         _ => new MarkupString("")
+    };
+
+    // --- SVG tile rendering ---
+
+    private void LoadTileSvgs()
+    {
+        var tilesPath = Path.Combine(Env.ContentRootPath, "..", "..", "resources");
+        tilesPath = Path.GetFullPath(tilesPath);
+        if (!Directory.Exists(tilesPath))
+            return;
+
+        foreach (var file in Directory.GetFiles(tilesPath, "*.svg"))
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            _rawSvgCache[name] = File.ReadAllText(file);
+        }
+
+        RebuildColorizedCache();
+    }
+
+    private void RebuildColorizedCache()
+    {
+        _colorizedSvgCache.Clear();
+        var bgHex = GetBackgroundHex();
+        var waterHex = GetWaterHex();
+
+        foreach (var (name, raw) in _rawSvgCache)
+        {
+            var svg = raw;
+
+            // Strip XML declaration and DOCTYPE
+            var svgStart = svg.IndexOf("<svg");
+            if (svgStart > 0) svg = svg[svgStart..];
+
+            // Remove explicit width/height, add absolute positioning for layering
+            svg = svg.Replace("width=\"100%\" height=\"100%\" ", "");
+            svg = svg.Replace("style=\"", "style=\"position:absolute;inset:0;width:100%;height:100%;pointer-events:none;");
+
+            // Replace baked-in tile colors with level-specific colors
+            svg = svg.Replace(SourceBackgroundColor, bgHex);
+            svg = svg.Replace(SourceWaterColor, waterHex);
+
+            _colorizedSvgCache[name] = svg;
+        }
+    }
+
+    private string GetTileSvg(string tileName) =>
+        _colorizedSvgCache.TryGetValue(tileName, out var svg) ? svg : "";
+
+    private static string GetWaterTileName(bool n, bool e, bool s, bool w) => (n, e, s, w) switch
+    {
+        (true, true, true, true) => "10-water-full",
+        (false, false, false, false) => "11-water-no-neighbours",
+        (false, true, false, true) => "12-water-WE",
+        (true, false, true, false) => "13-water-NS",
+        (true, true, false, true) => "14-water-WNE",
+        (true, true, true, false) => "15-water-NES",
+        (false, true, true, true) => "16-water-ESW",
+        (true, false, true, true) => "17-water-SWN",
+        (true, false, false, false) => "18-water-N",
+        (false, true, false, false) => "19-water-E",
+        (false, false, true, false) => "20-water-S",
+        (false, false, false, true) => "21-water-W",
+        (true, true, false, false) => "31-water-NE",
+        (false, true, true, false) => "32-water-ES",
+        (false, false, true, true) => "33-water-SW",
+        (true, false, false, true) => "34-water-WN"
+    };
+
+    private List<string> GetInnerCornerOverlays(int x, int y, bool n, bool e, bool s, bool w)
+    {
+        var overlays = new List<string>();
+        if (n && e && !IsWaterAt(x + 1, y - 1)) overlays.Add("37-water-SW");
+        if (e && s && !IsWaterAt(x + 1, y + 1)) overlays.Add("38-water-WN");
+        if (s && w && !IsWaterAt(x - 1, y + 1)) overlays.Add("35-water-NE");
+        if (w && n && !IsWaterAt(x - 1, y - 1)) overlays.Add("36-water-ES");
+        return overlays;
+    }
+
+    private static string GetStationTileSvgName(StationType type) => type switch
+    {
+        StationType.Circle => "91-station-circle",
+        StationType.Rectangle => "92-station-square",
+        StationType.Triangle => "93-station-triangle",
+        StationType.Diamond => "94-station-diamond",
+        StationType.Cross => "95-station-polygon",
+        StationType.Ruby => "96-station-star",
+        _ => ""
     };
 
     public void Dispose()
