@@ -162,4 +162,18 @@
   <data name="SpawnSeed" xml:space="preserve"><value>Spawn Seed</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+
+  <!-- Submission Management -->
+  <data name="Submissions" xml:space="preserve"><value>Submissions</value></data>
+  <data name="SubmissionMgmtSubtitle" xml:space="preserve"><value>View submission history for all users.</value></data>
+  <data name="SubmissionCount" xml:space="preserve"><value>Submissions</value></data>
+  <data name="LastSubmission" xml:space="preserve"><value>Last Submission</value></data>
+  <data name="ViewSubmissions" xml:space="preserve"><value>View submissions</value></data>
+  <data name="UserSubmissions" xml:space="preserve"><value>User Submissions</value></data>
+  <data name="UserSubmissionsTitle" xml:space="preserve"><value>Submissions by {0}</value></data>
+  <data name="UserSubmissionsSubtitle" xml:space="preserve"><value>All submissions ordered from most recent to oldest.</value></data>
+  <data name="BackToSubmissions" xml:space="preserve"><value>Back to all users</value></data>
+  <data name="Version" xml:space="preserve"><value>Version</value></data>
+  <data name="SubmittedAt" xml:space="preserve"><value>Submitted At</value></data>
+  <data name="CodePreview" xml:space="preserve"><value>Code Preview</value></data>
 </root>

@@ -1,0 +1,78 @@
+@page "/admin/submissions"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@using MediatR
+@using MetroMania.Application.DTOs
+@using MetroMania.Application.Submissions.Queries
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+@inject IStringLocalizer<Localization> Loc
+
+<PageTitle>MetroMania - @Loc["Submissions"]</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.History" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["Submissions"]</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["SubmissionMgmtSubtitle"]</MudText>
+
+@if (_overviews is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        <MudTable Items="_overviews" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>@Loc["Name"]</MudTh>
+                <MudTh>@Loc["SubmissionCount"]</MudTh>
+                <MudTh>@Loc["LastSubmission"]</MudTh>
+                <MudTh Style="text-align: right;">@Loc["Actions"]</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="@Loc["Name"]">
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">
+                            @context.UserName[0].ToString().ToUpper()
+                        </MudAvatar>
+                        @context.UserName
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="@Loc["SubmissionCount"]">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Color="@(context.SubmissionCount > 0 ? Color.Primary : Color.Default)">
+                        @context.SubmissionCount
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="@Loc["LastSubmission"]">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        @(context.LastSubmissionAt.HasValue
+                            ? context.LastSubmissionAt.Value.ToString("yyyy-MM-dd HH:mm")
+                            : Loc["NoSubmissionsYet"])
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="@Loc["Actions"]" Style="text-align: right;">
+                    <MudTooltip Text="@Loc["ViewSubmissions"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Primary" Size="Size.Small"
+                                       OnClick="() => ViewUserSubmissions(context.UserId)"
+                                       Disabled="context.SubmissionCount == 0" />
+                    </MudTooltip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    private List<UserSubmissionOverviewDto>? _overviews;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _overviews = await Mediator.Send(new GetAllSubmissionOverviewsQuery());
+    }
+
+    private void ViewUserSubmissions(Guid userId)
+    {
+        Navigation.NavigateTo($"/admin/submissions/{userId}");
+    }
+}

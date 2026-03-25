@@ -7,4 +7,5 @@ public interface ISubmissionRepository
     Task<List<Submission>> GetByUserIdAsync(Guid userId);
     Task<int> GetNextVersionAsync(Guid userId);
     Task AddAsync(Submission submission);
+    Task<Dictionary<Guid, (int Count, DateTime? LastSubmittedAt)>> GetSubmissionStatsByUserAsync();
 }

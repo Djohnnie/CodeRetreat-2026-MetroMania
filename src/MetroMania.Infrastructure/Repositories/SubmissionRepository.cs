@@ -23,4 +23,14 @@ public class SubmissionRepository(AppDbContext db) : ISubmissionRepository
         db.Submissions.Add(submission);
         await db.SaveChangesAsync();
     }
+
+    public async Task<Dictionary<Guid, (int Count, DateTime? LastSubmittedAt)>> GetSubmissionStatsByUserAsync()
+    {
+        var stats = await db.Submissions
+            .GroupBy(s => s.UserId)
+            .Select(g => new { UserId = g.Key, Count = g.Count(), LastSubmittedAt = (DateTime?)g.Max(s => s.SubmittedAt) })
+            .ToListAsync();
+
+        return stats.ToDictionary(s => s.UserId, s => (s.Count, s.LastSubmittedAt));
+    }
 }

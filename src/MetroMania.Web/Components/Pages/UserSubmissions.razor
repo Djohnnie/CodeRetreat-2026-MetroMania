@@ -1,0 +1,168 @@
+@page "/admin/submissions/{UserId:guid}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using MediatR
+@using MetroMania.Application.DTOs
+@using MetroMania.Application.Users.Queries
+@using MetroMania.Application.Submissions.Queries
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IStringLocalizer<Localization> Loc
+
+<PageTitle>MetroMania - @Loc["UserSubmissions"]</PageTitle>
+
+<MudButton Href="/admin/submissions" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack"
+           Color="Color.Primary" Class="mb-4">
+    @Loc["BackToSubmissions"]
+</MudButton>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.Code" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">
+        @if (_userName is not null)
+        {
+            @string.Format(Loc["UserSubmissionsTitle"], _userName)
+        }
+        else
+        {
+            @Loc["UserSubmissions"]
+        }
+    </MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["UserSubmissionsSubtitle"]</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_submissions is null || _submissions.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">@Loc["NoSubmissionsYet"]</MudAlert>
+}
+else
+{
+    <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        <MudTable Items="_submissions" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh Style="width: 0;" />
+                <MudTh>@Loc["Version"]</MudTh>
+                <MudTh>@Loc["SubmittedAt"]</MudTh>
+                <MudTh>@Loc["CodePreview"]</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudIconButton Size="Size.Small"
+                                   Icon="@(_expandedRows.Contains(context.Id) ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                                   OnClick="() => ToggleRow(context.Id)" />
+                </MudTd>
+                <MudTd DataLabel="@Loc["Version"]">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
+                        v@(context.Version)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="@Loc["SubmittedAt"]">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        @context.SubmittedAt.ToString("yyyy-MM-dd HH:mm:ss")
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="@Loc["CodePreview"]">
+                    <MudText Typo="Typo.body2" Style="font-family: monospace; max-width: 500px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        @Truncate(context.Code, 100)
+                    </MudText>
+                </MudTd>
+            </RowTemplate>
+            <ChildRowContent>
+                @if (_expandedRows.Contains(context.Id))
+                {
+                    <MudTr>
+                        <td colspan="4" style="padding: 0;">
+                            <div class="pa-4" style="background: var(--mud-palette-background-grey);">
+                                <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 8px; overflow: hidden; height: @(CalculateEditorHeight(context.Code))px;">
+                                    <StandaloneCodeEditor Id="@($"submission-{context.Id}")"
+                                                          ConstructionOptions="@(e => ReadOnlyEditorOptions(context.Code))"
+                                                          OnDidInit="() => SetEditorHeight(context.Id, context.Code)" />
+                                </div>
+                            </div>
+                        </td>
+                    </MudTr>
+                }
+            </ChildRowContent>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+
+    [CascadingParameter(Name = "IsDarkMode")]
+    private bool IsDarkMode { get; set; }
+
+    private List<SubmissionDto>? _submissions;
+    private string? _userName;
+    private bool _loading = true;
+    private bool _previousDarkMode;
+    private readonly HashSet<Guid> _expandedRows = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userTask = Mediator.Send(new GetUserByIdQuery(UserId));
+        var submissionsTask = Mediator.Send(new GetUserSubmissionsQuery(UserId));
+
+        await Task.WhenAll(userTask, submissionsTask);
+
+        var user = await userTask;
+        _userName = user?.Name;
+        _submissions = await submissionsTask;
+        _loading = false;
+        _previousDarkMode = IsDarkMode;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsDarkMode != _previousDarkMode)
+        {
+            _previousDarkMode = IsDarkMode;
+            await BlazorMonaco.Editor.Global.SetTheme(JS, IsDarkMode ? "vs-dark" : "vs");
+        }
+    }
+
+    private StandaloneEditorConstructionOptions ReadOnlyEditorOptions(string code) => new()
+    {
+        AutomaticLayout = true,
+        Language = "csharp",
+        Theme = IsDarkMode ? "vs-dark" : "vs",
+        Value = code,
+        ReadOnly = true,
+        FontSize = 13,
+        FontFamily = "'Cascadia Code', 'Fira Code', 'Consolas', monospace",
+        Minimap = new EditorMinimapOptions { Enabled = false },
+        ScrollBeyondLastLine = false,
+        RenderLineHighlight = "none",
+        Padding = new EditorPaddingOptions { Top = 10, Bottom = 10 },
+        TabSize = 4
+    };
+
+    private async Task SetEditorHeight(Guid id, string code)
+    {
+        var height = CalculateEditorHeight(code);
+        await JS.InvokeVoidAsync("eval",
+            $"document.getElementById('submission-{id}').style.height = '{height}px'");
+    }
+
+    private static int CalculateEditorHeight(string code)
+    {
+        var lineCount = code.Split('\n').Length;
+        return Math.Clamp(lineCount * 20 + 20, 100, 500);
+    }
+
+    private static string Truncate(string value, int maxLength) =>
+        value.Length <= maxLength ? value : value[..maxLength] + "…";
+
+    private void ToggleRow(Guid id)
+    {
+        if (!_expandedRows.Remove(id))
+            _expandedRows.Add(id);
+    }
+}
