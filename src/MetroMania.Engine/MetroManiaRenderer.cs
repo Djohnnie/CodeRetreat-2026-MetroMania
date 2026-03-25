@@ -217,8 +217,8 @@ public class MetroManiaRenderer
         StationType.Rectangle => "station-square",
         StationType.Triangle => "station-triangle",
         StationType.Diamond => "station-diamond",
-        StationType.Cross => "station-polygon",
-        StationType.Ruby => "station-star",
+        StationType.Pentagon => "station-pentagon",
+        StationType.Star => "station-star",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown station type")
     };
 }

@@ -6,6 +6,6 @@ public enum StationType
     Rectangle,
     Triangle,
     Diamond,
-    Cross,
-    Ruby
+    Pentagon,
+    Star
 }

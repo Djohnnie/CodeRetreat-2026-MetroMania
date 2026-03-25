@@ -150,8 +150,8 @@
   <data name="Rectangle" xml:space="preserve"><value>Rectangle</value></data>
   <data name="Triangle" xml:space="preserve"><value>Triangle</value></data>
   <data name="Diamond" xml:space="preserve"><value>Diamond</value></data>
-  <data name="Cross" xml:space="preserve"><value>Cross</value></data>
-  <data name="Ruby" xml:space="preserve"><value>Ruby</value></data>
+  <data name="Pentagon" xml:space="preserve"><value>Pentagon</value></data>
+  <data name="Star" xml:space="preserve"><value>Star</value></data>
   <data name="BackgroundColor" xml:space="preserve"><value>Background</value></data>
   <data name="WaterColor" xml:space="preserve"><value>Water</value></data>
   <data name="Water" xml:space="preserve"><value>Water</value></data>
@@ -159,7 +159,7 @@
   <data name="SpawnOrder" xml:space="preserve"><value>Spawn Order</value></data>
   <data name="SpawnDelay" xml:space="preserve"><value>Spawn Delay (days)</value></data>
   <data name="Shape" xml:space="preserve"><value>Shape</value></data>
-  <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Phases</value></data>
+  <data name="SpawnFrequency" xml:space="preserve"><value>Passenger Spawn Phases</value></data>
   <data name="AfterDays" xml:space="preserve"><value>After Days</value></data>
   <data name="FrequencyInHours" xml:space="preserve"><value>Every N Hours</value></data>
   <data name="AddPhase" xml:space="preserve"><value>Add Phase</value></data>

@@ -150,8 +150,8 @@
   <data name="Rectangle" xml:space="preserve"><value>Rechthoek</value></data>
   <data name="Triangle" xml:space="preserve"><value>Driehoek</value></data>
   <data name="Diamond" xml:space="preserve"><value>Ruit</value></data>
-  <data name="Cross" xml:space="preserve"><value>Kruis</value></data>
-  <data name="Ruby" xml:space="preserve"><value>Robijn</value></data>
+  <data name="Pentagon" xml:space="preserve"><value>Vijfhoek</value></data>
+  <data name="Star" xml:space="preserve"><value>Ster</value></data>
   <data name="BackgroundColor" xml:space="preserve"><value>Achtergrond</value></data>
   <data name="WaterColor" xml:space="preserve"><value>Water</value></data>
   <data name="Water" xml:space="preserve"><value>Water</value></data>
@@ -159,7 +159,7 @@
   <data name="SpawnOrder" xml:space="preserve"><value>Spawn Volgorde</value></data>
   <data name="SpawnDelay" xml:space="preserve"><value>Spawn Vertraging (dagen)</value></data>
   <data name="Shape" xml:space="preserve"><value>Vorm</value></data>
-  <data name="SpawnFrequency" xml:space="preserve"><value>Spawn Fases</value></data>
+  <data name="SpawnFrequency" xml:space="preserve"><value>Passagier Spawn Fases</value></data>
   <data name="AfterDays" xml:space="preserve"><value>Na Dagen</value></data>
   <data name="FrequencyInHours" xml:space="preserve"><value>Elke N Uren</value></data>
   <data name="AddPhase" xml:space="preserve"><value>Fase Toevoegen</value></data>

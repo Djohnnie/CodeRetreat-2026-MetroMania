@@ -92,15 +92,16 @@ Station tiles are overlaid on top of background (or water) tiles. Each station t
 <img src="station-diamond.svg" width="64">
 **Diamond station** — Maps to `StationType.Diamond`. A 45°-rotated square (diamond) centered in the tile.
 
-### `station-polygon.svg`
+### `station-pentagon.svg`
 
-<img src="station-polygon.svg" width="64">
-**Cross/Polygon station** — Maps to `StationType.Cross`. A plus/cross shape centered in the tile.
+<img src="station-pentagon.svg" width="64">
+
+**Pentagon station** — Maps to `StationType.Pentagon`. A regular pentagon shape centered in the tile.
 
 ### `station-star.svg`
 
 <img src="station-star.svg" width="64">
-**Star station** — Maps to `StationType.Ruby`. A pentagon/star shape centered in the tile.
+**Star station** — Maps to `StationType.Star`. A five-pointed star shape centered in the tile.
 
 ---
 
@@ -545,7 +546,7 @@ All four cardinal neighbors are water. The tile is "interior" water. Each of the
 | <img src="station-square.svg" width="32"> | `station-square.svg` | — (Rectangle) |
 | <img src="station-triangle.svg" width="32"> | `station-triangle.svg` | — (Triangle) |
 | <img src="station-diamond.svg" width="32"> | `station-diamond.svg` | — (Diamond) |
-| <img src="station-polygon.svg" width="32"> | `station-polygon.svg` | — (Cross) |
-| <img src="station-star.svg" width="32"> | `station-star.svg` | — (Ruby) |
+| <img src="station-pentagon.svg" width="32"> | `station-pentagon.svg` | — (Pentagon) |
+| <img src="station-star.svg" width="32"> | `station-star.svg` | — (Star) |
 
 > **All 47 water tile variants are now included.** The auto-tiling system selects the correct tile based on all 8 neighbors — no fallback needed.
