@@ -1,13 +1,11 @@
 @page "/admin/levels/{LevelId:guid}"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
-@using MediatR
 @using MetroMania.Application.DTOs
-@using MetroMania.Application.Levels.Commands
-@using MetroMania.Application.Levels.Queries
 @using MetroMania.Domain.Entities
 @using MetroMania.Domain.Enums
+@using MetroMania.Web.Services
 @using MudBlazor.Utilities
-@inject IMediator Mediator
+@inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 @implements IDisposable
@@ -260,7 +258,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _level = await Mediator.Send(new GetLevelQuery(LevelId));
+        _level = await ApiClient.GetLevelAsync(LevelId);
         if (_level is not null)
         {
             _stations = _level.Stations.Select(s => new StationPlacement
@@ -441,7 +439,7 @@ else
                 Stations = _stations,
                 WaterTiles = _waterTiles
             };
-            await Mediator.Send(new UpdateGridDataCommand(LevelId, data));
+            await ApiClient.UpdateGridDataAsync(LevelId, data);
         }
         finally
         {

@@ -1,11 +1,9 @@
 @page "/admin/users"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
-@using MediatR
 @using MetroMania.Application.DTOs
-@using MetroMania.Application.Users.Commands
-@using MetroMania.Application.Users.Queries
 @using MetroMania.Domain.Enums
-@inject IMediator Mediator
+@using MetroMania.Web.Services
+@inject MetroManiaApiClient ApiClient
 @inject IStringLocalizer<Localization> Loc
 
 <PageTitle>MetroMania - @Loc["UserManagement"]</PageTitle>
@@ -106,7 +104,7 @@ else
 
     private async Task LoadUsers()
     {
-        _users = await Mediator.Send(new GetAllUsersQuery());
+        _users = await ApiClient.GetAllUsersAsync();
     }
 
     private Color GetStatusColor(ApprovalStatus status) => status switch
@@ -119,7 +117,7 @@ else
 
     private async Task ApproveUser(Guid userId)
     {
-        var success = await Mediator.Send(new ApproveUserCommand(userId, ApprovalStatus.Approved));
+        var success = await ApiClient.ApproveUserAsync(userId, ApprovalStatus.Approved);
         _message = success ? Loc["UserApproved"].Value : Loc["UserApproveFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadUsers();
@@ -127,7 +125,7 @@ else
 
     private async Task RejectUser(Guid userId)
     {
-        var success = await Mediator.Send(new ApproveUserCommand(userId, ApprovalStatus.Rejected));
+        var success = await ApiClient.ApproveUserAsync(userId, ApprovalStatus.Rejected);
         _message = success ? Loc["UserRejected"].Value : Loc["UserRejectFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadUsers();
@@ -135,7 +133,7 @@ else
 
     private async Task DeleteUser(Guid userId, string name)
     {
-        var success = await Mediator.Send(new DeleteUserCommand(userId));
+        var success = await ApiClient.DeleteUserAsync(userId);
         _message = success ? string.Format(Loc["UserDeleted"], name) : Loc["UserDeleteFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadUsers();

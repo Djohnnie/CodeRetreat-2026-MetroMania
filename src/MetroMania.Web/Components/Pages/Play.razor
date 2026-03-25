@@ -2,14 +2,12 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using BlazorMonaco
 @using BlazorMonaco.Editor
-@using MediatR
 @using MetroMania.Application.DTOs
-@using MetroMania.Application.Submissions.Commands
-@using MetroMania.Application.Submissions.Queries
+@using MetroMania.Web.Services
 @using System.Security.Claims
 @inject IJSRuntime JS
 @inject IStringLocalizer<Localization> Loc
-@inject IMediator Mediator
+@inject MetroManiaApiClient ApiClient
 @inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>MetroMania - @Loc["Play"]</PageTitle>
@@ -128,7 +126,7 @@ else
         if (Guid.TryParse(userIdClaim, out var uid))
         {
             _userId = uid;
-            _submissions = await Mediator.Send(new GetUserSubmissionsQuery(_userId));
+            _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
         }
     }
 
@@ -195,8 +193,8 @@ else
         _submitting = true;
         try
         {
-            await Mediator.Send(new SubmitCodeCommand(_userId, code));
-            _submissions = await Mediator.Send(new GetUserSubmissionsQuery(_userId));
+            await ApiClient.SubmitCodeAsync(_userId, code);
+            _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
         }
         finally
         {

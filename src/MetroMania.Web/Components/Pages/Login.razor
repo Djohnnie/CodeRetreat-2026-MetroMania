@@ -1,8 +1,6 @@
 @page "/login"
-@using MediatR
-@using MetroMania.Application.Auth.Queries
 @using MetroMania.Web.Services
-@inject IMediator Mediator
+@inject MetroManiaApiClient ApiClient
 @inject LoginTicketService LoginTickets
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
@@ -73,7 +71,7 @@
 
         try
         {
-            var result = await Mediator.Send(new LoginQuery(_model.Name, _model.Password));
+            var result = await ApiClient.LoginAsync(_model.Name, _model.Password);
             if (result.Success && result.User is not null)
             {
                 var ticket = LoginTickets.CreateTicket(result.User.Id);

@@ -6,10 +6,11 @@ MetroMania is a coding challenge web application inspired by the Mini Metro game
 
 - **.NET 10.0** across all projects, with nullable reference types and implicit usings enabled.
 - **Blazor Server** with `InteractiveServerRenderMode` for the UI, communicating over WebSocket.
+- **ASP.NET Minimal API** for the backend REST API (`MetroMania.Api`), exposing domain endpoints consumed by the Blazor frontend via `HttpClient`.
 - **MudBlazor v9.2.0** as the Material Design component library.
 - **BlazorMonaco v3.4.0** for embedding the Monaco code editor (C# bot code submission).
 - **Markdig v0.40.0** for rendering Markdown content (game instructions and user manuals).
-- **MediatR v14.1.0** for CQRS command/query dispatching.
+- **MediatR v14.1.0** for CQRS command/query dispatching (used in the API project only).
 - **Entity Framework Core 10.0.5** with SQL Server as the database provider.
 - **BCrypt.Net-Next v4.1.0** for password hashing.
 - **Inter** (Google Fonts) as the primary typeface.
@@ -17,13 +18,14 @@ MetroMania is a coding challenge web application inspired by the Mini Metro game
 
 ## Architecture
 
-The solution follows **Clean Architecture** with four projects:
+The solution follows **Clean Architecture** with five projects:
 
 ```
 MetroMania.Domain          → Entities, enums, repository interfaces (no external dependencies)
 MetroMania.Application     → CQRS commands/queries, DTOs, handler logic (depends on Domain)
 MetroMania.Infrastructure  → EF Core DbContext, repository implementations, services (depends on Application)
-MetroMania.Web             → Blazor UI, auth services, pages, layout (depends on Application + Infrastructure)
+MetroMania.Api             → ASP.NET Minimal API, MediatR dispatching, endpoint groups (depends on Application + Infrastructure)
+MetroMania.Web             → Blazor UI, auth services, pages, layout, HttpClient API calls (depends on Application for DTOs)
 ```
 
 ### Domain Layer (`MetroMania.Domain`)
@@ -40,8 +42,8 @@ MetroMania.Web             → Blazor UI, auth services, pages, layout (depends 
 - Commands and queries are organized by feature area:
   - `Auth` — `RegisterCommand`, `LoginQuery`
   - `Users` — `ApproveUserCommand`, `DeleteUserCommand`, `GetAllUsersQuery`, `GetUserByIdQuery`
-  - `Levels` — `CreateLevelCommand`, `UpdateLevelCommand`, `DeleteLevelCommand`, `ReorderLevelsCommand`, `GetAllLevelsQuery`, `GetLevelQuery`
-  - `Submissions` — `SubmitCodeCommand`, `GetAllSubmissionsQuery`, `GetUserSubmissionsQuery`
+  - `Levels` — `CreateLevelCommand`, `UpdateLevelCommand`, `DeleteLevelCommand`, `ReorderLevelsCommand`, `GetAllLevelsQuery`, `GetLevelQuery`, `UpdateGridDataCommand`
+  - `Submissions` — `SubmitCodeCommand`, `GetAllSubmissionOverviewsQuery`, `GetUserSubmissionsQuery`
   - `Language` — `ChangeLanguageCommand`
   - `Theme` — `ToggleThemeCommand`
 - **DTOs:** `UserDto`, `LevelDto`, `SubmissionDto`, `UserSubmissionOverviewDto` — typically records with static `FromEntity()` factory methods.
@@ -53,24 +55,51 @@ MetroMania.Web             → Blazor UI, auth services, pages, layout (depends 
 - **Repository implementations:** `UserRepository`, `LevelRepository`, `SubmissionRepository`.
 - **`PasswordHasher`** wraps BCrypt with work factor 12.
 - **`DependencyInjection.AddInfrastructure()`** registers all scoped services (`DbContext`, repositories, `IPasswordHasher`).
-- **Auto-migration:** The database is migrated on application startup.
+
+### API Layer (`MetroMania.Api`)
+
+- **ASP.NET Minimal API** project that hosts all backend endpoints.
+- **MediatR** is registered here and dispatches commands/queries from the Application layer.
+- **Auto-migration:** The database is migrated on API startup.
+- **Endpoint organization:** Each domain area has its own static class with a `Map*Endpoints()` extension method in the `Endpoints/` folder:
+  - `AuthEndpoints.cs` — `POST /api/auth/login`, `POST /api/auth/register`
+  - `UserEndpoints.cs` — `GET /api/users`, `GET /api/users/{id}`, `POST /api/users/{id}/approve`, `DELETE /api/users/{id}`
+  - `LevelEndpoints.cs` — `GET /api/levels`, `GET /api/levels/{id}`, `POST /api/levels`, `PUT /api/levels/{id}`, `DELETE /api/levels/{id}`, `POST /api/levels/{id}/reorder`, `PUT /api/levels/{id}/grid-data`
+  - `SubmissionEndpoints.cs` — `GET /api/submissions/overviews`, `GET /api/submissions/users/{userId}`, `POST /api/submissions`
+  - `ThemeEndpoints.cs` — `POST /api/theme/toggle`
+  - `LanguageEndpoints.cs` — `POST /api/language/change`
+- **Request records** are defined in each endpoint file (e.g., `LoginRequest`, `CreateLevelRequest`).
+- **JSON serialization** uses `JsonStringEnumConverter` for consistent enum handling.
+- **CORS** is configured to allow the Blazor Web project to call the API.
+- The API is an internal service — it does not implement its own authentication. Access control is enforced by the Blazor Server frontend.
 
 ### Web Layer (`MetroMania.Web`)
 
-- **`Program.cs`** wires up DI, authentication, authorization, localization, and middleware.
+- **`Program.cs`** wires up DI, authentication, authorization, localization, `HttpClient` for the API, and middleware.
+- **`MetroManiaApiClient`** — a typed `HttpClient` service that wraps all API calls. All Blazor pages and components use this client instead of MediatR directly.
 - **Pages:** `Login`, `Register`, `Home` (dashboard), `Play` (code editor), `Info` (game instructions), `UserManagement`, `Levels`, `LevelEditor`, `SubmissionManagement`, `UserSubmissions`, `NotFound`, `Error`.
 - **Layout:** `MainLayout.razor` with `MudAppBar`, `MudDrawer`, navigation menu, language switcher, theme toggle, and user profile chip.
-- **Services:** `LoginTicketService` (one-time login tickets), `CookieAuthStateProvider` (custom `AuthenticationStateProvider`).
+- **Services:** `LoginTicketService` (one-time login tickets), `CookieAuthStateProvider` (custom `AuthenticationStateProvider` that calls the API for user validation), `MetroManiaApiClient` (typed HttpClient).
+- The Web project references `MetroMania.Application` only for DTO types and domain enums — it does **not** reference `MetroMania.Infrastructure` or use MediatR.
+
+## Running the Application
+
+Both the API and Web projects must run simultaneously:
+
+1. Start the API: `dotnet run --project src/MetroMania.Api` (listens on `https://localhost:5101`)
+2. Start the Web: `dotnet run --project src/MetroMania.Web` (connects to the API via the `ApiBaseUrl` setting in `appsettings.json`)
+
+The API base URL is configured in `MetroMania.Web/appsettings.json` under the `ApiBaseUrl` key.
 
 ## Authentication
 
-Authentication is **cookie-based** using the ASP.NET Core `"BlazorServer"` authentication scheme.
+Authentication is **cookie-based** using the ASP.NET Core `"BlazorServer"` authentication scheme, managed entirely in the Web project.
 
 - Cookies expire after 30 days with sliding expiration.
-- Login flow: `LoginQuery` validates credentials → `LoginTicketService` issues a one-time ticket → POST to `/api/auth/login-callback` redeems the ticket, creates a `ClaimsPrincipal`, and calls `SignInAsync`.
-- Logout: POST to `/api/auth/logout` calls `SignOutAsync` and redirects to `/login`.
-- **`CookieAuthStateProvider`** extends `AuthenticationStateProvider`, fetches the user from the database on each check, and validates that `ApprovalStatus == Approved`. Claims include `NameIdentifier`, `Name`, `Role`, `IsDarkMode`, and `Language`.
-- **Password hashing:** BCrypt with a work factor of 12 via `IPasswordHasher`.
+- Login flow: Blazor `Login` page calls `MetroManiaApiClient.LoginAsync()` → API validates credentials via MediatR → on success, `LoginTicketService` issues a one-time ticket → browser redirects to `/api/auth/login-callback` (in Web) which redeems the ticket, calls `MetroManiaApiClient.GetUserByIdAsync()` to verify the user, creates a `ClaimsPrincipal`, and calls `SignInAsync`.
+- Logout: GET to `/api/auth/logout` (in Web) calls `SignOutAsync` and redirects to `/login`.
+- **`CookieAuthStateProvider`** extends `AuthenticationStateProvider`, calls the API to fetch user details, and validates that `ApprovalStatus == Approved`. Claims include `NameIdentifier`, `Name`, `Role`, `IsDarkMode`, and `Language`.
+- **Password hashing:** BCrypt with a work factor of 12 via `IPasswordHasher` (in Infrastructure, called by API handlers).
 - **User approval workflow:** The first registered user automatically becomes an Admin with Approved status. All subsequent users start as Pending and must be approved by an Admin before they can log in.
 - **Authorization in components:** Uses `AuthorizeView` and claims-based checks (`context.User.Identity?.IsAuthenticated`, role claims).
 
@@ -86,7 +115,7 @@ Localization uses **ASP.NET Core `IStringLocalizer<T>`** with `.resx` resource f
   @inject IStringLocalizer<Localization> Loc
   <MudText>@Loc["AppName"]</MudText>
   ```
-- **Language switching:** A dropdown in `MainLayout` with flag emojis (🇬🇧 / 🇳🇱). Changing language dispatches a `ChangeLanguageCommand` that persists the preference to the `User.Language` property, and the UI updates accordingly.
+- **Language switching:** A dropdown in `MainLayout` with flag emojis (🇬🇧 / 🇳🇱). Changing language calls `MetroManiaApiClient.ChangeLanguageAsync()` to persist the preference, then updates the culture cookie and reloads.
 - **Language-specific assets:** User info SVGs and Markdown user manuals have language variants in `wwwroot` (e.g., `en/`, `nl/`).
 - When adding new user-facing text, always add localization keys to both `.resx` files.
 
@@ -94,7 +123,7 @@ Localization uses **ASP.NET Core `IStringLocalizer<T>`** with `.resx` resource f
 
 - **Component library:** MudBlazor (Material Design 3). Use `Mud*` components for all UI elements — do not use raw HTML controls.
 - **Commonly used components:** `MudLayout`, `MudAppBar`, `MudDrawer`, `MudNavMenu`, `MudContainer`, `MudPaper`, `MudText`, `MudButton`, `MudIconButton`, `MudTextField`, `MudChip`, `MudAlert`, `MudLink`, `MudDivider`, `MudAvatar`, `MudIcon`, `MudMenu`, `MudMenuItem`, `MudTooltip`, `MudProgressCircular`, `MudDialogProvider`, `MudSnackbarProvider`.
-- **Theme:** Dark and light modes, toggled per user via `ToggleThemeCommand` and cascaded as `IsDarkMode` through `CascadingValue`. The `MudThemeProvider` applies the active theme.
+- **Theme:** Dark and light modes, toggled per user via `MetroManiaApiClient.ToggleThemeAsync()` and cascaded as `IsDarkMode` through `CascadingValue`. The `MudThemeProvider` applies the active theme.
 - **Code editor:** BlazorMonaco for C# code input on the Play page.
 - **Markdown rendering:** Markdig converts Markdown to HTML for game info pages.
 - **Custom CSS:** `wwwroot/app.css` includes `.card-hover` (hover animation with lift effect), `.blazor-error-boundary`, smooth theme-transition styles, and classes like `appbar-blur`, `hamburger-btn`, `theme-toggle-btn`, `drawer-animate`.

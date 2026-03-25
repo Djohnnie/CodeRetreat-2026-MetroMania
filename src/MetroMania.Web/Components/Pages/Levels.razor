@@ -1,10 +1,8 @@
 @page "/admin/levels"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
-@using MediatR
 @using MetroMania.Application.DTOs
-@using MetroMania.Application.Levels.Commands
-@using MetroMania.Application.Levels.Queries
-@inject IMediator Mediator
+@using MetroMania.Web.Services
+@inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 
@@ -160,7 +158,7 @@ else
 
     private async Task LoadLevels()
     {
-        _levels = await Mediator.Send(new GetAllLevelsQuery());
+        _levels = await ApiClient.GetAllLevelsAsync();
     }
 
     private void StartCreate()
@@ -196,12 +194,12 @@ else
 
         if (_editId is null)
         {
-            await Mediator.Send(new CreateLevelCommand(_editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight));
+            await ApiClient.CreateLevelAsync(_editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight);
             _message = Loc["LevelCreated"].Value;
         }
         else
         {
-            await Mediator.Send(new UpdateLevelCommand(_editId.Value, _editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight));
+            await ApiClient.UpdateLevelAsync(_editId.Value, _editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight);
             _message = Loc["LevelUpdated"].Value;
         }
 
@@ -214,13 +212,13 @@ else
 
     private async Task MoveLevel(Guid id, int direction)
     {
-        await Mediator.Send(new ReorderLevelCommand(id, direction));
+        await ApiClient.ReorderLevelAsync(id, direction);
         await LoadLevels();
     }
 
     private async Task DeleteLevel(Guid id)
     {
-        var success = await Mediator.Send(new DeleteLevelCommand(id));
+        var success = await ApiClient.DeleteLevelAsync(id);
         _message = success ? Loc["LevelDeleted"].Value : Loc["LevelDeleteFailed"].Value;
         _messageSeverity = success ? Severity.Success : Severity.Error;
         await LoadLevels();

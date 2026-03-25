@@ -1,28 +1,20 @@
 using System.Globalization;
 using System.Security.Claims;
 using MetroMania.Domain.Enums;
-using MetroMania.Domain.Interfaces;
-using MetroMania.Infrastructure;
-using MetroMania.Infrastructure.Persistence;
 using MetroMania.Web.Components;
 using MetroMania.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Infrastructure (EF Core, repositories, password hasher)
-var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")
-    ?? builder.Configuration.GetConnectionString("Default")
-    ?? throw new InvalidOperationException("Set the SQL_CONNECTION_STRING environment variable or configure ConnectionStrings:Default.");
-builder.Services.AddInfrastructure(connectionString);
-
-// MediatR
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(MetroMania.Application.DTOs.UserDto).Assembly));
+// API HttpClient
+var apiBaseUrl = builder.Configuration.GetValue<string>("API_BASE_URL")
+    ?? throw new InvalidOperationException("Configure ApiBaseUrl in appsettings.");
+builder.Services.AddHttpClient<MetroManiaApiClient>(client =>
+    client.BaseAddress = new Uri(apiBaseUrl));
 
 // MudBlazor
 builder.Services.AddMudServices();
@@ -51,13 +43,6 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
-// Auto-migrate database
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-}
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -79,18 +64,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-// Auth endpoints
+// Auth callback endpoints (cookie management must stay in the Web host)
 app.MapGet("/api/auth/login-callback", async (HttpContext context, string ticket,
-    LoginTicketService ticketService, IServiceProvider sp) =>
+    LoginTicketService ticketService, MetroManiaApiClient apiClient) =>
 {
     var userId = ticketService.RedeemTicket(ticket);
     if (userId is null)
         return Results.Redirect("/login");
 
-    using var scope = sp.CreateScope();
-    var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-    var user = await userRepo.GetByIdAsync(userId.Value);
-
+    var user = await apiClient.GetUserByIdAsync(userId.Value);
     if (user is null || user.ApprovalStatus != ApprovalStatus.Approved)
         return Results.Redirect("/login");
 

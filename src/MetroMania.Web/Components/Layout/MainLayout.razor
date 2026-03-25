@@ -1,12 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @using MetroMania.Web.Services
-@using MetroMania.Application.Theme.Commands
-@using MetroMania.Application.Language.Commands
-@using MediatR
 @using System.Security.Claims
 @using System.Globalization
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IMediator Mediator
+@inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @inject IStringLocalizer<Localization> Loc
@@ -202,7 +199,7 @@
         var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (Guid.TryParse(userIdStr, out var userId))
         {
-            _isDarkMode = await Mediator.Send(new ToggleThemeCommand(userId));
+            _isDarkMode = await ApiClient.ToggleThemeAsync(userId);
         }
     }
 
@@ -213,7 +210,7 @@
         var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (Guid.TryParse(userIdStr, out var userId))
         {
-            await Mediator.Send(new ChangeLanguageCommand(userId, language));
+            await ApiClient.ChangeLanguageAsync(userId, language);
         }
 
         // Set the culture cookie and reload — the middleware will apply the culture

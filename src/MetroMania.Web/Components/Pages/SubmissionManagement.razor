@@ -1,9 +1,8 @@
 @page "/admin/submissions"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
-@using MediatR
 @using MetroMania.Application.DTOs
-@using MetroMania.Application.Submissions.Queries
-@inject IMediator Mediator
+@using MetroMania.Web.Services
+@inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 
@@ -68,7 +67,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _overviews = await Mediator.Send(new GetAllSubmissionOverviewsQuery());
+        _overviews = await ApiClient.GetAllSubmissionOverviewsAsync();
     }
 
     private void ViewUserSubmissions(Guid userId)

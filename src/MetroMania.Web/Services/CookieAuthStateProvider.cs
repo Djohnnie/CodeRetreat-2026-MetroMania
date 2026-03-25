@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using MetroMania.Domain.Enums;
-using MetroMania.Domain.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace MetroMania.Web.Services;
@@ -8,11 +7,11 @@ namespace MetroMania.Web.Services;
 public class CookieAuthStateProvider : AuthenticationStateProvider
 {
     private readonly ClaimsPrincipal? _initialHttpUser;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly MetroManiaApiClient _apiClient;
 
-    public CookieAuthStateProvider(IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+    public CookieAuthStateProvider(IHttpContextAccessor httpContextAccessor, MetroManiaApiClient apiClient)
     {
-        _serviceProvider = serviceProvider;
+        _apiClient = apiClient;
         _initialHttpUser = httpContextAccessor.HttpContext?.User;
     }
 
@@ -23,9 +22,7 @@ public class CookieAuthStateProvider : AuthenticationStateProvider
             var userIdStr = _initialHttpUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdStr, out var userId))
             {
-                using var scope = _serviceProvider.CreateScope();
-                var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-                var user = await userRepo.GetByIdAsync(userId);
+                var user = await _apiClient.GetUserByIdAsync(userId);
 
                 if (user is not null && user.ApprovalStatus == ApprovalStatus.Approved)
                 {

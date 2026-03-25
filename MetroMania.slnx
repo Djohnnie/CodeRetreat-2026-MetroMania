@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/MetroMania.Api/MetroMania.Api.csproj" />
     <Project Path="src/MetroMania.Application/MetroMania.Application.csproj" />
     <Project Path="src/MetroMania.Domain/MetroMania.Domain.csproj" />
     <Project Path="src/MetroMania.Infrastructure/MetroMania.Infrastructure.csproj" />

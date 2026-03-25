@@ -1,7 +1,6 @@
 @page "/register"
-@using MediatR
-@using MetroMania.Application.Auth.Commands
-@inject IMediator Mediator
+@using MetroMania.Web.Services
+@inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 
@@ -104,7 +103,7 @@
 
         try
         {
-            var result = await Mediator.Send(new RegisterCommand(_model.Name, _model.Password));
+            var result = await ApiClient.RegisterAsync(_model.Name, _model.Password);
             if (result.Success && result.User is not null)
             {
                 _registrationSuccess = true;

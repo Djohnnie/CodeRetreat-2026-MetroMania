@@ -2,19 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="BlazorMonaco" Version="3.4.0" />
-    <PackageReference Include="Markdig" Version="0.40.0" />
-    <PackageReference Include="MudBlazor" Version="9.2.0" />
+    <ProjectReference Include="..\MetroMania.Infrastructure\MetroMania.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
 </Project>

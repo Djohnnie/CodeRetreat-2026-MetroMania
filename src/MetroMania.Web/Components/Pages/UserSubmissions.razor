@@ -2,11 +2,9 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
 @using BlazorMonaco
 @using BlazorMonaco.Editor
-@using MediatR
 @using MetroMania.Application.DTOs
-@using MetroMania.Application.Users.Queries
-@using MetroMania.Application.Submissions.Queries
-@inject IMediator Mediator
+@using MetroMania.Web.Services
+@inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject IStringLocalizer<Localization> Loc
@@ -107,8 +105,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var userTask = Mediator.Send(new GetUserByIdQuery(UserId));
-        var submissionsTask = Mediator.Send(new GetUserSubmissionsQuery(UserId));
+        var userTask = ApiClient.GetUserByIdAsync(UserId);
+        var submissionsTask = ApiClient.GetUserSubmissionsAsync(UserId);
 
         await Task.WhenAll(userTask, submissionsTask);
 
