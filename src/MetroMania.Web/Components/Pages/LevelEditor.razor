@@ -20,15 +20,19 @@
 }
 else
 {
+    <MudButton Href="/admin/levels" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack"
+               Color="Color.Primary" Class="mb-4">
+        @Loc["BackToLevels"]
+    </MudButton>
+
     <div class="d-flex align-center mb-1">
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="GoBack" Class="mr-1" />
         <MudIcon Icon="@Icons.Material.Filled.GridOn" Class="mr-2" Color="Color.Primary" />
         <MudText Typo="Typo.h4" Style="font-weight: 700;">@_level.Title</MudText>
         <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info" Class="ml-3">
             @_level.GridWidth x @_level.GridHeight
         </MudChip>
     </div>
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@Loc["EditGridSubtitle"]</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["EditGridSubtitle"]</MudText>
 
     <!-- Color pickers -->
     <div class="d-flex justify-center mb-4">
@@ -444,8 +448,6 @@ else
             _saveLock.Release();
         }
     }
-
-    private void GoBack() => Navigation.NavigateTo("/admin/levels");
 
     private void RenumberSpawnOrders()
     {

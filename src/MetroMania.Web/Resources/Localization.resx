@@ -140,6 +140,7 @@
   <data name="GridWidth" xml:space="preserve"><value>Width</value></data>
   <data name="GridHeight" xml:space="preserve"><value>Height</value></data>
   <data name="EditGrid" xml:space="preserve"><value>Edit grid</value></data>
+  <data name="BackToLevels" xml:space="preserve"><value>Back to all levels</value></data>
   <data name="EditGridSubtitle" xml:space="preserve"><value>Click a station type, then click a tile to place it. Click again to remove.</value></data>
   <data name="StationTypes" xml:space="preserve"><value>Stations</value></data>
   <data name="Beginner" xml:space="preserve"><value>Beginner</value></data>
