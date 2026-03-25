@@ -8,6 +8,7 @@
     <PackageReference Include="BlazorMonaco" Version="3.4.0" />
     <PackageReference Include="Markdig" Version="0.40.0" />
     <PackageReference Include="MudBlazor" Version="9.2.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
   </ItemGroup>
 
   <PropertyGroup>

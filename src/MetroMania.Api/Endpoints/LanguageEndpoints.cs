@@ -7,7 +7,7 @@ public static class LanguageEndpoints
 {
     public static IEndpointRouteBuilder MapLanguageEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/language").WithTags("Language");
+        var group = app.MapGroup("/api/language").WithTags("Language").RequireAuthorization();
 
         group.MapPost("/change", async (ChangeLanguageRequest request, IMediator mediator) =>
         {

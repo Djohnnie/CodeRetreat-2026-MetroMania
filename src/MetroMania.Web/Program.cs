@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Security.Claims;
-using MetroMania.Domain.Enums;
 using MetroMania.Web.Components;
 using MetroMania.Web.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -25,6 +24,7 @@ builder.Services.AddLocalization();
 // Auth
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<LoginTicketService>();
+builder.Services.AddScoped<JwtTokenProvider>();
 builder.Services.AddAuthentication("BlazorServer")
     .AddCookie("BlazorServer", options =>
     {
@@ -66,21 +66,19 @@ app.UseAntiforgery();
 
 // Auth callback endpoints (cookie management must stay in the Web host)
 app.MapGet("/api/auth/login-callback", async (HttpContext context, string ticket,
-    LoginTicketService ticketService, MetroManiaApiClient apiClient) =>
+    LoginTicketService ticketService) =>
 {
-    var userId = ticketService.RedeemTicket(ticket);
-    if (userId is null)
-        return Results.Redirect("/login");
-
-    var user = await apiClient.GetUserByIdAsync(userId.Value);
-    if (user is null || user.ApprovalStatus != ApprovalStatus.Approved)
+    var user = ticketService.RedeemTicket(ticket);
+    if (user is null)
         return Results.Redirect("/login");
 
     var claims = new List<Claim>
     {
         new(ClaimTypes.NameIdentifier, user.Id.ToString()),
         new(ClaimTypes.Name, user.Name),
-        new(ClaimTypes.Role, user.Role.ToString())
+        new(ClaimTypes.Role, user.Role.ToString()),
+        new("IsDarkMode", user.IsDarkMode.ToString()),
+        new("Language", user.Language)
     };
     var identity = new ClaimsIdentity(claims, "BlazorServer");
     var principal = new ClaimsPrincipal(identity);

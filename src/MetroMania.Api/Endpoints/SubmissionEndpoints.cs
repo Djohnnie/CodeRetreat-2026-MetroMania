@@ -8,7 +8,7 @@ public static class SubmissionEndpoints
 {
     public static IEndpointRouteBuilder MapSubmissionEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/submissions").WithTags("Submissions");
+        var group = app.MapGroup("/api/submissions").WithTags("Submissions").RequireAuthorization();
 
         group.MapGet("/overviews", async (IMediator mediator) =>
         {

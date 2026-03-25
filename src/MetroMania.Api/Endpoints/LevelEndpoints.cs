@@ -9,7 +9,7 @@ public static class LevelEndpoints
 {
     public static IEndpointRouteBuilder MapLevelEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/levels").WithTags("Levels");
+        var group = app.MapGroup("/api/levels").WithTags("Levels").RequireAuthorization();
 
         group.MapGet("/", async (IMediator mediator) =>
         {

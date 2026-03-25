@@ -1,27 +1,29 @@
 using System.Collections.Concurrent;
+using MetroMania.Application.DTOs;
 
 namespace MetroMania.Web.Services;
 
 /// <summary>
 /// Short-lived, single-use tickets that bridge the Blazor circuit login
-/// to an HTTP cookie sign-in endpoint.
+/// to an HTTP cookie sign-in endpoint. Stores the full UserDto so the
+/// callback can create claims without calling the API again.
 /// </summary>
 public class LoginTicketService
 {
-    private readonly ConcurrentDictionary<string, (Guid UserId, DateTime Expiry)> _tickets = new();
+    private readonly ConcurrentDictionary<string, (UserDto User, DateTime Expiry)> _tickets = new();
 
-    public string CreateTicket(Guid userId)
+    public string CreateTicket(UserDto user)
     {
         Cleanup();
         var ticket = Guid.NewGuid().ToString("N");
-        _tickets[ticket] = (userId, DateTime.UtcNow.AddMinutes(1));
+        _tickets[ticket] = (user, DateTime.UtcNow.AddMinutes(1));
         return ticket;
     }
 
-    public Guid? RedeemTicket(string ticket)
+    public UserDto? RedeemTicket(string ticket)
     {
         if (_tickets.TryRemove(ticket, out var data) && data.Expiry > DateTime.UtcNow)
-            return data.UserId;
+            return data.User;
         return null;
     }
 

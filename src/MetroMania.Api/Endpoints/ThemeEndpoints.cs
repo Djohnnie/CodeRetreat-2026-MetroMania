@@ -7,7 +7,7 @@ public static class ThemeEndpoints
 {
     public static IEndpointRouteBuilder MapThemeEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/theme").WithTags("Theme");
+        var group = app.MapGroup("/api/theme").WithTags("Theme").RequireAuthorization();
 
         group.MapPost("/toggle", async (ToggleThemeRequest request, IMediator mediator) =>
         {
