@@ -27,8 +27,7 @@ public class MetroManiaEngineTests
                         GridX = 0,
                         GridY = 0,
                         StationType = StationType.Triangle,
-                        SpawnOrder = 1,
-                        SpawnDelayDays = 1,
+                        SpawnDelayDays = 0,
                         PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }]
                     }
                 ]

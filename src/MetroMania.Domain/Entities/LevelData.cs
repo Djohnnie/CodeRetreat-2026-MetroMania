@@ -28,7 +28,6 @@ public class MetroStation
     public int GridX { get; set; }
     public int GridY { get; set; }
     public StationType StationType { get; set; }
-    public int SpawnOrder { get; set; }
     public int SpawnDelayDays { get; set; }
 
     /// <summary>

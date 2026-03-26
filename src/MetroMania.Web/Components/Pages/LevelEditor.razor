@@ -153,7 +153,7 @@ else
                             @if (station is not null)
                             {
                                 @((MarkupString)GetTileSvg(GetStationTileSvgName(station.StationType)))
-                                <span class="spawn-order-badge">@station.SpawnOrder</span>
+                                <span class="spawn-delay-badge">@station.SpawnDelayDays</span>
                             }
                         </div>
                     }
@@ -171,8 +171,6 @@ else
             </div>
         </TitleContent>
         <DialogContent>
-            <MudNumericField @bind-Value="_editSpawnOrder" Label="@Loc["SpawnOrder"]"
-                             Variant="Variant.Outlined" Min="0" Class="mb-3" />
             <MudNumericField @bind-Value="_editSpawnDelayDays" Label="@Loc["SpawnDelay"]"
                              Variant="Variant.Outlined" Min="0" Class="mb-3" />
             <MudSelect @bind-Value="_editShape" Label="@Loc["Shape"]"
@@ -229,7 +227,7 @@ else
         transform: scale(1.05);
         z-index: 1;
     }
-    .spawn-order-badge {
+    .spawn-delay-badge {
         position: absolute;
         bottom: 1px;
         right: 2px;
@@ -282,7 +280,6 @@ else
                 GridX = s.GridX,
                 GridY = s.GridY,
                 StationType = s.StationType,
-                SpawnOrder = s.SpawnOrder,
                 SpawnDelayDays = s.SpawnDelayDays,
                 PassengerSpawnPhases = s.PassengerSpawnPhases.Select(p => new PassengerSpawnPhase { AfterDays = p.AfterDays, FrequencyInHours = p.FrequencyInHours }).ToList(),
             }).ToList();
@@ -346,7 +343,6 @@ else
 
     private MetroStation? _editingStation;
     private bool _showStationDialog;
-    private int _editSpawnOrder;
     private int _editSpawnDelayDays;
     private StationType _editShape;
     private List<PassengerSpawnPhase> _editSpawnPhases = [];
@@ -364,7 +360,6 @@ else
                 if (existingStation is not null)
                 {
                     _stations.Remove(existingStation);
-                    RenumberSpawnOrders();
                 }
                 if (isWater)
                 {
@@ -401,7 +396,6 @@ else
                         GridX = x,
                         GridY = y,
                         StationType = _selectedType,
-                        SpawnOrder= (_stations.Count > 0 ? _stations.Max(s => s.SpawnOrder) : 0) + 1,
                         PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }],
                     });
                 }
@@ -414,7 +408,6 @@ else
     private void OpenStationDialog(MetroStation station)
     {
         _editingStation = station;
-        _editSpawnOrder = station.SpawnOrder;
         _editSpawnDelayDays = station.SpawnDelayDays;
         _editShape = station.StationType;
         _editSpawnPhases = station.PassengerSpawnPhases.Select(p => new PassengerSpawnPhase { AfterDays = p.AfterDays, FrequencyInHours = p.FrequencyInHours }).ToList();
@@ -425,7 +418,6 @@ else
     {
         if (_editingStation is not null)
         {
-            _editingStation.SpawnOrder = _editSpawnOrder;
             _editingStation.SpawnDelayDays = _editSpawnDelayDays;
             _editingStation.StationType = _editShape;
             _editingStation.PassengerSpawnPhases = _editSpawnPhases.OrderBy(p => p.AfterDays).ToList();
@@ -473,15 +465,6 @@ else
         finally
         {
             _saveLock.Release();
-        }
-    }
-
-    private void RenumberSpawnOrders()
-    {
-        var ordered = _stations.OrderBy(s => s.SpawnOrder).ToList();
-        for (var i = 0; i < ordered.Count; i++)
-        {
-            ordered[i].SpawnOrder = i + 1;
         }
     }
 

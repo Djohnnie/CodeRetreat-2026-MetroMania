@@ -156,7 +156,6 @@
   <data name="WaterColor" xml:space="preserve"><value>Water</value></data>
   <data name="Water" xml:space="preserve"><value>Water</value></data>
   <data name="StationProperties" xml:space="preserve"><value>Station Eigenschappen</value></data>
-  <data name="SpawnOrder" xml:space="preserve"><value>Spawn Volgorde</value></data>
   <data name="SpawnDelay" xml:space="preserve"><value>Spawn Vertraging (dagen)</value></data>
   <data name="Shape" xml:space="preserve"><value>Vorm</value></data>
   <data name="SpawnFrequency" xml:space="preserve"><value>Passagier Spawn Fases</value></data>

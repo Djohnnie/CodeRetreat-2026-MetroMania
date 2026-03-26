@@ -14,10 +14,10 @@ var level = new Level
         Seed = 42,
         Stations =
         [
-            new MetroStation { GridX = 2, GridY = 3, StationType = StationType.Circle, SpawnOrder = 1, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }, new() { AfterDays = 5, FrequencyInHours = 4 }] },
-            new MetroStation { GridX = 5, GridY = 1, StationType = StationType.Rectangle, SpawnOrder = 2, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }, new() { AfterDays = 5, FrequencyInHours = 4 }] },
-            new MetroStation { GridX = 8, GridY = 5, StationType = StationType.Triangle, SpawnOrder = 3, SpawnDelayDays = 3, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 6 }, new() { AfterDays = 4, FrequencyInHours = 3 }] },
-            new MetroStation { GridX = 1, GridY = 7, StationType = StationType.Diamond, SpawnOrder = 4, SpawnDelayDays = 5, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 6 }] },
+            new MetroStation { GridX = 2, GridY = 3, StationType = StationType.Circle, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }, new() { AfterDays = 5, FrequencyInHours = 4 }] },
+            new MetroStation { GridX = 5, GridY = 1, StationType = StationType.Rectangle, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }, new() { AfterDays = 5, FrequencyInHours = 4 }] },
+            new MetroStation { GridX = 8, GridY = 5, StationType = StationType.Triangle, SpawnDelayDays = 3, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 6 }, new() { AfterDays = 4, FrequencyInHours = 3 }] },
+            new MetroStation { GridX = 1, GridY = 7, StationType = StationType.Diamond, SpawnDelayDays = 5, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 6 }] },
         ],
         WaterTiles =
         [
