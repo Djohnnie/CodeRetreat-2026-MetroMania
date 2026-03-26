@@ -18,6 +18,13 @@ public class LevelData
 
     public List<MetroStation> Stations { get; set; } = [];
     public List<Water> WaterTiles { get; set; } = [];
+
+    /// <summary>
+    /// Optional static overrides for weekly gift resource types.
+    /// When a week number has an entry here, the engine uses the specified resource type
+    /// instead of picking one randomly. Weeks without an entry still use the seeded RNG.
+    /// </summary>
+    public List<WeeklyGiftOverride> WeeklyGiftOverrides { get; set; } = [];
 }
 
 /// <summary>
@@ -73,4 +80,20 @@ public class Water
 {
     public int GridX { get; set; }
     public int GridY { get; set; }
+}
+
+/// <summary>
+/// Overrides the random weekly gift for a specific week with a fixed resource type.
+/// </summary>
+public class WeeklyGiftOverride
+{
+    /// <summary>
+    /// The 1-based week number. Week 1 is the first Monday (day 1), week 2 is day 8, etc.
+    /// </summary>
+    public int Week { get; set; }
+
+    /// <summary>
+    /// The resource type to gift on this week instead of a random one.
+    /// </summary>
+    public ResourceType ResourceType { get; set; }
 }

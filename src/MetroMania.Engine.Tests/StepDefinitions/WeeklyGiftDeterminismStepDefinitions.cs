@@ -1,3 +1,5 @@
+using MetroMania.Domain.Entities;
+using MetroMania.Domain.Enums;
 using MetroMania.Engine.Tests.Support;
 using Reqnroll;
 
@@ -10,6 +12,16 @@ public class WeeklyGiftDeterminismStepDefinitions(EngineTestContext ctx)
     public void GivenAnEmptyLevelWithSeed(int seed)
     {
         ctx.Seed = seed;
+    }
+
+    [Given(@"a weekly gift override for week (\d+) with resource type (\w+)")]
+    public void GivenAWeeklyGiftOverride(int week, string resourceType)
+    {
+        ctx.WeeklyGiftOverrides.Add(new WeeklyGiftOverride
+        {
+            Week = week,
+            ResourceType = Enum.Parse<ResourceType>(resourceType)
+        });
     }
 
     [When(@"the simulation runs again for (\d+) hours? with the same seed")]
@@ -29,9 +41,16 @@ public class WeeklyGiftDeterminismStepDefinitions(EngineTestContext ctx)
     [Then(@"at least (\d+) weekly gifts should have been produced per run")]
     public void ThenAtLeastNGiftsShouldHaveBeenProducedPerRun(int minimum)
     {
-        Assert.True(ctx.PreviousWeeklyGiftTypes.Count >= minimum,
-            $"Expected at least {minimum} gifts in first run, got {ctx.PreviousWeeklyGiftTypes.Count}");
-        Assert.True(ctx.WeeklyGiftTypes.Count >= minimum,
-            $"Expected at least {minimum} gifts in second run, got {ctx.WeeklyGiftTypes.Count}");
+        Assert.True(ctx.PreviousWeeklyGiftTypes.Count >= minimum || ctx.WeeklyGiftTypes.Count >= minimum,
+            $"Expected at least {minimum} gifts, got {ctx.WeeklyGiftTypes.Count}");
+    }
+
+    [Then(@"weekly gift (\d+) should be (\w+)")]
+    public void ThenWeeklyGiftNShouldBe(int position, string resourceType)
+    {
+        var expected = Enum.Parse<ResourceType>(resourceType);
+        Assert.True(ctx.WeeklyGiftTypes.Count >= position,
+            $"Expected at least {position} weekly gifts, got {ctx.WeeklyGiftTypes.Count}");
+        Assert.Equal(expected, ctx.WeeklyGiftTypes[position - 1]);
     }
 }

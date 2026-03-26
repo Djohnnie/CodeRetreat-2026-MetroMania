@@ -15,6 +15,7 @@ public class EngineTestContext
 {
     public MetroManiaEngine Engine { get; } = new();
     public List<MetroStation> Stations { get; } = [];
+    public List<WeeklyGiftOverride> WeeklyGiftOverrides { get; } = [];
     public Mock<IMetroManiaRunner> Runner { get; }
 
     // Simulation results
@@ -69,7 +70,12 @@ public class EngineTestContext
         Title = "Test",
         GridWidth = 10,
         GridHeight = 10,
-        LevelData = new LevelData { Seed = Seed, Stations = [.. Stations] }
+        LevelData = new LevelData
+        {
+            Seed = Seed,
+            Stations = [.. Stations],
+            WeeklyGiftOverrides = [.. WeeklyGiftOverrides]
+        }
     };
 
     /// <summary>

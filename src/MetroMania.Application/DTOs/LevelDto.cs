@@ -14,12 +14,14 @@ public record LevelDto(
     string WaterColor,
     int Seed,
     List<MetroStation> Stations,
-    List<Water> WaterTiles)
+    List<Water> WaterTiles,
+    List<WeeklyGiftOverride> WeeklyGiftOverrides)
 {
     public static LevelDto FromEntity(Level level) =>
         new(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight,
             level.SortOrder, level.CreatedAt,
             level.LevelData.BackgroundColor, level.LevelData.WaterColor,
             level.LevelData.Seed,
-            level.LevelData.Stations, level.LevelData.WaterTiles);
+            level.LevelData.Stations, level.LevelData.WaterTiles,
+            level.LevelData.WeeklyGiftOverrides);
 }

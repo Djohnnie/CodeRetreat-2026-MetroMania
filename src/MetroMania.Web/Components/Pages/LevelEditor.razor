@@ -162,6 +162,42 @@ else
         </MudPaper>
     </div>
 
+    <!-- Weekly Gift Overrides -->
+    <div class="d-flex flex-column align-center mt-6 mb-3">
+        <MudText Typo="Typo.subtitle2" Class="mb-2">@Loc["WeeklyGiftOverrides"]</MudText>
+        <MudTable Items="_weeklyGiftOverrides" Dense="true" Elevation="0" Class="mb-3"
+                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 4px; max-width: 500px; width: 100%;">
+            <HeaderContent>
+                <MudTh>@Loc["Week"]</MudTh>
+                <MudTh>@Loc["ResourceType"]</MudTh>
+                <MudTh Style="width: 48px;"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudNumericField Value="context.Week" ValueChanged="(int v) => OnGiftWeekChanged(context, v)"
+                                     Min="1" Variant="Variant.Text" Margin="Margin.Dense"
+                                     Style="@(IsDuplicateWeek(context) ? "color: var(--mud-palette-error);" : "")"
+                                     Error="IsDuplicateWeek(context)" />
+                </MudTd>
+                <MudTd>
+                    <MudSelect Value="context.ResourceType" ValueChanged="(ResourceType v) => OnGiftResourceTypeChanged(context, v)"
+                               Variant="Variant.Text" Margin="Margin.Dense">
+                        @foreach (var rt in Enum.GetValues<ResourceType>())
+                        {
+                            <MudSelectItem Value="rt">@Loc[rt.ToString()]</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                   OnClick="() => RemoveGiftOverride(context)" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Variant="Variant.Text"
+                   OnClick="AddGiftOverride">@Loc["AddWeek"]</MudButton>
+    </div>
+
     <!-- Station properties dialog -->
     <MudDialog @bind-Visible="_showStationDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
         <TitleContent>
@@ -253,6 +289,7 @@ else
     private LevelDto? _level;
     private List<MetroStation> _stations = [];
     private List<Water> _waterTiles = [];
+    private List<WeeklyGiftOverride> _weeklyGiftOverrides = [];
     private HashSet<(int X, int Y)> _waterSet = [];
     private StationType _selectedType = StationType.Circle;
     private ToolMode _toolMode = ToolMode.Station;
@@ -288,6 +325,10 @@ else
                 GridX = w.GridX,
                 GridY = w.GridY
             }).ToList();
+            _weeklyGiftOverrides = _level.WeeklyGiftOverrides
+                .Select(g => new WeeklyGiftOverride { Week = g.Week, ResourceType = g.ResourceType })
+                .OrderBy(g => g.Week)
+                .ToList();
             RebuildWaterSet();
             _backgroundColor = new MudColor(_level.BackgroundColor);
             _waterColor = new MudColor(_level.WaterColor);
@@ -458,7 +499,8 @@ else
                 WaterColor = GetWaterHex(),
                 Seed = _seed,
                 Stations = _stations,
-                WaterTiles = _waterTiles
+                WaterTiles = _waterTiles,
+                WeeklyGiftOverrides = _weeklyGiftOverrides
             };
             await ApiClient.UpdateGridDataAsync(LevelId, data);
         }
@@ -467,6 +509,59 @@ else
             _saveLock.Release();
         }
     }
+
+    // --- Weekly gift override helpers ---
+
+    private async Task OnGiftWeekChanged(WeeklyGiftOverride item, int newWeek)
+    {
+        int oldWeek = item.Week;
+        newWeek = Math.Max(1, newWeek);
+
+        var usedWeeks = new HashSet<int>(_weeklyGiftOverrides.Where(g => g != item).Select(g => g.Week));
+
+        if (usedWeeks.Contains(newWeek))
+        {
+            int direction = newWeek >= oldWeek ? 1 : -1;
+            int candidate = newWeek;
+            while (usedWeeks.Contains(candidate) && candidate > 1)
+                candidate += direction;
+            // Use resolved candidate, or keep newWeek (duplicate) when decreasing hits floor
+            newWeek = candidate >= 1 ? candidate : newWeek;
+        }
+
+        item.Week = newWeek;
+        SortGiftOverrides();
+        await DebouncedSaveLevelData();
+    }
+
+    private async Task OnGiftResourceTypeChanged(WeeklyGiftOverride item, ResourceType newType)
+    {
+        item.ResourceType = newType;
+        await DebouncedSaveLevelData();
+    }
+
+    private async Task AddGiftOverride()
+    {
+        var usedWeeks = new HashSet<int>(_weeklyGiftOverrides.Select(g => g.Week));
+        int nextWeek = 1;
+        while (usedWeeks.Contains(nextWeek))
+            nextWeek++;
+        _weeklyGiftOverrides.Add(new WeeklyGiftOverride { Week = nextWeek, ResourceType = ResourceType.Line });
+        SortGiftOverrides();
+        await SaveLevelData();
+    }
+
+    private async Task RemoveGiftOverride(WeeklyGiftOverride item)
+    {
+        _weeklyGiftOverrides.Remove(item);
+        await SaveLevelData();
+    }
+
+    private void SortGiftOverrides() =>
+        _weeklyGiftOverrides = [.. _weeklyGiftOverrides.OrderBy(g => g.Week)];
+
+    private bool IsDuplicateWeek(WeeklyGiftOverride item) =>
+        _weeklyGiftOverrides.Any(g => g != item && g.Week == item.Week);
 
     // --- SVG tile rendering ---
 

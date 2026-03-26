@@ -178,4 +178,11 @@
   <data name="Version" xml:space="preserve"><value>Version</value></data>
   <data name="SubmittedAt" xml:space="preserve"><value>Submitted At</value></data>
   <data name="CodePreview" xml:space="preserve"><value>Code Preview</value></data>
+  <data name="WeeklyGiftOverrides" xml:space="preserve"><value>Weekly Gift Overrides</value></data>
+  <data name="Week" xml:space="preserve"><value>Week</value></data>
+  <data name="ResourceType" xml:space="preserve"><value>Resource Type</value></data>
+  <data name="AddWeek" xml:space="preserve"><value>Add Week</value></data>
+  <data name="Line" xml:space="preserve"><value>Line</value></data>
+  <data name="Train" xml:space="preserve"><value>Train</value></data>
+  <data name="Wagon" xml:space="preserve"><value>Wagon</value></data>
 </root>

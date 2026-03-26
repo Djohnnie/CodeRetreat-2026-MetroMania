@@ -80,7 +80,14 @@ public class MetroManiaEngine
 
                 if (dayOfWeek == DayOfWeek.Monday)
                 {
-                    var gift = (ResourceType)random.Next(3);
+                    int weekNumber = (day - 1) / 7 + 1;
+                    var giftOverride = level.LevelData.WeeklyGiftOverrides
+                        .FirstOrDefault(g => g.Week == weekNumber);
+
+                    var gift = giftOverride is not null
+                        ? giftOverride.ResourceType
+                        : (ResourceType)random.Next(3);
+
                     runner.OnWeeklyGift(time, gift);
                 }
             }
