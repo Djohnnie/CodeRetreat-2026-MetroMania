@@ -23,33 +23,42 @@ public class EngineTestContext
 
     // Event tracking — always active
     public List<string> EventLog { get; } = [];
-    public List<(int Day, DayOfWeek DayOfWeek)> DayStartCalls { get; } = [];
-    public List<(int Day, int Hour)> HourTickCalls { get; } = [];
+    public List<GameTime> DayStartCalls { get; } = [];
+    public List<GameTime> HourTickCalls { get; } = [];
+
+    // Weekly gift tracking for determinism tests
+    public int Seed { get; set; } = 42;
+    public List<ResourceType> WeeklyGiftTypes { get; } = [];
+    public List<ResourceType> PreviousWeeklyGiftTypes { get; } = [];
 
     public EngineTestContext()
     {
         Runner = new Mock<IMetroManiaRunner>();
 
-        Runner.Setup(r => r.OnStationSpawned(It.IsAny<Location>(), It.IsAny<StationType>()))
+        Runner.Setup(r => r.OnStationSpawned(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<StationType>()))
             .Callback(() => EventLog.Add("OnStationSpawned"));
-        Runner.Setup(r => r.OnWeeklyGift(It.IsAny<ResourceType>()))
-            .Callback(() => EventLog.Add("OnWeeklyGift"));
-        Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback(() => EventLog.Add("OnPassengerWaiting"));
-        Runner.Setup(r => r.OnStationOverrun(It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback(() => EventLog.Add("OnStationOverrun"));
-        Runner.Setup(r => r.OnGameOver(It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback(() => EventLog.Add("OnGameOver"));
-        Runner.Setup(r => r.OnDayStart(It.IsAny<int>(), It.IsAny<DayOfWeek>()))
-            .Callback<int, DayOfWeek>((d, dow) =>
+        Runner.Setup(r => r.OnWeeklyGift(It.IsAny<GameTime>(), It.IsAny<ResourceType>()))
+            .Callback<GameTime, ResourceType>((_, gift) =>
             {
-                DayStartCalls.Add((d, dow));
+                EventLog.Add("OnWeeklyGift");
+                WeeklyGiftTypes.Add(gift);
+            });
+        Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+            .Callback(() => EventLog.Add("OnPassengerWaiting"));
+        Runner.Setup(r => r.OnStationOverrun(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+            .Callback(() => EventLog.Add("OnStationOverrun"));
+        Runner.Setup(r => r.OnGameOver(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+            .Callback(() => EventLog.Add("OnGameOver"));
+        Runner.Setup(r => r.OnDayStart(It.IsAny<GameTime>()))
+            .Callback<GameTime>(t =>
+            {
+                DayStartCalls.Add(t);
                 EventLog.Add("OnDayStart");
             });
-        Runner.Setup(r => r.OnHourTick(It.IsAny<int>(), It.IsAny<int>()))
-            .Callback<int, int>((d, h) =>
+        Runner.Setup(r => r.OnHourTick(It.IsAny<GameTime>()))
+            .Callback<GameTime>(t =>
             {
-                HourTickCalls.Add((d, h));
+                HourTickCalls.Add(t);
                 EventLog.Add("OnHourTick");
             })
             .Returns(PlayerAction.None);
@@ -60,6 +69,21 @@ public class EngineTestContext
         Title = "Test",
         GridWidth = 10,
         GridHeight = 10,
-        LevelData = new LevelData { Seed = 42, Stations = [.. Stations] }
+        LevelData = new LevelData { Seed = Seed, Stations = [.. Stations] }
     };
+
+    /// <summary>
+    /// Saves the current weekly gift sequence and resets tracking state
+    /// so the simulation can run again for comparison.
+    /// </summary>
+    public void PrepareForRerun()
+    {
+        PreviousWeeklyGiftTypes.AddRange(WeeklyGiftTypes);
+        WeeklyGiftTypes.Clear();
+        EventLog.Clear();
+        DayStartCalls.Clear();
+        HourTickCalls.Clear();
+        Snapshot = null;
+        Result = null;
+    }
 }

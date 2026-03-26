@@ -136,6 +136,23 @@ Localization uses **ASP.NET Core `IStringLocalizer<T>`** with `.resx` resource f
 - **Language-specific assets:** User info SVGs and Markdown user manuals have language variants in `wwwroot` (e.g., `en/`, `nl/`).
 - When adding new user-facing text, always add localization keys to both `.resx` files.
 
+## Testing
+
+- **Framework:** [Reqnroll](https://reqnroll.net/) (BDD/Gherkin) with **xUnit** as the test runner and **Moq** for mocking.
+- **Test project:** `MetroMania.Engine.Tests` — covers the game engine simulation logic.
+- **Structure:**
+  - `Features/*.feature` — Gherkin scenarios written in natural language (Given/When/Then).
+  - `StepDefinitions/*.cs` — Step definition classes bound to feature steps via `[Binding]` and regex attributes.
+  - `Support/EngineTestContext.cs` — Shared per-scenario context holding the engine, `Mock<IMetroManiaRunner>`, level configuration, simulation results, and event tracking.
+- **Conventions:**
+  - All new engine tests must be written as Reqnroll feature files — do not use plain `[Fact]`/`[Theory]` xUnit tests.
+  - Step definition classes use **primary constructor injection** with `EngineTestContext` for shared state.
+  - Group related step definitions in a dedicated file per feature area (e.g., `WeeklyGiftDeterminismStepDefinitions.cs`).
+  - Reuse existing Given/When steps from `EngineStepDefinitions.cs` wherever possible; only add new steps for genuinely new behavior.
+  - The mock runner captures all engine callbacks in `EventLog` (by event name) and typed lists (e.g., `WeeklyGiftTypes`) for assertions.
+  - Use `EngineTestContext.BuildLevel()` to construct levels — configure via `ctx.Seed`, `ctx.Stations`, etc.
+- **Running tests:** `dotnet test src\MetroMania.Engine.Tests`
+
 ## UI Style
 
 - **Component library:** MudBlazor (Material Design 3). Use `Mud*` components for all UI elements — do not use raw HTML controls.

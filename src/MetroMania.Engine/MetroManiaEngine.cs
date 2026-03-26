@@ -18,7 +18,7 @@ public class MetroManiaEngine
         {
             Score = sim.HoursElapsed,
             TimeTaken = stopwatch.Elapsed,
-            DaysSurvived = sim.Day,
+            DaysSurvived = sim.Time.Day,
             TotalPassengersSpawned = sim.TotalPassengersSpawned
         };
     }
@@ -33,8 +33,7 @@ public class MetroManiaEngine
 
         return new GameSnapshot
         {
-            Day = sim.Day,
-            Hour = sim.Hour,
+            Time = sim.Time,
             TotalHoursElapsed = sim.HoursElapsed,
             GameOver = sim.GameOver,
             Stations = sim.ActiveStations.ToDictionary(
@@ -55,15 +54,15 @@ public class MetroManiaEngine
 
         int totalPassengersSpawned = 0;
         int hoursElapsed = 0;
-        int day = 0;
-        int currentHour = 0;
+        var time = new GameTime(0, 0, default);
         bool gameOver = false;
 
         while (!gameOver && (targetHours is null || hoursElapsed < targetHours))
         {
-            day = hoursElapsed / 24 + 1;
-            currentHour = hoursElapsed % 24;
+            int day = hoursElapsed / 24 + 1;
+            int currentHour = hoursElapsed % 24;
             var dayOfWeek = (DayOfWeek)(day % 7);
+            time = new GameTime(day, currentHour, dayOfWeek);
             bool isDayStart = currentHour == 0;
 
             // Phase 1: "Other events" — fire first
@@ -75,14 +74,14 @@ public class MetroManiaEngine
                     if (day == spawn.SpawnDelayDays + 1 && !activeStations.ContainsKey(location))
                     {
                         activeStations[location] = new StationState(spawn.StationType, spawn.PassengerSpawnPhases, day);
-                        runner.OnStationSpawned(location, spawn.StationType);
+                        runner.OnStationSpawned(time, location, spawn.StationType);
                     }
                 }
 
                 if (dayOfWeek == DayOfWeek.Monday)
                 {
                     var gift = (ResourceType)random.Next(3);
-                    runner.OnWeeklyGift(gift);
+                    runner.OnWeeklyGift(time, gift);
                 }
             }
 
@@ -109,7 +108,7 @@ public class MetroManiaEngine
                     state.Passengers.Add(new Passenger(destType));
                     totalPassengersSpawned++;
 
-                    runner.OnPassengerWaiting(location, state.Passengers.AsReadOnly());
+                    runner.OnPassengerWaiting(time, location, state.Passengers.AsReadOnly());
                 }
             }
 
@@ -117,14 +116,14 @@ public class MetroManiaEngine
             {
                 if (state.Passengers.Count >= 20)
                 {
-                    runner.OnGameOver(location, state.Passengers.AsReadOnly());
+                    runner.OnGameOver(time, location, state.Passengers.AsReadOnly());
                     gameOver = true;
                     break;
                 }
 
                 if (state.Passengers.Count >= 10)
                 {
-                    runner.OnStationOverrun(location, state.Passengers.AsReadOnly());
+                    runner.OnStationOverrun(time, location, state.Passengers.AsReadOnly());
                 }
             }
 
@@ -133,20 +132,19 @@ public class MetroManiaEngine
             // Phase 2: OnDayStart — fire second
             if (isDayStart)
             {
-                runner.OnDayStart(day, dayOfWeek);
+                runner.OnDayStart(time);
             }
 
             // Phase 3: OnHourTick — fire last
-            runner.OnHourTick(day, currentHour);
+            runner.OnHourTick(time);
             hoursElapsed++;
         }
 
-        return new SimulationResult(day, currentHour, hoursElapsed, gameOver, totalPassengersSpawned, activeStations);
+        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, activeStations);
     }
 
     private record SimulationResult(
-        int Day,
-        int Hour,
+        GameTime Time,
         int HoursElapsed,
         bool GameOver,
         int TotalPassengersSpawned,

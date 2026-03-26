@@ -7,8 +7,7 @@ namespace MetroMania.Engine.Model;
 /// </summary>
 public class GameSnapshot
 {
-    public required int Day { get; init; }
-    public required int Hour { get; init; }
+    public required GameTime Time { get; init; }
     public required int TotalHoursElapsed { get; init; }
     public required bool GameOver { get; init; }
     public required Dictionary<Location, StationSnapshot> Stations { get; init; }

@@ -88,7 +88,7 @@ public class EngineStepDefinitions(EngineTestContext ctx)
     public void ThenStationShouldHaveSpawned(string type, int x, int y)
     {
         ctx.Runner.Verify(
-            r => r.OnStationSpawned(new Location(x, y), Enum.Parse<StationType>(type)),
+            r => r.OnStationSpawned(It.IsAny<GameTime>(), new Location(x, y), Enum.Parse<StationType>(type)),
             Times.Once);
     }
 
@@ -96,7 +96,7 @@ public class EngineStepDefinitions(EngineTestContext ctx)
     public void ThenStationShouldNotHaveSpawned(string type, int x, int y)
     {
         ctx.Runner.Verify(
-            r => r.OnStationSpawned(new Location(x, y), Enum.Parse<StationType>(type)),
+            r => r.OnStationSpawned(It.IsAny<GameTime>(), new Location(x, y), Enum.Parse<StationType>(type)),
             Times.Never);
     }
 
@@ -177,7 +177,8 @@ public class EngineStepDefinitions(EngineTestContext ctx)
         {
             int expectedDay = i / 24 + 1;
             int expectedHour = i % 24;
-            Assert.Equal((expectedDay, expectedHour), ctx.HourTickCalls[i]);
+            Assert.Equal(expectedDay, ctx.HourTickCalls[i].Day);
+            Assert.Equal(expectedHour, ctx.HourTickCalls[i].Hour);
         }
     }
 
@@ -229,8 +230,8 @@ public class EngineStepDefinitions(EngineTestContext ctx)
     public void ThenSnapshotShowsDayAndHour(int day, int hour)
     {
         Assert.NotNull(ctx.Snapshot);
-        Assert.Equal(day, ctx.Snapshot.Day);
-        Assert.Equal(hour, ctx.Snapshot.Hour);
+        Assert.Equal(day, ctx.Snapshot.Time.Day);
+        Assert.Equal(hour, ctx.Snapshot.Time.Hour);
     }
 
     [Then(@"the snapshot should show (\d+) total hours elapsed")]
