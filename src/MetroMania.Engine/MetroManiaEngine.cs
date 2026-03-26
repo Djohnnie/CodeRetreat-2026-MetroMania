@@ -61,79 +61,84 @@ public class MetroManiaEngine
 
         while (!gameOver && (targetHours is null || hoursElapsed < targetHours))
         {
-            day++;
+            day = hoursElapsed / 24 + 1;
+            currentHour = hoursElapsed % 24;
             var dayOfWeek = (DayOfWeek)(day % 7);
+            bool isDayStart = currentHour == 0;
 
-            runner.OnDayStart(day, dayOfWeek);
-
-            if (dayOfWeek == DayOfWeek.Monday)
+            // Phase 1: "Other events" — fire first
+            if (isDayStart)
             {
-                var gift = (ResourceType)random.Next(3);
-                runner.OnWeeklyGift(gift);
-            }
-
-            foreach (var spawn in level.LevelData.Stations)
-            {
-                var location = new Location(spawn.GridX, spawn.GridY);
-                if (spawn.SpawnDelayDays == day && !activeStations.ContainsKey(location))
+                foreach (var spawn in level.LevelData.Stations)
                 {
-                    activeStations[location] = new StationState(spawn.StationType, spawn.PassengerSpawnPhases, day);
-                    runner.OnStationSpawned(location, spawn.StationType);
+                    var location = new Location(spawn.GridX, spawn.GridY);
+                    if (day == spawn.SpawnDelayDays + 1 && !activeStations.ContainsKey(location))
+                    {
+                        activeStations[location] = new StationState(spawn.StationType, spawn.PassengerSpawnPhases, day);
+                        runner.OnStationSpawned(location, spawn.StationType);
+                    }
+                }
+
+                if (dayOfWeek == DayOfWeek.Monday)
+                {
+                    var gift = (ResourceType)random.Next(3);
+                    runner.OnWeeklyGift(gift);
                 }
             }
 
-            for (currentHour = 0; currentHour < 24; currentHour++)
+            int totalHour = (day - 1) * 24 + currentHour;
+
+            foreach (var (location, state) in activeStations)
             {
-                if (targetHours is not null && hoursElapsed >= targetHours)
+                int daysSinceSpawn = day - state.SpawnedOnDay;
+                var activePhase = state.Phases
+                    .Where(p => daysSinceSpawn >= p.AfterDays)
+                    .OrderByDescending(p => p.AfterDays)
+                    .FirstOrDefault();
+
+                if (activePhase is null)
+                    continue;
+
+                if ((totalHour - state.SpawnedAtHour) % activePhase.FrequencyInHours == 0
+                    && totalHour > state.SpawnedAtHour)
+                {
+                    StationType destType;
+                    do { destType = stationTypes[random.Next(stationTypes.Length)]; }
+                    while (destType == state.Type);
+
+                    state.Passengers.Add(new Passenger(destType));
+                    totalPassengersSpawned++;
+
+                    runner.OnPassengerWaiting(location, state.Passengers.AsReadOnly());
+                }
+            }
+
+            foreach (var (location, state) in activeStations)
+            {
+                if (state.Passengers.Count >= 20)
+                {
+                    runner.OnGameOver(location, state.Passengers.AsReadOnly());
+                    gameOver = true;
                     break;
-
-                int totalHour = (day - 1) * 24 + currentHour;
-
-                foreach (var (location, state) in activeStations)
-                {
-                    int daysSinceSpawn = day - state.SpawnedOnDay;
-                    var activePhase = state.Phases
-                        .Where(p => daysSinceSpawn >= p.AfterDays)
-                        .OrderByDescending(p => p.AfterDays)
-                        .FirstOrDefault();
-
-                    if (activePhase is null)
-                        continue;
-
-                    if ((totalHour - state.SpawnedAtHour) % activePhase.FrequencyInHours == 0
-                        && totalHour > state.SpawnedAtHour)
-                    {
-                        StationType destType;
-                        do { destType = stationTypes[random.Next(stationTypes.Length)]; }
-                        while (destType == state.Type);
-
-                        state.Passengers.Add(new Passenger(destType));
-                        totalPassengersSpawned++;
-
-                        runner.OnPassengerWaiting(location, state.Passengers.AsReadOnly());
-                    }
                 }
 
-                runner.OnHourTick(day, currentHour);
-                hoursElapsed++;
-
-                foreach (var (location, state) in activeStations)
+                if (state.Passengers.Count >= 10)
                 {
-                    if (state.Passengers.Count >= 20)
-                    {
-                        runner.OnGameOver(location, state.Passengers.AsReadOnly());
-                        gameOver = true;
-                        break;
-                    }
-
-                    if (state.Passengers.Count >= 10)
-                    {
-                        runner.OnStationOverrun(location, state.Passengers.AsReadOnly());
-                    }
+                    runner.OnStationOverrun(location, state.Passengers.AsReadOnly());
                 }
-
-                if (gameOver) break;
             }
+
+            if (gameOver) break;
+
+            // Phase 2: OnDayStart — fire second
+            if (isDayStart)
+            {
+                runner.OnDayStart(day, dayOfWeek);
+            }
+
+            // Phase 3: OnHourTick — fire last
+            runner.OnHourTick(day, currentHour);
+            hoursElapsed++;
         }
 
         return new SimulationResult(day, currentHour, hoursElapsed, gameOver, totalPassengersSpawned, activeStations);

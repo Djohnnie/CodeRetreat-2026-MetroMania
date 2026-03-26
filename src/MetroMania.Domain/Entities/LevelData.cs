@@ -28,6 +28,13 @@ public class MetroStation
     public int GridX { get; set; }
     public int GridY { get; set; }
     public StationType StationType { get; set; }
+
+    /// <summary>
+    /// Number of days to delay before this station spawns.
+    /// 0 means the station spawns immediately on day 1.
+    /// 1 means the station spawns on the second day (day 2) at midnight.
+    /// N means the station spawns on day N+1 at midnight.
+    /// </summary>
     public int SpawnDelayDays { get; set; }
 
     /// <summary>
