@@ -9,4 +9,5 @@ public class Submission
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;
+    public List<SubmissionScore> Scores { get; set; } = [];
 }

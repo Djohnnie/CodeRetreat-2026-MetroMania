@@ -74,6 +74,7 @@ app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapLevelEndpoints();
 app.MapSubmissionEndpoints();
+app.MapLeaderboardEndpoints();
 app.MapThemeEndpoints();
 app.MapLanguageEndpoints();
 

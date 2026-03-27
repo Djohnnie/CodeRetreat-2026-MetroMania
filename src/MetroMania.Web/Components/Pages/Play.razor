@@ -85,6 +85,9 @@ else
                             <MudText Typo="Typo.body2" Style="font-weight: 600;">
                                 @Loc["Submission"] #@submission.Version
                             </MudText>
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
+                                @Loc["TotalScore"]: @submission.TotalScore.ToString("N0")
+                            </MudChip>
                         </div>
                         <MudText Typo="Typo.caption" Color="Color.Secondary">
                             @submission.SubmittedAt.ToLocalTime().ToString("g")
@@ -92,6 +95,34 @@ else
                     </div>
                 </TitleContent>
                 <ChildContent>
+                    @if (submission.Scores.Count > 0)
+                    {
+                        <MudTable Items="submission.Scores" Dense="true" Hover="true" Elevation="0"
+                                  Class="mb-3" Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 6px;">
+                            <HeaderContent>
+                                <MudTh>@Loc["LevelName"]</MudTh>
+                                <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="@Loc["LevelName"]">@context.LevelTitle</MudTd>
+                                <MudTd DataLabel="@Loc["Score"]" Style="text-align: right;">
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary">
+                                        @context.Score.ToString("N0")
+                                    </MudChip>
+                                </MudTd>
+                            </RowTemplate>
+                            <FooterContent>
+                                <MudTFootRow>
+                                    <MudTd Style="font-weight: 700;">@Loc["TotalScore"]</MudTd>
+                                    <MudTd Style="text-align: right; font-weight: 700;">
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
+                                            @submission.TotalScore.ToString("N0")
+                                        </MudChip>
+                                    </MudTd>
+                                </MudTFootRow>
+                            </FooterContent>
+                        </MudTable>
+                    }
                     <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 6px; overflow: hidden; max-height: 300px; overflow-y: auto;">
                         <pre style="margin: 0; padding: 12px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: var(--mud-palette-background-default); white-space: pre-wrap; word-break: break-word;">@submission.Code</pre>
                     </div>

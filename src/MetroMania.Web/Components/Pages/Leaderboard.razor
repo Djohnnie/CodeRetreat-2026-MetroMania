@@ -1,0 +1,149 @@
+@page "/leaderboard"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using MetroMania.Application.DTOs
+@using MetroMania.Web.Services
+@inject MetroManiaApiClient ApiClient
+@inject IStringLocalizer<Localization> Loc
+
+<PageTitle>MetroMania - @Loc["Leaderboard"]</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["Leaderboard"]</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["LeaderboardSubtitle"]</MudText>
+
+@if (_entries is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_entries.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">@Loc["NoSubmissionsYet"]</MudAlert>
+}
+else
+{
+    <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        <MudTable Items="_entries" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh Style="width: 0;" />
+                <MudTh Style="width: 60px; text-align: center;">@Loc["Rank"]</MudTh>
+                <MudTh>@Loc["Name"]</MudTh>
+                <MudTh Style="text-align: right;">@Loc["TotalScore"]</MudTh>
+                <MudTh Style="text-align: right;">@Loc["SubmissionCount"]</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudIconButton Size="Size.Small"
+                                   Icon="@(_expandedRows.Contains(context.UserId) ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                                   OnClick="() => ToggleRow(context.UserId)" />
+                </MudTd>
+                <MudTd Style="text-align: center;">
+                    @{ var rank = GetRank(context); }
+                    @if (rank == 1)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Color="Color.Warning" Size="Size.Small"
+                                 Title="@Loc["FirstPlace"]" />
+                    }
+                    else if (rank == 2)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Style="color: #b0b0b0;" Size="Size.Small"
+                                 Title="@Loc["SecondPlace"]" />
+                    }
+                    else if (rank == 3)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Style="color: #cd7f32;" Size="Size.Small"
+                                 Title="@Loc["ThirdPlace"]" />
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@rank</MudText>
+                    }
+                </MudTd>
+                <MudTd DataLabel="@Loc["Name"]">
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mr-2">
+                            @context.UserName[0].ToString().ToUpper()
+                        </MudAvatar>
+                        <MudText Typo="Typo.body2" Style="@(GetRank(context) <= 3 ? "font-weight: 700;" : "")">
+                            @context.UserName
+                        </MudText>
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="@Loc["TotalScore"]" Style="text-align: right;">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
+                             Color="@(GetRank(context) == 1 ? Color.Warning : Color.Primary)">
+                        @context.TotalScore.ToString("N0")
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="@Loc["SubmissionCount"]" Style="text-align: right;">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
+                        @context.SubmissionCount
+                    </MudChip>
+                </MudTd>
+            </RowTemplate>
+            <ChildRowContent>
+                @if (_expandedRows.Contains(context.UserId))
+                {
+                    <MudTr>
+                        <td colspan="5" style="padding: 0;">
+                            <div class="pa-4" style="background: var(--mud-palette-background-grey);">
+                                @if (context.LevelScores.Count > 0)
+                                {
+                                    <MudTable Items="context.LevelScores" Dense="true" Hover="true" Elevation="0"
+                                              Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 6px;">
+                                        <HeaderContent>
+                                            <MudTh>@Loc["LevelName"]</MudTh>
+                                            <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate Context="scoreCtx">
+                                            <MudTd DataLabel="@Loc["LevelName"]">@scoreCtx.LevelTitle</MudTd>
+                                            <MudTd DataLabel="@Loc["Score"]" Style="text-align: right;">
+                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary">
+                                                    @scoreCtx.Score.ToString("N0")
+                                                </MudChip>
+                                            </MudTd>
+                                        </RowTemplate>
+                                        <FooterContent>
+                                            <MudTFootRow>
+                                                <MudTd Style="font-weight: 700;">@Loc["TotalScore"]</MudTd>
+                                                <MudTd Style="text-align: right; font-weight: 700;">
+                                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
+                                                        @context.TotalScore.ToString("N0")
+                                                    </MudChip>
+                                                </MudTd>
+                                            </MudTFootRow>
+                                        </FooterContent>
+                                    </MudTable>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc["NoScoresAvailable"]</MudText>
+                                }
+                            </div>
+                        </td>
+                    </MudTr>
+                }
+            </ChildRowContent>
+        </MudTable>
+    </MudPaper>
+}
+
+@code {
+    private List<LeaderboardEntryDto>? _entries;
+    private readonly HashSet<Guid> _expandedRows = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _entries = await ApiClient.GetLeaderboardAsync();
+    }
+
+    private void ToggleRow(Guid userId)
+    {
+        if (!_expandedRows.Remove(userId))
+            _expandedRows.Add(userId);
+    }
+
+    private int GetRank(LeaderboardEntryDto entry) =>
+        _entries!.IndexOf(entry) + 1;
+}

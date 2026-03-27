@@ -174,4 +174,12 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<bool>(JsonOptions);
     }
+
+    // ── Leaderboard ──────────────────────────────────────────────
+
+    public async Task<List<LeaderboardEntryDto>> GetLeaderboardAsync()
+    {
+        SetAuthHeader();
+        return (await httpClient.GetFromJsonAsync<List<LeaderboardEntryDto>>("/api/leaderboard", JsonOptions))!;
+    }
 }

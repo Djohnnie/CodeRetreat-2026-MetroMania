@@ -46,6 +46,7 @@ else
             <HeaderContent>
                 <MudTh Style="width: 0;" />
                 <MudTh>@Loc["Version"]</MudTh>
+                <MudTh>@Loc["TotalScore"]</MudTh>
                 <MudTh>@Loc["SubmittedAt"]</MudTh>
                 <MudTh>@Loc["CodePreview"]</MudTh>
             </HeaderContent>
@@ -58,6 +59,11 @@ else
                 <MudTd DataLabel="@Loc["Version"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
                         v@(context.Version)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="@Loc["TotalScore"]">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
+                        @context.TotalScore.ToString("N0")
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="@Loc["SubmittedAt"]">
@@ -75,8 +81,36 @@ else
                 @if (_expandedRows.Contains(context.Id))
                 {
                     <MudTr>
-                        <td colspan="4" style="padding: 0;">
+                        <td colspan="5" style="padding: 0;">
                             <div class="pa-4" style="background: var(--mud-palette-background-grey);">
+                                @if (context.Scores.Count > 0)
+                                {
+                                    <MudTable Items="context.Scores" Dense="true" Hover="true" Elevation="0"
+                                              Class="mb-3" Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 6px;">
+                                        <HeaderContent>
+                                            <MudTh>@Loc["LevelName"]</MudTh>
+                                            <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate Context="scoreCtx">
+                                            <MudTd DataLabel="@Loc["LevelName"]">@scoreCtx.LevelTitle</MudTd>
+                                            <MudTd DataLabel="@Loc["Score"]" Style="text-align: right;">
+                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary">
+                                                    @scoreCtx.Score.ToString("N0")
+                                                </MudChip>
+                                            </MudTd>
+                                        </RowTemplate>
+                                        <FooterContent>
+                                            <MudTFootRow>
+                                                <MudTd Style="font-weight: 700;">@Loc["TotalScore"]</MudTd>
+                                                <MudTd Style="text-align: right; font-weight: 700;">
+                                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
+                                                        @_submissions!.First(s => s.Id == context.Id).TotalScore.ToString("N0")
+                                                    </MudChip>
+                                                </MudTd>
+                                            </MudTFootRow>
+                                        </FooterContent>
+                                    </MudTable>
+                                }
                                 <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 8px; overflow: hidden; height: @(CalculateEditorHeight(context.Code))px;">
                                     <StandaloneCodeEditor Id="@($"submission-{context.Id}")"
                                                           ConstructionOptions="@(e => ReadOnlyEditorOptions(context.Code))"

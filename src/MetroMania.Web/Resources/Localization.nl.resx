@@ -186,4 +186,18 @@
   <data name="Line" xml:space="preserve"><value>Lijn</value></data>
   <data name="Train" xml:space="preserve"><value>Trein</value></data>
   <data name="Wagon" xml:space="preserve"><value>Wagon</value></data>
+
+  <!-- Scores -->
+  <data name="Score" xml:space="preserve"><value>Score</value></data>
+  <data name="TotalScore" xml:space="preserve"><value>Totaalscore</value></data>
+  <data name="LevelName" xml:space="preserve"><value>Level</value></data>
+
+  <!-- Leaderboard -->
+  <data name="Leaderboard" xml:space="preserve"><value>Klassement</value></data>
+  <data name="LeaderboardSubtitle" xml:space="preserve"><value>Ranglijst op basis van de scores van de laatste inzending per speler.</value></data>
+  <data name="Rank" xml:space="preserve"><value>Rang</value></data>
+  <data name="FirstPlace" xml:space="preserve"><value>1e Plaats</value></data>
+  <data name="SecondPlace" xml:space="preserve"><value>2e Plaats</value></data>
+  <data name="ThirdPlace" xml:space="preserve"><value>3e Plaats</value></data>
+  <data name="NoScoresAvailable" xml:space="preserve"><value>Geen scores beschikbaar voor deze inzending.</value></data>
 </root>

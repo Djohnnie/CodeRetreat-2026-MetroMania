@@ -15,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Level> Levels => Set<Level>();
     public DbSet<Submission> Submissions => Set<Submission>();
+    public DbSet<SubmissionScore> SubmissionScores => Set<SubmissionScore>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +56,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Code).IsRequired();
             entity.HasIndex(e => new { e.UserId, e.Version }).IsUnique();
             entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SubmissionScore>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.SubmissionId, e.LevelId }).IsUnique();
+            entity.HasOne(e => e.Submission).WithMany(s => s.Scores)
+                .HasForeignKey(e => e.SubmissionId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Level).WithMany()
+                .HasForeignKey(e => e.LevelId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

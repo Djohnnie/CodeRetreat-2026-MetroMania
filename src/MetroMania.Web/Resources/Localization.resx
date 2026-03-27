@@ -186,4 +186,18 @@
   <data name="Line" xml:space="preserve"><value>Line</value></data>
   <data name="Train" xml:space="preserve"><value>Train</value></data>
   <data name="Wagon" xml:space="preserve"><value>Wagon</value></data>
+
+  <!-- Scores -->
+  <data name="Score" xml:space="preserve"><value>Score</value></data>
+  <data name="TotalScore" xml:space="preserve"><value>Total Score</value></data>
+  <data name="LevelName" xml:space="preserve"><value>Level</value></data>
+
+  <!-- Leaderboard -->
+  <data name="Leaderboard" xml:space="preserve"><value>Leaderboard</value></data>
+  <data name="LeaderboardSubtitle" xml:space="preserve"><value>Rankings based on each player's latest submission scores.</value></data>
+  <data name="Rank" xml:space="preserve"><value>Rank</value></data>
+  <data name="FirstPlace" xml:space="preserve"><value>1st Place</value></data>
+  <data name="SecondPlace" xml:space="preserve"><value>2nd Place</value></data>
+  <data name="ThirdPlace" xml:space="preserve"><value>3rd Place</value></data>
+  <data name="NoScoresAvailable" xml:space="preserve"><value>No scores available for this submission.</value></data>
 </root>
