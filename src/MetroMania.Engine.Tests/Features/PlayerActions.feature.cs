@@ -125,7 +125,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PlayerActions.feature.ndjson", 9);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PlayerActions.feature.ndjson", 12);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -465,6 +465,141 @@ namespace MetroMania.Engine.Tests.Features
 #line hidden
 #line 63
         await testRunner.AndAsync("the active line should connect stations (0,0), (1,0) and (2,0) in order", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Unconnected and connected stations are tracked in the snapshot")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
+        [global::Xunit.TraitAttribute("Description", "Unconnected and connected stations are tracked in the snapshot")]
+        public async global::System.Threading.Tasks.Task UnconnectedAndConnectedStationsAreTrackedInTheSnapshot()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Unconnected and connected stations are tracked in the snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 65
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 5
+    await this.FeatureBackgroundAsync();
+#line hidden
+#line 66
+        await testRunner.GivenAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 67
+        await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 68
+        await testRunner.ThenAsync("the snapshot should have 2 connected stations", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 69
+        await testRunner.AndAsync("the snapshot should have 1 unconnected station", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 70
+        await testRunner.AndAsync("station (2,0) should be unconnected", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 71
+        await testRunner.AndAsync("station (0,0) should be connected", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 72
+        await testRunner.AndAsync("station (1,0) should be connected", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Line exposes its station snapshots and stations expose their lines")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
+        [global::Xunit.TraitAttribute("Description", "Line exposes its station snapshots and stations expose their lines")]
+        public async global::System.Threading.Tasks.Task LineExposesItsStationSnapshotsAndStationsExposeTheirLines()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Line exposes its station snapshots and stations expose their lines", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 74
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 5
+    await this.FeatureBackgroundAsync();
+#line hidden
+#line 75
+        await testRunner.GivenAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 76
+        await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 77
+        await testRunner.ThenAsync("the active line should have 2 station snapshots", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 78
+        await testRunner.AndAsync("station (0,0) should belong to 1 line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 79
+        await testRunner.AndAsync("station (2,0) should belong to 0 lines", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Line exposes its vehicles and vehicles reference their line")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
+        [global::Xunit.TraitAttribute("Description", "Line exposes its vehicles and vehicles reference their line")]
+        public async global::System.Threading.Tasks.Task LineExposesItsVehiclesAndVehiclesReferenceTheirLine()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Line exposes its vehicles and vehicles reference their line", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 81
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 5
+    await this.FeatureBackgroundAsync();
+#line hidden
+#line 82
+        await testRunner.GivenAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 83
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 84
+        await testRunner.WhenAsync("the simulation runs for 4 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 85
+        await testRunner.ThenAsync("the active line should have 1 vehicle", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 86
+        await testRunner.AndAsync("the active vehicle should reference the created line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

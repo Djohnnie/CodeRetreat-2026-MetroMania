@@ -160,6 +160,9 @@ public class MetroManiaEngine
                     CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles));
             }
 
+            // Move vehicles along their lines before the player acts
+            MoveVehicles(vehicles, lines, activeStations);
+
             // Phase 3: OnHourTick — fire last, then process the player's action
             var action = runner.OnHourTick(
                 CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles));
@@ -209,7 +212,26 @@ public class MetroManiaEngine
                 if (vehicleResource is not null && targetLine is not null && targetLine.StationIds.Contains(addVehicle.StationId))
                 {
                     vehicleResource.InUse = true;
-                    vehicles.Add(new VehicleState(vehicleResource.Id, targetLine.ResourceId, addVehicle.StationId));
+                    int stationIdx = targetLine.StationIds.IndexOf(addVehicle.StationId);
+                    int numSegments = targetLine.StationIds.Count - 1;
+
+                    int segIdx;
+                    float prog;
+                    int dir;
+                    if (stationIdx >= numSegments)
+                    {
+                        segIdx = numSegments - 1;
+                        prog = 1.0f;
+                        dir = -1;
+                    }
+                    else
+                    {
+                        segIdx = stationIdx;
+                        prog = 0.0f;
+                        dir = 1;
+                    }
+
+                    vehicles.Add(new VehicleState(vehicleResource.Id, targetLine.ResourceId, segIdx, prog, dir));
                 }
                 break;
 
@@ -262,7 +284,7 @@ public class MetroManiaEngine
         Dictionary<Location, StationState> activeStations, int totalScore,
         List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles)
     {
-        return new GameSnapshot
+        var snapshot = new GameSnapshot
         {
             Time = time,
             TotalHoursElapsed = hoursElapsed,
@@ -277,9 +299,42 @@ public class MetroManiaEngine
                     Passengers = [.. kvp.Value.Passengers]
                 }),
             Resources = resources.Select(r => new ResourceSnapshot(r.Id, r.Type, r.InUse)).ToList().AsReadOnly(),
-            Lines = lines.Select(l => new LineSnapshot(l.ResourceId, l.StationIds.ToList().AsReadOnly())).ToList().AsReadOnly(),
-            Vehicles = vehicles.Select(v => new VehicleSnapshot(v.ResourceId, v.LineResourceId, v.StationId)).ToList().AsReadOnly()
+            Lines = lines.Select(l => new LineSnapshot
+            {
+                LineId = l.ResourceId,
+                StationIds = l.StationIds.ToList().AsReadOnly()
+            }).ToList().AsReadOnly(),
+            Vehicles = vehicles.Select(v =>
+            {
+                var line = lines.FirstOrDefault(l => l.ResourceId == v.LineResourceId);
+                Guid? stationId = null;
+                if (line is not null)
+                {
+                    if (v.Progress <= 0.0f)
+                        stationId = line.StationIds[v.SegmentIndex];
+                    else if (v.Progress >= 1.0f)
+                        stationId = line.StationIds[v.SegmentIndex + 1];
+                }
+                return new VehicleSnapshot
+                {
+                    VehicleId = v.ResourceId,
+                    LineId = v.LineResourceId,
+                    SegmentIndex = v.SegmentIndex,
+                    Progress = v.Direction == -1 ? 1.0f - v.Progress : v.Progress,
+                    Direction = v.Direction,
+                    StationId = stationId
+                };
+            }).ToList().AsReadOnly()
         };
+
+        foreach (var station in snapshot.Stations.Values)
+            station.Snapshot = snapshot;
+        foreach (var line in snapshot.Lines)
+            line.Snapshot = snapshot;
+        foreach (var vehicle in snapshot.Vehicles)
+            vehicle.Snapshot = snapshot;
+
+        return snapshot;
     }
 
     private record SimulationResult(
@@ -292,6 +347,90 @@ public class MetroManiaEngine
         List<ResourceState> Resources,
         List<LineState> Lines,
         List<VehicleState> Vehicles);
+
+    private static void MoveVehicles(
+        List<VehicleState> vehicles, List<LineState> lines,
+        Dictionary<Location, StationState> activeStations, float speedPerHour = 1.0f)
+    {
+        var stationLocations = activeStations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+
+        foreach (var vehicle in vehicles)
+        {
+            var line = lines.FirstOrDefault(l => l.ResourceId == vehicle.LineResourceId);
+            if (line is null || line.StationIds.Count < 2)
+                continue;
+
+            int numSegments = line.StationIds.Count - 1;
+            float remainingSpeed = speedPerHour;
+
+            while (remainingSpeed > 0.001f)
+            {
+                if (!stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var fromLoc) ||
+                    !stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var toLoc))
+                    break;
+
+                float segmentLength = Distance(fromLoc, toLoc);
+                if (segmentLength < 0.001f)
+                    break;
+
+                float progressDelta = remainingSpeed / segmentLength;
+
+                if (vehicle.Direction == 1)
+                {
+                    float newProgress = vehicle.Progress + progressDelta;
+                    if (newProgress < 1.0f)
+                    {
+                        vehicle.Progress = newProgress;
+                        remainingSpeed = 0;
+                    }
+                    else
+                    {
+                        remainingSpeed = (newProgress - 1.0f) * segmentLength;
+                        if (vehicle.SegmentIndex < numSegments - 1)
+                        {
+                            vehicle.SegmentIndex++;
+                            vehicle.Progress = 0.0f;
+                        }
+                        else
+                        {
+                            vehicle.Progress = 1.0f;
+                            vehicle.Direction = -1;
+                        }
+                    }
+                }
+                else
+                {
+                    float newProgress = vehicle.Progress - progressDelta;
+                    if (newProgress > 0.0f)
+                    {
+                        vehicle.Progress = newProgress;
+                        remainingSpeed = 0;
+                    }
+                    else
+                    {
+                        remainingSpeed = (0.0f - newProgress) * segmentLength;
+                        if (vehicle.SegmentIndex > 0)
+                        {
+                            vehicle.SegmentIndex--;
+                            vehicle.Progress = 1.0f;
+                        }
+                        else
+                        {
+                            vehicle.Progress = 0.0f;
+                            vehicle.Direction = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static float Distance(Location a, Location b)
+    {
+        float dx = a.X - b.X;
+        float dy = a.Y - b.Y;
+        return MathF.Sqrt(dx * dx + dy * dy);
+    }
 
     private class StationState(Guid id, StationType type, List<PassengerSpawnPhase> phases, int spawnedOnDay)
     {
@@ -316,10 +455,12 @@ public class MetroManiaEngine
         public List<Guid> StationIds { get; } = [];
     }
 
-    private class VehicleState(Guid resourceId, Guid lineResourceId, Guid stationId)
+    private class VehicleState(Guid resourceId, Guid lineResourceId, int segmentIndex, float progress, int direction)
     {
         public Guid ResourceId { get; } = resourceId;
         public Guid LineResourceId { get; } = lineResourceId;
-        public Guid StationId { get; set; } = stationId;
+        public int SegmentIndex { get; set; } = segmentIndex;
+        public float Progress { get; set; } = progress;
+        public int Direction { get; set; } = direction;
     }
 }

@@ -120,7 +120,67 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
         ctx.PendingActions.Add(_ => new RemoveLine(Guid.NewGuid()));
     }
 
-    // --- Then steps ---
+    // --- Then steps: connectivity ---
+
+    [Then(@"the snapshot should have (\d+) connected stations?")]
+    public void ThenTheSnapshotShouldHaveConnectedStations(int count)
+    {
+        Assert.Equal(count, ctx.Snapshot!.ConnectedStations.Count);
+    }
+
+    [Then(@"the snapshot should have (\d+) unconnected stations?")]
+    public void ThenTheSnapshotShouldHaveUnconnectedStations(int count)
+    {
+        Assert.Equal(count, ctx.Snapshot!.UnconnectedStations.Count);
+    }
+
+    [Then(@"station \((\d+),(\d+)\) should be unconnected")]
+    public void ThenStationShouldBeUnconnected(int x, int y)
+    {
+        var stationId = ctx.StationIdsByLocation[new Location(x, y)];
+        Assert.Contains(ctx.Snapshot!.UnconnectedStations, s => s.Id == stationId);
+    }
+
+    [Then(@"station \((\d+),(\d+)\) should be connected")]
+    public void ThenStationShouldBeConnected(int x, int y)
+    {
+        var stationId = ctx.StationIdsByLocation[new Location(x, y)];
+        Assert.Contains(ctx.Snapshot!.ConnectedStations, s => s.Id == stationId);
+    }
+
+    // --- Then steps: navigation properties ---
+
+    [Then(@"the active line should have (\d+) station snapshots?")]
+    public void ThenTheActiveLineShouldHaveStationSnapshots(int count)
+    {
+        var line = Assert.Single(ctx.Snapshot!.Lines);
+        Assert.Equal(count, line.Stations.Count);
+    }
+
+    [Then(@"station \((\d+),(\d+)\) should belong to (\d+) lines?")]
+    public void ThenStationShouldBelongToLines(int x, int y, int count)
+    {
+        var stationId = ctx.StationIdsByLocation[new Location(x, y)];
+        var station = ctx.Snapshot!.Stations.Values.Single(s => s.Id == stationId);
+        Assert.Equal(count, station.Lines.Count);
+    }
+
+    [Then(@"the active line should have (\d+) vehicles?")]
+    public void ThenTheActiveLineShouldHaveVehicles(int count)
+    {
+        var line = Assert.Single(ctx.Snapshot!.Lines);
+        Assert.Equal(count, line.Vehicles.Count);
+    }
+
+    [Then(@"the active vehicle should reference the created line")]
+    public void ThenTheActiveVehicleShouldReferenceTheCreatedLine()
+    {
+        var vehicle = Assert.Single(ctx.Snapshot!.Vehicles);
+        Assert.NotNull(vehicle.Line);
+        Assert.Equal(ctx.LastCreatedLineId, vehicle.Line.LineId);
+    }
+
+    // --- Then steps: lines/vehicles ---
 
     [Then(@"the snapshot should have (\d+) active lines?")]
     public void ThenTheSnapshotShouldHaveActiveLines(int count)
@@ -176,6 +236,7 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
     {
         var vehicle = Assert.Single(ctx.Snapshot!.Vehicles);
         Assert.Equal(ctx.LastCreatedLineId, vehicle.LineId);
-        Assert.Equal(ctx.StationIdsByLocation[new Location(x, y)], vehicle.StationId);
+        Assert.NotNull(vehicle.StationId);
+        Assert.Equal(ctx.StationIdsByLocation[new Location(x, y)], vehicle.StationId.Value);
     }
 }

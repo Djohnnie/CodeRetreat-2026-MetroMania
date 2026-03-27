@@ -61,3 +61,26 @@ Feature: Player Actions
         When the simulation runs for 4 hours
         Then the snapshot should have 1 active line
         And the active line should connect stations (0,0), (1,0) and (2,0) in order
+
+    Scenario: Unconnected and connected stations are tracked in the snapshot
+        Given the player will create a line connecting stations at (0,0) and (1,0)
+        When the simulation runs for 3 hours
+        Then the snapshot should have 2 connected stations
+        And the snapshot should have 1 unconnected station
+        And station (2,0) should be unconnected
+        And station (0,0) should be connected
+        And station (1,0) should be connected
+
+    Scenario: Line exposes its station snapshots and stations expose their lines
+        Given the player will create a line connecting stations at (0,0) and (1,0)
+        When the simulation runs for 3 hours
+        Then the active line should have 2 station snapshots
+        And station (0,0) should belong to 1 line
+        And station (2,0) should belong to 0 lines
+
+    Scenario: Line exposes its vehicles and vehicles reference their line
+        Given the player will create a line connecting stations at (0,0) and (1,0)
+        And the player will then add a vehicle to the created line at station (0,0)
+        When the simulation runs for 4 hours
+        Then the active line should have 1 vehicle
+        And the active vehicle should reference the created line
