@@ -5,7 +5,9 @@ using MetroMania.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Http.Resilience;
 using MudBlazor.Services;
+using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +15,29 @@ var builder = WebApplication.CreateBuilder(args);
 var apiBaseUrl = builder.Configuration.GetValue<string>("API_BASE_URL")
     ?? throw new InvalidOperationException("Configure ApiBaseUrl in appsettings.");
 builder.Services.AddHttpClient<MetroManiaApiClient>(client =>
-    client.BaseAddress = new Uri(apiBaseUrl));
+    client.BaseAddress = new Uri(apiBaseUrl))
+    .AddResilienceHandler("api-retry", pipeline =>
+    {
+        pipeline.AddRetry(new HttpRetryStrategyOptions
+        {
+            MaxRetryAttempts = 5,
+            BackoffType = DelayBackoffType.Exponential,
+            Delay = TimeSpan.FromSeconds(2),
+            ShouldHandle = args => ValueTask.FromResult(
+                args.Outcome.Exception is HttpRequestException or TaskCanceledException),
+            OnRetry = args =>
+            {
+                var logger = args.Context.Properties.GetValue(
+                    new ResiliencePropertyKey<ILogger>("logger"), null!);
+                logger?.LogWarning(
+                    "API request failed ({Exception}). Retry {Attempt} in {Delay}...",
+                    args.Outcome.Exception?.GetType().Name ?? "unknown",
+                    args.AttemptNumber + 1,
+                    args.RetryDelay);
+                return ValueTask.CompletedTask;
+            }
+        });
+    });
 
 // MudBlazor
 builder.Services.AddMudServices();
