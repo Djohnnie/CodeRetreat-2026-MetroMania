@@ -8,6 +8,7 @@ Feature: Passenger Spawning
 
     Scenario: Single station with one spawn phase spawns passengers at the correct frequency
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 12 hours
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs for 49 hours
         Then "OnPassengerWaiting" should have fired exactly 4 times
         And the passenger waiting events should be:
@@ -29,6 +30,7 @@ Feature: Passenger Spawning
             | AfterDays | FrequencyInHours |
             | 0         | 24               |
             | 2         | 12               |
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs for 73 hours
         Then "OnPassengerWaiting" should have fired exactly 4 times
         And the passenger waiting events should be:
@@ -59,14 +61,29 @@ Feature: Passenger Spawning
 
     Scenario: Passenger destination type always differs from origin station type
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs for 11 hours
         Then all passengers should have a destination type different from their origin station type
 
     Scenario: Station with spawn delay and immediate phase spawns passengers after delay
         Given a level with a Circle station at (0,0) with a spawn delay of 2 days and passengers every 24 hours
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs for 97 hours
         Then "OnPassengerWaiting" should have fired exactly 2 times
         And the passenger waiting events should be:
             | Day | Hour | X | Y | PassengerCount |
             | 4   | 0    | 0 | 0 | 1              |
             | 5   | 0    | 0 | 0 | 2              |
+
+    Scenario: Station does not spawn passengers when no other station types exist
+        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        And the simulation will be cancelled after 50 hours
+        When the simulation runs until game over or cancellation
+        Then the simulation should have been cancelled
+        And "OnPassengerWaiting" should have fired exactly 0 times
+
+    Scenario: Passengers can only have destination types of actually spawned stations
+        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        And a level with a Triangle station at (1,0) with a spawn delay of 0 days
+        When the simulation runs for 5 hours
+        Then all passengers should have a destination type that exists among spawned station types

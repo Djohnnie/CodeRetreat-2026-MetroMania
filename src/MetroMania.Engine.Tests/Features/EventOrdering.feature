@@ -38,16 +38,19 @@ Feature: Event Ordering
 
     Scenario: Passenger waiting fires before day start when both occur on the same tick
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 24 hours
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs for 25 hours
         Then the first "OnPassengerWaiting" should appear before the second "OnDayStart"
 
     Scenario: Station overrun notification fires before the player gets to act
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs for 11 hours
         Then "OnStationOverrun" should have fired directly before "OnHourTick"
 
     Scenario: Game over is the final event and ends the simulation immediately
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs until game over
         Then "OnGameOver" should have fired exactly 1 time
         And "OnGameOver" should be the last event fired

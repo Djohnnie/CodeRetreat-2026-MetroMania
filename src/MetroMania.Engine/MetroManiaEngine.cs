@@ -37,7 +37,6 @@ public class MetroManiaEngine
     {
         var random = new Random(level.LevelData.Seed);
         var activeStations = new Dictionary<Location, StationState>();
-        var stationTypes = Enum.GetValues<StationType>();
 
         // Initialize starting resources: 1 line and 1 vehicle
         var resources = new List<ResourceState>
@@ -113,9 +112,16 @@ public class MetroManiaEngine
                 if ((totalHour - state.SpawnedAtHour) % activePhase.FrequencyInHours == 0
                     && totalHour > state.SpawnedAtHour)
                 {
-                    StationType destType;
-                    do { destType = stationTypes[random.Next(stationTypes.Length)]; }
-                    while (destType == state.Type);
+                    var validDestTypes = activeStations.Values
+                        .Select(s => s.Type)
+                        .Where(t => t != state.Type)
+                        .Distinct()
+                        .ToArray();
+
+                    if (validDestTypes.Length == 0)
+                        continue;
+
+                    var destType = validDestTypes[random.Next(validDestTypes.Length)];
 
                     state.Passengers.Add(new Passenger(destType));
                     totalPassengersSpawned++;

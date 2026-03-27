@@ -106,4 +106,20 @@ public class PassengerSpawningStepDefinitions(EngineTestContext ctx)
             }
         }
     }
+
+    [Then(@"all passengers should have a destination type that exists among spawned station types")]
+    public void ThenAllPassengersShouldHaveExistingDestinationType()
+    {
+        Assert.NotEmpty(ctx.PassengerWaitingCalls);
+        Assert.NotNull(ctx.Snapshot);
+        var spawnedTypes = ctx.Snapshot.Stations.Values.Select(s => s.Type).Distinct().ToHashSet();
+
+        foreach (var evt in ctx.PassengerWaitingCalls)
+        {
+            foreach (var passenger in evt.Passengers)
+            {
+                Assert.Contains(passenger.DestinationType, spawnedTypes);
+            }
+        }
+    }
 }
