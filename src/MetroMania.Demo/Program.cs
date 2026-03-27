@@ -11,7 +11,7 @@ var runner = new SimpleRunner();
 var result = engine.Run(runner, level);
 
 Console.WriteLine($"Game Over!");
-Console.WriteLine($"  Score:              {result.Score} (hours survived)");
+Console.WriteLine($"  Score:              {result.Score}");
 Console.WriteLine($"  Days Survived:      {result.DaysSurvived}");
 Console.WriteLine($"  Passengers Spawned: {result.TotalPassengersSpawned}");
 Console.WriteLine($"  Time Taken:         {result.TimeTaken.TotalMilliseconds:F0}ms");

@@ -16,8 +16,8 @@ internal static class Level1
             Seed = 42,
             Stations =
             [
-                new MetroStation { GridX = 0, GridY = 0, StationType = StationType.Circle, SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }] },
-                new MetroStation { GridX = 3, GridY = 0, StationType = StationType.Rectangle, SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 8 }] },
+                new MetroStation { GridX = 0, GridY = 0, StationType = StationType.Circle, SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 1 }] },
+                new MetroStation { GridX = 3, GridY = 0, StationType = StationType.Rectangle, SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 1 }] },
             ]
         }
     };

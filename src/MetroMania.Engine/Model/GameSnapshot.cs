@@ -146,7 +146,30 @@ public class VehicleSnapshot
     /// </summary>
     public required int Capacity { get; init; }
 
+    /// <summary>
+    /// The Ids of wagons attached to this train. Empty for wagons.
+    /// </summary>
+    public required IReadOnlyList<Guid> WagonIds { get; init; }
+
+    /// <summary>
+    /// Passengers currently onboard this vehicle.
+    /// </summary>
+    public required IReadOnlyList<Passenger> Passengers { get; init; }
+
     internal GameSnapshot? Snapshot { get; set; }
+
+    /// <summary>
+    /// The wagon snapshots attached to this train, or empty for wagons.
+    /// </summary>
+    public IReadOnlyList<VehicleSnapshot> Wagons =>
+        Snapshot?.Vehicles.Where(v => WagonIds.Contains(v.VehicleId)).ToList()
+        ?? [];
+
+    /// <summary>
+    /// The train this wagon is attached to, or null if this is a train or unattached.
+    /// </summary>
+    public VehicleSnapshot? Train =>
+        Snapshot?.Vehicles.FirstOrDefault(v => v.WagonIds.Contains(VehicleId));
 
     /// <summary>
     /// The line this vehicle is traveling on.

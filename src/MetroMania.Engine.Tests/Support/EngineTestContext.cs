@@ -47,6 +47,12 @@ public class EngineTestContext
     // Tracks the last line created (for follow-up actions like AddVehicle, RemoveLine)
     public Guid? LastCreatedLineId { get; set; }
     public Guid? LastAddedVehicleId { get; set; }
+    public Guid? LastAddedWagonId { get; set; }
+
+    // Passenger delivery tracking
+    public int MaxPassengersOnboard { get; set; }
+    public bool DwellTimeObserved { get; set; }
+    public int? VehicleCapacityOverride { get; set; }
 
     // Overrun and game over tracking
     public List<OverrunEvent> OverrunCalls { get; } = [];
@@ -109,6 +115,18 @@ public class EngineTestContext
             {
                 HourTickCalls.Add(snapshot.Time);
                 EventLog.Add("OnHourTick");
+
+                // Track max passengers onboard any vehicle
+                foreach (var v in snapshot.Vehicles)
+                {
+                    if (v.Passengers.Count > MaxPassengersOnboard)
+                        MaxPassengersOnboard = v.Passengers.Count;
+                }
+
+                // Track if any vehicle is dwelling (at station but not moving)
+                if (snapshot.Vehicles.Any(v => v.StationId is not null && v.Passengers.Count > 0))
+                    DwellTimeObserved = true;
+
                 if (CancelAfterHours.HasValue && HourTickCalls.Count >= CancelAfterHours.Value)
                     Cts.Cancel();
 
@@ -126,18 +144,25 @@ public class EngineTestContext
             });
     }
 
-    public Level BuildLevel() => new()
+    public Level BuildLevel()
     {
-        Title = "Test",
-        GridWidth = 10,
-        GridHeight = 10,
-        LevelData = new LevelData
+        var levelData = new LevelData
         {
             Seed = Seed,
             Stations = [.. Stations],
             WeeklyGiftOverrides = [.. WeeklyGiftOverrides]
-        }
-    };
+        };
+        if (VehicleCapacityOverride.HasValue)
+            levelData.VehicleCapacity = VehicleCapacityOverride.Value;
+
+        return new()
+        {
+            Title = "Test",
+            GridWidth = 10,
+            GridHeight = 10,
+            LevelData = levelData
+        };
+    }
 
     /// <summary>
     /// Saves the current weekly gift sequence and resets tracking state

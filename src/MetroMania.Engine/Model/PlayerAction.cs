@@ -44,3 +44,16 @@ public sealed record ExtendLine(Guid LineId, Guid FromStationId, Guid ToStationI
 /// <paramref name="FromStationId"/> and <paramref name="ToStationId"/> must be adjacent on the line.
 /// </summary>
 public sealed record InsertStationInLine(Guid LineId, Guid NewStationId, Guid FromStationId, Guid ToStationId) : PlayerAction;
+
+/// <summary>
+/// Adds an available wagon to a train that is already placed on a line.
+/// <paramref name="WagonId"/> must be the Id of an available Wagon resource.
+/// <paramref name="TrainId"/> must be the Id of a used Train resource (i.e. a vehicle on a line).
+/// </summary>
+public sealed record AddWagonToTrain(Guid WagonId, Guid TrainId) : PlayerAction;
+
+/// <summary>
+/// Moves a wagon from one train to another. Both trains must be placed on a line.
+/// <paramref name="WagonId"/> must be the Id of a used Wagon resource currently attached to <paramref name="SourceTrainId"/>.
+/// </summary>
+public sealed record MoveWagonBetweenTrains(Guid WagonId, Guid SourceTrainId, Guid DestinationTrainId) : PlayerAction;
