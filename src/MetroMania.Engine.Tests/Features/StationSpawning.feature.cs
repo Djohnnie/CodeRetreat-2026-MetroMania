@@ -204,23 +204,23 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                             "X",
                             "Y",
                             "Type",
                             "SpawnDelay"});
-                table1.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "0",
                             "0",
                             "Circle",
                             "0"});
-                table1.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "1",
                             "0",
                             "Triangle",
                             "2"});
 #line 26
-        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table1, "Given ");
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table6, "Given ");
 #line hidden
 #line 30
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
@@ -256,23 +256,23 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "X",
                             "Y",
                             "Type",
                             "SpawnDelay"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "0",
                             "0",
                             "Circle",
                             "0"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "1",
                             "0",
                             "Triangle",
                             "2"});
 #line 35
-        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table2, "Given ");
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table7, "Given ");
 #line hidden
 #line 39
         await testRunner.WhenAsync("the simulation runs for 49 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");

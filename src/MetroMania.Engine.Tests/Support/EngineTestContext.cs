@@ -6,6 +6,8 @@ using Moq;
 
 namespace MetroMania.Engine.Tests.Support;
 
+public record PassengerWaitingEvent(GameTime Time, Location Location, IReadOnlyList<Passenger> Passengers);
+
 /// <summary>
 /// Shared scenario context holding the engine, mock runner, level configuration,
 /// simulation results, and a full event log captured via Moq callbacks.
@@ -27,10 +29,18 @@ public class EngineTestContext
     public List<GameTime> DayStartCalls { get; } = [];
     public List<GameTime> HourTickCalls { get; } = [];
 
+    // Passenger spawn tracking
+    public List<PassengerWaitingEvent> PassengerWaitingCalls { get; } = [];
+
     // Weekly gift tracking for determinism tests
     public int Seed { get; set; } = 42;
     public List<ResourceType> WeeklyGiftTypes { get; } = [];
     public List<ResourceType> PreviousWeeklyGiftTypes { get; } = [];
+
+    // Cancellation support
+    public CancellationTokenSource Cts { get; } = new();
+    public int? CancelAfterHours { get; set; }
+    public bool WasCancelled { get; set; }
 
     public EngineTestContext()
     {
@@ -45,7 +55,11 @@ public class EngineTestContext
                 WeeklyGiftTypes.Add(gift);
             });
         Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback(() => EventLog.Add("OnPassengerWaiting"));
+            .Callback<GameTime, Location, IReadOnlyList<Passenger>>((t, loc, passengers) =>
+            {
+                EventLog.Add("OnPassengerWaiting");
+                PassengerWaitingCalls.Add(new PassengerWaitingEvent(t, loc, passengers.ToList().AsReadOnly()));
+            });
         Runner.Setup(r => r.OnStationOverrun(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
             .Callback(() => EventLog.Add("OnStationOverrun"));
         Runner.Setup(r => r.OnGameOver(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
@@ -61,6 +75,8 @@ public class EngineTestContext
             {
                 HourTickCalls.Add(t);
                 EventLog.Add("OnHourTick");
+                if (CancelAfterHours.HasValue && HourTickCalls.Count >= CancelAfterHours.Value)
+                    Cts.Cancel();
             })
             .Returns(PlayerAction.None);
     }
@@ -89,7 +105,9 @@ public class EngineTestContext
         EventLog.Clear();
         DayStartCalls.Clear();
         HourTickCalls.Clear();
+        PassengerWaitingCalls.Clear();
         Snapshot = null;
         Result = null;
+        WasCancelled = false;
     }
 }

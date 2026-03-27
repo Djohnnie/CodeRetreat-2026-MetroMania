@@ -8,10 +8,10 @@ namespace MetroMania.Engine;
 
 public class MetroManiaEngine
 {
-    public GameResult Run(IMetroManiaRunner runner, Level level)
+    public GameResult Run(IMetroManiaRunner runner, Level level, CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
-        var sim = RunSimulation(runner, level);
+        var sim = RunSimulation(runner, level, cancellationToken: cancellationToken);
         stopwatch.Stop();
 
         return new GameResult
@@ -27,9 +27,9 @@ public class MetroManiaEngine
     /// Runs the game simulation for a specific number of hours and returns a snapshot of the state.
     /// If the game ends before reaching the target hours, the snapshot reflects the game-over state.
     /// </summary>
-    public GameSnapshot RunForHours(IMetroManiaRunner runner, Level level, int targetHours)
+    public GameSnapshot RunForHours(IMetroManiaRunner runner, Level level, int targetHours, CancellationToken cancellationToken = default)
     {
-        var sim = RunSimulation(runner, level, targetHours);
+        var sim = RunSimulation(runner, level, targetHours, cancellationToken);
 
         return new GameSnapshot
         {
@@ -46,7 +46,7 @@ public class MetroManiaEngine
         };
     }
 
-    private SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? targetHours = null)
+    private SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? targetHours = null, CancellationToken cancellationToken = default)
     {
         var random = new Random(level.LevelData.Seed);
         var activeStations = new Dictionary<Location, StationState>();
@@ -59,6 +59,7 @@ public class MetroManiaEngine
 
         while (!gameOver && (targetHours is null || hoursElapsed < targetHours))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             int day = hoursElapsed / 24 + 1;
             int currentHour = hoursElapsed % 24;
             var dayOfWeek = (DayOfWeek)(day % 7);
