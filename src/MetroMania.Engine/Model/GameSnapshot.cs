@@ -18,6 +18,11 @@ public class GameSnapshot
     public required int TotalScore { get; init; }
 
     public required Dictionary<Location, StationSnapshot> Stations { get; init; }
+
+    /// <summary>
+    /// All resources the player has received, including both available and in-use resources.
+    /// </summary>
+    public required IReadOnlyList<ResourceSnapshot> Resources { get; init; }
 }
 
 /// <summary>
@@ -29,3 +34,8 @@ public class StationSnapshot
     public required StationType Type { get; init; }
     public required List<Passenger> Passengers { get; init; }
 }
+
+/// <summary>
+/// The state of a player resource (line or vehicle) at a point in time.
+/// </summary>
+public record ResourceSnapshot(Guid Id, ResourceType Type, bool InUse);

@@ -8,6 +8,8 @@ namespace MetroMania.Engine.Tests.Support;
 
 public record PassengerWaitingEvent(GameTime Time, Location Location, IReadOnlyList<Passenger> Passengers);
 
+public record WeeklyGiftEvent(GameSnapshot Snapshot, ResourceType Gift);
+
 /// <summary>
 /// Shared scenario context holding the engine, mock runner, level configuration,
 /// simulation results, and a full event log captured via Moq callbacks.
@@ -36,6 +38,7 @@ public class EngineTestContext
     public int Seed { get; set; } = 42;
     public List<ResourceType> WeeklyGiftTypes { get; } = [];
     public List<ResourceType> PreviousWeeklyGiftTypes { get; } = [];
+    public List<WeeklyGiftEvent> WeeklyGiftEvents { get; } = [];
 
     // Cancellation support
     public CancellationTokenSource Cts { get; } = new();
@@ -49,10 +52,11 @@ public class EngineTestContext
         Runner.Setup(r => r.OnStationSpawned(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), It.IsAny<Location>(), It.IsAny<StationType>()))
             .Callback(() => EventLog.Add("OnStationSpawned"));
         Runner.Setup(r => r.OnWeeklyGift(It.IsAny<GameSnapshot>(), It.IsAny<ResourceType>()))
-            .Callback<GameSnapshot, ResourceType>((_, gift) =>
+            .Callback<GameSnapshot, ResourceType>((snapshot, gift) =>
             {
                 EventLog.Add("OnWeeklyGift");
                 WeeklyGiftTypes.Add(gift);
+                WeeklyGiftEvents.Add(new WeeklyGiftEvent(snapshot, gift));
             });
         Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
             .Callback<GameSnapshot, Location, IReadOnlyList<Passenger>>((snapshot, loc, passengers) =>
@@ -102,6 +106,7 @@ public class EngineTestContext
     {
         PreviousWeeklyGiftTypes.AddRange(WeeklyGiftTypes);
         WeeklyGiftTypes.Clear();
+        WeeklyGiftEvents.Clear();
         EventLog.Clear();
         DayStartCalls.Clear();
         HourTickCalls.Clear();
