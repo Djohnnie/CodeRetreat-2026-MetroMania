@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using MetroMania.Api.Endpoints;
 using MetroMania.Infrastructure;
 using MetroMania.Infrastructure.Persistence;
+using MetroMania.Orleans.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +15,11 @@ var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING
     ?? builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("Set the SQL_CONNECTION_STRING environment variable or configure ConnectionStrings:Default.");
 builder.Services.AddInfrastructure(connectionString);
+
+// Orleans client — connects to the Orleans cluster
+builder.UseOrleansClient(clientBuilder =>
+    clientBuilder.UseLocalhostClustering());
+builder.Services.AddOrleansClient();
 
 // MediatR
 builder.Services.AddMediatR(cfg =>
