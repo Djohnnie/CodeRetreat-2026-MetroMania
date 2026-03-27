@@ -6,17 +6,17 @@ namespace MetroMania.Demo;
 
 public class MyMetroManiaRunner : IMetroManiaRunner
 {
-    public PlayerAction OnHourTick(GameTime time) => PlayerAction.None;
+    public PlayerAction OnHourTick(GameSnapshot snapshot) => PlayerAction.None;
 
-    public void OnDayStart(GameTime time) { }
+    public void OnDayStart(GameSnapshot snapshot) { }
 
-    public void OnWeeklyGift(GameTime time, ResourceType gift) { }
+    public void OnWeeklyGift(GameSnapshot snapshot, ResourceType gift) { }
 
-    public void OnStationSpawned(GameTime time, Location location, StationType stationType) { }
+    public void OnStationSpawned(GameSnapshot snapshot, Guid stationId, Location location, StationType stationType) { }
 
-    public void OnPassengerWaiting(GameTime time, Location location, IReadOnlyList<Passenger> passengers) { }
+    public void OnPassengerWaiting(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers) { }
 
-    public void OnStationOverrun(GameTime time, Location location, IReadOnlyList<Passenger> passengers) { }
+    public void OnStationOverrun(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers) { }
 
-    public void OnGameOver(GameTime time, Location location, IReadOnlyList<Passenger> passengers) { }
+    public void OnGameOver(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers) { }
 }

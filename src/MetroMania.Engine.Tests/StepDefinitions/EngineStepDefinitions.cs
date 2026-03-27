@@ -88,7 +88,7 @@ public class EngineStepDefinitions(EngineTestContext ctx)
     public void ThenStationShouldHaveSpawned(string type, int x, int y)
     {
         ctx.Runner.Verify(
-            r => r.OnStationSpawned(It.IsAny<GameTime>(), new Location(x, y), Enum.Parse<StationType>(type)),
+            r => r.OnStationSpawned(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), new Location(x, y), Enum.Parse<StationType>(type)),
             Times.Once);
     }
 
@@ -96,7 +96,7 @@ public class EngineStepDefinitions(EngineTestContext ctx)
     public void ThenStationShouldNotHaveSpawned(string type, int x, int y)
     {
         ctx.Runner.Verify(
-            r => r.OnStationSpawned(It.IsAny<GameTime>(), new Location(x, y), Enum.Parse<StationType>(type)),
+            r => r.OnStationSpawned(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), new Location(x, y), Enum.Parse<StationType>(type)),
             Times.Never);
     }
 

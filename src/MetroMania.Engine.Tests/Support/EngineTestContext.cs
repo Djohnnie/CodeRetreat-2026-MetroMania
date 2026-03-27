@@ -46,34 +46,34 @@ public class EngineTestContext
     {
         Runner = new Mock<IMetroManiaRunner>();
 
-        Runner.Setup(r => r.OnStationSpawned(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<StationType>()))
+        Runner.Setup(r => r.OnStationSpawned(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), It.IsAny<Location>(), It.IsAny<StationType>()))
             .Callback(() => EventLog.Add("OnStationSpawned"));
-        Runner.Setup(r => r.OnWeeklyGift(It.IsAny<GameTime>(), It.IsAny<ResourceType>()))
-            .Callback<GameTime, ResourceType>((_, gift) =>
+        Runner.Setup(r => r.OnWeeklyGift(It.IsAny<GameSnapshot>(), It.IsAny<ResourceType>()))
+            .Callback<GameSnapshot, ResourceType>((_, gift) =>
             {
                 EventLog.Add("OnWeeklyGift");
                 WeeklyGiftTypes.Add(gift);
             });
-        Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback<GameTime, Location, IReadOnlyList<Passenger>>((t, loc, passengers) =>
+        Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+            .Callback<GameSnapshot, Location, IReadOnlyList<Passenger>>((snapshot, loc, passengers) =>
             {
                 EventLog.Add("OnPassengerWaiting");
-                PassengerWaitingCalls.Add(new PassengerWaitingEvent(t, loc, passengers.ToList().AsReadOnly()));
+                PassengerWaitingCalls.Add(new PassengerWaitingEvent(snapshot.Time, loc, passengers.ToList().AsReadOnly()));
             });
-        Runner.Setup(r => r.OnStationOverrun(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+        Runner.Setup(r => r.OnStationOverrun(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
             .Callback(() => EventLog.Add("OnStationOverrun"));
-        Runner.Setup(r => r.OnGameOver(It.IsAny<GameTime>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+        Runner.Setup(r => r.OnGameOver(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
             .Callback(() => EventLog.Add("OnGameOver"));
-        Runner.Setup(r => r.OnDayStart(It.IsAny<GameTime>()))
-            .Callback<GameTime>(t =>
+        Runner.Setup(r => r.OnDayStart(It.IsAny<GameSnapshot>()))
+            .Callback<GameSnapshot>(snapshot =>
             {
-                DayStartCalls.Add(t);
+                DayStartCalls.Add(snapshot.Time);
                 EventLog.Add("OnDayStart");
             });
-        Runner.Setup(r => r.OnHourTick(It.IsAny<GameTime>()))
-            .Callback<GameTime>(t =>
+        Runner.Setup(r => r.OnHourTick(It.IsAny<GameSnapshot>()))
+            .Callback<GameSnapshot>(snapshot =>
             {
-                HourTickCalls.Add(t);
+                HourTickCalls.Add(snapshot.Time);
                 EventLog.Add("OnHourTick");
                 if (CancelAfterHours.HasValue && HourTickCalls.Count >= CancelAfterHours.Value)
                     Cts.Cancel();

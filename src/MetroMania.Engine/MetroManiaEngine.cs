@@ -30,20 +30,7 @@ public class MetroManiaEngine
     public GameSnapshot RunForHours(IMetroManiaRunner runner, Level level, int targetHours, CancellationToken cancellationToken = default)
     {
         var sim = RunSimulation(runner, level, targetHours, cancellationToken);
-
-        return new GameSnapshot
-        {
-            Time = sim.Time,
-            TotalHoursElapsed = sim.HoursElapsed,
-            GameOver = sim.GameOver,
-            Stations = sim.ActiveStations.ToDictionary(
-                kvp => kvp.Key,
-                kvp => new StationSnapshot
-                {
-                    Type = kvp.Value.Type,
-                    Passengers = [.. kvp.Value.Passengers]
-                })
-        };
+        return CreateSnapshot(sim.Time, sim.HoursElapsed, sim.GameOver, sim.ActiveStations, sim.TotalScore);
     }
 
     private SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? targetHours = null, CancellationToken cancellationToken = default)
@@ -53,6 +40,7 @@ public class MetroManiaEngine
         var stationTypes = Enum.GetValues<StationType>();
 
         int totalPassengersSpawned = 0;
+        int totalScore = 0;
         int hoursElapsed = 0;
         var time = new GameTime(0, 0, default);
         bool gameOver = false;
@@ -74,8 +62,11 @@ public class MetroManiaEngine
                     var location = new Location(spawn.GridX, spawn.GridY);
                     if (day == spawn.SpawnDelayDays + 1 && !activeStations.ContainsKey(location))
                     {
-                        activeStations[location] = new StationState(spawn.StationType, spawn.PassengerSpawnPhases, day);
-                        runner.OnStationSpawned(time, location, spawn.StationType);
+                        var stationId = NextGuid(random);
+                        activeStations[location] = new StationState(stationId, spawn.StationType, spawn.PassengerSpawnPhases, day);
+                        runner.OnStationSpawned(
+                            CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore),
+                            stationId, location, spawn.StationType);
                     }
                 }
 
@@ -89,7 +80,9 @@ public class MetroManiaEngine
                         ? giftOverride.ResourceType
                         : (ResourceType)random.Next(3);
 
-                    runner.OnWeeklyGift(time, gift);
+                    runner.OnWeeklyGift(
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore),
+                        gift);
                 }
             }
 
@@ -116,7 +109,9 @@ public class MetroManiaEngine
                     state.Passengers.Add(new Passenger(destType));
                     totalPassengersSpawned++;
 
-                    runner.OnPassengerWaiting(time, location, state.Passengers.AsReadOnly());
+                    runner.OnPassengerWaiting(
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore),
+                        location, state.Passengers.AsReadOnly());
                 }
             }
 
@@ -124,14 +119,18 @@ public class MetroManiaEngine
             {
                 if (state.Passengers.Count >= 20)
                 {
-                    runner.OnGameOver(time, location, state.Passengers.AsReadOnly());
                     gameOver = true;
+                    runner.OnGameOver(
+                        CreateSnapshot(time, hoursElapsed, true, activeStations, totalScore),
+                        location, state.Passengers.AsReadOnly());
                     break;
                 }
 
                 if (state.Passengers.Count >= 10)
                 {
-                    runner.OnStationOverrun(time, location, state.Passengers.AsReadOnly());
+                    runner.OnStationOverrun(
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore),
+                        location, state.Passengers.AsReadOnly());
                 }
             }
 
@@ -140,15 +139,45 @@ public class MetroManiaEngine
             // Phase 2: OnDayStart — fire second
             if (isDayStart)
             {
-                runner.OnDayStart(time);
+                runner.OnDayStart(
+                    CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore));
             }
 
             // Phase 3: OnHourTick — fire last
-            runner.OnHourTick(time);
+            runner.OnHourTick(
+                CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore));
             hoursElapsed++;
         }
 
-        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, activeStations);
+        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations);
+    }
+
+    private static Guid NextGuid(Random random)
+    {
+        Span<byte> bytes = stackalloc byte[16];
+        random.NextBytes(bytes);
+        return new Guid(bytes);
+    }
+
+    private static GameSnapshot CreateSnapshot(
+        GameTime time, int hoursElapsed, bool gameOver,
+        Dictionary<Location, StationState> activeStations, int totalScore)
+    {
+        return new GameSnapshot
+        {
+            Time = time,
+            TotalHoursElapsed = hoursElapsed,
+            GameOver = gameOver,
+            TotalScore = totalScore,
+            Stations = activeStations.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new StationSnapshot
+                {
+                    Id = kvp.Value.Id,
+                    Type = kvp.Value.Type,
+                    Passengers = [.. kvp.Value.Passengers]
+                })
+        };
     }
 
     private record SimulationResult(
@@ -156,10 +185,12 @@ public class MetroManiaEngine
         int HoursElapsed,
         bool GameOver,
         int TotalPassengersSpawned,
+        int TotalScore,
         Dictionary<Location, StationState> ActiveStations);
 
-    private class StationState(StationType type, List<PassengerSpawnPhase> phases, int spawnedOnDay)
+    private class StationState(Guid id, StationType type, List<PassengerSpawnPhase> phases, int spawnedOnDay)
     {
+        public Guid Id { get; } = id;
         public StationType Type { get; } = type;
         public List<PassengerSpawnPhase> Phases { get; } = phases;
         public int SpawnedOnDay { get; } = spawnedOnDay;

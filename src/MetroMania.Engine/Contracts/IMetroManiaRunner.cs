@@ -8,35 +8,35 @@ public interface IMetroManiaRunner
     /// <summary>
     /// Called every hour of the game. The player must return an action to perform.
     /// </summary>
-    PlayerAction OnHourTick(GameTime time);
+    PlayerAction OnHourTick(GameSnapshot snapshot);
 
     /// <summary>
-    /// Called at the start of each new day with the current game time.
+    /// Called at the start of each new day with the current game snapshot.
     /// </summary>
-    void OnDayStart(GameTime time);
+    void OnDayStart(GameSnapshot snapshot);
 
     /// <summary>
     /// Called every Monday at 0h when the player receives a new resource.
     /// </summary>
-    void OnWeeklyGift(GameTime time, ResourceType gift);
+    void OnWeeklyGift(GameSnapshot snapshot, ResourceType gift);
 
     /// <summary>
     /// Called when a new station appears on the map.
     /// </summary>
-    void OnStationSpawned(GameTime time, Location location, StationType stationType);
+    void OnStationSpawned(GameSnapshot snapshot, Guid stationId, Location location, StationType stationType);
 
     /// <summary>
     /// Called when a station has a new passenger waiting to be picked up.
     /// </summary>
-    void OnPassengerWaiting(GameTime time, Location location, IReadOnlyList<Passenger> passengers);
+    void OnPassengerWaiting(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers);
 
     /// <summary>
     /// Called when a station is getting overrun by passengers (10+).
     /// </summary>
-    void OnStationOverrun(GameTime time, Location location, IReadOnlyList<Passenger> passengers);
+    void OnStationOverrun(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers);
 
     /// <summary>
     /// Called when the game is over because a station has too many passengers not picked up (20+).
     /// </summary>
-    void OnGameOver(GameTime time, Location location, IReadOnlyList<Passenger> passengers);
+    void OnGameOver(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers);
 }
