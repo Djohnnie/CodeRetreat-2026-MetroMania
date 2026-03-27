@@ -180,6 +180,32 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
         Assert.Equal(ctx.LastCreatedLineId, vehicle.Line.LineId);
     }
 
+    [Then(@"the active vehicle should reference its resource")]
+    public void ThenTheActiveVehicleShouldReferenceItsResource()
+    {
+        var vehicle = Assert.Single(ctx.Snapshot!.Vehicles);
+        Assert.NotNull(vehicle.Resource);
+        Assert.Equal(vehicle.VehicleId, vehicle.Resource.Id);
+        Assert.True(vehicle.Resource.InUse);
+    }
+
+    [Then(@"the active line should reference its resource")]
+    public void ThenTheActiveLineShouldReferenceItsResource()
+    {
+        var line = Assert.Single(ctx.Snapshot!.Lines);
+        Assert.NotNull(line.Resource);
+        Assert.Equal(line.LineId, line.Resource.Id);
+        Assert.True(line.Resource.InUse);
+    }
+
+    [Then(@"the active vehicle at station \((\d+),(\d+)\) should reference the station snapshot")]
+    public void ThenTheActiveVehicleAtStationShouldReferenceTheStationSnapshot(int x, int y)
+    {
+        var vehicle = Assert.Single(ctx.Snapshot!.Vehicles);
+        Assert.NotNull(vehicle.Station);
+        Assert.Equal(ctx.StationIdsByLocation[new Location(x, y)], vehicle.Station.Id);
+    }
+
     // --- Then steps: lines/vehicles ---
 
     [Then(@"the snapshot should have (\d+) active lines?")]

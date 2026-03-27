@@ -30,12 +30,13 @@ public class MetroManiaEngine
     public GameSnapshot RunForHours(IMetroManiaRunner runner, Level level, int targetHours, CancellationToken cancellationToken = default)
     {
         var sim = RunSimulation(runner, level, targetHours, cancellationToken);
-        return CreateSnapshot(sim.Time, sim.HoursElapsed, sim.GameOver, sim.ActiveStations, sim.TotalScore, sim.Resources, sim.Lines, sim.Vehicles);
+        return CreateSnapshot(sim.Time, sim.HoursElapsed, sim.GameOver, sim.ActiveStations, sim.TotalScore, sim.Resources, sim.Lines, sim.Vehicles, sim.VehicleCapacity);
     }
 
     private SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? targetHours = null, CancellationToken cancellationToken = default)
     {
         var random = new Random(level.LevelData.Seed);
+        var vehicleCapacity = level.LevelData.VehicleCapacity;
         var activeStations = new Dictionary<Location, StationState>();
 
         // Initialize starting resources: 1 line and 1 vehicle
@@ -73,7 +74,7 @@ public class MetroManiaEngine
                         var stationId = NextGuid(random);
                         activeStations[location] = new StationState(stationId, spawn.StationType, spawn.PassengerSpawnPhases, day);
                         runner.OnStationSpawned(
-                            CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles),
+                            CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
                             stationId, location, spawn.StationType);
                     }
                 }
@@ -91,7 +92,7 @@ public class MetroManiaEngine
                     resources.Add(new ResourceState(NextGuid(random), gift));
 
                     runner.OnWeeklyGift(
-                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles),
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
                         gift);
                 }
             }
@@ -127,7 +128,7 @@ public class MetroManiaEngine
                     totalPassengersSpawned++;
 
                     runner.OnPassengerWaiting(
-                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles),
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
                         location, state.Passengers.AsReadOnly());
                 }
             }
@@ -138,7 +139,7 @@ public class MetroManiaEngine
                 {
                     gameOver = true;
                     runner.OnGameOver(
-                        CreateSnapshot(time, hoursElapsed, true, activeStations, totalScore, resources, lines, vehicles),
+                        CreateSnapshot(time, hoursElapsed, true, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
                         location, state.Passengers.AsReadOnly());
                     break;
                 }
@@ -146,7 +147,7 @@ public class MetroManiaEngine
                 if (state.Passengers.Count >= 10)
                 {
                     runner.OnStationOverrun(
-                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles),
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
                         location, state.Passengers.AsReadOnly());
                 }
             }
@@ -157,7 +158,7 @@ public class MetroManiaEngine
             if (isDayStart)
             {
                 runner.OnDayStart(
-                    CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles));
+                    CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
             }
 
             // Move vehicles along their lines before the player acts
@@ -165,12 +166,12 @@ public class MetroManiaEngine
 
             // Phase 3: OnHourTick — fire last, then process the player's action
             var action = runner.OnHourTick(
-                CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles));
+                CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
             ProcessAction(action, resources, lines, vehicles);
             hoursElapsed++;
         }
 
-        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations, resources, lines, vehicles);
+        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations, resources, lines, vehicles, vehicleCapacity);
     }
 
     private static void ProcessAction(PlayerAction action, List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles)
@@ -282,7 +283,8 @@ public class MetroManiaEngine
     private static GameSnapshot CreateSnapshot(
         GameTime time, int hoursElapsed, bool gameOver,
         Dictionary<Location, StationState> activeStations, int totalScore,
-        List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles)
+        List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles,
+        int vehicleCapacity)
     {
         var snapshot = new GameSnapshot
         {
@@ -322,7 +324,8 @@ public class MetroManiaEngine
                     SegmentIndex = v.SegmentIndex,
                     Progress = v.Direction == -1 ? 1.0f - v.Progress : v.Progress,
                     Direction = v.Direction,
-                    StationId = stationId
+                    StationId = stationId,
+                    Capacity = vehicleCapacity
                 };
             }).ToList().AsReadOnly()
         };
@@ -346,7 +349,8 @@ public class MetroManiaEngine
         Dictionary<Location, StationState> ActiveStations,
         List<ResourceState> Resources,
         List<LineState> Lines,
-        List<VehicleState> Vehicles);
+        List<VehicleState> Vehicles,
+        int VehicleCapacity);
 
     private static void MoveVehicles(
         List<VehicleState> vehicles, List<LineState> lines,

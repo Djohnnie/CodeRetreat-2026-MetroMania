@@ -117,6 +117,12 @@ public class LineSnapshot
     public IReadOnlyList<VehicleSnapshot> Vehicles =>
         Snapshot?.Vehicles.Where(v => v.LineId == LineId).ToList()
         ?? [];
+
+    /// <summary>
+    /// The resource backing this line.
+    /// </summary>
+    public ResourceSnapshot? Resource =>
+        Snapshot?.Resources.FirstOrDefault(r => r.Id == LineId);
 }
 
 /// <summary>
@@ -135,6 +141,11 @@ public class VehicleSnapshot
     public required int Direction { get; init; }
     public required Guid? StationId { get; init; }
 
+    /// <summary>
+    /// Maximum number of passengers this vehicle can carry.
+    /// </summary>
+    public required int Capacity { get; init; }
+
     internal GameSnapshot? Snapshot { get; set; }
 
     /// <summary>
@@ -142,4 +153,17 @@ public class VehicleSnapshot
     /// </summary>
     public LineSnapshot? Line =>
         Snapshot?.Lines.FirstOrDefault(l => l.LineId == LineId);
+
+    /// <summary>
+    /// The station the vehicle is currently at, or null when mid-segment.
+    /// </summary>
+    public StationSnapshot? Station =>
+        StationId is null ? null
+        : Snapshot?.Stations.Values.FirstOrDefault(s => s.Id == StationId.Value);
+
+    /// <summary>
+    /// The resource (Train/Wagon) backing this vehicle.
+    /// </summary>
+    public ResourceSnapshot? Resource =>
+        Snapshot?.Resources.FirstOrDefault(r => r.Id == VehicleId);
 }

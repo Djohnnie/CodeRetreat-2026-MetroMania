@@ -84,3 +84,6 @@ Feature: Player Actions
         When the simulation runs for 4 hours
         Then the active line should have 1 vehicle
         And the active vehicle should reference the created line
+        And the active vehicle should reference its resource
+        And the active line should reference its resource
+        And the active vehicle at station (0,0) should reference the station snapshot

@@ -163,6 +163,7 @@
   <data name="FrequencyInHours" xml:space="preserve"><value>Elke N Uren</value></data>
   <data name="AddPhase" xml:space="preserve"><value>Fase Toevoegen</value></data>
   <data name="Seed" xml:space="preserve"><value>Seed</value></data>
+  <data name="VehicleCapacity" xml:space="preserve"><value>Voertuigcapaciteit</value></data>
   <data name="Save" xml:space="preserve"><value>Opslaan</value></data>
 
   <!-- Submission Management -->

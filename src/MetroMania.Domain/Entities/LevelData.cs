@@ -16,6 +16,12 @@ public class LevelData
     /// </summary>
     public int Seed { get; set; }
 
+    /// <summary>
+    /// Maximum number of passengers a single vehicle (train or wagon) can carry.
+    /// Applies equally to both trains and wagons. Default is 6.
+    /// </summary>
+    public int VehicleCapacity { get; set; } = 6;
+
     public List<MetroStation> Stations { get; set; } = [];
     public List<Water> WaterTiles { get; set; } = [];
 

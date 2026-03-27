@@ -163,6 +163,7 @@
   <data name="FrequencyInHours" xml:space="preserve"><value>Every N Hours</value></data>
   <data name="AddPhase" xml:space="preserve"><value>Add Phase</value></data>
   <data name="Seed" xml:space="preserve"><value>Seed</value></data>
+  <data name="VehicleCapacity" xml:space="preserve"><value>Vehicle Capacity</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
 
   <!-- Submission Management -->

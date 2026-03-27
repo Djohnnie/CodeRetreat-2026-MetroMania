@@ -601,6 +601,15 @@ namespace MetroMania.Engine.Tests.Features
 #line 86
         await testRunner.AndAsync("the active vehicle should reference the created line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
+#line 87
+        await testRunner.AndAsync("the active vehicle should reference its resource", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 88
+        await testRunner.AndAsync("the active line should reference its resource", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 89
+        await testRunner.AndAsync("the active vehicle at station (0,0) should reference the station snapshot", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
             }
             await this.ScenarioCleanupAsync();
         }
