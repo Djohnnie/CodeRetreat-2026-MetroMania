@@ -28,6 +28,29 @@ public class WagonManagementStepDefinitions(EngineTestContext ctx)
         });
     }
 
+    [Given(@"the player will then add first wagon to the train")]
+    public void GivenThePlayerWillThenAddFirstWagonToTheTrain()
+    {
+        GivenThePlayerWillThenAddAWagonToTheTrain();
+    }
+
+    [Given(@"the player will then add second wagon to the train")]
+    public void GivenThePlayerWillThenAddSecondWagonToTheTrain()
+    {
+        ctx.PendingActions.Add(snapshot =>
+        {
+            if (ctx.LastAddedVehicleId is null) return null;
+            if (snapshot.Vehicles.All(v => v.VehicleId != ctx.LastAddedVehicleId)) return null;
+
+            var wagon = snapshot.AvailableResources
+                .FirstOrDefault(r => r.Type == ResourceType.Wagon && r.Id != ctx.LastAddedWagonId);
+            if (wagon is null) return null;
+
+            ctx.SecondAddedWagonId = wagon.Id;
+            return new AddWagonToTrain(wagon.Id, ctx.LastAddedVehicleId.Value);
+        });
+    }
+
     [Given(@"the player will then add a wagon to a random train id")]
     public void GivenThePlayerWillThenAddAWagonToARandomTrainId()
     {
@@ -137,6 +160,18 @@ public class WagonManagementStepDefinitions(EngineTestContext ctx)
 
             // Source is second train (which does NOT own the wagon) — should be ignored
             return new MoveWagonBetweenTrains(ctx.LastAddedWagonId.Value, _secondTrainId.Value, ctx.LastAddedVehicleId.Value);
+        });
+    }
+
+    [Given(@"the player will then move the wagon from the first train to the first train")]
+    public void GivenThePlayerWillThenMoveTheWagonFromFirstToFirst()
+    {
+        ctx.PendingActions.Add(snapshot =>
+        {
+            if (ctx.LastAddedWagonId is null || ctx.LastAddedVehicleId is null) return null;
+            if (snapshot.Vehicles.All(v => v.VehicleId != ctx.LastAddedVehicleId)) return null;
+
+            return new MoveWagonBetweenTrains(ctx.LastAddedWagonId.Value, ctx.LastAddedVehicleId.Value, ctx.LastAddedVehicleId.Value);
         });
     }
 

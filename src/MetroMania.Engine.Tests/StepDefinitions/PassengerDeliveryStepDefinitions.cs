@@ -77,4 +77,28 @@ public class PassengerDeliveryStepDefinitions(EngineTestContext ctx)
     {
         Assert.True(ctx.DwellTimeObserved, "Expected the vehicle to dwell at a station but it never did");
     }
+
+    [Then(@"the total score should be (\d+)")]
+    public void ThenTheTotalScoreShouldBe(int expected)
+    {
+        Assert.Equal(expected, ctx.Snapshot!.TotalScore);
+    }
+
+    [Then(@"the station at \((\d+),(\d+)\) should have at least (\d+) passengers")]
+    public void ThenTheStationShouldHaveAtLeastPassengers(int x, int y, int minCount)
+    {
+        var station = ctx.Snapshot!.Stations[new Location(x, y)];
+        Assert.True(station.Passengers.Count >= minCount,
+            $"Expected at least {minCount} passengers at ({x},{y}), but was {station.Passengers.Count}");
+    }
+
+    [Then(@"no vehicle should carry a (\w+) passenger")]
+    public void ThenNoVehicleShouldCarryPassengerOfType(string typeName)
+    {
+        var destType = Enum.Parse<StationType>(typeName);
+        foreach (var vehicle in ctx.Snapshot!.Vehicles)
+        {
+            Assert.DoesNotContain(vehicle.Passengers, p => p.DestinationType == destType);
+        }
+    }
 }

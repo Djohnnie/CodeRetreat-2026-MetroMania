@@ -266,7 +266,9 @@ public class MetroManiaEngine
 
             case ExtendLine extendLine:
                 var lineToExtend = lines.FirstOrDefault(l => l.ResourceId == extendLine.LineId);
-                if (lineToExtend is not null && lineToExtend.StationIds.Count > 0)
+                if (lineToExtend is not null && lineToExtend.StationIds.Count > 0
+                    && extendLine.FromStationId != extendLine.ToStationId
+                    && !lineToExtend.StationIds.Contains(extendLine.ToStationId))
                 {
                     if (lineToExtend.StationIds[0] == extendLine.FromStationId)
                         lineToExtend.StationIds.Insert(0, extendLine.ToStationId);

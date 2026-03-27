@@ -106,7 +106,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PlayerActionEdgeCases.feature.ndjson", 9);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PlayerActionEdgeCases.feature.ndjson", 11);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -491,6 +491,101 @@ namespace MetroMania.Engine.Tests.Features
 #line hidden
 #line 79
         await testRunner.AndAsync("the snapshot should have 0 available lines", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a non-existent vehicle is silently ignored")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
+        [global::Xunit.TraitAttribute("Description", "Removing a non-existent vehicle is silently ignored")]
+        public async global::System.Threading.Tasks.Task RemovingANon_ExistentVehicleIsSilentlyIgnored()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Removing a non-existent vehicle is silently ignored", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 81
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 82
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 83
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 84
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 85
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 86
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 87
+        await testRunner.AndAsync("the player will attempt to remove a vehicle with a random id", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 88
+        await testRunner.WhenAsync("the simulation runs for 5 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 89
+        await testRunner.ThenAsync("the snapshot should have 1 active vehicle", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Extending a line with the same station twice is ignored")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
+        [global::Xunit.TraitAttribute("Description", "Extending a line with the same station twice is ignored")]
+        public async global::System.Threading.Tasks.Task ExtendingALineWithTheSameStationTwiceIsIgnored()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Extending a line with the same station twice is ignored", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 91
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 92
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 93
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 94
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 95
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 96
+        await testRunner.AndAsync("the player will then extend the created line from station (1,0) to station (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 97
+        await testRunner.WhenAsync("the simulation runs for 4 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 98
+        await testRunner.ThenAsync("the active line should connect stations (0,0) and (1,0) in order", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

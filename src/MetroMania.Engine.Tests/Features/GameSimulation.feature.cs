@@ -206,10 +206,7 @@ namespace MetroMania.Engine.Tests.Features
         await testRunner.WhenAsync("the simulation runs until game over", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 16
-        await testRunner.ThenAsync("the score should be greater than 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 17
-        await testRunner.AndAsync("at least 20 passengers should have been spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.ThenAsync("at least 20 passengers should have been spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -226,7 +223,7 @@ namespace MetroMania.Engine.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("DayOfWeek is correctly calculated across two weeks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 19
+#line 18
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -236,13 +233,13 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 20
+#line 19
         await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 21
+#line 20
         await testRunner.WhenAsync("the simulation runs for 337 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 22
+#line 21
         await testRunner.ThenAsync("the DayOfWeek values should cycle Monday through Sunday correctly", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }

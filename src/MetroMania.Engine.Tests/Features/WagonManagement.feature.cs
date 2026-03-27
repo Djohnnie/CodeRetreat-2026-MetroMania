@@ -127,7 +127,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/WagonManagement.feature.ndjson", 11);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/WagonManagement.feature.ndjson", 13);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -552,6 +552,89 @@ namespace MetroMania.Engine.Tests.Features
 #line hidden
 #line 78
         await testRunner.AndAsync("the train should reference the wagon via navigation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Adding multiple wagons to a single train increases capacity proportionally")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
+        [global::Xunit.TraitAttribute("Description", "Adding multiple wagons to a single train increases capacity proportionally")]
+        public async global::System.Threading.Tasks.Task AddingMultipleWagonsToASingleTrainIncreasesCapacityProportionally()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Adding multiple wagons to a single train increases capacity proportionally", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 80
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 5
+    await this.FeatureBackgroundAsync();
+#line hidden
+#line 81
+        await testRunner.GivenAsync("a weekly gift override for week 2 with resource type Wagon", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 82
+        await testRunner.AndAsync("the player will then add a wagon to the train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 83
+        await testRunner.AndAsync("the player will then add second wagon to the train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 84
+        await testRunner.WhenAsync("the simulation runs for 400 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 85
+        await testRunner.ThenAsync("the train should have 2 wagons attached", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Moving a wagon to the same train it is already on is ignored")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
+        [global::Xunit.TraitAttribute("Description", "Moving a wagon to the same train it is already on is ignored")]
+        public async global::System.Threading.Tasks.Task MovingAWagonToTheSameTrainItIsAlreadyOnIsIgnored()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Moving a wagon to the same train it is already on is ignored", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 87
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 5
+    await this.FeatureBackgroundAsync();
+#line hidden
+#line 88
+        await testRunner.GivenAsync("the player will then add a wagon to the train", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 89
+        await testRunner.AndAsync("the player will then move the wagon from the first train to the first train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 90
+        await testRunner.WhenAsync("the simulation runs for 400 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 91
+        await testRunner.ThenAsync("the first train should have 1 wagon attached", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

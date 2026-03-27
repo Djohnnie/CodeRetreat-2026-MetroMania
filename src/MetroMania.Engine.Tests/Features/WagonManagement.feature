@@ -76,3 +76,16 @@ Feature: Wagon Management
         When the simulation runs for 5 hours
         Then the wagon should reference the train via navigation
         And the train should reference the wagon via navigation
+
+    Scenario: Adding multiple wagons to a single train increases capacity proportionally
+        Given a weekly gift override for week 2 with resource type Wagon
+        And the player will then add a wagon to the train
+        And the player will then add second wagon to the train
+        When the simulation runs for 400 hours
+        Then the train should have 2 wagons attached
+
+    Scenario: Moving a wagon to the same train it is already on is ignored
+        Given the player will then add a wagon to the train
+        And the player will then move the wagon from the first train to the first train
+        When the simulation runs for 400 hours
+        Then the first train should have 1 wagon attached

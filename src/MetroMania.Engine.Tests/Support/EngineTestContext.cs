@@ -47,7 +47,9 @@ public class EngineTestContext
     // Tracks the last line created (for follow-up actions like AddVehicle, RemoveLine)
     public Guid? LastCreatedLineId { get; set; }
     public Guid? LastAddedVehicleId { get; set; }
+    public Guid? SecondAddedVehicleId { get; set; }
     public Guid? LastAddedWagonId { get; set; }
+    public Guid? SecondAddedWagonId { get; set; }
 
     // Passenger delivery tracking
     public int MaxPassengersOnboard { get; set; }

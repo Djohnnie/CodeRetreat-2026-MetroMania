@@ -77,3 +77,22 @@ Feature: Player Action Edge Cases
         When the simulation runs for 5 hours
         Then the snapshot should have 2 active lines
         And the snapshot should have 0 available lines
+
+    Scenario: Removing a non-existent vehicle is silently ignored
+        Given a level with a Circle station at (0,0) with a spawn delay of 0 days
+        And a level with a Triangle station at (1,0) with a spawn delay of 0 days
+        And a weekly gift override for week 1 with resource type Line
+        And the player will create a line connecting stations at (0,0) and (1,0)
+        And the player will then add a vehicle to the created line at station (0,0)
+        And the player will attempt to remove a vehicle with a random id
+        When the simulation runs for 5 hours
+        Then the snapshot should have 1 active vehicle
+
+    Scenario: Extending a line with the same station twice is ignored
+        Given a level with a Circle station at (0,0) with a spawn delay of 0 days
+        And a level with a Triangle station at (1,0) with a spawn delay of 0 days
+        And a weekly gift override for week 1 with resource type Line
+        And the player will create a line connecting stations at (0,0) and (1,0)
+        And the player will then extend the created line from station (1,0) to station (1,0)
+        When the simulation runs for 4 hours
+        Then the active line should connect stations (0,0) and (1,0) in order

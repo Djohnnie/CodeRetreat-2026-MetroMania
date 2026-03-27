@@ -120,6 +120,12 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
         ctx.PendingActions.Add(_ => new RemoveLine(Guid.NewGuid()));
     }
 
+    [Given(@"the player will attempt to remove a vehicle with a random id")]
+    public void GivenThePlayerWillAttemptToRemoveAVehicleWithARandomId()
+    {
+        ctx.PendingActions.Add(_ => new RemoveVehicle(Guid.NewGuid()));
+    }
+
     // --- Then steps: connectivity ---
 
     [Then(@"the snapshot should have (\d+) connected stations?")]

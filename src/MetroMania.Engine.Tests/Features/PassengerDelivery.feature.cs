@@ -108,7 +108,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PassengerDelivery.feature.ndjson", 9);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PassengerDelivery.feature.ndjson", 20);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -475,6 +475,580 @@ namespace MetroMania.Engine.Tests.Features
 #line hidden
 #line 73
         await testRunner.ThenAsync("the vehicle should have experienced dwell time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Two trains on the same line both deliver passengers")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Two trains on the same line both deliver passengers")]
+        public async global::System.Threading.Tasks.Task TwoTrainsOnTheSameLineBothDeliverPassengers()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Two trains on the same line both deliver passengers", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 75
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 76
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 77
+        await testRunner.AndAsync("a level with a Triangle station at (2,0) with a spawn delay of 0 days and passeng" +
+                        "ers every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 78
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 79
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (2,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 80
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 81
+        await testRunner.AndAsync("the player will then add a second vehicle to the created line at station (2,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 82
+        await testRunner.WhenAsync("the simulation runs for 72 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 83
+        await testRunner.ThenAsync("the total score should be greater than 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 84
+        await testRunner.AndAsync("the snapshot should have 2 active vehicles", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Train with two wagons has triple capacity")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Train with two wagons has triple capacity")]
+        public async global::System.Threading.Tasks.Task TrainWithTwoWagonsHasTripleCapacity()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Train with two wagons has triple capacity", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 86
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 87
+        await testRunner.GivenAsync("a level with vehicle capacity 1", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 88
+        await testRunner.AndAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 89
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 90
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Wagon", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 91
+        await testRunner.AndAsync("a weekly gift override for week 2 with resource type Wagon", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 92
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 93
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 94
+        await testRunner.AndAsync("the player will then add first wagon to the train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 95
+        await testRunner.AndAsync("the player will then add second wagon to the train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 96
+        await testRunner.WhenAsync("the simulation runs for 100 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 97
+        await testRunner.ThenAsync("the vehicle should never have more than 3 passengers onboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 98
+        await testRunner.AndAsync("the total score should be greater than 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Train drops off multiple passengers at the same station")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Train drops off multiple passengers at the same station")]
+        public async global::System.Threading.Tasks.Task TrainDropsOffMultiplePassengersAtTheSameStation()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Train drops off multiple passengers at the same station", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 100
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 101
+        await testRunner.GivenAsync("a level with vehicle capacity 6", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 102
+        await testRunner.AndAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 103
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 104
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 105
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 106
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 107
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 108
+        await testRunner.ThenAsync("the total score should be at least 3", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Passengers accumulate when no line is connected")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Passengers accumulate when no line is connected")]
+        public async global::System.Threading.Tasks.Task PassengersAccumulateWhenNoLineIsConnected()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Passengers accumulate when no line is connected", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 110
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 111
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 112
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 113
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 114
+        await testRunner.WhenAsync("the simulation runs for 10 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 115
+        await testRunner.ThenAsync("the total score should be 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 116
+        await testRunner.AndAsync("the station at (0,0) should have at least 5 passengers", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Score does not increase without delivering to correct type")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Score does not increase without delivering to correct type")]
+        public async global::System.Threading.Tasks.Task ScoreDoesNotIncreaseWithoutDeliveringToCorrectType()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "11";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Score does not increase without delivering to correct type", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 118
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 119
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 120
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 121
+        await testRunner.AndAsync("a level with a Diamond station at (9,9) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 122
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 123
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 124
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 125
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 126
+        await testRunner.ThenAsync("no vehicle should carry a Diamond passenger", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Train picks up passengers from both directions during ping-pong")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Train picks up passengers from both directions during ping-pong")]
+        public async global::System.Threading.Tasks.Task TrainPicksUpPassengersFromBothDirectionsDuringPing_Pong()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "12";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Train picks up passengers from both directions during ping-pong", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 128
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 129
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 130
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days and passeng" +
+                        "ers every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 131
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 132
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 133
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 134
+        await testRunner.WhenAsync("the simulation runs for 72 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 135
+        await testRunner.ThenAsync("the total score should be at least 2", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Multiple trains on a three-station line deliver efficiently")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Multiple trains on a three-station line deliver efficiently")]
+        public async global::System.Threading.Tasks.Task MultipleTrainsOnAThree_StationLineDeliverEfficiently()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "13";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Multiple trains on a three-station line deliver efficiently", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 137
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 138
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 4 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 139
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days and passeng" +
+                        "ers every 4 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 140
+        await testRunner.AndAsync("a level with a Diamond station at (2,0) with a spawn delay of 0 days and passenge" +
+                        "rs every 4 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 141
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 142
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 143
+        await testRunner.AndAsync("the player will then extend the created line from station (1,0) to station (2,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 144
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 145
+        await testRunner.AndAsync("the player will then add a second vehicle to the created line at station (2,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 146
+        await testRunner.WhenAsync("the simulation runs for 120 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 147
+        await testRunner.ThenAsync("the total score should be at least 3", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a vehicle while carrying passengers loses them")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Removing a vehicle while carrying passengers loses them")]
+        public async global::System.Threading.Tasks.Task RemovingAVehicleWhileCarryingPassengersLosesThem()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "14";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Removing a vehicle while carrying passengers loses them", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 149
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 150
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 151
+        await testRunner.AndAsync("a level with a Triangle station at (3,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 152
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 153
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 154
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 155
+        await testRunner.AndAsync("the player will then remove the added vehicle", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 156
+        await testRunner.WhenAsync("the simulation runs for 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 157
+        await testRunner.ThenAsync("the snapshot should have 0 active vehicles", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 158
+        await testRunner.AndAsync("the snapshot should have 1 available vehicle", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Train does not exceed capacity even with many passengers waiting")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Train does not exceed capacity even with many passengers waiting")]
+        public async global::System.Threading.Tasks.Task TrainDoesNotExceedCapacityEvenWithManyPassengersWaiting()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "15";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Train does not exceed capacity even with many passengers waiting", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 160
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 161
+        await testRunner.GivenAsync("a level with vehicle capacity 2", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 162
+        await testRunner.AndAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 163
+        await testRunner.AndAsync("a level with a Triangle station at (5,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 164
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 165
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (5,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 166
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 167
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 168
+        await testRunner.ThenAsync("the vehicle should never have more than 2 passengers onboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Passengers at disconnected station are not picked up by trains on other lines")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Passengers at disconnected station are not picked up by trains on other lines")]
+        public async global::System.Threading.Tasks.Task PassengersAtDisconnectedStationAreNotPickedUpByTrainsOnOtherLines()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "16";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Passengers at disconnected station are not picked up by trains on other lines", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 170
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 171
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 172
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days and passeng" +
+                        "ers every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 173
+        await testRunner.AndAsync("a level with a Diamond station at (9,9) with a spawn delay of 0 days and passenge" +
+                        "rs every 6 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 174
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 175
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 176
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 177
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 178
+        await testRunner.ThenAsync("the station at (9,9) should have at least 1 passengers", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Active train prevents game over by picking up passengers")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
+        [global::Xunit.TraitAttribute("Description", "Active train prevents game over by picking up passengers")]
+        public async global::System.Threading.Tasks.Task ActiveTrainPreventsGameOverByPickingUpPassengers()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "17";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Active train prevents game over by picking up passengers", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 180
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 181
+        await testRunner.GivenAsync("a level with vehicle capacity 6", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 182
+        await testRunner.AndAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 4 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 183
+        await testRunner.AndAsync("a level with a Triangle station at (1,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 184
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 185
+        await testRunner.AndAsync("the player will create a line connecting stations at (0,0) and (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 186
+        await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 187
+        await testRunner.WhenAsync("the simulation runs for 100 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 188
+        await testRunner.ThenAsync("\"OnGameOver\" should have fired exactly 0 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 189
+        await testRunner.AndAsync("the total score should be greater than 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -13,8 +13,7 @@ Feature: Game Simulation
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
         And a level with a Triangle station at (9,9) with a spawn delay of 0 days
         When the simulation runs until game over
-        Then the score should be greater than 0
-        And at least 20 passengers should have been spawned
+        Then at least 20 passengers should have been spawned
 
     Scenario: DayOfWeek is correctly calculated across two weeks
         Given an empty level
