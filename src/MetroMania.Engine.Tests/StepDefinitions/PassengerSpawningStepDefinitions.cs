@@ -92,4 +92,18 @@ public class PassengerSpawningStepDefinitions(EngineTestContext ctx)
             Assert.Equal(exp.PassengerCount, actual.Passengers.Count);
         }
     }
+
+    [Then(@"all passengers should have a destination type different from their origin station type")]
+    public void ThenAllPassengersShouldHaveDifferentDestinationType()
+    {
+        Assert.NotEmpty(ctx.PassengerWaitingCalls);
+        foreach (var evt in ctx.PassengerWaitingCalls)
+        {
+            var stationDef = ctx.Stations.First(s => s.GridX == evt.Location.X && s.GridY == evt.Location.Y);
+            foreach (var passenger in evt.Passengers)
+            {
+                Assert.NotEqual(stationDef.StationType, passenger.DestinationType);
+            }
+        }
+    }
 }

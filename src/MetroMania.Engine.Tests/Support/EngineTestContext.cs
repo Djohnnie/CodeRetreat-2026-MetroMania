@@ -10,6 +10,10 @@ public record PassengerWaitingEvent(GameTime Time, Location Location, IReadOnlyL
 
 public record WeeklyGiftEvent(GameSnapshot Snapshot, ResourceType Gift);
 
+public record OverrunEvent(GameTime Time, Location Location, int PassengerCount);
+
+public record GameOverEvent(GameTime Time, Location Location, int PassengerCount);
+
 /// <summary>
 /// Shared scenario context holding the engine, mock runner, level configuration,
 /// simulation results, and a full event log captured via Moq callbacks.
@@ -34,6 +38,20 @@ public class EngineTestContext
     // Passenger spawn tracking
     public List<PassengerWaitingEvent> PassengerWaitingCalls { get; } = [];
 
+    // Station ID tracking (Location → Guid)
+    public Dictionary<Location, Guid> StationIdsByLocation { get; } = [];
+
+    // Player action scheduling
+    public List<Func<GameSnapshot, PlayerAction?>> PendingActions { get; } = [];
+
+    // Tracks the last line created (for follow-up actions like AddVehicle, RemoveLine)
+    public Guid? LastCreatedLineId { get; set; }
+    public Guid? LastAddedVehicleId { get; set; }
+
+    // Overrun and game over tracking
+    public List<OverrunEvent> OverrunCalls { get; } = [];
+    public List<GameOverEvent> GameOverCalls { get; } = [];
+
     // Weekly gift tracking for determinism tests
     public int Seed { get; set; } = 42;
     public List<ResourceType> WeeklyGiftTypes { get; } = [];
@@ -50,7 +68,11 @@ public class EngineTestContext
         Runner = new Mock<IMetroManiaRunner>();
 
         Runner.Setup(r => r.OnStationSpawned(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), It.IsAny<Location>(), It.IsAny<StationType>()))
-            .Callback(() => EventLog.Add("OnStationSpawned"));
+            .Callback<GameSnapshot, Guid, Location, StationType>((_, id, loc, _) =>
+            {
+                EventLog.Add("OnStationSpawned");
+                StationIdsByLocation[loc] = id;
+            });
         Runner.Setup(r => r.OnWeeklyGift(It.IsAny<GameSnapshot>(), It.IsAny<ResourceType>()))
             .Callback<GameSnapshot, ResourceType>((snapshot, gift) =>
             {
@@ -65,9 +87,17 @@ public class EngineTestContext
                 PassengerWaitingCalls.Add(new PassengerWaitingEvent(snapshot.Time, loc, passengers.ToList().AsReadOnly()));
             });
         Runner.Setup(r => r.OnStationOverrun(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback(() => EventLog.Add("OnStationOverrun"));
+            .Callback<GameSnapshot, Location, IReadOnlyList<Passenger>>((snapshot, loc, passengers) =>
+            {
+                EventLog.Add("OnStationOverrun");
+                OverrunCalls.Add(new OverrunEvent(snapshot.Time, loc, passengers.Count));
+            });
         Runner.Setup(r => r.OnGameOver(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
-            .Callback(() => EventLog.Add("OnGameOver"));
+            .Callback<GameSnapshot, Location, IReadOnlyList<Passenger>>((snapshot, loc, passengers) =>
+            {
+                EventLog.Add("OnGameOver");
+                GameOverCalls.Add(new GameOverEvent(snapshot.Time, loc, passengers.Count));
+            });
         Runner.Setup(r => r.OnDayStart(It.IsAny<GameSnapshot>()))
             .Callback<GameSnapshot>(snapshot =>
             {
@@ -75,14 +105,25 @@ public class EngineTestContext
                 EventLog.Add("OnDayStart");
             });
         Runner.Setup(r => r.OnHourTick(It.IsAny<GameSnapshot>()))
-            .Callback<GameSnapshot>(snapshot =>
+            .Returns<GameSnapshot>(snapshot =>
             {
                 HourTickCalls.Add(snapshot.Time);
                 EventLog.Add("OnHourTick");
                 if (CancelAfterHours.HasValue && HourTickCalls.Count >= CancelAfterHours.Value)
                     Cts.Cancel();
-            })
-            .Returns(PlayerAction.None);
+
+                for (int i = 0; i < PendingActions.Count; i++)
+                {
+                    var action = PendingActions[i](snapshot);
+                    if (action is not null)
+                    {
+                        PendingActions.RemoveAt(i);
+                        return action;
+                    }
+                }
+
+                return PlayerAction.None;
+            });
     }
 
     public Level BuildLevel() => new()
@@ -111,6 +152,12 @@ public class EngineTestContext
         DayStartCalls.Clear();
         HourTickCalls.Clear();
         PassengerWaitingCalls.Clear();
+        StationIdsByLocation.Clear();
+        PendingActions.Clear();
+        LastCreatedLineId = null;
+        LastAddedVehicleId = null;
+        OverrunCalls.Clear();
+        GameOverCalls.Clear();
         Snapshot = null;
         Result = null;
         WasCancelled = false;

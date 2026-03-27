@@ -17,22 +17,24 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class GameSimulationFeature : object, global::Xunit.IClassFixture<GameSimulationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class GameOverThresholdsFeature : object, global::Xunit.IClassFixture<GameOverThresholdsFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Game Simulation", "    The engine tracks game progress including days survived, hours elapsed,\r\n    " +
-                "and game-over conditions triggered when a station accumulates 20+ passengers.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Game Over Thresholds", @"    The engine monitors passenger counts per station. A station with 10 or more
+    passengers triggers OnStationOverrun. A station with 20 or more passengers
+    triggers OnGameOver and ends the simulation immediately, before OnHourTick
+    fires for that tick.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "GameSimulation.feature"
+#line 1 "GameOverThresholds.feature"
 #line hidden
         
-        public GameSimulationFeature(GameSimulationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public GameOverThresholdsFeature(GameOverThresholdsFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -106,7 +108,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/GameSimulation.feature.ndjson", 5);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/GameOverThresholds.feature.ndjson", 5);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -134,18 +136,18 @@ namespace MetroMania.Engine.Tests.Features
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Game snapshot reflects the correct day and hour after a partial simulation")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Game Simulation")]
-        [global::Xunit.TraitAttribute("Description", "Game snapshot reflects the correct day and hour after a partial simulation")]
-        public async global::System.Threading.Tasks.Task GameSnapshotReflectsTheCorrectDayAndHourAfterAPartialSimulation()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Station overrun fires when a station reaches exactly 10 passengers")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Game Over Thresholds")]
+        [global::Xunit.TraitAttribute("Description", "Station overrun fires when a station reaches exactly 10 passengers")]
+        public async global::System.Threading.Tasks.Task StationOverrunFiresWhenAStationReachesExactly10Passengers()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Game snapshot reflects the correct day and hour after a partial simulation", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Station overrun fires when a station reaches exactly 10 passengers", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 5
+#line 7
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -155,37 +157,35 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 6
-        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 7
-        await testRunner.WhenAsync("the simulation runs for 26 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
 #line 8
-        await testRunner.ThenAsync("the snapshot should show day 2 and hour 1", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 9
-        await testRunner.AndAsync("the snapshot should show 26 total hours elapsed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.WhenAsync("the simulation runs for 11 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 10
-        await testRunner.AndAsync("the game should not be over", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.ThenAsync("\"OnStationOverrun\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 11
+        await testRunner.AndAsync("the first overrun event should have 10 passengers at (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Game ends when a station accumulates too many passengers")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Game Simulation")]
-        [global::Xunit.TraitAttribute("Description", "Game ends when a station accumulates too many passengers")]
-        public async global::System.Threading.Tasks.Task GameEndsWhenAStationAccumulatesTooManyPassengers()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Game over fires when a station reaches exactly 20 passengers")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Game Over Thresholds")]
+        [global::Xunit.TraitAttribute("Description", "Game over fires when a station reaches exactly 20 passengers")]
+        public async global::System.Threading.Tasks.Task GameOverFiresWhenAStationReachesExactly20Passengers()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Game ends when a station accumulates too many passengers", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Game over fires when a station reaches exactly 20 passengers", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 12
+#line 13
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -195,35 +195,35 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 13
+#line 14
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
                         "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 14
+#line 15
         await testRunner.WhenAsync("the simulation runs until game over", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 15
-        await testRunner.ThenAsync("the score should be greater than 0", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
 #line 16
-        await testRunner.AndAsync("at least 20 passengers should have been spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+        await testRunner.ThenAsync("\"OnGameOver\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 17
+        await testRunner.AndAsync("the game over event should have 20 passengers at (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="DayOfWeek is correctly calculated across two weeks")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Game Simulation")]
-        [global::Xunit.TraitAttribute("Description", "DayOfWeek is correctly calculated across two weeks")]
-        public async global::System.Threading.Tasks.Task DayOfWeekIsCorrectlyCalculatedAcrossTwoWeeks()
+        [global::Xunit.SkippableFactAttribute(DisplayName="No OnHourTick fires on the same tick as game over")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Game Over Thresholds")]
+        [global::Xunit.TraitAttribute("Description", "No OnHourTick fires on the same tick as game over")]
+        public async global::System.Threading.Tasks.Task NoOnHourTickFiresOnTheSameTickAsGameOver()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("DayOfWeek is correctly calculated across two weeks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("No OnHourTick fires on the same tick as game over", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 18
+#line 19
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -233,14 +233,18 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 19
-        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
 #line 20
-        await testRunner.WhenAsync("the simulation runs for 337 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 21
-        await testRunner.ThenAsync("the DayOfWeek values should cycle Monday through Sunday correctly", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.WhenAsync("the simulation runs until game over", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 22
+        await testRunner.ThenAsync("\"OnHourTick\" should have fired 20 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 23
+        await testRunner.AndAsync("\"OnGameOver\" should be the last event fired", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -253,12 +257,12 @@ namespace MetroMania.Engine.Tests.Features
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await GameSimulationFeature.FeatureSetupAsync();
+                await GameOverThresholdsFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await GameSimulationFeature.FeatureTearDownAsync();
+                await GameOverThresholdsFeature.FeatureTearDownAsync();
             }
         }
     }

@@ -107,7 +107,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/StationSpawning.feature.ndjson", 11);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/StationSpawning.feature.ndjson", 13);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -204,23 +204,23 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "X",
                             "Y",
                             "Type",
                             "SpawnDelay"});
-                table6.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "0",
                             "0",
                             "Circle",
                             "0"});
-                table6.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "1",
                             "0",
                             "Triangle",
                             "2"});
 #line 26
-        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table6, "Given ");
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table7, "Given ");
 #line hidden
 #line 30
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
@@ -256,23 +256,23 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
                             "X",
                             "Y",
                             "Type",
                             "SpawnDelay"});
-                table7.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "0",
                             "0",
                             "Circle",
                             "0"});
-                table7.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "1",
                             "0",
                             "Triangle",
                             "2"});
 #line 35
-        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table7, "Given ");
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table8, "Given ");
 #line hidden
 #line 39
         await testRunner.WhenAsync("the simulation runs for 49 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
@@ -350,6 +350,115 @@ namespace MetroMania.Engine.Tests.Features
 #line hidden
 #line 51
         await testRunner.ThenAsync("the game snapshot should contain no stations", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Two stations at the same location with different delays — only first spawns")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Two stations at the same location with different delays — only first spawns")]
+        public async global::System.Threading.Tasks.Task TwoStationsAtTheSameLocationWithDifferentDelaysOnlyFirstSpawns()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Two stations at the same location with different delays — only first spawns", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 53
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+                            "X",
+                            "Y",
+                            "Type",
+                            "SpawnDelay"});
+                table9.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Circle",
+                            "0"});
+                table9.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Triangle",
+                            "2"});
+#line 54
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table9, "Given ");
+#line hidden
+#line 58
+        await testRunner.WhenAsync("the simulation runs for 73 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 59
+        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 60
+        await testRunner.AndAsync("the Triangle station at (0,0) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 61
+        await testRunner.AndAsync("the game snapshot should contain a Circle station at (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Each spawned station has a unique Id")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Each spawned station has a unique Id")]
+        public async global::System.Threading.Tasks.Task EachSpawnedStationHasAUniqueId()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Each spawned station has a unique Id", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 63
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
+                            "X",
+                            "Y",
+                            "Type",
+                            "SpawnDelay"});
+                table10.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Circle",
+                            "0"});
+                table10.AddRow(new string[] {
+                            "1",
+                            "0",
+                            "Triangle",
+                            "0"});
+                table10.AddRow(new string[] {
+                            "2",
+                            "0",
+                            "Diamond",
+                            "0"});
+#line 64
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table10, "Given ");
+#line hidden
+#line 69
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 70
+        await testRunner.ThenAsync("all spawned stations should have unique Ids", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -49,3 +49,22 @@ Feature: Station Spawning
         Given a level with a Diamond station at (3,4) with a spawn delay of 3 days
         When the simulation runs for 24 hours
         Then the game snapshot should contain no stations
+
+    Scenario: Two stations at the same location with different delays — only first spawns
+        Given a level with the following stations:
+            | X | Y | Type     | SpawnDelay |
+            | 0 | 0 | Circle   | 0          |
+            | 0 | 0 | Triangle | 2          |
+        When the simulation runs for 73 hours
+        Then the Circle station at (0,0) should have spawned
+        And the Triangle station at (0,0) should not have spawned
+        And the game snapshot should contain a Circle station at (0,0)
+
+    Scenario: Each spawned station has a unique Id
+        Given a level with the following stations:
+            | X | Y | Type     | SpawnDelay |
+            | 0 | 0 | Circle   | 0          |
+            | 1 | 0 | Triangle | 0          |
+            | 2 | 0 | Diamond  | 0          |
+        When the simulation runs for 1 hour
+        Then all spawned stations should have unique Ids

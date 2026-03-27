@@ -261,4 +261,24 @@ public class EngineStepDefinitions(EngineTestContext ctx)
         Assert.NotNull(ctx.Result);
         Assert.True(ctx.Result.TotalPassengersSpawned >= minimum);
     }
+
+    [Then(@"all spawned stations should have unique Ids")]
+    public void ThenAllSpawnedStationsShouldHaveUniqueIds()
+    {
+        Assert.NotNull(ctx.Snapshot);
+        var ids = ctx.Snapshot.Stations.Values.Select(s => s.Id).ToList();
+        Assert.Equal(ids.Count, ids.Distinct().Count());
+    }
+
+    [Then(@"the DayOfWeek values should cycle Monday through Sunday correctly")]
+    public void ThenDayOfWeekValuesShouldCycleCorrectly()
+    {
+        Assert.NotEmpty(ctx.HourTickCalls);
+        foreach (var tick in ctx.HourTickCalls)
+        {
+            // day 1 = Monday (1%7=1), day 7 = Sunday (7%7=0), day 8 = Monday (8%7=1)
+            var expectedDow = (DayOfWeek)(tick.Day % 7);
+            Assert.Equal(expectedDow, tick.DayOfWeek);
+        }
+    }
 }

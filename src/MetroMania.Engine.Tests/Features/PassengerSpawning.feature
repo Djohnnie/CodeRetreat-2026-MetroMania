@@ -56,3 +56,17 @@ Feature: Passenger Spawning
             | 4   | 12   | 0 | 0 | 4              |
             | 5   | 0    | 0 | 0 | 5              |
             | 5   | 0    | 1 | 0 | 3              |
+
+    Scenario: Passenger destination type always differs from origin station type
+        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        When the simulation runs for 11 hours
+        Then all passengers should have a destination type different from their origin station type
+
+    Scenario: Station with spawn delay and immediate phase spawns passengers after delay
+        Given a level with a Circle station at (0,0) with a spawn delay of 2 days and passengers every 24 hours
+        When the simulation runs for 97 hours
+        Then "OnPassengerWaiting" should have fired exactly 2 times
+        And the passenger waiting events should be:
+            | Day | Hour | X | Y | PassengerCount |
+            | 4   | 0    | 0 | 0 | 1              |
+            | 5   | 0    | 0 | 0 | 2              |

@@ -14,3 +14,8 @@ Feature: Game Simulation
         When the simulation runs until game over
         Then the score should be greater than 0
         And at least 20 passengers should have been spawned
+
+    Scenario: DayOfWeek is correctly calculated across two weeks
+        Given an empty level
+        When the simulation runs for 337 hours
+        Then the DayOfWeek values should cycle Monday through Sunday correctly

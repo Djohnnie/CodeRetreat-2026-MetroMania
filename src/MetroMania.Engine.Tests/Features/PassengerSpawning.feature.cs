@@ -110,7 +110,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PassengerSpawning.feature.ndjson", 6);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PassengerSpawning.feature.ndjson", 8);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -424,6 +424,98 @@ namespace MetroMania.Engine.Tests.Features
                             "3"});
 #line 49
         await testRunner.AndAsync("the passenger waiting events should be:", ((string)(null)), table5, "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Passenger destination type always differs from origin station type")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Passenger destination type always differs from origin station type")]
+        public async global::System.Threading.Tasks.Task PassengerDestinationTypeAlwaysDiffersFromOriginStationType()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "4";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Passenger destination type always differs from origin station type", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 60
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 61
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 62
+        await testRunner.WhenAsync("the simulation runs for 11 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 63
+        await testRunner.ThenAsync("all passengers should have a destination type different from their origin station" +
+                        " type", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Station with spawn delay and immediate phase spawns passengers after delay")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Station with spawn delay and immediate phase spawns passengers after delay")]
+        public async global::System.Threading.Tasks.Task StationWithSpawnDelayAndImmediatePhaseSpawnsPassengersAfterDelay()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "5";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Station with spawn delay and immediate phase spawns passengers after delay", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 65
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 66
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 2 days and passenger" +
+                        "s every 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 67
+        await testRunner.WhenAsync("the simulation runs for 97 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 68
+        await testRunner.ThenAsync("\"OnPassengerWaiting\" should have fired exactly 2 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                            "Day",
+                            "Hour",
+                            "X",
+                            "Y",
+                            "PassengerCount"});
+                table6.AddRow(new string[] {
+                            "4",
+                            "0",
+                            "0",
+                            "0",
+                            "1"});
+                table6.AddRow(new string[] {
+                            "5",
+                            "0",
+                            "0",
+                            "0",
+                            "2"});
+#line 69
+        await testRunner.AndAsync("the passenger waiting events should be:", ((string)(null)), table6, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
