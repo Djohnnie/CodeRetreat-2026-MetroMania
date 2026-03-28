@@ -17,10 +17,12 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class PlayerActionsFeature : object, global::Xunit.IClassFixture<PlayerActionsFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class PlayerActionsFeature : object, Xunit.IClassFixture<PlayerActionsFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
@@ -28,12 +30,10 @@ namespace MetroMania.Engine.Tests.Features
                 "ick.\r\n    The engine processes each action and updates the game state accordingl" +
                 "y.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "PlayerActions.feature"
 #line hidden
         
-        public PlayerActionsFeature(PlayerActionsFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public PlayerActionsFeature(PlayerActionsFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -92,7 +92,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -128,7 +128,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PlayerActions.feature.ndjson", 12);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -138,7 +138,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -148,12 +148,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Creating a line consumes a line resource and adds the line to the game state")]
+        [global::Xunit.FactAttribute(DisplayName="Creating a line consumes a line resource and adds the line to the game state")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Creating a line consumes a line resource and adds the line to the game state")]
         public async global::System.Threading.Tasks.Task CreatingALineConsumesALineResourceAndAddsTheLineToTheGameState()
@@ -196,7 +196,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a line releases the line resource")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a line releases the line resource")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Removing a line releases the line resource")]
         public async global::System.Threading.Tasks.Task RemovingALineReleasesTheLineResource()
@@ -239,7 +239,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a vehicle to a line consumes a vehicle resource")]
+        [global::Xunit.FactAttribute(DisplayName="Adding a vehicle to a line consumes a vehicle resource")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Adding a vehicle to a line consumes a vehicle resource")]
         public async global::System.Threading.Tasks.Task AddingAVehicleToALineConsumesAVehicleResource()
@@ -285,7 +285,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a vehicle releases the vehicle resource")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a vehicle releases the vehicle resource")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Removing a vehicle releases the vehicle resource")]
         public async global::System.Threading.Tasks.Task RemovingAVehicleReleasesTheVehicleResource()
@@ -331,7 +331,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a line also releases its vehicles")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a line also releases its vehicles")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Removing a line also releases its vehicles")]
         public async global::System.Threading.Tasks.Task RemovingALineAlsoReleasesItsVehicles()
@@ -383,7 +383,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Extending a line from the back adds a station")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a line from the back adds a station")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Extending a line from the back adds a station")]
         public async global::System.Threading.Tasks.Task ExtendingALineFromTheBackAddsAStation()
@@ -426,7 +426,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Inserting a station between two existing stations")]
+        [global::Xunit.FactAttribute(DisplayName="Inserting a station between two existing stations")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Inserting a station between two existing stations")]
         public async global::System.Threading.Tasks.Task InsertingAStationBetweenTwoExistingStations()
@@ -470,7 +470,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Unconnected and connected stations are tracked in the snapshot")]
+        [global::Xunit.FactAttribute(DisplayName="Unconnected and connected stations are tracked in the snapshot")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Unconnected and connected stations are tracked in the snapshot")]
         public async global::System.Threading.Tasks.Task UnconnectedAndConnectedStationsAreTrackedInTheSnapshot()
@@ -519,7 +519,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Line exposes its station snapshots and stations expose their lines")]
+        [global::Xunit.FactAttribute(DisplayName="Line exposes its station snapshots and stations expose their lines")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Line exposes its station snapshots and stations expose their lines")]
         public async global::System.Threading.Tasks.Task LineExposesItsStationSnapshotsAndStationsExposeTheirLines()
@@ -562,7 +562,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Line exposes its vehicles and vehicles reference their line")]
+        [global::Xunit.FactAttribute(DisplayName="Line exposes its vehicles and vehicles reference their line")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Actions")]
         [global::Xunit.TraitAttribute("Description", "Line exposes its vehicles and vehicles reference their line")]
         public async global::System.Threading.Tasks.Task LineExposesItsVehiclesAndVehiclesReferenceTheirLine()
@@ -616,15 +616,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await PlayerActionsFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await PlayerActionsFeature.FeatureTearDownAsync();
             }

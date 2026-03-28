@@ -17,10 +17,12 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class EventOrderingFeature : object, global::Xunit.IClassFixture<EventOrderingFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class EventOrderingFeature : object, Xunit.IClassFixture<EventOrderingFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
@@ -33,12 +35,10 @@ namespace MetroMania.Engine.Tests.Features
       Phase 2 — OnDayStart fires second (only at midnight / hour 0)
       Phase 3 — OnHourTick fires last (every hour)", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "EventOrdering.feature"
 #line hidden
         
-        public EventOrderingFeature(EventOrderingFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public EventOrderingFeature(EventOrderingFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -97,7 +97,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -115,7 +115,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/EventOrdering.feature.ndjson", 12);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -125,7 +125,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -135,12 +135,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Station spawn fires before day start which fires before hour tick")]
+        [global::Xunit.FactAttribute(DisplayName="Station spawn fires before day start which fires before hour tick")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "Station spawn fires before day start which fires before hour tick")]
         public async global::System.Threading.Tasks.Task StationSpawnFiresBeforeDayStartWhichFiresBeforeHourTick()
@@ -177,7 +177,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="OnDayStart fires exactly once per day at midnight")]
+        [global::Xunit.FactAttribute(DisplayName="OnDayStart fires exactly once per day at midnight")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "OnDayStart fires exactly once per day at midnight")]
         public async global::System.Threading.Tasks.Task OnDayStartFiresExactlyOncePerDayAtMidnight()
@@ -214,7 +214,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="OnDayStart always fires immediately before OnHourTick on day boundaries")]
+        [global::Xunit.FactAttribute(DisplayName="OnDayStart always fires immediately before OnHourTick on day boundaries")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "OnDayStart always fires immediately before OnHourTick on day boundaries")]
         public async global::System.Threading.Tasks.Task OnDayStartAlwaysFiresImmediatelyBeforeOnHourTickOnDayBoundaries()
@@ -248,7 +248,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="OnHourTick fires every hour with the correct day and hour values")]
+        [global::Xunit.FactAttribute(DisplayName="OnHourTick fires every hour with the correct day and hour values")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "OnHourTick fires every hour with the correct day and hour values")]
         public async global::System.Threading.Tasks.Task OnHourTickFiresEveryHourWithTheCorrectDayAndHourValues()
@@ -285,7 +285,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Weekly gift fires before day start on Monday")]
+        [global::Xunit.FactAttribute(DisplayName="Weekly gift fires before day start on Monday")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "Weekly gift fires before day start on Monday")]
         public async global::System.Threading.Tasks.Task WeeklyGiftFiresBeforeDayStartOnMonday()
@@ -319,7 +319,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Passenger waiting fires before day start when both occur on the same tick")]
+        [global::Xunit.FactAttribute(DisplayName="Passenger waiting fires before day start when both occur on the same tick")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "Passenger waiting fires before day start when both occur on the same tick")]
         public async global::System.Threading.Tasks.Task PassengerWaitingFiresBeforeDayStartWhenBothOccurOnTheSameTick()
@@ -357,7 +357,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Station overrun notification fires before the player gets to act")]
+        [global::Xunit.FactAttribute(DisplayName="Station overrun notification fires before the player gets to act")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "Station overrun notification fires before the player gets to act")]
         public async global::System.Threading.Tasks.Task StationOverrunNotificationFiresBeforeThePlayerGetsToAct()
@@ -395,7 +395,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Game over is the final event and ends the simulation immediately")]
+        [global::Xunit.FactAttribute(DisplayName="Game over is the final event and ends the simulation immediately")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "Game over is the final event and ends the simulation immediately")]
         public async global::System.Threading.Tasks.Task GameOverIsTheFinalEventAndEndsTheSimulationImmediately()
@@ -436,7 +436,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="All event types respect the three-phase ordering on day 1")]
+        [global::Xunit.FactAttribute(DisplayName="All event types respect the three-phase ordering on day 1")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "All event types respect the three-phase ordering on day 1")]
         public async global::System.Threading.Tasks.Task AllEventTypesRespectTheThree_PhaseOrderingOnDay1()
@@ -471,7 +471,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Non-midnight hours produce only hour tick events")]
+        [global::Xunit.FactAttribute(DisplayName="Non-midnight hours produce only hour tick events")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
         [global::Xunit.TraitAttribute("Description", "Non-midnight hours produce only hour tick events")]
         public async global::System.Threading.Tasks.Task Non_MidnightHoursProduceOnlyHourTickEvents()
@@ -510,15 +510,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await EventOrderingFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await EventOrderingFeature.FeatureTearDownAsync();
             }

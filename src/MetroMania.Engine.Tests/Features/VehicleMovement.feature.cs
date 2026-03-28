@@ -17,10 +17,12 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class VehicleMovementFeature : object, global::Xunit.IClassFixture<VehicleMovementFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class VehicleMovementFeature : object, Xunit.IClassFixture<VehicleMovementFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
@@ -30,12 +32,10 @@ namespace MetroMania.Engine.Tests.Features
     Vehicles move BEFORE the player acts each tick, so newly placed vehicles
     start moving on the next tick.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "VehicleMovement.feature"
 #line hidden
         
-        public VehicleMovementFeature(VehicleMovementFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public VehicleMovementFeature(VehicleMovementFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -94,7 +94,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -112,7 +112,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/VehicleMovement.feature.ndjson", 13);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -122,7 +122,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -132,12 +132,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle moves at the correct speed along a segment")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle moves at the correct speed along a segment")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle moves at the correct speed along a segment")]
         public async global::System.Threading.Tasks.Task VehicleMovesAtTheCorrectSpeedAlongASegment()
@@ -186,7 +186,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle completes a full ping-pong cycle")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle completes a full ping-pong cycle")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle completes a full ping-pong cycle")]
         public async global::System.Threading.Tasks.Task VehicleCompletesAFullPing_PongCycle()
@@ -232,7 +232,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle traverses multiple segments")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle traverses multiple segments")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle traverses multiple segments")]
         public async global::System.Threading.Tasks.Task VehicleTraversesMultipleSegments()
@@ -284,7 +284,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle placed at last station starts moving backward")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle placed at last station starts moving backward")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle placed at last station starts moving backward")]
         public async global::System.Threading.Tasks.Task VehiclePlacedAtLastStationStartsMovingBackward()
@@ -330,7 +330,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle moves correctly on a diagonal segment")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle moves correctly on a diagonal segment")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle moves correctly on a diagonal segment")]
         public async global::System.Threading.Tasks.Task VehicleMovesCorrectlyOnADiagonalSegment()
@@ -376,7 +376,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Two vehicles on the same line move independently")]
+        [global::Xunit.FactAttribute(DisplayName="Two vehicles on the same line move independently")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Two vehicles on the same line move independently")]
         public async global::System.Threading.Tasks.Task TwoVehiclesOnTheSameLineMoveIndependently()
@@ -428,7 +428,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle dwells at station during passenger loading")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle dwells at station during passenger loading")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle dwells at station during passenger loading")]
         public async global::System.Threading.Tasks.Task VehicleDwellsAtStationDuringPassengerLoading()
@@ -478,7 +478,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle resumes movement after dwell completes")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle resumes movement after dwell completes")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle resumes movement after dwell completes")]
         public async global::System.Threading.Tasks.Task VehicleResumesMovementAfterDwellCompletes()
@@ -525,7 +525,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle on a long multi-segment line reaches the end and returns")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle on a long multi-segment line reaches the end and returns")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle on a long multi-segment line reaches the end and returns")]
         public async global::System.Threading.Tasks.Task VehicleOnALongMulti_SegmentLineReachesTheEndAndReturns()
@@ -583,7 +583,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Vehicle carries over remaining speed across segment boundaries")]
+        [global::Xunit.FactAttribute(DisplayName="Vehicle carries over remaining speed across segment boundaries")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Vehicle carries over remaining speed across segment boundaries")]
         public async global::System.Threading.Tasks.Task VehicleCarriesOverRemainingSpeedAcrossSegmentBoundaries()
@@ -635,7 +635,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Newly placed vehicle does not move on its placement tick")]
+        [global::Xunit.FactAttribute(DisplayName="Newly placed vehicle does not move on its placement tick")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Vehicle Movement")]
         [global::Xunit.TraitAttribute("Description", "Newly placed vehicle does not move on its placement tick")]
         public async global::System.Threading.Tasks.Task NewlyPlacedVehicleDoesNotMoveOnItsPlacementTick()
@@ -683,15 +683,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await VehicleMovementFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await VehicleMovementFeature.FeatureTearDownAsync();
             }

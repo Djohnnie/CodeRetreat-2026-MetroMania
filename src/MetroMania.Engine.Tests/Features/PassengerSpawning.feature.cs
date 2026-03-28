@@ -17,10 +17,12 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class PassengerSpawningFeature : object, global::Xunit.IClassFixture<PassengerSpawningFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class PassengerSpawningFeature : object, Xunit.IClassFixture<PassengerSpawningFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
@@ -31,12 +33,10 @@ namespace MetroMania.Engine.Tests.Features
     and no game-over occurs, the simulation runs indefinitely and must be cancelled
     via a CancellationToken.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "PassengerSpawning.feature"
 #line hidden
         
-        public PassengerSpawningFeature(PassengerSpawningFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public PassengerSpawningFeature(PassengerSpawningFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -95,7 +95,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -113,7 +113,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PassengerSpawning.feature.ndjson", 10);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -123,7 +123,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -133,12 +133,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Single station with one spawn phase spawns passengers at the correct frequency")]
+        [global::Xunit.FactAttribute(DisplayName="Single station with one spawn phase spawns passengers at the correct frequency")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Single station with one spawn phase spawns passengers at the correct frequency")]
         public async global::System.Threading.Tasks.Task SingleStationWithOneSpawnPhaseSpawnsPassengersAtTheCorrectFrequency()
@@ -209,7 +209,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Station without spawn phases never spawns passengers and simulation is cancelled")]
+        [global::Xunit.FactAttribute(DisplayName="Station without spawn phases never spawns passengers and simulation is cancelled")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Station without spawn phases never spawns passengers and simulation is cancelled")]
         public async global::System.Threading.Tasks.Task StationWithoutSpawnPhasesNeverSpawnsPassengersAndSimulationIsCancelled()
@@ -250,7 +250,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Station with multiple spawn phases transitions to faster frequency")]
+        [global::Xunit.FactAttribute(DisplayName="Station with multiple spawn phases transitions to faster frequency")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Station with multiple spawn phases transitions to faster frequency")]
         public async global::System.Threading.Tasks.Task StationWithMultipleSpawnPhasesTransitionsToFasterFrequency()
@@ -330,7 +330,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Multiple stations with different spawn phases fire events in correct order")]
+        [global::Xunit.FactAttribute(DisplayName="Multiple stations with different spawn phases fire events in correct order")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Multiple stations with different spawn phases fire events in correct order")]
         public async global::System.Threading.Tasks.Task MultipleStationsWithDifferentSpawnPhasesFireEventsInCorrectOrder()
@@ -435,7 +435,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Passenger destination type always differs from origin station type")]
+        [global::Xunit.FactAttribute(DisplayName="Passenger destination type always differs from origin station type")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Passenger destination type always differs from origin station type")]
         public async global::System.Threading.Tasks.Task PassengerDestinationTypeAlwaysDiffersFromOriginStationType()
@@ -474,7 +474,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Station with spawn delay and immediate phase spawns passengers after delay")]
+        [global::Xunit.FactAttribute(DisplayName="Station with spawn delay and immediate phase spawns passengers after delay")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Station with spawn delay and immediate phase spawns passengers after delay")]
         public async global::System.Threading.Tasks.Task StationWithSpawnDelayAndImmediatePhaseSpawnsPassengersAfterDelay()
@@ -533,7 +533,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Station does not spawn passengers when no other station types exist")]
+        [global::Xunit.FactAttribute(DisplayName="Station does not spawn passengers when no other station types exist")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Station does not spawn passengers when no other station types exist")]
         public async global::System.Threading.Tasks.Task StationDoesNotSpawnPassengersWhenNoOtherStationTypesExist()
@@ -574,7 +574,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Passengers can only have destination types of actually spawned stations")]
+        [global::Xunit.FactAttribute(DisplayName="Passengers can only have destination types of actually spawned stations")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Spawning")]
         [global::Xunit.TraitAttribute("Description", "Passengers can only have destination types of actually spawned stations")]
         public async global::System.Threading.Tasks.Task PassengersCanOnlyHaveDestinationTypesOfActuallySpawnedStations()
@@ -615,15 +615,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await PassengerSpawningFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await PassengerSpawningFeature.FeatureTearDownAsync();
             }

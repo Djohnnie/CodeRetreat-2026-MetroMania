@@ -17,10 +17,12 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class PassengerPickupAndDeliveryFeature : object, global::Xunit.IClassFixture<PassengerPickupAndDeliveryFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class PassengerPickupAndDeliveryFeature : object, Xunit.IClassFixture<PassengerPickupAndDeliveryFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
@@ -29,12 +31,10 @@ namespace MetroMania.Engine.Tests.Features
     The train stays at the station (dwells) for the total number of actions.
     Score increases by 1 for each passenger delivered.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "PassengerDelivery.feature"
 #line hidden
         
-        public PassengerPickupAndDeliveryFeature(PassengerPickupAndDeliveryFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public PassengerPickupAndDeliveryFeature(PassengerPickupAndDeliveryFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -93,7 +93,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -111,7 +111,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PassengerDelivery.feature.ndjson", 20);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -121,7 +121,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -131,12 +131,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train delivers a passenger and increases the score")]
+        [global::Xunit.FactAttribute(DisplayName="Train delivers a passenger and increases the score")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train delivers a passenger and increases the score")]
         public async global::System.Threading.Tasks.Task TrainDeliversAPassengerAndIncreasesTheScore()
@@ -183,7 +183,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train picks up a passenger at a station and carries it")]
+        [global::Xunit.FactAttribute(DisplayName="Train picks up a passenger at a station and carries it")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train picks up a passenger at a station and carries it")]
         public async global::System.Threading.Tasks.Task TrainPicksUpAPassengerAtAStationAndCarriesIt()
@@ -230,7 +230,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train drops off passengers at the correct destination")]
+        [global::Xunit.FactAttribute(DisplayName="Train drops off passengers at the correct destination")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train drops off passengers at the correct destination")]
         public async global::System.Threading.Tasks.Task TrainDropsOffPassengersAtTheCorrectDestination()
@@ -280,7 +280,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train does not pick up passengers it cannot deliver")]
+        [global::Xunit.FactAttribute(DisplayName="Train does not pick up passengers it cannot deliver")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train does not pick up passengers it cannot deliver")]
         public async global::System.Threading.Tasks.Task TrainDoesNotPickUpPassengersItCannotDeliver()
@@ -330,7 +330,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train capacity limits the number of passengers picked up")]
+        [global::Xunit.FactAttribute(DisplayName="Train capacity limits the number of passengers picked up")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train capacity limits the number of passengers picked up")]
         public async global::System.Threading.Tasks.Task TrainCapacityLimitsTheNumberOfPassengersPickedUp()
@@ -380,7 +380,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Wagon capacity increases the number of passengers a train can carry")]
+        [global::Xunit.FactAttribute(DisplayName="Wagon capacity increases the number of passengers a train can carry")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Wagon capacity increases the number of passengers a train can carry")]
         public async global::System.Threading.Tasks.Task WagonCapacityIncreasesTheNumberOfPassengersATrainCanCarry()
@@ -433,7 +433,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Each passenger pickup and dropoff takes one hour of dwell time")]
+        [global::Xunit.FactAttribute(DisplayName="Each passenger pickup and dropoff takes one hour of dwell time")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Each passenger pickup and dropoff takes one hour of dwell time")]
         public async global::System.Threading.Tasks.Task EachPassengerPickupAndDropoffTakesOneHourOfDwellTime()
@@ -480,7 +480,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Two trains on the same line both deliver passengers")]
+        [global::Xunit.FactAttribute(DisplayName="Two trains on the same line both deliver passengers")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Two trains on the same line both deliver passengers")]
         public async global::System.Threading.Tasks.Task TwoTrainsOnTheSameLineBothDeliverPassengers()
@@ -534,7 +534,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train with two wagons has triple capacity")]
+        [global::Xunit.FactAttribute(DisplayName="Train with two wagons has triple capacity")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train with two wagons has triple capacity")]
         public async global::System.Threading.Tasks.Task TrainWithTwoWagonsHasTripleCapacity()
@@ -596,7 +596,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train drops off multiple passengers at the same station")]
+        [global::Xunit.FactAttribute(DisplayName="Train drops off multiple passengers at the same station")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train drops off multiple passengers at the same station")]
         public async global::System.Threading.Tasks.Task TrainDropsOffMultiplePassengersAtTheSameStation()
@@ -646,7 +646,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Passengers accumulate when no line is connected")]
+        [global::Xunit.FactAttribute(DisplayName="Passengers accumulate when no line is connected")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Passengers accumulate when no line is connected")]
         public async global::System.Threading.Tasks.Task PassengersAccumulateWhenNoLineIsConnected()
@@ -690,7 +690,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Score does not increase without delivering to correct type")]
+        [global::Xunit.FactAttribute(DisplayName="Score does not increase without delivering to correct type")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Score does not increase without delivering to correct type")]
         public async global::System.Threading.Tasks.Task ScoreDoesNotIncreaseWithoutDeliveringToCorrectType()
@@ -740,7 +740,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train picks up passengers from both directions during ping-pong")]
+        [global::Xunit.FactAttribute(DisplayName="Train picks up passengers from both directions during ping-pong")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train picks up passengers from both directions during ping-pong")]
         public async global::System.Threading.Tasks.Task TrainPicksUpPassengersFromBothDirectionsDuringPing_Pong()
@@ -788,7 +788,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Multiple trains on a three-station line deliver efficiently")]
+        [global::Xunit.FactAttribute(DisplayName="Multiple trains on a three-station line deliver efficiently")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Multiple trains on a three-station line deliver efficiently")]
         public async global::System.Threading.Tasks.Task MultipleTrainsOnAThree_StationLineDeliverEfficiently()
@@ -846,7 +846,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a vehicle while carrying passengers loses them")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a vehicle while carrying passengers loses them")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Removing a vehicle while carrying passengers loses them")]
         public async global::System.Threading.Tasks.Task RemovingAVehicleWhileCarryingPassengersLosesThem()
@@ -899,7 +899,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Train does not exceed capacity even with many passengers waiting")]
+        [global::Xunit.FactAttribute(DisplayName="Train does not exceed capacity even with many passengers waiting")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Train does not exceed capacity even with many passengers waiting")]
         public async global::System.Threading.Tasks.Task TrainDoesNotExceedCapacityEvenWithManyPassengersWaiting()
@@ -949,7 +949,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Passengers at disconnected station are not picked up by trains on other lines")]
+        [global::Xunit.FactAttribute(DisplayName="Passengers at disconnected station are not picked up by trains on other lines")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Passengers at disconnected station are not picked up by trains on other lines")]
         public async global::System.Threading.Tasks.Task PassengersAtDisconnectedStationAreNotPickedUpByTrainsOnOtherLines()
@@ -1001,7 +1001,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Active train prevents game over by picking up passengers")]
+        [global::Xunit.FactAttribute(DisplayName="Active train prevents game over by picking up passengers")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Passenger Pickup and Delivery")]
         [global::Xunit.TraitAttribute("Description", "Active train prevents game over by picking up passengers")]
         public async global::System.Threading.Tasks.Task ActiveTrainPreventsGameOverByPickingUpPassengers()
@@ -1056,15 +1056,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await PassengerPickupAndDeliveryFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await PassengerPickupAndDeliveryFeature.FeatureTearDownAsync();
             }

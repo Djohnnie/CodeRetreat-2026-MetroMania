@@ -17,22 +17,22 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class PlayerActionEdgeCasesFeature : object, global::Xunit.IClassFixture<PlayerActionEdgeCasesFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class PlayerActionEdgeCasesFeature : object, Xunit.IClassFixture<PlayerActionEdgeCasesFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Player Action Edge Cases", "    Edge cases and invalid action handling for player actions.\r\n    Invalid actio" +
                 "ns should be silently ignored without changing game state.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "PlayerActionEdgeCases.feature"
 #line hidden
         
-        public PlayerActionEdgeCasesFeature(PlayerActionEdgeCasesFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public PlayerActionEdgeCasesFeature(PlayerActionEdgeCasesFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -91,7 +91,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -109,7 +109,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/PlayerActionEdgeCases.feature.ndjson", 11);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -119,7 +119,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -129,12 +129,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Creating a line with only one station is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Creating a line with only one station is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Creating a line with only one station is ignored")]
         public async global::System.Threading.Tasks.Task CreatingALineWithOnlyOneStationIsIgnored()
@@ -177,7 +177,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Extending a line from the front adds a station at position 0")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a line from the front adds a station at position 0")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Extending a line from the front adds a station at position 0")]
         public async global::System.Threading.Tasks.Task ExtendingALineFromTheFrontAddsAStationAtPosition0()
@@ -229,7 +229,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Extending a line from a middle station is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a line from a middle station is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Extending a line from a middle station is ignored")]
         public async global::System.Threading.Tasks.Task ExtendingALineFromAMiddleStationIsIgnored()
@@ -287,7 +287,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Inserting a station between non-adjacent stations is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Inserting a station between non-adjacent stations is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Inserting a station between non-adjacent stations is ignored")]
         public async global::System.Threading.Tasks.Task InsertingAStationBetweenNon_AdjacentStationsIsIgnored()
@@ -346,7 +346,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a vehicle at a station not on the line is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Adding a vehicle at a station not on the line is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Adding a vehicle at a station not on the line is ignored")]
         public async global::System.Threading.Tasks.Task AddingAVehicleAtAStationNotOnTheLineIsIgnored()
@@ -398,7 +398,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a non-existent line is silently ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a non-existent line is silently ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Removing a non-existent line is silently ignored")]
         public async global::System.Threading.Tasks.Task RemovingANon_ExistentLineIsSilentlyIgnored()
@@ -441,7 +441,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Creating a line when no line resources are available is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Creating a line when no line resources are available is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Creating a line when no line resources are available is ignored")]
         public async global::System.Threading.Tasks.Task CreatingALineWhenNoLineResourcesAreAvailableIsIgnored()
@@ -496,7 +496,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a non-existent vehicle is silently ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a non-existent vehicle is silently ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Removing a non-existent vehicle is silently ignored")]
         public async global::System.Threading.Tasks.Task RemovingANon_ExistentVehicleIsSilentlyIgnored()
@@ -545,7 +545,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Extending a line with the same station twice is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a line with the same station twice is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Edge Cases")]
         [global::Xunit.TraitAttribute("Description", "Extending a line with the same station twice is ignored")]
         public async global::System.Threading.Tasks.Task ExtendingALineWithTheSameStationTwiceIsIgnored()
@@ -593,15 +593,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await PlayerActionEdgeCasesFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await PlayerActionEdgeCasesFeature.FeatureTearDownAsync();
             }

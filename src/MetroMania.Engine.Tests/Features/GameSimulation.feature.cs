@@ -17,22 +17,22 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class GameSimulationFeature : object, global::Xunit.IClassFixture<GameSimulationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class GameSimulationFeature : object, Xunit.IClassFixture<GameSimulationFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Game Simulation", "    The engine tracks game progress including days survived, hours elapsed,\r\n    " +
                 "and game-over conditions triggered when a station accumulates 20+ passengers.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "GameSimulation.feature"
 #line hidden
         
-        public GameSimulationFeature(GameSimulationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public GameSimulationFeature(GameSimulationFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -91,7 +91,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -109,7 +109,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/GameSimulation.feature.ndjson", 5);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -119,7 +119,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -129,12 +129,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Game snapshot reflects the correct day and hour after a partial simulation")]
+        [global::Xunit.FactAttribute(DisplayName="Game snapshot reflects the correct day and hour after a partial simulation")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Simulation")]
         [global::Xunit.TraitAttribute("Description", "Game snapshot reflects the correct day and hour after a partial simulation")]
         public async global::System.Threading.Tasks.Task GameSnapshotReflectsTheCorrectDayAndHourAfterAPartialSimulation()
@@ -174,7 +174,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Game ends when a station accumulates too many passengers")]
+        [global::Xunit.FactAttribute(DisplayName="Game ends when a station accumulates too many passengers")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Simulation")]
         [global::Xunit.TraitAttribute("Description", "Game ends when a station accumulates too many passengers")]
         public async global::System.Threading.Tasks.Task GameEndsWhenAStationAccumulatesTooManyPassengers()
@@ -212,7 +212,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="DayOfWeek is correctly calculated across two weeks")]
+        [global::Xunit.FactAttribute(DisplayName="DayOfWeek is correctly calculated across two weeks")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Simulation")]
         [global::Xunit.TraitAttribute("Description", "DayOfWeek is correctly calculated across two weeks")]
         public async global::System.Threading.Tasks.Task DayOfWeekIsCorrectlyCalculatedAcrossTwoWeeks()
@@ -248,15 +248,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await GameSimulationFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await GameSimulationFeature.FeatureTearDownAsync();
             }

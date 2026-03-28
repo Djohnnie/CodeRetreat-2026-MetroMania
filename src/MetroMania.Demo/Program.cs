@@ -16,7 +16,6 @@ Console.WriteLine($"  Days Survived:      {result.DaysSurvived}");
 Console.WriteLine($"  Passengers Spawned: {result.TotalPassengersSpawned}");
 Console.WriteLine($"  Time Taken:         {result.TimeTaken.TotalMilliseconds:F0}ms");
 
-
 //// --- Render the level at different points in time ---
 //var svgResourcesPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "resources"));
 //if (!Directory.Exists(svgResourcesPath))

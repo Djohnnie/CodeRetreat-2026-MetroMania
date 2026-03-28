@@ -17,22 +17,22 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class WagonManagementFeature : object, global::Xunit.IClassFixture<WagonManagementFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class WagonManagementFeature : object, Xunit.IClassFixture<WagonManagementFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Wagon Management", "    Wagons are attached to trains to increase passenger capacity.\r\n    They can b" +
                 "e added from available resources or moved between trains.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "WagonManagement.feature"
 #line hidden
         
-        public WagonManagementFeature(WagonManagementFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public WagonManagementFeature(WagonManagementFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -91,7 +91,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -130,7 +130,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/WagonManagement.feature.ndjson", 13);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -140,7 +140,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -150,12 +150,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a wagon to a train consumes the wagon resource")]
+        [global::Xunit.FactAttribute(DisplayName="Adding a wagon to a train consumes the wagon resource")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Adding a wagon to a train consumes the wagon resource")]
         public async global::System.Threading.Tasks.Task AddingAWagonToATrainConsumesTheWagonResource()
@@ -195,7 +195,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a wagon to a non-existent train is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Adding a wagon to a non-existent train is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Adding a wagon to a non-existent train is ignored")]
         public async global::System.Threading.Tasks.Task AddingAWagonToANon_ExistentTrainIsIgnored()
@@ -235,7 +235,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding an already-used wagon is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Adding an already-used wagon is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Adding an already-used wagon is ignored")]
         public async global::System.Threading.Tasks.Task AddingAnAlready_UsedWagonIsIgnored()
@@ -275,7 +275,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a train also releases its wagons")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a train also releases its wagons")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Removing a train also releases its wagons")]
         public async global::System.Threading.Tasks.Task RemovingATrainAlsoReleasesItsWagons()
@@ -318,7 +318,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Removing a line releases trains and their wagons")]
+        [global::Xunit.FactAttribute(DisplayName="Removing a line releases trains and their wagons")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Removing a line releases trains and their wagons")]
         public async global::System.Threading.Tasks.Task RemovingALineReleasesTrainsAndTheirWagons()
@@ -361,7 +361,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a wagon directly to a line via AddVehicleToLine is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Adding a wagon directly to a line via AddVehicleToLine is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Adding a wagon directly to a line via AddVehicleToLine is ignored")]
         public async global::System.Threading.Tasks.Task AddingAWagonDirectlyToALineViaAddVehicleToLineIsIgnored()
@@ -401,7 +401,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Moving a wagon between two trains")]
+        [global::Xunit.FactAttribute(DisplayName="Moving a wagon between two trains")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Moving a wagon between two trains")]
         public async global::System.Threading.Tasks.Task MovingAWagonBetweenTwoTrains()
@@ -459,7 +459,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Moving a wagon from a train that does not own it is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Moving a wagon from a train that does not own it is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Moving a wagon from a train that does not own it is ignored")]
         public async global::System.Threading.Tasks.Task MovingAWagonFromATrainThatDoesNotOwnItIsIgnored()
@@ -517,7 +517,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Wagon snapshot exposes navigation to its parent train")]
+        [global::Xunit.FactAttribute(DisplayName="Wagon snapshot exposes navigation to its parent train")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Wagon snapshot exposes navigation to its parent train")]
         public async global::System.Threading.Tasks.Task WagonSnapshotExposesNavigationToItsParentTrain()
@@ -557,7 +557,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding multiple wagons to a single train increases capacity proportionally")]
+        [global::Xunit.FactAttribute(DisplayName="Adding multiple wagons to a single train increases capacity proportionally")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Adding multiple wagons to a single train increases capacity proportionally")]
         public async global::System.Threading.Tasks.Task AddingMultipleWagonsToASingleTrainIncreasesCapacityProportionally()
@@ -600,7 +600,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Moving a wagon to the same train it is already on is ignored")]
+        [global::Xunit.FactAttribute(DisplayName="Moving a wagon to the same train it is already on is ignored")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Wagon Management")]
         [global::Xunit.TraitAttribute("Description", "Moving a wagon to the same train it is already on is ignored")]
         public async global::System.Threading.Tasks.Task MovingAWagonToTheSameTrainItIsAlreadyOnIsIgnored()
@@ -642,15 +642,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await WagonManagementFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await WagonManagementFeature.FeatureTearDownAsync();
             }

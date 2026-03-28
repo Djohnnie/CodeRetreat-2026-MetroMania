@@ -17,10 +17,12 @@ namespace MetroMania.Engine.Tests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class StationSpawningFeature : object, global::Xunit.IClassFixture<StationSpawningFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class StationSpawningFeature : object, Xunit.IClassFixture<StationSpawningFeature.FixtureData>, Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
+        
+        private Xunit.ITestOutputHelper _testOutputHelper;
         
         private static string[] featureTags = ((string[])(null));
         
@@ -28,12 +30,10 @@ namespace MetroMania.Engine.Tests.Features
                 "\r\n    A delay of 0 means the station appears immediately at the start of the gam" +
                 "e.\r\n    A delay of N days means the station appears at midnight on day N+1.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
-        private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
-        
 #line 1 "StationSpawning.feature"
 #line hidden
         
-        public StationSpawningFeature(StationSpawningFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public StationSpawningFeature(StationSpawningFeature.FixtureData fixtureData, Xunit.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -92,7 +92,7 @@ namespace MetroMania.Engine.Tests.Features
         public void ScenarioInitialize(global::Reqnroll.ScenarioInfo scenarioInfo, global::Reqnroll.RuleInfo ruleInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo, ruleInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<global::Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.ITestOutputHelper>(_testOutputHelper);
         }
         
         public async global::System.Threading.Tasks.Task ScenarioStartAsync()
@@ -110,7 +110,7 @@ namespace MetroMania.Engine.Tests.Features
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/StationSpawning.feature.ndjson", 13);
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+        async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
         {
             try
             {
@@ -120,7 +120,7 @@ namespace MetroMania.Engine.Tests.Features
             {
                 try
                 {
-                    ((global::Xunit.IAsyncLifetime)(this)).DisposeAsync();
+                    ((Xunit.IAsyncLifetime)(this)).DisposeAsync();
                 }
                 catch (System.Exception e2)
                 {
@@ -130,12 +130,12 @@ namespace MetroMania.Engine.Tests.Features
             }
         }
         
-        async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+        async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
         {
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableTheoryAttribute(DisplayName="Stations spawn at the correct time based on their delay")]
+        [global::Xunit.TheoryAttribute(DisplayName="Stations spawn at the correct time based on their delay")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "Stations spawn at the correct time based on their delay")]
         [global::Xunit.InlineDataAttribute("Circle", "0", "0", "0", "1", "should have spawned", "0", new string[0])]
@@ -180,7 +180,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Only the immediate station has spawned after 1 hour when multiple stations have d" +
+        [global::Xunit.FactAttribute(DisplayName="Only the immediate station has spawned after 1 hour when multiple stations have d" +
             "ifferent delays")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "Only the immediate station has spawned after 1 hour when multiple stations have d" +
@@ -235,7 +235,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Both stations have spawned once enough game days have passed")]
+        [global::Xunit.FactAttribute(DisplayName="Both stations have spawned once enough game days have passed")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "Both stations have spawned once enough game days have passed")]
         public async global::System.Threading.Tasks.Task BothStationsHaveSpawnedOnceEnoughGameDaysHavePassed()
@@ -287,7 +287,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="An immediately spawned station is present in the game snapshot")]
+        [global::Xunit.FactAttribute(DisplayName="An immediately spawned station is present in the game snapshot")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "An immediately spawned station is present in the game snapshot")]
         public async global::System.Threading.Tasks.Task AnImmediatelySpawnedStationIsPresentInTheGameSnapshot()
@@ -321,7 +321,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="A station that has not yet spawned is absent from the game snapshot")]
+        [global::Xunit.FactAttribute(DisplayName="A station that has not yet spawned is absent from the game snapshot")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "A station that has not yet spawned is absent from the game snapshot")]
         public async global::System.Threading.Tasks.Task AStationThatHasNotYetSpawnedIsAbsentFromTheGameSnapshot()
@@ -355,7 +355,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Two stations at the same location with different delays — only first spawns")]
+        [global::Xunit.FactAttribute(DisplayName="Two stations at the same location with different delays — only first spawns")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "Two stations at the same location with different delays — only first spawns")]
         public async global::System.Threading.Tasks.Task TwoStationsAtTheSameLocationWithDifferentDelaysOnlyFirstSpawns()
@@ -410,7 +410,7 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Each spawned station has a unique Id")]
+        [global::Xunit.FactAttribute(DisplayName="Each spawned station has a unique Id")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
         [global::Xunit.TraitAttribute("Description", "Each spawned station has a unique Id")]
         public async global::System.Threading.Tasks.Task EachSpawnedStationHasAUniqueId()
@@ -466,15 +466,15 @@ namespace MetroMania.Engine.Tests.Features
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FixtureData : object, global::Xunit.IAsyncLifetime
+        public class FixtureData : object, Xunit.IAsyncLifetime
         {
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
+            async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
             {
                 await StationSpawningFeature.FeatureSetupAsync();
             }
             
-            async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
+            async System.Threading.Tasks.ValueTask System.IAsyncDisposable.DisposeAsync()
             {
                 await StationSpawningFeature.FeatureTearDownAsync();
             }
