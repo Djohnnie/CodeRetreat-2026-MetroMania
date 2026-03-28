@@ -1,4 +1,5 @@
 using MetroMania.Domain.Entities;
+using MetroMania.Domain.Extensions;
 
 namespace MetroMania.Application.DTOs;
 
@@ -34,7 +35,7 @@ public record SubmissionDto(
         return new SubmissionDto(
             submission.Id,
             submission.Version,
-            submission.Code,
+            submission.Code.Base64Decode(),
             submission.SubmittedAt,
             scoreDtos,
             scoreDtos.Sum(s => s.Score));

@@ -1,6 +1,7 @@
 using MediatR;
 using MetroMania.Application.DTOs;
 using MetroMania.Domain.Entities;
+using MetroMania.Domain.Extensions;
 using MetroMania.Domain.Interfaces;
 
 namespace MetroMania.Application.Submissions.Commands;
@@ -22,7 +23,7 @@ public class SubmitCodeCommandHandler(
             Id = Guid.NewGuid(),
             UserId = request.UserId,
             Version = nextVersion,
-            Code = request.Code,
+            Code = request.Code.Base64Encode(),
             SubmittedAt = DateTime.UtcNow
         };
 
