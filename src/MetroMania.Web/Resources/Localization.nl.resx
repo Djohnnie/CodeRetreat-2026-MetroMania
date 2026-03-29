@@ -98,6 +98,7 @@
   <data name="Paste" xml:space="preserve"><value>Plakken</value></data>
   <data name="Clear" xml:space="preserve"><value>Wissen</value></data>
   <data name="Submit" xml:space="preserve"><value>Indienen</value></data>
+  <data name="ValidationFailed" xml:space="preserve"><value>Validatie Mislukt</value></data>
   <data name="SubmissionHistory" xml:space="preserve"><value>Inzendingsgeschiedenis</value></data>
   <data name="NoSubmissionsYet" xml:space="preserve"><value>Nog geen inzendingen. Dien je bot-code in om je geschiedenis hier te zien.</value></data>
   <data name="Submission" xml:space="preserve"><value>Inzending</value></data>

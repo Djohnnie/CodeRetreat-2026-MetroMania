@@ -1,3 +1,4 @@
+using MetroMania.Application.Interfaces;
 using MetroMania.Orleans.Contracts.Grains;
 
 namespace MetroMania.Orleans.Client.Services;
@@ -8,5 +9,13 @@ public class GameRunnerValidationService(IGrainFactory grainFactory) : IGameRunn
     {
         var grain = grainFactory.GetGrain<IGameRunnerValidationGrain>(grainId);
         return grain.PingAsync();
+    }
+
+    public async Task<ScriptValidationResult> ValidateAsync(string base64Code)
+    {
+        var grain = grainFactory.GetGrain<IGameRunnerValidationGrain>(Guid.NewGuid());
+        var result = await grain.ValidateScriptAsync(base64Code);
+
+        return new ScriptValidationResult(result.Success, result.Errors);
     }
 }

@@ -98,6 +98,7 @@
   <data name="Paste" xml:space="preserve"><value>Paste</value></data>
   <data name="Clear" xml:space="preserve"><value>Clear</value></data>
   <data name="Submit" xml:space="preserve"><value>Submit</value></data>
+  <data name="ValidationFailed" xml:space="preserve"><value>Validation Failed</value></data>
   <data name="SubmissionHistory" xml:space="preserve"><value>Submission History</value></data>
   <data name="NoSubmissionsYet" xml:space="preserve"><value>No submissions yet. Submit your bot code to see your history here.</value></data>
   <data name="Submission" xml:space="preserve"><value>Submission</value></data>

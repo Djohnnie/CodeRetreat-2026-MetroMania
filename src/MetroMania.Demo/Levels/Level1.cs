@@ -7,6 +7,7 @@ internal static class Level1
 {
     public static Level Level => new Level
     {
+        Id = Guid.NewGuid(),
         Title = "Demo Level",
         Description = "A simple demo level with two stations",
         GridWidth = 4,

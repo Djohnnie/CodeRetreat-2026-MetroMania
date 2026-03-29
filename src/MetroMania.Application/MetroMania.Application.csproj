@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MetroMania.Domain\MetroMania.Domain.csproj" />
+    <ProjectReference Include="..\MetroMania.Engine\MetroMania.Engine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

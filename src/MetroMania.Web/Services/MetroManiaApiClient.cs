@@ -3,6 +3,7 @@ using MetroMania.Application.Auth.Queries;
 using MetroMania.Application.DTOs;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
+using MetroMania.Domain.Extensions;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -147,12 +148,27 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return (await httpClient.GetFromJsonAsync<List<SubmissionDto>>($"/api/submissions/users/{userId}", JsonOptions))!;
     }
 
-    public async Task<SubmissionDto> SubmitCodeAsync(Guid userId, string code)
+    public async Task<string> GetStarterCodeAsync()
+    {
+        SetAuthHeader();
+        var base64 = (await httpClient.GetFromJsonAsync<string>("/api/submissions/starter-code", JsonOptions))!;
+        return base64.Base64Decode();
+    }
+
+    public async Task<SubmitCodeResponse> SubmitCodeAsync(Guid userId, string code)
     {
         SetAuthHeader();
         var response = await httpClient.PostAsJsonAsync("/api/submissions", new { userId, code });
+
+        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            var errorBody = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonOptions);
+            return new SubmitCodeResponse(false, errorBody?.Errors, null);
+        }
+
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<SubmissionDto>(JsonOptions))!;
+        var submission = await response.Content.ReadFromJsonAsync<SubmissionDto>(JsonOptions);
+        return new SubmitCodeResponse(true, null, submission);
     }
 
     // ── Theme ─────────────────────────────────────────────────────
@@ -183,3 +199,7 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return (await httpClient.GetFromJsonAsync<List<LeaderboardEntryDto>>("/api/leaderboard", JsonOptions))!;
     }
 }
+
+public record SubmitCodeResponse(bool Success, IReadOnlyList<string>? ValidationErrors, SubmissionDto? Submission);
+
+record ValidationErrorResponse(IReadOnlyList<string>? Errors);

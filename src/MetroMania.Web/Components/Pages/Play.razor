@@ -41,23 +41,38 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
                    StartIcon="@Icons.Material.Filled.CloudUpload"
                    OnClick="SubmitCode" Disabled="_submitting">
-            @if (_submitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-            }
             @Loc["Submit"]
         </MudButton>
         <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
                    StartIcon="@Icons.Material.Filled.ContentPaste"
-                   OnClick="PasteFromClipboard">
+                   OnClick="PasteFromClipboard" Disabled="_submitting">
             @Loc["Paste"]
         </MudButton>
         <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
                    StartIcon="@Icons.Material.Filled.Clear"
-                   OnClick="ClearCode">
+                   OnClick="ClearCode" Disabled="_submitting">
             @Loc["Clear"]
         </MudButton>
     </div>
+
+    @if (_submitting)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-3" Rounded="true" />
+    }
+
+    @if (_validationErrors is { Count: > 0 })
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="mt-3"
+                  ShowCloseIcon="true" CloseIconClicked="() => _validationErrors = null">
+            <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">@Loc["ValidationFailed"]</MudText>
+            <ul style="margin: 4px 0 0 16px; padding: 0;">
+                @foreach (var error in _validationErrors)
+                {
+                    <li><MudText Typo="Typo.body2">@error</MudText></li>
+                }
+            </ul>
+        </MudAlert>
+    }
 </MudPaper>
 
 <MudText Typo="Typo.h6" Class="mt-8 mb-3" Style="font-weight: 600;">
@@ -145,7 +160,9 @@ else
     private bool _previousDarkMode;
     private bool _submitting;
     private Guid _userId;
+    private string _starterCode = "";
     private List<SubmissionDto> _submissions = [];
+    private IReadOnlyList<string>? _validationErrors;
 
     [CascadingParameter(Name = "IsDarkMode")]
     private bool IsDarkMode { get; set; }
@@ -158,6 +175,14 @@ else
         {
             _userId = uid;
             _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
+        }
+
+        _starterCode = await ApiClient.GetStarterCodeAsync();
+
+        if (_isReady)
+        {
+            await _editor.SetValue(_starterCode);
+            await UpdateEditorHeight();
         }
     }
 
@@ -188,7 +213,7 @@ else
             AutomaticLayout = true,
             Language = "csharp",
             Theme = IsDarkMode ? "vs-dark" : "vs",
-            Value = "// Write your bot code here\n",
+            Value = _starterCode,
             FontSize = 14,
             FontFamily = "'Cascadia Code', 'Fira Code', 'Consolas', monospace",
             Minimap = new EditorMinimapOptions { Enabled = false },
@@ -202,6 +227,8 @@ else
 
     private async Task OnEditorInit()
     {
+        if (!string.IsNullOrEmpty(_starterCode))
+            await _editor.SetValue(_starterCode);
         await UpdateEditorHeight();
     }
 
@@ -221,10 +248,19 @@ else
         var code = await _editor.GetValue();
         if (string.IsNullOrWhiteSpace(code)) return;
 
+        _validationErrors = null;
         _submitting = true;
+        StateHasChanged();
         try
         {
-            await ApiClient.SubmitCodeAsync(_userId, code);
+            var result = await ApiClient.SubmitCodeAsync(_userId, code);
+
+            if (!result.Success)
+            {
+                _validationErrors = result.ValidationErrors;
+                return;
+            }
+
             _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
         }
         finally
@@ -252,7 +288,7 @@ else
 
     private async Task ClearCode()
     {
-        await _editor.SetValue(string.Empty);
+        await _editor.SetValue(_starterCode);
         await UpdateEditorHeight();
     }
 

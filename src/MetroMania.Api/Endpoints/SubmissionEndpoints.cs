@@ -22,10 +22,20 @@ public static class SubmissionEndpoints
             return Results.Ok(submissions);
         });
 
+        group.MapGet("/starter-code", async (IMediator mediator) =>
+        {
+            var base64Code = await mediator.Send(new GetStarterCodeQuery());
+            return Results.Ok(base64Code);
+        });
+
         group.MapPost("/", async (SubmitCodeRequest request, IMediator mediator) =>
         {
-            var submission = await mediator.Send(new SubmitCodeCommand(request.UserId, request.Code));
-            return Results.Created($"/api/submissions/{submission.Id}", submission);
+            var result = await mediator.Send(new SubmitCodeCommand(request.UserId, request.Code));
+
+            if (!result.Success)
+                return Results.BadRequest(new { errors = result.ValidationErrors });
+
+            return Results.Created($"/api/submissions/{result.Submission!.Id}", result.Submission);
         });
 
         return app;

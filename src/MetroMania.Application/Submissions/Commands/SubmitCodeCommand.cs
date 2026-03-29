@@ -1,21 +1,32 @@
 using MediatR;
 using MetroMania.Application.DTOs;
+using MetroMania.Application.Interfaces;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Extensions;
 using MetroMania.Domain.Interfaces;
 
 namespace MetroMania.Application.Submissions.Commands;
 
-public record SubmitCodeCommand(Guid UserId, string Code) : IRequest<SubmissionDto>;
+public record SubmitCodeCommand(Guid UserId, string Code) : IRequest<SubmitCodeResult>;
+
+public record SubmitCodeResult(bool Success, IReadOnlyList<string>? ValidationErrors, SubmissionDto? Submission);
 
 public class SubmitCodeCommandHandler(
     ISubmissionRepository submissionRepository,
     ISubmissionScoreRepository scoreRepository,
-    ILevelRepository levelRepository)
-    : IRequestHandler<SubmitCodeCommand, SubmissionDto>
+    ILevelRepository levelRepository,
+    IScriptValidationService scriptValidationService)
+    : IRequestHandler<SubmitCodeCommand, SubmitCodeResult>
 {
-    public async Task<SubmissionDto> Handle(SubmitCodeCommand request, CancellationToken cancellationToken)
+    public async Task<SubmitCodeResult> Handle(SubmitCodeCommand request, CancellationToken cancellationToken)
     {
+        // Validate the script by compiling and running it before storing
+        var base64Code = request.Code.Base64Encode();
+        var validationResult = await scriptValidationService.ValidateAsync(base64Code);
+
+        if (!validationResult.Success)
+            return new SubmitCodeResult(false, validationResult.Errors, null);
+
         var nextVersion = await submissionRepository.GetNextVersionAsync(request.UserId);
 
         var submission = new Submission
@@ -23,7 +34,7 @@ public class SubmitCodeCommandHandler(
             Id = Guid.NewGuid(),
             UserId = request.UserId,
             Version = nextVersion,
-            Code = request.Code.Base64Encode(),
+            Code = base64Code,
             SubmittedAt = DateTime.UtcNow
         };
 
@@ -44,6 +55,6 @@ public class SubmitCodeCommandHandler(
         if (scores.Count > 0)
             await scoreRepository.AddManyAsync(scores);
 
-        return SubmissionDto.FromEntity(submission, scores, levels);
+        return new SubmitCodeResult(true, null, SubmissionDto.FromEntity(submission, scores, levels));
     }
 }

@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MetroMania.Engine\MetroMania.Engine.csproj" />
     <ProjectReference Include="..\MetroMania.Orleans.Contracts\MetroMania.Orleans.Contracts.csproj" />
   </ItemGroup>
 
