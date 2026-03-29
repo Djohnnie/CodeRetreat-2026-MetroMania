@@ -1,3 +1,5 @@
+using MetroMania.Domain.Entities;
+
 namespace MetroMania.Engine.Scripting;
 
 /// <summary>
@@ -6,5 +8,10 @@ namespace MetroMania.Engine.Scripting;
 /// </summary>
 public class ScriptGlobals
 {
-    // TODO: Implement script globals with game state and player action methods
+    public Level Level { get; }
+
+    public ScriptGlobals(Level level)
+    {
+        Level = level;
+    }
 }

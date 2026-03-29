@@ -9,13 +9,13 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace MetroMania.Engine.Scripting;
 
-public interface IScriptCompiler
+public interface IScriptCompiler<TResult>
 {
-    Task<ScriptRunner<object?>> CompileForExecution(string script);
+    Task<ScriptRunner<TResult?>> CompileForExecution(string script);
     Task<ImmutableArray<Diagnostic>> CompileForDiagnostics(string script);
 }
 
-public class ScriptCompiler : IScriptCompiler
+public class ScriptCompiler<TResult> : IScriptCompiler<TResult>
 {
     private static readonly Assembly MSCoreLib = typeof(object).Assembly;
     private static readonly Assembly SystemCore = typeof(Enumerable).Assembly;
@@ -23,7 +23,7 @@ public class ScriptCompiler : IScriptCompiler
     private static readonly Assembly EngineModel = typeof(PlayerAction).Assembly;
     private static readonly Assembly DomainEnums = typeof(StationType).Assembly;
 
-    public Task<ScriptRunner<object?>> CompileForExecution(string script)
+    public Task<ScriptRunner<TResult?>> CompileForExecution(string script)
     {
         return Task.Run(() =>
         {
@@ -41,7 +41,7 @@ public class ScriptCompiler : IScriptCompiler
         });
     }
 
-    private Script<object?> PrepareScript(string script)
+    private Script<TResult?> PrepareScript(string script)
     {
         var decodedScript = script.Base64Decode();
 
@@ -50,11 +50,11 @@ public class ScriptCompiler : IScriptCompiler
             .WithImports(
                 "System", "System.Linq", "System.Collections",
                 "System.Collections.Generic", "MetroMania.Domain.Enums",
-                "MetroMania.Engine.Model",
+                "MetroMania.Engine", "MetroMania.Engine.Contracts", "MetroMania.Engine.Model",
                 "System.Runtime.CompilerServices")
             .WithOptimizationLevel(OptimizationLevel.Release);
 
-        var botScript = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(
+        var botScript = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create<TResult?>(
             decodedScript, scriptOptions, typeof(ScriptGlobals));
         botScript.WithOptions(botScript.Options.AddReferences(MSCoreLib, SystemCore));
 
