@@ -1,3 +1,5 @@
+using MetroMania.Domain.Enums;
+
 namespace MetroMania.Domain.Entities;
 
 public class Submission
@@ -6,6 +8,7 @@ public class Submission
     public Guid UserId { get; set; }
     public int Version { get; set; }
     public string Code { get; set; } = string.Empty;
+    public SubmissionStatus Status { get; set; } = SubmissionStatus.Waiting;
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;

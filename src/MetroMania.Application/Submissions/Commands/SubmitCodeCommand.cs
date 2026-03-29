@@ -2,6 +2,7 @@ using MediatR;
 using MetroMania.Application.DTOs;
 using MetroMania.Application.Interfaces;
 using MetroMania.Domain.Entities;
+using MetroMania.Domain.Enums;
 using MetroMania.Domain.Extensions;
 using MetroMania.Domain.Interfaces;
 
@@ -35,6 +36,7 @@ public class SubmitCodeCommandHandler(
             UserId = request.UserId,
             Version = nextVersion,
             Code = base64Code,
+            Status = SubmissionStatus.Waiting,
             SubmittedAt = DateTime.UtcNow
         };
 
