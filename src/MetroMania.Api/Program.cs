@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using MetroMania.Api.Endpoints;
-using MetroMania.Infrastructure;
-using MetroMania.Infrastructure.Persistence;
-using MetroMania.Orleans.Client;
+using MetroMania.Infrastructure.Sql;
+using MetroMania.Infrastructure.Sql.Persistence;
+using MetroMania.Infrastructure.Orleans;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

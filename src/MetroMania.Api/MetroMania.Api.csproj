@@ -2,8 +2,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure\MetroMania.Infrastructure.csproj" />
-    <ProjectReference Include="..\MetroMania.Orleans.Client\MetroMania.Orleans.Client.csproj" />
+    <ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
+    <ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
   </ItemGroup>
 
   <ItemGroup>
