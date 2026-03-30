@@ -23,5 +23,6 @@
   </Folder>
   <Folder Name="/src/9. Other/">
     <Project Path="src/MetroMania.Demo/MetroMania.Demo.csproj" />
+    <Project Path="src/MetroMania.PlayerSdk/MetroMania.PlayerSdk.csproj" />
   </Folder>
 </Solution>

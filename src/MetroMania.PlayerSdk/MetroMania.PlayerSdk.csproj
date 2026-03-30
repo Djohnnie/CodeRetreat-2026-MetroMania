@@ -1,0 +1,112 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<!-- Resolve repo root regardless of whether we're building via solution or direct project reference -->
+		<_RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</_RepoRoot>
+		<!-- Output directory for the obfuscated player SDK -->
+		<PlayerSdkOutputDir>$(_RepoRoot)\output\PlayerSdk\</PlayerSdkOutputDir>
+		<!-- Copy NuGet package DLLs to bin output so they can be picked up for the SDK -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Pull in Engine (which transitively pulls in Domain and all NuGet deps) -->
+		<ProjectReference Include="..\MetroMania.Engine\MetroMania.Engine.csproj" />
+	</ItemGroup>
+
+	<!--
+		Obfuscation target: runs after a Release build.
+		Produces obfuscated MetroMania.Engine.dll and MetroMania.Domain.dll
+		plus all runtime dependencies in output/PlayerSdk/.
+
+		To build the player SDK:
+		  dotnet build src\MetroMania.PlayerSdk -c Release
+
+		First-time setup (installs Obfuscar dotnet tool):
+		  dotnet tool restore
+	-->
+	<Target Name="ObfuscatePlayerSdk" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+
+		<PropertyGroup>
+			<!-- Absolute resolved build output path -->
+			<_InPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\$(OutputPath)'))</_InPath>
+			<!--
+				Use a staging dir for Obfuscar output so we can strip the Mapping.txt
+				(which would allow players to reverse the obfuscation) before copying to the SDK dir.
+			-->
+			<_StagingPath>$(MSBuildProjectDirectory)\obj\obfuscar-staging\</_StagingPath>
+			<_ObfuscarConfig>$(MSBuildProjectDirectory)\obfuscar.generated.xml</_ObfuscarConfig>
+		</PropertyGroup>
+
+		<MakeDir Directories="$(PlayerSdkOutputDir);$(_StagingPath)" />
+
+		<!--
+			Dynamically generate the Obfuscar XML config with resolved absolute paths.
+			Using item metadata (%(Value)) avoids MSBuild glob-expansion on Include values.
+			KeepPublicApi=true   → all public types/members keep their original names (player API surface)
+			HideStrings=true     → string literals are encrypted at IL level
+			UseUnicodeNames=true → renamed private symbols use lookalike Unicode characters
+		-->
+		<ItemGroup>
+			<_ObfuscarLine Include="l01"><Value>&lt;?xml version='1.0'?&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l02"><Value>&lt;Obfuscator&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l03"><Value>  &lt;Var name="InPath"              value="$(_InPath)" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l04"><Value>  &lt;Var name="OutPath"             value="$(_StagingPath)" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l05"><Value>  &lt;Var name="KeepPublicApi"       value="true" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l06"><Value>  &lt;Var name="RenameFields"        value="true" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l07"><Value>  &lt;Var name="RenameProperties"    value="true" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l08"><Value>  &lt;Var name="RenameEvents"        value="true" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l09"><Value>  &lt;Var name="HideStrings"         value="true" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l10"><Value>  &lt;Var name="UseUnicodeNames"     value="true" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l11"><Value>  &lt;Var name="RegenerateDebugInfo" value="false" /&gt;</Value></_ObfuscarLine>
+			<!-- Full absolute paths in Module file — avoids Obfuscar resolving against CWD -->
+			<_ObfuscarLine Include="l12"><Value>  &lt;Module file="$(_InPath)MetroMania.Engine.dll" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l13"><Value>  &lt;Module file="$(_InPath)MetroMania.Domain.dll" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l14"><Value>&lt;/Obfuscator&gt;</Value></_ObfuscarLine>
+		</ItemGroup>
+
+		<WriteLinesToFile
+			File="$(_ObfuscarConfig)"
+			Lines="@(_ObfuscarLine->'%(Value)')"
+			Overwrite="true"
+			WriteOnlyWhenDifferent="false" />
+
+		<!-- Restore the local dotnet tool if not yet installed -->
+		<Exec Command="dotnet tool restore" WorkingDirectory="$(_RepoRoot)" />
+
+		<!-- Run Obfuscar — writes obfuscated Engine.dll + Domain.dll to the staging dir -->
+		<Exec Command="dotnet tool run obfuscar.console &quot;$(_ObfuscarConfig)&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+
+		<!--
+			Copy only the obfuscated DLLs from staging (exclude Mapping.txt which would
+			let players reverse the obfuscation) to the final SDK output directory.
+		-->
+		<ItemGroup>
+			<_ObfuscatedDlls Include="$(_StagingPath)*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_ObfuscatedDlls)" DestinationFolder="$(PlayerSdkOutputDir)" SkipUnchangedFiles="true" />
+
+		<!--
+			Copy runtime dependencies (SkiaSharp, Svg.Skia, Roslyn, etc.) to the SDK output.
+			CopyLocalLockFileAssemblies=true ensures NuGet DLLs land in the bin output first.
+			Exclude MetroMania.* — the obfuscated versions are already copied above.
+		-->
+		<ItemGroup>
+			<_RuntimeDeps
+				Include="$(_InPath)*.dll"
+				Exclude="$(_InPath)MetroMania.*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_RuntimeDeps)" DestinationFolder="$(PlayerSdkOutputDir)" SkipUnchangedFiles="true" />
+
+		<!-- Clean up ephemeral files -->
+		<Delete Files="$(_ObfuscarConfig)" />
+		<RemoveDir Directories="$(_StagingPath)" />
+
+		<Message Text="✅  PlayerSdk built → $(PlayerSdkOutputDir)" Importance="high" />
+
+	</Target>
+
+</Project>
