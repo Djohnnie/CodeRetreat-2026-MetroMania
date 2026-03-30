@@ -1,0 +1,13 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/TestResults
+**/output
+**/.gitignore
+**/*.user
+**/node_modules
+**/*.md
+!src/**/README.md
+LICENSE
