@@ -64,6 +64,12 @@ else
                 <MudNumericField Value="_vehicleCapacity" ValueChanged="OnVehicleCapacityChanged" T="int"
                                  Min="1" Variant="Variant.Outlined" Style="max-width: 100px;" />
             </div>
+            <MudDivider Vertical="true" FlexItem="true" />
+            <div class="d-flex align-center gap-2">
+                <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["MaxDays"]:</MudText>
+                <MudNumericField Value="_maxDays" ValueChanged="OnMaxDaysChanged" T="int"
+                                 Min="1" Variant="Variant.Outlined" Style="max-width: 100px;" />
+            </div>
         </MudPaper>
     </div>
 
@@ -306,6 +312,7 @@ else
     private MudColor _waterColor = new("#90caf9");
     private int _seed;
     private int _vehicleCapacity = 6;
+    private int _maxDays = 200;
 
     private CancellationTokenSource? _debounceCts;
     private readonly SemaphoreSlim _saveLock = new(1, 1);
@@ -343,6 +350,7 @@ else
             _waterColor = new MudColor(_level.WaterColor);
             _seed = _level.Seed;
             _vehicleCapacity = _level.VehicleCapacity;
+            _maxDays = _level.MaxDays > 0 ? _level.MaxDays : 200;
             LoadTileSvgs();
         }
     }
@@ -389,6 +397,12 @@ else
     private async Task OnVehicleCapacityChanged(int capacity)
     {
         _vehicleCapacity = Math.Max(1, capacity);
+        await DebouncedSaveLevelData();
+    }
+
+    private async Task OnMaxDaysChanged(int days)
+    {
+        _maxDays = Math.Max(1, days);
         await DebouncedSaveLevelData();
     }
 
@@ -509,6 +523,7 @@ else
                 WaterColor = GetWaterHex(),
                 Seed = _seed,
                 VehicleCapacity = _vehicleCapacity,
+                MaxDays = _maxDays,
                 Stations = _stations,
                 WaterTiles = _waterTiles,
                 WeeklyGiftOverrides = _weeklyGiftOverrides

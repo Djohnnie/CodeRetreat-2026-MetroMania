@@ -14,6 +14,7 @@ public record LevelDto(
     string WaterColor,
     int Seed,
     int VehicleCapacity,
+    int MaxDays,
     List<MetroStation> Stations,
     List<Water> WaterTiles,
     List<WeeklyGiftOverride> WeeklyGiftOverrides)
@@ -22,7 +23,7 @@ public record LevelDto(
         new(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight,
             level.SortOrder, level.CreatedAt,
             level.LevelData.BackgroundColor, level.LevelData.WaterColor,
-            level.LevelData.Seed, level.LevelData.VehicleCapacity,
+            level.LevelData.Seed, level.LevelData.VehicleCapacity, level.LevelData.MaxDays,
             level.LevelData.Stations, level.LevelData.WaterTiles,
             level.LevelData.WeeklyGiftOverrides);
 }

@@ -37,6 +37,7 @@ public class MetroManiaEngine
     {
         var random = new Random(level.LevelData.Seed);
         var vehicleCapacity = level.LevelData.VehicleCapacity;
+        var maxDays = level.LevelData.MaxDays;
         var activeStations = new Dictionary<Location, StationState>();
 
         // Initialize starting resources: 1 line and 1 vehicle
@@ -54,7 +55,7 @@ public class MetroManiaEngine
         var time = new GameTime(0, 0, default);
         bool gameOver = false;
 
-        while (!gameOver && (targetHours is null || hoursElapsed < targetHours))
+        while (!gameOver && (targetHours is null || hoursElapsed < targetHours) && (maxDays <= 0 || hoursElapsed < maxDays * 24))
         {
             cancellationToken.ThrowIfCancellationRequested();
             int day = hoursElapsed / 24 + 1;

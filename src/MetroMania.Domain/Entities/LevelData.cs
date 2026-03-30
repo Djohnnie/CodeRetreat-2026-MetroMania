@@ -22,6 +22,13 @@ public class LevelData
     /// </summary>
     public int VehicleCapacity { get; set; } = 6;
 
+    /// <summary>
+    /// Maximum number of days the simulation may run before it ends with the current score.
+    /// The simulation stops cleanly after the last hour of this day without triggering a game-over.
+    /// A value of 0 means no limit — the simulation only ends when a station overruns (game over).
+    /// </summary>
+    public int MaxDays { get; set; } = 200;
+
     public List<MetroStation> Stations { get; set; } = [];
     public List<Water> WaterTiles { get; set; } = [];
 

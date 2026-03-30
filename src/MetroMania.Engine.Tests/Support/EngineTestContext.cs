@@ -55,6 +55,7 @@ public class EngineTestContext
     public int MaxPassengersOnboard { get; set; }
     public bool DwellTimeObserved { get; set; }
     public int? VehicleCapacityOverride { get; set; }
+    public int? MaxDaysOverride { get; set; }
 
     // Overrun and game over tracking
     public List<OverrunEvent> OverrunCalls { get; } = [];
@@ -156,6 +157,8 @@ public class EngineTestContext
         };
         if (VehicleCapacityOverride.HasValue)
             levelData.VehicleCapacity = VehicleCapacityOverride.Value;
+        if (MaxDaysOverride.HasValue)
+            levelData.MaxDays = MaxDaysOverride.Value;
 
         return new()
         {
