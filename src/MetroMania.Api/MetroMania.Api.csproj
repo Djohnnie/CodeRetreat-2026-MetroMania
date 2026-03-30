@@ -1,25 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <ItemGroup>
-    <ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
+		<ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
+		<ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
+		<ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Orleans.Client" Version="10.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Orleans.Client" Version="10.0.1" />
+	</ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
 </Project>

@@ -1,24 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
-    <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="*" />
-    <PackageReference Include="Microsoft.Orleans.Client" Version="10.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
+		<PackageReference Include="MediatR" Version="14.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="*" />
+		<PackageReference Include="Microsoft.Orleans.Client" Version="10.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
-    <ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
+		<ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
+		<ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
+		<ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
+	</ItemGroup>
 
 </Project>

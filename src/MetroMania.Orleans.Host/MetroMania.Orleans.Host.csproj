@@ -1,21 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.Dashboard" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Orleans.Dashboard.Abstractions" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Orleans.Server" Version="10.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Orleans.Dashboard" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Orleans.Dashboard.Abstractions" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Orleans.Server" Version="10.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MetroMania.Domain\MetroMania.Domain.csproj" />
-    <ProjectReference Include="..\MetroMania.Engine\MetroMania.Engine.csproj" />
-    <ProjectReference Include="..\MetroMania.Orleans.Contracts\MetroMania.Orleans.Contracts.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MetroMania.Domain\MetroMania.Domain.csproj" />
+		<ProjectReference Include="..\MetroMania.Engine\MetroMania.Engine.csproj" />
+		<ProjectReference Include="..\MetroMania.Orleans.Contracts\MetroMania.Orleans.Contracts.csproj" />
+	</ItemGroup>
 
 </Project>
