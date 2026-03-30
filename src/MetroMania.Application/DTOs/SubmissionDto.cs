@@ -29,12 +29,17 @@ public record SubmissionDto(
                 var localizedTitles = level?.LevelData.LocalizedContent
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Title)
                     ?? [];
+                var localizedDescriptions = level?.LevelData.LocalizedContent
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Description)
+                    ?? [];
                 return new SubmissionScoreDto(
                     s.LevelId,
                     level?.Title ?? "Unknown",
+                    level?.Description ?? "",
                     level?.SortOrder ?? 0,
                     s.Score,
-                    localizedTitles);
+                    localizedTitles,
+                    localizedDescriptions);
             })
             .OrderBy(s => s.SortOrder)
             .ToList();
