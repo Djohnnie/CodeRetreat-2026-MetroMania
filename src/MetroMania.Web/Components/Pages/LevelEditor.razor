@@ -60,12 +60,6 @@ else
             </div>
             <MudDivider Vertical="true" FlexItem="true" />
             <div class="d-flex align-center gap-2">
-                <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["Seed"]:</MudText>
-                <MudNumericField Value="_seed" ValueChanged="OnSeedChanged" T="int"
-                                 Variant="Variant.Outlined" Style="max-width: 140px;" />
-            </div>
-            <MudDivider Vertical="true" FlexItem="true" />
-            <div class="d-flex align-center gap-2">
                 <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["VehicleCapacity"]:</MudText>
                 <MudNumericField Value="_vehicleCapacity" ValueChanged="OnVehicleCapacityChanged" T="int"
                                  Min="1" Variant="Variant.Outlined" Style="max-width: 100px;" />
@@ -166,6 +160,14 @@ else
                 }
             </div>
         </MudPaper>
+    </div>
+
+    <!-- Weekly Gift Overrides -->
+    <div class="d-flex justify-center mt-3 mb-1">
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            <MudIcon Icon="@Icons.Material.Filled.Casino" Size="Size.Small" Style="vertical-align: middle; margin-right: 4px;" />
+            @Loc["Seed"]: <strong>@_seed</strong>
+        </MudText>
     </div>
 
     <!-- Weekly Gift Overrides -->
@@ -381,12 +383,6 @@ else
     {
         _waterColor = color;
         RebuildColorizedCache();
-        await DebouncedSaveLevelData();
-    }
-
-    private async Task OnSeedChanged(int seed)
-    {
-        _seed = seed;
         await DebouncedSaveLevelData();
     }
 
