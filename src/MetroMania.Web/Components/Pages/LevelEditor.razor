@@ -26,7 +26,7 @@ else
 
     <div class="d-flex align-center mb-1">
         <MudIcon Icon="@Icons.Material.Filled.GridOn" Class="mr-2" Color="Color.Primary" />
-        <MudText Typo="Typo.h4" Style="font-weight: 700;">@_level.Title</MudText>
+        <MudText Typo="Typo.h4" Style="font-weight: 700;">@_level.GetLocalizedTitle()</MudText>
         <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info" Class="ml-3">
             @_level.GridWidth x @_level.GridHeight
         </MudChip>

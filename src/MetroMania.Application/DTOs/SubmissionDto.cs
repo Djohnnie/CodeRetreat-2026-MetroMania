@@ -26,11 +26,15 @@ public record SubmissionDto(
             .Select(s =>
             {
                 var level = levels.FirstOrDefault(l => l.Id == s.LevelId);
+                var localizedTitles = level?.LevelData.LocalizedContent
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Title)
+                    ?? [];
                 return new SubmissionScoreDto(
                     s.LevelId,
                     level?.Title ?? "Unknown",
                     level?.SortOrder ?? 0,
-                    s.Score);
+                    s.Score,
+                    localizedTitles);
             })
             .OrderBy(s => s.SortOrder)
             .ToList();

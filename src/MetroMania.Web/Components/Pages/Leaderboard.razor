@@ -97,7 +97,7 @@ else
                                             <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
                                         </HeaderContent>
                                         <RowTemplate Context="scoreCtx">
-                                            <MudTd DataLabel="@Loc["LevelName"]">@scoreCtx.LevelTitle</MudTd>
+                                            <MudTd DataLabel="@Loc["LevelName"]">@scoreCtx.GetLocalizedTitle()</MudTd>
                                             <MudTd DataLabel="@Loc["Score"]" Style="text-align: right;">
                                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary">
                                                     @scoreCtx.Score.ToString("N0")

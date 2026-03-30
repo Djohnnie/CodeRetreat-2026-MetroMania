@@ -92,18 +92,18 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return await response.Content.ReadFromJsonAsync<LevelDto>(JsonOptions);
     }
 
-    public async Task<LevelDto> CreateLevelAsync(string title, string description, int gridWidth, int gridHeight)
+    public async Task<LevelDto> CreateLevelAsync(string title, string description, int gridWidth, int gridHeight, Dictionary<string, LocalizedLevelText> localizedContent)
     {
         SetAuthHeader();
-        var response = await httpClient.PostAsJsonAsync("/api/levels", new { title, description, gridWidth, gridHeight });
+        var response = await httpClient.PostAsJsonAsync("/api/levels", new { title, description, gridWidth, gridHeight, localizedContent }, JsonOptions);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<LevelDto>(JsonOptions))!;
     }
 
-    public async Task<LevelDto?> UpdateLevelAsync(Guid id, string title, string description, int gridWidth, int gridHeight)
+    public async Task<LevelDto?> UpdateLevelAsync(Guid id, string title, string description, int gridWidth, int gridHeight, Dictionary<string, LocalizedLevelText> localizedContent)
     {
         SetAuthHeader();
-        var response = await httpClient.PutAsJsonAsync($"/api/levels/{id}", new { title, description, gridWidth, gridHeight });
+        var response = await httpClient.PutAsJsonAsync($"/api/levels/{id}", new { title, description, gridWidth, gridHeight, localizedContent }, JsonOptions);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<LevelDto>(JsonOptions);

@@ -26,14 +26,16 @@ public static class LevelEndpoints
         group.MapPost("/", async (CreateLevelRequest request, IMediator mediator) =>
         {
             var level = await mediator.Send(new CreateLevelCommand(
-                request.Title, request.Description, request.GridWidth, request.GridHeight));
+                request.Title, request.Description, request.GridWidth, request.GridHeight,
+                request.LocalizedContent));
             return Results.Created($"/api/levels/{level.Id}", level);
         }).RequireAuthorization("Admin");
 
         group.MapPut("/{id:guid}", async (Guid id, UpdateLevelRequest request, IMediator mediator) =>
         {
             var level = await mediator.Send(new UpdateLevelCommand(
-                id, request.Title, request.Description, request.GridWidth, request.GridHeight));
+                id, request.Title, request.Description, request.GridWidth, request.GridHeight,
+                request.LocalizedContent));
             return level is not null ? Results.Ok(level) : Results.NotFound();
         }).RequireAuthorization("Admin");
 
@@ -59,7 +61,7 @@ public static class LevelEndpoints
     }
 }
 
-record CreateLevelRequest(string Title, string Description, int GridWidth, int GridHeight);
-record UpdateLevelRequest(string Title, string Description, int GridWidth, int GridHeight);
+record CreateLevelRequest(string Title, string Description, int GridWidth, int GridHeight, Dictionary<string, LocalizedLevelText> LocalizedContent);
+record UpdateLevelRequest(string Title, string Description, int GridWidth, int GridHeight, Dictionary<string, LocalizedLevelText> LocalizedContent);
 record ReorderLevelRequest(int Direction);
 record UpdateGridDataRequest(LevelData LevelData);

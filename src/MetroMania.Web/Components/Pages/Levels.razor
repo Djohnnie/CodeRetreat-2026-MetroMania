@@ -1,6 +1,7 @@
 @page "/admin/levels"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
 @using MetroMania.Application.DTOs
+@using MetroMania.Domain.Entities
 @using MetroMania.Web.Services
 @inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
@@ -32,11 +33,22 @@
         <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">
             @(_editId is null ? Loc["AddLevel"] : Loc["EditLevel"])
         </MudText>
-        <MudTextField @bind-Value="_editTitle" Label="@Loc["LevelTitle"]" Variant="Variant.Outlined"
+
+        <!-- English -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">🇬🇧 @Loc["English"]</MudText>
+        <MudTextField @bind-Value="_editTitleEn" Label="@Loc["TitleEN"]" Variant="Variant.Outlined"
                       Required="true" RequiredError="@Loc["TitleRequired"]" Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
-        <MudTextField @bind-Value="_editDescription" Label="@Loc["LevelDescription"]" Variant="Variant.Outlined"
-                      Lines="3" Class="mb-3"
+        <MudTextField @bind-Value="_editDescriptionEn" Label="@Loc["DescriptionEN"]" Variant="Variant.Outlined"
+                      Lines="2" Class="mb-4"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
+
+        <!-- Dutch -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">🇳🇱 @Loc["Dutch"]</MudText>
+        <MudTextField @bind-Value="_editTitleNl" Label="@Loc["TitleNL"]" Variant="Variant.Outlined" Class="mb-3"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
+        <MudTextField @bind-Value="_editDescriptionNl" Label="@Loc["DescriptionNL"]" Variant="Variant.Outlined"
+                      Lines="2" Class="mb-4"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
         <div class="d-flex gap-3 mb-4">
             <MudNumericField @bind-Value="_editGridWidth" Label="@Loc["GridWidth"]" Variant="Variant.Outlined"
@@ -49,7 +61,7 @@
         </div>
         <div class="d-flex gap-2">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveLevel"
-                       Disabled="_saving || string.IsNullOrWhiteSpace(_editTitle)"
+                       Disabled="_saving || string.IsNullOrWhiteSpace(_editTitleEn)"
                        Style="text-transform: none; font-weight: 600;">
                 @if (_saving)
                 {
@@ -94,7 +106,7 @@ else
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="@Loc["LevelTitle"]">
-                    <MudText Style="font-weight: 600;">@context.Title</MudText>
+                    <MudText Style="font-weight: 600;">@context.GetLocalizedTitle()</MudText>
                 </MudTd>
                 <MudTd DataLabel="@Loc["GridSize"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info">
@@ -103,7 +115,7 @@ else
                 </MudTd>
                 <MudTd DataLabel="@Loc["LevelDescription"]">
                     <MudText Typo="Typo.body2" Color="Color.Secondary" Style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        @context.Description
+                        @context.GetLocalizedDescription()
                     </MudText>
                 </MudTd>
                 <MudTd DataLabel="@Loc["Actions"]" Style="text-align: right; white-space: nowrap;">
@@ -146,8 +158,10 @@ else
     private bool _editing;
     private bool _saving;
     private Guid? _editId;
-    private string _editTitle = string.Empty;
-    private string _editDescription = string.Empty;
+    private string _editTitleEn = string.Empty;
+    private string _editDescriptionEn = string.Empty;
+    private string _editTitleNl = string.Empty;
+    private string _editDescriptionNl = string.Empty;
     private int _editGridWidth = 10;
     private int _editGridHeight = 8;
 
@@ -164,8 +178,10 @@ else
     private void StartCreate()
     {
         _editId = null;
-        _editTitle = string.Empty;
-        _editDescription = string.Empty;
+        _editTitleEn = string.Empty;
+        _editDescriptionEn = string.Empty;
+        _editTitleNl = string.Empty;
+        _editDescriptionNl = string.Empty;
         _editGridWidth = 10;
         _editGridHeight = 8;
         _editing = true;
@@ -174,8 +190,10 @@ else
     private void StartEdit(LevelDto level)
     {
         _editId = level.Id;
-        _editTitle = level.Title;
-        _editDescription = level.Description;
+        _editTitleEn = level.LocalizedContent.TryGetValue("en", out var en) ? en.Title : level.Title;
+        _editDescriptionEn = level.LocalizedContent.TryGetValue("en", out var enD) ? enD.Description : level.Description;
+        _editTitleNl = level.LocalizedContent.TryGetValue("nl", out var nl) ? nl.Title : string.Empty;
+        _editDescriptionNl = level.LocalizedContent.TryGetValue("nl", out var nlD) ? nlD.Description : string.Empty;
         _editGridWidth = level.GridWidth;
         _editGridHeight = level.GridHeight;
         _editing = true;
@@ -189,17 +207,23 @@ else
 
     private async Task SaveLevel()
     {
-        if (string.IsNullOrWhiteSpace(_editTitle)) return;
+        if (string.IsNullOrWhiteSpace(_editTitleEn)) return;
         _saving = true;
+
+        var localizedContent = new Dictionary<string, LocalizedLevelText>
+        {
+            ["en"] = new() { Title = _editTitleEn.Trim(), Description = _editDescriptionEn.Trim() },
+            ["nl"] = new() { Title = _editTitleNl.Trim(), Description = _editDescriptionNl.Trim() }
+        };
 
         if (_editId is null)
         {
-            await ApiClient.CreateLevelAsync(_editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight);
+            await ApiClient.CreateLevelAsync(_editTitleEn.Trim(), _editDescriptionEn.Trim(), _editGridWidth, _editGridHeight, localizedContent);
             _message = Loc["LevelCreated"].Value;
         }
         else
         {
-            await ApiClient.UpdateLevelAsync(_editId.Value, _editTitle.Trim(), _editDescription.Trim(), _editGridWidth, _editGridHeight);
+            await ApiClient.UpdateLevelAsync(_editId.Value, _editTitleEn.Trim(), _editDescriptionEn.Trim(), _editGridWidth, _editGridHeight, localizedContent);
             _message = Loc["LevelUpdated"].Value;
         }
 

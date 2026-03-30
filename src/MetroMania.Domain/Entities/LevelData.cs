@@ -29,6 +29,13 @@ public class LevelData
     /// </summary>
     public int MaxDays { get; set; } = 200;
 
+    /// <summary>
+    /// Multilingual title and description, keyed by two-letter ISO language code (e.g. "en", "nl").
+    /// Used by the UI to show the correct language variant. Stored as JSON inside LevelData so no
+    /// database schema change is needed.
+    /// </summary>
+    public Dictionary<string, LocalizedLevelText> LocalizedContent { get; set; } = [];
+
     public List<MetroStation> Stations { get; set; } = [];
     public List<Water> WaterTiles { get; set; } = [];
 
@@ -109,4 +116,13 @@ public class WeeklyGiftOverride
     /// The resource type to gift on this week instead of a random one.
     /// </summary>
     public ResourceType ResourceType { get; set; }
+}
+
+/// <summary>
+/// Holds the localized title and description for a level in a specific language.
+/// </summary>
+public class LocalizedLevelText
+{
+    public string Title { get; set; } = "";
+    public string Description { get; set; } = "";
 }
