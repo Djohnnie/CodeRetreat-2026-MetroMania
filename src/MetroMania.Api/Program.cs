@@ -1,14 +1,16 @@
-using System.Text;
-using System.Text.Json.Serialization;
+using Azure.Data.Tables;
 using MetroMania.Api.Endpoints;
 using MetroMania.Api.Hubs;
-using MetroMania.Infrastructure.Sql;
-using MetroMania.Infrastructure.Sql.Persistence;
 using MetroMania.Infrastructure.Orleans;
 using MetroMania.Infrastructure.ServiceBus;
+using MetroMania.Infrastructure.Sql;
+using MetroMania.Infrastructure.Sql.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Orleans.Configuration;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +22,26 @@ builder.Services.AddInfrastructure(connectionString);
 
 // Orleans client — connects to the Orleans cluster
 builder.UseOrleansClient(clientBuilder =>
-    clientBuilder.UseLocalhostClustering());
-builder.Services.AddOrleansClient();
+{
+    var azureStorageConnectionString = clientBuilder.Configuration.GetValue<string>("AZURE_STORAGE_CONNECTION_STRING");
+
+#if DEBUG
+    siloBuilder.UseLocalhostClustering();
+    siloBuilder.AddMemoryGrainStorageAsDefault();
+#else
+    clientBuilder.Configure<ClusterOptions>(options =>
+    {
+        options.ClusterId = "metromania-orleans";
+        options.ServiceId = "metromania-orleans";
+    });
+
+    clientBuilder.UseAzureStorageClustering(options =>
+    {
+        options.TableServiceClient = new TableServiceClient(azureStorageConnectionString);
+    });
+#endif
+    builder.Services.AddOrleansClient();
+});
 
 // Service Bus
 builder.Services.AddServiceBus();
