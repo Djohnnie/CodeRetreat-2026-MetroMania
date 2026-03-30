@@ -87,10 +87,15 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Behind a reverse proxy (Azure Container Apps), trust forwarded headers so the app
+// sees the original HTTPS scheme. This is required for secure cookies and correct redirects.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                     | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+});
 
 // Culture middleware
 var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("nl") };
