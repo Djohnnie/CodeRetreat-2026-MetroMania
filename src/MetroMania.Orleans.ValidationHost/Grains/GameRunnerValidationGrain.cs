@@ -38,6 +38,8 @@ public class GameRunnerValidationGrain : Grain, IGameRunnerValidationGrain
             var script = await scriptCompiler.CompileForExecution(wrappedScript);
             await script.Invoke(globals);
 
+            DeactivateOnIdle(); // Deactivate grain after processing
+
             return new ScriptValidationResult { Success = true };
         }
         catch (Exception ex)
