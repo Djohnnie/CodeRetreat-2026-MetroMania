@@ -4,6 +4,7 @@ using MetroMania.Api.Endpoints;
 using MetroMania.Infrastructure.Sql;
 using MetroMania.Infrastructure.Sql.Persistence;
 using MetroMania.Infrastructure.Orleans;
+using MetroMania.Infrastructure.ServiceBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,6 +21,9 @@ builder.Services.AddInfrastructure(connectionString);
 builder.UseOrleansClient(clientBuilder =>
     clientBuilder.UseLocalhostClustering());
 builder.Services.AddOrleansClient();
+
+// Service Bus
+builder.Services.AddServiceBus();
 
 // MediatR
 builder.Services.AddMediatR(cfg =>

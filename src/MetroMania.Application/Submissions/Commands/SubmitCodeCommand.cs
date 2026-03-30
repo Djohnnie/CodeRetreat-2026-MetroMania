@@ -16,7 +16,8 @@ public class SubmitCodeCommandHandler(
     ISubmissionRepository submissionRepository,
     ISubmissionScoreRepository scoreRepository,
     ILevelRepository levelRepository,
-    IScriptValidationService scriptValidationService)
+    IScriptValidationService scriptValidationService,
+    ISubmissionQueueService submissionQueueService)
     : IRequestHandler<SubmitCodeCommand, SubmitCodeResult>
 {
     public async Task<SubmitCodeResult> Handle(SubmitCodeCommand request, CancellationToken cancellationToken)
@@ -56,6 +57,9 @@ public class SubmitCodeCommandHandler(
 
         if (scores.Count > 0)
             await scoreRepository.AddManyAsync(scores);
+
+        // Enqueue submission for async processing
+        await submissionQueueService.EnqueueSubmissionAsync(submission.Id, cancellationToken);
 
         return new SubmitCodeResult(true, null, SubmissionDto.FromEntity(submission, scores, levels));
     }

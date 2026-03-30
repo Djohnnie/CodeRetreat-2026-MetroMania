@@ -9,12 +9,14 @@
   </Folder>
   <Folder Name="/src/3. Infrastructure/">
     <Project Path="src/MetroMania.Api/MetroMania.Api.csproj" />
+    <Project Path="src/MetroMania.Infrastructure.ServiceBus/MetroMania.Infrastructure.ServiceBus.csproj" />
     <Project Path="src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj" />
     <Project Path="src/MetroMania.Infrastructure.Orleans/MetroMania.Infrastructure.Orleans.csproj" />
     <Project Path="src/MetroMania.Orleans.Contracts/MetroMania.Orleans.Contracts.csproj" />
     <Project Path="src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj" />
     <Project Path="src/MetroMania.Orleans.ValidationHost/MetroMania.Orleans.ValidationHost.csproj" />
     <Project Path="src/MetroMania.Web/MetroMania.Web.csproj" />
+    <Project Path="src/MetroMania.Worker/MetroMania.Worker.csproj" />
   </Folder>
   <Folder Name="/src/4. Tests/">
     <Project Path="src/MetroMania.Engine.Tests/MetroMania.Engine.Tests.csproj" />

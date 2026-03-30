@@ -4,6 +4,7 @@
     <ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
     <ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
     <ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
+    <ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
   </ItemGroup>
 
   <ItemGroup>
