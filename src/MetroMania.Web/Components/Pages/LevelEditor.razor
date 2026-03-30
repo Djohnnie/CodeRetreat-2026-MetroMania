@@ -582,8 +582,11 @@ else
 
     private void LoadTileSvgs()
     {
-        var tilesPath = Path.Combine(Env.ContentRootPath, "..", "..", "resources");
-        tilesPath = Path.GetFullPath(tilesPath);
+        // Dev: resources/ is at repo root (two levels up from src/MetroMania.Web/)
+        // Docker: resources/ is copied alongside the app at /app/resources/
+        var tilesPath = Path.GetFullPath(Path.Combine(Env.ContentRootPath, "..", "..", "resources"));
+        if (!Directory.Exists(tilesPath))
+            tilesPath = Path.Combine(Env.ContentRootPath, "resources");
         if (!Directory.Exists(tilesPath))
             return;
 

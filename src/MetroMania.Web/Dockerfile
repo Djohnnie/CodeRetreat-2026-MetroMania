@@ -18,5 +18,6 @@ RUN dotnet publish src/MetroMania.Web/MetroMania.Web.csproj -c Release -o /app/p
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
+COPY resources/ /app/resources/
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "MetroMania.Web.dll"]
