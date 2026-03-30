@@ -269,24 +269,36 @@ else
     {
         _editorReady = true;
         if (!string.IsNullOrEmpty(_starterCode))
-            await _editor.SetValue(_starterCode);
+            await EditorInteropWithRetryAsync(() => _editor.SetValue(_starterCode));
         await UpdateEditorHeight();
     }
 
     private async Task UpdateEditorHeight()
     {
         if (!_editorReady) return;
-        try
+        await EditorInteropWithRetryAsync(async () =>
         {
             var model = await _editor.GetModel();
             var lineCount = await model.GetLineCount();
             var height = Math.Clamp(lineCount * 20 + 20, 300, 600);
             await JS.InvokeVoidAsync("eval",
                 $"document.getElementById('bot-code-editor').style.height = '{height}px'");
-        }
-        catch (JSException)
+        });
+    }
+
+    private static async Task EditorInteropWithRetryAsync(Func<Task> action, int maxRetries = 5)
+    {
+        for (var i = 0; i < maxRetries; i++)
         {
-            // Editor not yet mounted in DOM — will be set on next interaction
+            try
+            {
+                await action();
+                return;
+            }
+            catch (JSException) when (i < maxRetries - 1)
+            {
+                await Task.Delay(100 * (i + 1));
+            }
         }
     }
 
