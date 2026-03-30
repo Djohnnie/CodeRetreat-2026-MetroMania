@@ -167,6 +167,7 @@ else
 @code {
     private StandaloneCodeEditor _editor = null!;
     private bool _isReady;
+    private bool _editorReady;
     private bool _previousDarkMode;
     private bool _submitting;
     private Guid _userId;
@@ -191,7 +192,7 @@ else
 
         _starterCode = await ApiClient.GetStarterCodeAsync();
 
-        if (_isReady)
+        if (_editorReady)
         {
             await _editor.SetValue(_starterCode);
             await UpdateEditorHeight();
@@ -266,6 +267,7 @@ else
 
     private async Task OnEditorInit()
     {
+        _editorReady = true;
         if (!string.IsNullOrEmpty(_starterCode))
             await _editor.SetValue(_starterCode);
         await UpdateEditorHeight();
@@ -273,11 +275,19 @@ else
 
     private async Task UpdateEditorHeight()
     {
-        var model = await _editor.GetModel();
-        var lineCount = await model.GetLineCount();
-        var height = Math.Clamp(lineCount * 20 + 20, 300, 600);
-        await JS.InvokeVoidAsync("eval",
-            $"document.getElementById('bot-code-editor').style.height = '{height}px'");
+        if (!_editorReady) return;
+        try
+        {
+            var model = await _editor.GetModel();
+            var lineCount = await model.GetLineCount();
+            var height = Math.Clamp(lineCount * 20 + 20, 300, 600);
+            await JS.InvokeVoidAsync("eval",
+                $"document.getElementById('bot-code-editor').style.height = '{height}px'");
+        }
+        catch (JSException)
+        {
+            // Editor not yet mounted in DOM — will be set on next interaction
+        }
     }
 
     private async Task SubmitCode()
