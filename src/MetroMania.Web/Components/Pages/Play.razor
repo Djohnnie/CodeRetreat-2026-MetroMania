@@ -105,7 +105,7 @@ else
                                 @Loc["Submission"] #@submission.Version
                             </MudText>
                             <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="GetStatusColor(submission.Status)">
-                                @submission.Status
+                                @Loc[submission.Status.ToString()]
                             </MudChip>
                             @if (submission.Status == SubmissionStatus.Succeeded)
                             {

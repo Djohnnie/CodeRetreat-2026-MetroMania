@@ -52,7 +52,7 @@ else
                 </MudTd>
                 <MudTd DataLabel="@Loc["Status"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="@GetStatusColor(context.ApprovalStatus)">
-                        @context.ApprovalStatus
+                        @Loc[context.ApprovalStatus.ToString()]
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="@Loc["Registered"]">

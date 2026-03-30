@@ -39,6 +39,10 @@
   <data name="Role" xml:space="preserve"><value>Role</value></data>
   <data name="Administration" xml:space="preserve"><value>Administration</value></data>
   <data name="ManageUsers" xml:space="preserve"><value>Manage Users</value></data>
+  <!-- ApprovalStatus enum values -->
+  <data name="Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="Rejected" xml:space="preserve"><value>Rejected</value></data>
 
   <!-- Home - Not Authenticated -->
   <data name="WelcomeGuest" xml:space="preserve"><value>Please log in or register to continue.</value></data>
@@ -104,6 +108,11 @@
   <data name="Submission" xml:space="preserve"><value>Submission</value></data>
   <data name="RevertToThis" xml:space="preserve"><value>Revert to this version</value></data>
   <data name="LoadToEditor" xml:space="preserve"><value>Load into editor</value></data>
+  <!-- SubmissionStatus enum values -->
+  <data name="Waiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="Running" xml:space="preserve"><value>Running</value></data>
+  <data name="Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="Failed" xml:space="preserve"><value>Failed</value></data>
 
   <!-- Not Found -->
   <data name="PageNotFound" xml:space="preserve"><value>Page Not Found</value></data>
