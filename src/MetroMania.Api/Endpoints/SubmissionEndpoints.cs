@@ -1,6 +1,9 @@
 using MediatR;
+using MetroMania.Api.Hubs;
 using MetroMania.Application.Submissions.Commands;
 using MetroMania.Application.Submissions.Queries;
+using MetroMania.Domain.Enums;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MetroMania.Api.Endpoints;
 
@@ -38,8 +41,17 @@ public static class SubmissionEndpoints
             return Results.Created($"/api/submissions/{result.Submission!.Id}", result.Submission);
         });
 
+        // Internal endpoint for the Worker to broadcast submission status changes via SignalR
+        group.MapPost("/notify", async (NotifySubmissionRequest request, IHubContext<SubmissionHub> hubContext) =>
+        {
+            await hubContext.Clients.Group(request.UserId.ToString())
+                .SendAsync("SubmissionStatusChanged", request.SubmissionId, request.Status.ToString());
+            return Results.Ok();
+        }).AllowAnonymous();
+
         return app;
     }
 }
 
 record SubmitCodeRequest(Guid UserId, string Code);
+record NotifySubmissionRequest(Guid SubmissionId, Guid UserId, SubmissionStatus Status);

@@ -23,6 +23,10 @@ builder.UseOrleansClient(clientBuilder =>
     clientBuilder.UseLocalhostClustering());
 builder.Services.AddOrleansClient();
 
+// HttpClient for API SignalR notifications
+var apiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? "https://localhost:5101";
+builder.Services.AddHttpClient("ApiNotify", client => client.BaseAddress = new Uri(apiBaseUrl));
+
 builder.Services.AddHostedService<ServiceBusWorker>();
 
 var host = builder.Build();

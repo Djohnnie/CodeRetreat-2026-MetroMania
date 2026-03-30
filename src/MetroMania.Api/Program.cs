@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using MetroMania.Api.Endpoints;
+using MetroMania.Api.Hubs;
 using MetroMania.Infrastructure.Sql;
 using MetroMania.Infrastructure.Sql.Persistence;
 using MetroMania.Infrastructure.Orleans;
@@ -55,10 +56,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("Admin", policy => policy.RequireRole("Admin"));
 
-// CORS — allow the Blazor Web project to call this API
+// SignalR for real-time submission status updates
+builder.Services.AddSignalR();
+
+// CORS — allow the Blazor Web project and Worker to call this API
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+        policy.SetIsOriginAllowed(_ => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials()));
 
 var app = builder.Build();
 
@@ -72,6 +76,9 @@ using (var scope = app.Services.CreateScope())
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// SignalR hub for real-time submission notifications
+app.MapHub<SubmissionHub>("/hubs/submissions");
 
 // Map all domain endpoints
 app.MapAuthEndpoints();

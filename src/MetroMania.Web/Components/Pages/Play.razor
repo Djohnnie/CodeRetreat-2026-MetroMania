@@ -5,11 +5,14 @@
 @using MetroMania.Application.DTOs
 @using MetroMania.Domain.Enums
 @using MetroMania.Web.Services
+@using Microsoft.AspNetCore.SignalR.Client
 @using System.Security.Claims
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 @inject IStringLocalizer<Localization> Loc
 @inject MetroManiaApiClient ApiClient
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IConfiguration Configuration
 
 <PageTitle>MetroMania - @Loc["Play"]</PageTitle>
 
@@ -170,6 +173,7 @@ else
     private string _starterCode = "";
     private List<SubmissionDto> _submissions = [];
     private IReadOnlyList<string>? _validationErrors;
+    private HubConnection? _hubConnection;
 
     [CascadingParameter(Name = "IsDarkMode")]
     private bool IsDarkMode { get; set; }
@@ -182,6 +186,7 @@ else
         {
             _userId = uid;
             _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
+            await StartHubConnectionAsync();
         }
 
         _starterCode = await ApiClient.GetStarterCodeAsync();
@@ -190,6 +195,33 @@ else
         {
             await _editor.SetValue(_starterCode);
             await UpdateEditorHeight();
+        }
+    }
+
+    private async Task StartHubConnectionAsync()
+    {
+        var apiBaseUrl = Configuration.GetValue<string>("API_BASE_URL");
+        if (string.IsNullOrEmpty(apiBaseUrl)) return;
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl($"{apiBaseUrl.TrimEnd('/')}/hubs/submissions")
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<Guid, string>("SubmissionStatusChanged", async (submissionId, status) =>
+        {
+            _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
+            await InvokeAsync(StateHasChanged);
+        });
+
+        try
+        {
+            await _hubConnection.StartAsync();
+            await _hubConnection.InvokeAsync("JoinUserGroup", _userId.ToString());
+        }
+        catch
+        {
+            // Hub connection is best-effort; page still works without it
         }
     }
 
@@ -313,4 +345,12 @@ else
         SubmissionStatus.Failed => Color.Error,
         _ => Color.Default
     };
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
 }

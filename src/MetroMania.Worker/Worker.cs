@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using MediatR;
@@ -16,6 +17,7 @@ namespace MetroMania.Worker;
 public class ServiceBusWorker(
     IServiceScopeFactory scopeFactory,
     IConfiguration configuration,
+    IHttpClientFactory httpClientFactory,
     ILogger<ServiceBusWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -82,6 +84,7 @@ public class ServiceBusWorker(
 
         // Mark as running
         await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Running), ct);
+        await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Running);
         logger.LogInformation("Processing submission {SubmissionId} against {LevelCount} levels", submissionId, levels.Count);
 
         try
@@ -113,6 +116,7 @@ public class ServiceBusWorker(
                     logger.LogError("Level run failed: {Error}", failure.Error);
 
                 await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
+                await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Failed);
                 logger.LogInformation("Submission {SubmissionId} failed", submissionId);
                 return;
             }
@@ -122,12 +126,14 @@ public class ServiceBusWorker(
                     levels[i].Title, results[i].Score, results[i].DaysSurvived, results[i].TimeTakenMs);
 
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Succeeded), ct);
+            await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Succeeded);
             logger.LogInformation("Submission {SubmissionId} succeeded", submissionId);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Submission {SubmissionId} failed during execution", submissionId);
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
+            await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Failed);
         }
     }
 
@@ -150,4 +156,17 @@ public class ServiceBusWorker(
             WeeklyGiftOverrides = dto.WeeklyGiftOverrides
         }
     };
+
+    private async Task NotifyStatusChangeAsync(Guid submissionId, Guid userId, SubmissionStatus status)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient("ApiNotify");
+            await client.PostAsJsonAsync("/api/submissions/notify", new { submissionId, userId, status });
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to send SignalR notification for submission {SubmissionId}", submissionId);
+        }
+    }
 }

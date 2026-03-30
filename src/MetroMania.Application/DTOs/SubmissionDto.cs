@@ -6,6 +6,7 @@ namespace MetroMania.Application.DTOs;
 
 public record SubmissionDto(
     Guid Id,
+    Guid UserId,
     int Version,
     string Code,
     SubmissionStatus Status,
@@ -36,6 +37,7 @@ public record SubmissionDto(
 
         return new SubmissionDto(
             submission.Id,
+            submission.UserId,
             submission.Version,
             submission.Code.Base64Decode(),
             submission.Status,
