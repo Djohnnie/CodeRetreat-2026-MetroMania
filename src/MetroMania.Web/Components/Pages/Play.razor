@@ -104,9 +104,12 @@ else
                             <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="GetStatusColor(submission.Status)">
                                 @submission.Status
                             </MudChip>
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
-                                @Loc["TotalScore"]: @submission.TotalScore.ToString("N0")
-                            </MudChip>
+                            @if (submission.Status == SubmissionStatus.Succeeded)
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
+                                    @Loc["TotalScore"]: @submission.TotalScore.ToString("N0")
+                                </MudChip>
+                            }
                         </div>
                         <MudText Typo="Typo.caption" Color="Color.Secondary">
                             @submission.SubmittedAt.ToLocalTime().ToString("g")
