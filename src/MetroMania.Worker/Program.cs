@@ -39,8 +39,13 @@ builder.UseOrleansClient(clientBuilder =>
         options.TableServiceClient = new TableServiceClient(azureStorageConnectionString);
     });
 #endif
-});
 
+    clientBuilder
+        .Configure<ClientMessagingOptions>(options =>
+        {
+            options.ResponseTimeout = TimeSpan.FromMinutes(5);
+        });
+});
 builder.Services.AddOrleansClient();
 
 // HttpClient for API SignalR notifications
