@@ -39,8 +39,9 @@ builder.UseOrleansClient(clientBuilder =>
         options.TableServiceClient = new TableServiceClient(azureStorageConnectionString);
     });
 #endif
-    builder.Services.AddOrleansClient();
 });
+
+builder.Services.AddOrleansClient();
 
 // Service Bus
 builder.Services.AddServiceBus();

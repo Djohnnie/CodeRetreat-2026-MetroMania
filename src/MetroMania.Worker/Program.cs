@@ -18,9 +18,27 @@ builder.Services.AddServiceBus();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(MetroMania.Application.DTOs.UserDto).Assembly));
 
-// Orleans client
+// Orleans client — connects to the Orleans cluster
 builder.UseOrleansClient(clientBuilder =>
-    clientBuilder.UseLocalhostClustering());
+{
+    var azureStorageConnectionString = clientBuilder.Configuration.GetValue<string>("AZURE_STORAGE_CONNECTION_STRING");
+
+#if DEBUG
+    clientBuilder.UseLocalhostClustering();
+#else
+    clientBuilder.Configure<ClusterOptions>(options =>
+    {
+        options.ClusterId = "metromania-orleans";
+        options.ServiceId = "metromania-orleans";
+    });
+
+    clientBuilder.UseAzureStorageClustering(options =>
+    {
+        options.TableServiceClient = new TableServiceClient(azureStorageConnectionString);
+    });
+#endif
+});
+
 builder.Services.AddOrleansClient();
 
 // HttpClient for API SignalR notifications
