@@ -9,5 +9,6 @@
 **/*.user
 **/node_modules
 **/*.md
+!src/**/wwwroot/**/*.md
 !src/**/README.md
 LICENSE
