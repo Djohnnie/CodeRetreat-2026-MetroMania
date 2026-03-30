@@ -1,5 +1,6 @@
 using MediatR;
 using MetroMania.Application.DTOs;
+using MetroMania.Domain.Enums;
 using MetroMania.Domain.Interfaces;
 
 namespace MetroMania.Application.Submissions.Queries;
@@ -27,15 +28,24 @@ public class GetLeaderboardQueryHandler(
             if (userStats.Count == 0)
                 continue;
 
-            // Get the latest submission for this user
+            // Fetch all succeeded submissions and their scores in one batch
             var submissions = await submissionRepository.GetByUserIdAsync(user.Id);
-            var latestSubmission = submissions.FirstOrDefault();
-            if (latestSubmission is null)
+            var succeededSubmissions = submissions
+                .Where(s => s.Status == SubmissionStatus.Succeeded)
+                .ToList();
+
+            if (succeededSubmissions.Count == 0)
                 continue;
 
-            var scores = await scoreRepository.GetBySubmissionIdAsync(latestSubmission.Id);
+            var allScores = await scoreRepository.GetBySubmissionIdsAsync(
+                succeededSubmissions.Select(s => s.Id));
 
-            var levelScores = scores
+            // Pick the submission with the highest total score
+            var bestSubmission = succeededSubmissions.MaxBy(s =>
+                allScores.Where(sc => sc.SubmissionId == s.Id).Sum(sc => sc.Score))!;
+
+            var levelScores = allScores
+                .Where(sc => sc.SubmissionId == bestSubmission.Id)
                 .Select(s =>
                 {
                     var level = levels.FirstOrDefault(l => l.Id == s.LevelId);
