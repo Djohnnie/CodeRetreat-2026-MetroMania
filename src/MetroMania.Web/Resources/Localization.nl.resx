@@ -103,6 +103,7 @@
   <data name="NoSubmissionsYet" xml:space="preserve"><value>Nog geen inzendingen. Dien je bot-code in om je geschiedenis hier te zien.</value></data>
   <data name="Submission" xml:space="preserve"><value>Inzending</value></data>
   <data name="RevertToThis" xml:space="preserve"><value>Terugzetten naar deze versie</value></data>
+  <data name="LoadToEditor" xml:space="preserve"><value>Laden in editor</value></data>
 
   <!-- Not Found -->
   <data name="PageNotFound" xml:space="preserve"><value>Pagina niet gevonden</value></data>

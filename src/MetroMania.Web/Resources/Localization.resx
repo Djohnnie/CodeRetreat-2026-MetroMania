@@ -103,6 +103,7 @@
   <data name="NoSubmissionsYet" xml:space="preserve"><value>No submissions yet. Submit your bot code to see your history here.</value></data>
   <data name="Submission" xml:space="preserve"><value>Submission</value></data>
   <data name="RevertToThis" xml:space="preserve"><value>Revert to this version</value></data>
+  <data name="LoadToEditor" xml:space="preserve"><value>Load into editor</value></data>
 
   <!-- Not Found -->
   <data name="PageNotFound" xml:space="preserve"><value>Page Not Found</value></data>

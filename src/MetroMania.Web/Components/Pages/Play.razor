@@ -114,9 +114,17 @@ else
                                 </MudChip>
                             }
                         </div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            @submission.SubmittedAt.ToLocalTime().ToString("g")
-                        </MudText>
+                        <div class="d-flex align-center gap-2" @onclick:stopPropagation="true">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @submission.SubmittedAt.ToLocalTime().ToString("g")
+                            </MudText>
+                            <MudTooltip Text="@Loc["LoadToEditor"]">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                               Size="Size.Small"
+                                               Color="Color.Primary"
+                                               OnClick="() => RevertToSubmission(submission)" />
+                            </MudTooltip>
+                        </div>
                     </div>
                 </TitleContent>
                 <ChildContent>
@@ -151,13 +159,6 @@ else
                     <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 6px; overflow: hidden; max-height: 300px; overflow-y: auto;">
                         <pre style="margin: 0; padding: 12px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: var(--mud-palette-background-default); white-space: pre-wrap; word-break: break-word;">@submission.Code</pre>
                     </div>
-                    <div class="d-flex justify-end mt-3">
-                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
-                                   StartIcon="@Icons.Material.Filled.RestorePage"
-                                   OnClick="() => RevertToSubmission(submission)">
-                            @Loc["RevertToThis"]
-                        </MudButton>
-                    </div>
                 </ChildContent>
             </MudExpansionPanel>
         }
@@ -172,6 +173,7 @@ else
     private bool _submitting;
     private Guid _userId;
     private string _starterCode = "";
+    private string _initialCode = "";
     private List<SubmissionDto> _submissions = [];
     private IReadOnlyList<string>? _validationErrors;
     private HubConnection? _hubConnection;
@@ -191,10 +193,13 @@ else
         }
 
         _starterCode = await ApiClient.GetStarterCodeAsync();
+        _initialCode = _submissions.Count > 0
+            ? _submissions.MaxBy(s => s.Version)!.Code
+            : _starterCode;
 
         if (_editorReady)
         {
-            await _editor.SetValue(_starterCode);
+            await _editor.SetValue(_initialCode);
             await UpdateEditorHeight();
         }
     }
@@ -253,7 +258,7 @@ else
             AutomaticLayout = true,
             Language = "csharp",
             Theme = IsDarkMode ? "vs-dark" : "vs",
-            Value = _starterCode,
+            Value = _initialCode,
             FontSize = 14,
             FontFamily = "'Cascadia Code', 'Fira Code', 'Consolas', monospace",
             Minimap = new EditorMinimapOptions { Enabled = false },
@@ -268,8 +273,8 @@ else
     private async Task OnEditorInit()
     {
         _editorReady = true;
-        if (!string.IsNullOrEmpty(_starterCode))
-            await EditorInteropWithRetryAsync(() => _editor.SetValue(_starterCode));
+        if (!string.IsNullOrEmpty(_initialCode))
+            await EditorInteropWithRetryAsync(() => _editor.SetValue(_initialCode));
         await UpdateEditorHeight();
     }
 
