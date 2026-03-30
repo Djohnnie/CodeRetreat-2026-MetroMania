@@ -424,3 +424,6 @@ FodyWeavers.xsd
 
 # Launch settings
 launchSettings.json
+
+# Build outputs
+output/
