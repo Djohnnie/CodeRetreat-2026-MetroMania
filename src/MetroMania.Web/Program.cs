@@ -4,6 +4,7 @@ using MetroMania.Web.Components;
 using MetroMania.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Http.Resilience;
 using MudBlazor.Services;
@@ -60,6 +61,22 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<CookieAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<CookieAuthStateProvider>());
+
+// Data Protection — persist keys to a stable path so antiforgery tokens survive container restarts.
+// Set DATA_PROTECTION_KEYS as an env var containing the XML key ring content.
+var dpKeysDir = Path.Combine(Path.GetTempPath(), "dataprotection-keys");
+Directory.CreateDirectory(dpKeysDir);
+
+var dpKeysEnv = Environment.GetEnvironmentVariable("DATA_PROTECTION_KEYS");
+if (!string.IsNullOrEmpty(dpKeysEnv))
+{
+    var keyFilePath = Path.Combine(dpKeysDir, "key-from-env.xml");
+    await File.WriteAllTextAsync(keyFilePath, dpKeysEnv);
+}
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("MetroMania")
+    .PersistKeysToFileSystem(new DirectoryInfo(dpKeysDir));
 
 // Blazor
 builder.Services.AddRazorComponents()

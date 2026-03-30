@@ -26,8 +26,7 @@ builder.UseOrleansClient(clientBuilder =>
     var azureStorageConnectionString = clientBuilder.Configuration.GetValue<string>("AZURE_STORAGE_CONNECTION_STRING");
 
 #if DEBUG
-    siloBuilder.UseLocalhostClustering();
-    siloBuilder.AddMemoryGrainStorageAsDefault();
+    clientBuilder.UseLocalhostClustering();
 #else
     clientBuilder.Configure<ClusterOptions>(options =>
     {
