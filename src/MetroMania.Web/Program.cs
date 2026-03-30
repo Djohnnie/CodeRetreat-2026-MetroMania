@@ -90,12 +90,18 @@ if (!app.Environment.IsDevelopment())
 }
 
 // Behind a reverse proxy (Azure Container Apps), trust forwarded headers so the app
-// sees the original HTTPS scheme. This is required for secure cookies and correct redirects.
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+// sees the original HTTPS scheme. Required for secure cookies, correct redirects, and wss:// WebSockets.
+// Clear KnownProxies/KnownNetworks to trust the ACA Envoy proxy (which isn't on localhost).
+var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
                      | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
-});
+};
+forwardedHeadersOptions.KnownProxies.Clear();
+forwardedHeadersOptions.KnownNetworks.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
+app.UseHttpsRedirection();
 
 // Culture middleware
 var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("nl") };
