@@ -8,7 +8,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddOrleansClient(this IServiceCollection services)
     {
-        services.AddScoped<IGameEngineService, GameEngineService>();
+        services.AddScoped<IGameRunnerService, GameRunnerService>();
         services.AddScoped<GameRunnerValidationService>();
         services.AddScoped<IGameRunnerValidationService>(sp => sp.GetRequiredService<GameRunnerValidationService>());
         services.AddScoped<IScriptValidationService>(sp => sp.GetRequiredService<GameRunnerValidationService>());

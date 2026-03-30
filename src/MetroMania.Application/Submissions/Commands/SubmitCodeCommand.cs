@@ -14,8 +14,6 @@ public record SubmitCodeResult(bool Success, IReadOnlyList<string>? ValidationEr
 
 public class SubmitCodeCommandHandler(
     ISubmissionRepository submissionRepository,
-    ISubmissionScoreRepository scoreRepository,
-    ILevelRepository levelRepository,
     IScriptValidationService scriptValidationService,
     ISubmissionQueueService submissionQueueService)
     : IRequestHandler<SubmitCodeCommand, SubmitCodeResult>
@@ -43,24 +41,9 @@ public class SubmitCodeCommandHandler(
 
         await submissionRepository.AddAsync(submission);
 
-        // Run submission against all levels and store scores
-        var levels = await levelRepository.GetAllAsync();
-        var random = new Random(submission.Id.GetHashCode());
-
-        var scores = levels.Select(level => new SubmissionScore
-        {
-            Id = Guid.NewGuid(),
-            SubmissionId = submission.Id,
-            LevelId = level.Id,
-            Score = random.Next(0, 10001) // Hardcoded random score 0–10000 for now
-        }).ToList();
-
-        if (scores.Count > 0)
-            await scoreRepository.AddManyAsync(scores);
-
         // Enqueue submission for async processing
         await submissionQueueService.EnqueueSubmissionAsync(submission.Id, cancellationToken);
 
-        return new SubmitCodeResult(true, null, SubmissionDto.FromEntity(submission, scores, levels));
+        return new SubmitCodeResult(true, null, SubmissionDto.FromEntity(submission));
     }
 }

@@ -7,6 +7,9 @@ namespace MetroMania.Infrastructure.Sql.Repositories;
 
 public class SubmissionRepository(AppDbContext db) : ISubmissionRepository
 {
+    public async Task<Submission?> GetByIdAsync(Guid id) =>
+        await db.Submissions.FindAsync(id);
+
     public async Task<List<Submission>> GetByUserIdAsync(Guid userId) =>
         await db.Submissions
             .Where(s => s.UserId == userId)
@@ -21,6 +24,12 @@ public class SubmissionRepository(AppDbContext db) : ISubmissionRepository
     public async Task AddAsync(Submission submission)
     {
         db.Submissions.Add(submission);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Submission submission)
+    {
+        db.Submissions.Update(submission);
         await db.SaveChangesAsync();
     }
 
