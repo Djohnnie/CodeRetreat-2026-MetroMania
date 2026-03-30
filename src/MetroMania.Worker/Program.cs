@@ -1,7 +1,9 @@
+using Azure.Data.Tables;
 using MetroMania.Infrastructure.Orleans;
 using MetroMania.Infrastructure.ServiceBus;
 using MetroMania.Infrastructure.Sql;
 using MetroMania.Worker;
+using Orleans.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 
