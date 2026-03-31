@@ -6,7 +6,7 @@ namespace MetroMania.Application.Submissions.Commands;
 
 public record SaveSubmissionRendersCommand(Guid SubmissionId, List<SaveSubmissionRendersCommand.LevelRender> Renders) : IRequest
 {
-    public record LevelRender(Guid LevelId, int Day, string SvgContent);
+    public record LevelRender(Guid LevelId, int Hour, string SvgContent);
 }
 
 public class SaveSubmissionRendersCommandHandler(ISubmissionRenderRepository renderRepository)
@@ -19,7 +19,7 @@ public class SaveSubmissionRendersCommandHandler(ISubmissionRenderRepository ren
             Id = Guid.NewGuid(),
             SubmissionId = request.SubmissionId,
             LevelId = r.LevelId,
-            Day = r.Day,
+            Hour = r.Hour,
             SvgContent = r.SvgContent
         });
 

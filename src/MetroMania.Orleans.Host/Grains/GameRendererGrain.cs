@@ -34,32 +34,31 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
             if (errors.Count > 0)
                 return new ScriptRenderResult { Success = false, Error = string.Join("; ", errors) };
 
-            // Run full game to determine how many days were survived
+            // Run full game to determine scores (also validates the script executes correctly)
             var runScript = await runCompiler.CompileForExecution(runWrapper);
             var fullResult = await runScript.Invoke(new ScriptGlobals(level));
 
             if (fullResult is null)
                 return new ScriptRenderResult { Success = false, Error = "Script returned null." };
 
-            int totalDays = fullResult.DaysSurvived;
-
             // Compile the snapshot wrapper (returns GameSnapshot instead of GameResult)
             var snapshotWrapper = WrapInSnapshotScript(base64Code);
-            var snapshotCompiler = new ScriptCompiler<GameSnapshot>();
+            var snapshotCompiler = new ScriptCompiler<IReadOnlyList<GameSnapshot>>();
             var snapshotScript = await snapshotCompiler.CompileForExecution(snapshotWrapper);
+
+            var hourlySnapshots = await snapshotScript.Invoke(new ScriptGlobals(level));
+            if (hourlySnapshots is null)
+                return new ScriptRenderResult { Success = false, Error = "Snapshot script returned null." };
 
             var engine = new MetroManiaEngine();
             var renderer = new MetroManiaRenderer(engine, svgResourcesPath);
             var renders = new List<FrameRender>();
 
-            // Render one frame per in-game day
-            for (int day = 1; day <= totalDays; day++)
+            // Render one frame per in-game hour (1-indexed)
+            for (int i = 0; i < hourlySnapshots.Count; i++)
             {
-                var snapshot = await snapshotScript.Invoke(new ScriptGlobals(level, day * 24));
-                if (snapshot is null) continue;
-
-                var svg = renderer.RenderSnapshot(level, snapshot);
-                renders.Add(new FrameRender { Day = day, SvgContent = svg });
+                var svg = renderer.RenderSnapshot(level, hourlySnapshots[i]);
+                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg });
             }
 
             DeactivateOnIdle();
@@ -114,8 +113,8 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         var outerScript = """
             var engine = new MetroManiaEngine();
             var runner = new MyMetroManiaRunner();
-            var snapshot = engine.RunForHours(runner, Level, TargetHours);
-            return snapshot;
+            var snapshots = engine.RunWithHourlySnapshots(runner, Level);
+            return snapshots;
 
             <<PLACEHOLDER>>
             """;

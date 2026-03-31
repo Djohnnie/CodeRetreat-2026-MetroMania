@@ -5,7 +5,7 @@ public class SubmissionRender
     public Guid Id { get; set; }
     public Guid SubmissionId { get; set; }
     public Guid LevelId { get; set; }
-    public int Day { get; set; }
+    public int Hour { get; set; }
     public string SvgContent { get; set; } = string.Empty;
 
     public Submission Submission { get; set; } = null!;

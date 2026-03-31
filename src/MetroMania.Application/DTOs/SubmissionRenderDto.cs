@@ -4,5 +4,5 @@ public record SubmissionRenderDto(
     Guid Id,
     Guid SubmissionId,
     Guid LevelId,
-    int Day,
+    int Hour,
     string SvgContent);

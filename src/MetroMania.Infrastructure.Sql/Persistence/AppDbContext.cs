@@ -74,7 +74,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<SubmissionRender>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.HasIndex(e => new { e.SubmissionId, e.LevelId, e.Day }).IsUnique();
+            entity.HasIndex(e => new { e.SubmissionId, e.LevelId, e.Hour }).IsUnique();
             entity.Property(e => e.SvgContent).HasColumnType("nvarchar(max)").IsRequired();
             entity.HasOne(e => e.Submission).WithMany()
                 .HasForeignKey(e => e.SubmissionId).OnDelete(DeleteBehavior.Cascade);

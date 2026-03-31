@@ -10,7 +10,7 @@ public class SubmissionRenderRepository(AppDbContext db) : ISubmissionRenderRepo
     public async Task<List<SubmissionRender>> GetBySubmissionAndLevelAsync(Guid submissionId, Guid levelId) =>
         await db.SubmissionRenders
             .Where(r => r.SubmissionId == submissionId && r.LevelId == levelId)
-            .OrderBy(r => r.Day)
+            .OrderBy(r => r.Hour)
             .ToListAsync();
 
     public async Task AddManyAsync(IEnumerable<SubmissionRender> renders)

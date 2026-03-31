@@ -13,7 +13,7 @@ public class GetSubmissionRendersQueryHandler(ISubmissionRenderRepository render
     {
         var renders = await renderRepository.GetBySubmissionAndLevelAsync(request.SubmissionId, request.LevelId);
         return renders
-            .Select(r => new SubmissionRenderDto(r.Id, r.SubmissionId, r.LevelId, r.Day, r.SvgContent))
+            .Select(r => new SubmissionRenderDto(r.Id, r.SubmissionId, r.LevelId, r.Hour, r.SvgContent))
             .ToList();
     }
 }

@@ -217,9 +217,10 @@
   <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigeer door de dagelijkse weergaven van deze inzending.</value></data>
   <data name="NoRendersAvailable" xml:space="preserve"><value>Er zijn nog geen weergaven beschikbaar voor deze inzending en dit level. Weergaven worden gegenereerd tijdens de verwerking.</value></data>
   <data name="Day" xml:space="preserve"><value>Dag</value></data>
+  <data name="Hour" xml:space="preserve"><value>Uur</value></data>
   <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
-  <data name="PreviousDay" xml:space="preserve"><value>Vorige dag</value></data>
-  <data name="NextDay" xml:space="preserve"><value>Volgende dag</value></data>
+  <data name="PreviousDay" xml:space="preserve"><value>Vorig uur</value></data>
+  <data name="NextDay" xml:space="preserve"><value>Volgend uur</value></data>
 
   <!-- Leaderboard -->
   <data name="Leaderboard" xml:space="preserve"><value>Klassement</value></data>

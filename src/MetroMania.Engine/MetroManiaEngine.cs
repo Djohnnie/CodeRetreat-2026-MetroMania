@@ -33,6 +33,140 @@ public class MetroManiaEngine
         return CreateSnapshot(sim.Time, sim.HoursElapsed, sim.GameOver, sim.ActiveStations, sim.TotalScore, sim.Resources, sim.Lines, sim.Vehicles, sim.VehicleCapacity);
     }
 
+    /// <summary>
+    /// Runs the full game simulation and returns one snapshot per hour elapsed.
+    /// Each snapshot reflects the state at the end of that hour tick.
+    /// This is efficient: the simulation runs exactly once.
+    /// </summary>
+    public IReadOnlyList<GameSnapshot> RunWithHourlySnapshots(IMetroManiaRunner runner, Level level, CancellationToken cancellationToken = default)
+    {
+        var random = new Random(level.LevelData.Seed);
+        var vehicleCapacity = level.LevelData.VehicleCapacity;
+        var maxDays = level.LevelData.MaxDays;
+        var activeStations = new Dictionary<Location, StationState>();
+
+        var resources = new List<ResourceState>
+        {
+            new(NextGuid(random), ResourceType.Line),
+            new(NextGuid(random), ResourceType.Train)
+        };
+        var lines = new List<LineState>();
+        var vehicles = new List<VehicleState>();
+
+        int totalPassengersSpawned = 0;
+        int totalScore = 0;
+        int hoursElapsed = 0;
+        var time = new GameTime(0, 0, default);
+        bool gameOver = false;
+        var snapshots = new List<GameSnapshot>();
+
+        while (!gameOver && (maxDays <= 0 || hoursElapsed < maxDays * 24))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            int day = hoursElapsed / 24 + 1;
+            int currentHour = hoursElapsed % 24;
+            var dayOfWeek = (DayOfWeek)(day % 7);
+            time = new GameTime(day, currentHour, dayOfWeek);
+            bool isDayStart = currentHour == 0;
+
+            if (isDayStart)
+            {
+                foreach (var spawn in level.LevelData.Stations)
+                {
+                    var location = new Location(spawn.GridX, spawn.GridY);
+                    if (day == spawn.SpawnDelayDays + 1 && !activeStations.ContainsKey(location))
+                    {
+                        var stationId = NextGuid(random);
+                        activeStations[location] = new StationState(stationId, spawn.StationType, spawn.PassengerSpawnPhases, day);
+                        runner.OnStationSpawned(
+                            CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
+                            stationId, location, spawn.StationType);
+                    }
+                }
+
+                if (dayOfWeek == DayOfWeek.Monday)
+                {
+                    int weekNumber = (day - 1) / 7 + 1;
+                    var giftOverride = level.LevelData.WeeklyGiftOverrides
+                        .FirstOrDefault(g => g.Week == weekNumber);
+                    var gift = giftOverride is not null ? giftOverride.ResourceType : (ResourceType)random.Next(3);
+                    resources.Add(new ResourceState(NextGuid(random), gift));
+                    runner.OnWeeklyGift(
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
+                        gift);
+                }
+            }
+
+            int totalHour = (day - 1) * 24 + currentHour;
+
+            foreach (var (location, state) in activeStations)
+            {
+                int daysSinceSpawn = day - state.SpawnedOnDay;
+                var activePhase = state.Phases
+                    .Where(p => daysSinceSpawn >= p.AfterDays)
+                    .OrderByDescending(p => p.AfterDays)
+                    .FirstOrDefault();
+
+                if (activePhase is null) continue;
+
+                if ((totalHour - state.SpawnedAtHour) % activePhase.FrequencyInHours == 0
+                    && totalHour > state.SpawnedAtHour)
+                {
+                    var validDestTypes = activeStations.Values
+                        .Select(s => s.Type)
+                        .Where(t => t != state.Type)
+                        .Distinct()
+                        .ToArray();
+                    if (validDestTypes.Length == 0) continue;
+                    var destType = validDestTypes[random.Next(validDestTypes.Length)];
+                    state.Passengers.Add(new Passenger(destType));
+                    totalPassengersSpawned++;
+                    runner.OnPassengerWaiting(
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
+                        location, state.Passengers.AsReadOnly());
+                }
+            }
+
+            foreach (var (location, state) in activeStations)
+            {
+                if (state.Passengers.Count >= 20)
+                {
+                    gameOver = true;
+                    runner.OnGameOver(
+                        CreateSnapshot(time, hoursElapsed, true, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
+                        location, state.Passengers.AsReadOnly());
+                    break;
+                }
+                if (state.Passengers.Count >= 10)
+                {
+                    runner.OnStationOverrun(
+                        CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
+                        location, state.Passengers.AsReadOnly());
+                }
+            }
+
+            if (gameOver) break;
+
+            if (isDayStart)
+            {
+                runner.OnDayStart(
+                    CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
+            }
+
+            totalScore += ProcessStationStops(vehicles, lines, activeStations, vehicleCapacity);
+            MoveVehicles(vehicles, lines, activeStations);
+
+            var action = runner.OnHourTick(
+                CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
+            ProcessAction(action, resources, lines, vehicles);
+            hoursElapsed++;
+
+            snapshots.Add(CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
+        }
+
+        return snapshots;
+    }
+
     private SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? targetHours = null, CancellationToken cancellationToken = default)
     {
         var random = new Random(level.LevelData.Seed);

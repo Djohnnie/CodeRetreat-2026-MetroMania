@@ -217,9 +217,10 @@
   <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigate through the per-day renders for this submission.</value></data>
   <data name="NoRendersAvailable" xml:space="preserve"><value>No renders are available for this submission and level yet. Renders are generated when the submission is processed.</value></data>
   <data name="Day" xml:space="preserve"><value>Day</value></data>
+  <data name="Hour" xml:space="preserve"><value>Hour</value></data>
   <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
-  <data name="PreviousDay" xml:space="preserve"><value>Previous day</value></data>
-  <data name="NextDay" xml:space="preserve"><value>Next day</value></data>
+  <data name="PreviousDay" xml:space="preserve"><value>Previous hour</value></data>
+  <data name="NextDay" xml:space="preserve"><value>Next hour</value></data>
 
   <!-- Leaderboard -->
   <data name="Leaderboard" xml:space="preserve"><value>Leaderboard</value></data>

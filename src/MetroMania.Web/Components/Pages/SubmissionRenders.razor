@@ -34,7 +34,7 @@ else
     <div @ref="_containerRef" tabindex="0" @onkeydown="HandleKeyDown"
          style="outline: none; display: flex; flex-direction: column; align-items: center; gap: 16px;">
 
-        @* Day counter and controls *@
+        @* Hour counter and controls *@
         <MudPaper Elevation="0" Class="pa-3 d-flex align-center gap-3"
                   Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%; max-width: 640px;">
 
@@ -73,9 +73,9 @@ else
             <MudSpacer />
 
             <MudText Typo="Typo.body1" Style="font-weight: 600; white-space: nowrap;">
-                @Loc["Day"] @_renders[_currentIndex].Day
+                @Loc["Hour"] @_renders[_currentIndex].Hour
                 <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: inline;">
-                    / @_renders[^1].Day
+                    / @_renders[^1].Hour
                 </MudText>
             </MudText>
 
