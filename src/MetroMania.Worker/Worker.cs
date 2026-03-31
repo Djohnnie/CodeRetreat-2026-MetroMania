@@ -129,10 +129,22 @@ public class ServiceBusWorker(
                 await sender.Send(new SaveSubmissionRendersCommand(submissionId, allRenders), ct);
 
             // Check if any level run failed
-            var failures = results.Where(r => !r.Success).ToList();
-            if (failures.Count > 0)
+            var runnerFailures = results.Where(r => !r.Success).ToList();
+            if (runnerFailures.Count > 0)
             {
-                foreach (var failure in failures)
+                foreach (var failure in runnerFailures)
+                    logger.LogError("Level run failed: {Error}", failure.Error);
+
+                await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
+                await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Failed);
+                logger.LogInformation("Submission {SubmissionId} failed", submissionId);
+                return;
+            }
+
+            var renderFailures = renderResults.Where(r => !r.Success).ToList();
+            if (renderFailures.Count > 0)
+            {
+                foreach (var failure in renderFailures)
                     logger.LogError("Level run failed: {Error}", failure.Error);
 
                 await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
