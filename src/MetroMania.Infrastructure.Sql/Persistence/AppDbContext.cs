@@ -2,6 +2,7 @@ using System.Text.Json;
 using MetroMania.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace MetroMania.Infrastructure.Sql.Persistence;
 
@@ -23,7 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).IsClustered(false);
-            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.HasIndex(e => e.Name).IsUnique();
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
@@ -36,7 +37,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Level>(entity =>
         {
             entity.HasKey(e => e.Id).IsClustered(false);
-            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(2000);
@@ -58,7 +59,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Submission>(entity =>
         {
             entity.HasKey(e => e.Id).IsClustered(false);
-            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.Property(e => e.Code).IsRequired();
             entity.Property(e => e.Status).HasConversion<string>();
@@ -70,7 +71,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<SubmissionScore>(entity =>
         {
             entity.HasKey(e => e.Id).IsClustered(false);
-            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.HasIndex(e => new { e.SubmissionId, e.LevelId }).IsUnique();
             entity.HasOne(e => e.Submission).WithMany(s => s.Scores)
@@ -82,7 +83,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<SubmissionRender>(entity =>
         {
             entity.HasKey(e => e.Id).IsClustered(false);
-            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.HasIndex(e => new { e.SubmissionId, e.LevelId, e.Hour }).IsUnique();
             entity.Property(e => e.SvgContent).HasColumnType("nvarchar(max)").IsRequired();
