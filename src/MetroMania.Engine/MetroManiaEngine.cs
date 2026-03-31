@@ -584,8 +584,10 @@ public class MetroManiaEngine
                         }
                         else
                         {
+                            // Terminal station: stop here so ProcessStationStops can handle it next tick
                             vehicle.Progress = 1.0f;
                             vehicle.Direction = -1;
+                            remainingSpeed = 0;
                         }
                     }
                 }
@@ -607,8 +609,10 @@ public class MetroManiaEngine
                         }
                         else
                         {
+                            // Terminal station: stop here so ProcessStationStops can handle it next tick
                             vehicle.Progress = 0.0f;
                             vehicle.Direction = 1;
+                            remainingSpeed = 0;
                         }
                     }
                 }
@@ -632,10 +636,15 @@ public class MetroManiaEngine
             var line = lines.FirstOrDefault(l => l.ResourceId == vehicle.LineResourceId);
             if (line is null) continue;
 
+            // Use a small epsilon for terminal stations to tolerate floating-point accumulation.
+            // Intermediate stations still require exact 0.0/1.0 (they're passed through, not stopped at).
+            const float terminalEpsilon = 0.01f;
+            int lastSegIdx = line.StationIds.Count - 2;
+
             Guid? currentStationId = null;
-            if (vehicle.Progress <= 0.0f)
+            if (vehicle.Progress <= 0.0f || (vehicle.SegmentIndex == 0 && vehicle.Progress <= terminalEpsilon))
                 currentStationId = line.StationIds[vehicle.SegmentIndex];
-            else if (vehicle.Progress >= 1.0f)
+            else if (vehicle.Progress >= 1.0f || (vehicle.SegmentIndex == lastSegIdx && vehicle.Progress >= 1.0f - terminalEpsilon))
                 currentStationId = line.StationIds[vehicle.SegmentIndex + 1];
 
             if (currentStationId is null) continue;
