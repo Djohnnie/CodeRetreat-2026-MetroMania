@@ -234,9 +234,13 @@ public class MetroManiaRenderer
                 if (!stationLocations.TryGetValue(line.StationIds[i], out var locA)) continue;
                 if (!stationLocations.TryGetValue(line.StationIds[i + 1], out var locB)) continue;
 
-                var (ax, ay) = StationCenter(locA);
-                var (bx, by) = StationCenter(locB);
-                canvas.DrawLine(ax, ay, bx, by, paint);
+                var pathPts = ComputeMetroPath(locA, locB);
+                for (int j = 0; j < pathPts.Count - 1; j++)
+                {
+                    var (ax, ay) = TileToPixel(pathPts[j].x, pathPts[j].y);
+                    var (bx, by) = TileToPixel(pathPts[j + 1].x, pathPts[j + 1].y);
+                    canvas.DrawLine(ax, ay, bx, by, paint);
+                }
             }
         }
     }
@@ -351,14 +355,34 @@ public class MetroManiaRenderer
         var (ax, ay) = StationCenter(locA);
         var (bx, by) = StationCenter(locB);
 
-        vx = ax + (bx - ax) * (float)vehicle.Progress;
-        vy = ay + (by - ay) * (float)vehicle.Progress;
+        var pathPts = ComputeMetroPath(locA, locB);
+        int totalTiles = Math.Max(Math.Abs(locB.X - locA.X), Math.Abs(locB.Y - locA.Y));
 
-        // Angle points in the direction of travel; flip 180° when moving backward.
-        angle = MathF.Atan2(by - ay, bx - ax);
-        if (vehicle.Direction == -1)
-            angle += MathF.PI;
+        if (totalTiles == 0)
+        {
+            vx = ax; vy = ay;
+            return true;
+        }
 
+        float distAlong = (float)vehicle.Progress * totalTiles;
+        float accumulated = 0f;
+        for (int i = 0; i < pathPts.Count - 1; i++)
+        {
+            var (p0x, p0y) = pathPts[i];
+            var (p1x, p1y) = pathPts[i + 1];
+            float segLen = Math.Max(Math.Abs(p1x - p0x), Math.Abs(p1y - p0y));
+            if (distAlong <= accumulated + segLen + 1e-6f || i == pathPts.Count - 2)
+            {
+                float t = segLen > 0f ? Math.Clamp((distAlong - accumulated) / segLen, 0f, 1f) : 0f;
+                (vx, vy) = TileToPixel(p0x + t * (p1x - p0x), p0y + t * (p1y - p0y));
+                angle = MathF.Atan2(p1y - p0y, p1x - p0x);
+                if (vehicle.Direction == -1) angle += MathF.PI;
+                return true;
+            }
+            accumulated += segLen;
+        }
+
+        vx = bx; vy = by;
         return true;
     }
 
@@ -533,6 +557,49 @@ public class MetroManiaRenderer
 
     private static (float x, float y) StationCenter(Location loc)
         => (loc.X * TileSize + TileSize / 2f, loc.Y * TileSize + TileSize / 2f);
+
+    private static (float px, float py) TileToPixel(float tx, float ty)
+        => (tx * TileSize + TileSize / 2f, ty * TileSize + TileSize / 2f);
+
+    /// <summary>
+    /// Computes metro-style routing waypoints (tile coordinates) between two stations.
+    /// The path has an optional H/V start segment, a single 45° diagonal, and an optional H/V end segment.
+    /// The straight portion is split as evenly as possible between start and end.
+    /// Total path length equals the Chebyshev distance: max(|dx|, |dy|) tiles.
+    /// </summary>
+    private static List<(float x, float y)> ComputeMetroPath(Location a, Location b)
+    {
+        int dx = b.X - a.X;
+        int dy = b.Y - a.Y;
+        int absDx = Math.Abs(dx);
+        int absDy = Math.Abs(dy);
+        int sdx = Math.Sign(dx);
+        int sdy = Math.Sign(dy);
+        int diagLen = Math.Min(absDx, absDy);
+        int startStraight = Math.Abs(absDx - absDy) / 2;
+
+        float x0 = a.X, y0 = a.Y;
+        float x3 = b.X, y3 = b.Y;
+        float x1, y1, x2, y2;
+
+        if (absDx >= absDy) // horizontal-dominant: straight portions are horizontal
+        {
+            x1 = x0 + sdx * startStraight; y1 = y0;
+            x2 = x1 + sdx * diagLen;       y2 = y1 + sdy * diagLen;
+        }
+        else // vertical-dominant: straight portions are vertical
+        {
+            x1 = x0;               y1 = y0 + sdy * startStraight;
+            x2 = x1 + sdx * diagLen; y2 = y1 + sdy * diagLen;
+        }
+
+        var pts = new List<(float, float)> { (x0, y0) };
+        if (x1 != x0 || y1 != y0) pts.Add((x1, y1));
+        if (x2 != x1 || y2 != y1) pts.Add((x2, y2));
+        if (x3 != pts[^1].Item1 || y3 != pts[^1].Item2) pts.Add((x3, y3));
+
+        return pts;
+    }
 
     /// <summary>
     /// Builds a color replacement map from the level data.

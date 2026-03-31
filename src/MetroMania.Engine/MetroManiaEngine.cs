@@ -905,11 +905,7 @@ public class MetroManiaEngine
     }
 
     private static float Distance(Location a, Location b)
-    {
-        float dx = a.X - b.X;
-        float dy = a.Y - b.Y;
-        return MathF.Sqrt(dx * dx + dy * dy);
-    }
+        => Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
 
     private class StationState(Guid id, StationType type, List<PassengerSpawnPhase> phases, int spawnedOnDay)
     {

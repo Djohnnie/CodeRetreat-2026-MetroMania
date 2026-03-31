@@ -1,6 +1,7 @@
 Feature: Vehicle Movement
-    Vehicles move along their lines at 1 grid unit per hour.
-    Distance between stations is Euclidean (straight line).
+    Vehicles move along their lines at 1 grid tile per hour.
+    Distance between stations uses the Chebyshev metric: max(|dx|, |dy|).
+    Lines are routed metro-style: optional H/V start → single 45° diagonal → optional H/V end.
     Vehicles ping-pong: they reverse direction when reaching either endpoint.
     Vehicles move BEFORE the player acts each tick, so newly placed vehicles
     start moving on the next tick.
@@ -50,7 +51,7 @@ Feature: Vehicle Movement
         And a weekly gift override for week 1 with resource type Line
         And the player will create a line connecting stations at (0,0) and (3,4)
         And the player will then add a vehicle to the created line at station (0,0)
-        When the simulation runs for 7 hours
+        When the simulation runs for 6 hours
         Then the vehicle should be at station (3,4) with direction -1
 
     Scenario: Two vehicles on the same line move independently
