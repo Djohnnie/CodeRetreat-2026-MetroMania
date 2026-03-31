@@ -197,12 +197,14 @@ public class MetroManiaRenderer
         // Left side: title + day/hour counter (e.g. "My Level  1/06:00")
         string dayHour = $"{time.Day}/{time.Hour:D2}:00";
         string leftText = $"{levelTitle}  {dayHour}";
-        canvas.DrawText(leftText, padding, textY, textPaint);
+        using var leftPath = textPaint.GetTextPath(leftText, padding, textY);
+        canvas.DrawPath(leftPath, textPaint);
 
         // Right side: score
         string rightText = $"score: {score}";
         float rightTextWidth = textPaint.MeasureText(rightText);
-        canvas.DrawText(rightText, totalWidth - padding - rightTextWidth, textY, textPaint);
+        using var rightPath = textPaint.GetTextPath(rightText, totalWidth - padding - rightTextWidth, textY);
+        canvas.DrawPath(rightPath, textPaint);
     }
 
     // ─── Metro lines ──────────────────────────────────────────────────────────

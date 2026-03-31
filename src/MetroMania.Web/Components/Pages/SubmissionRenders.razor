@@ -237,7 +237,7 @@ else
         {
             while (!ct.IsCancellationRequested && _currentIndex < _renders.Count - 1)
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(250, ct);
                 SetCurrentIndex(_currentIndex + 1);
                 await InvokeAsync(StateHasChanged);
             }
