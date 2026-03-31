@@ -182,7 +182,9 @@ public class MetroManiaRenderer
             Color = SKColors.White,
             IsAntialias = true,
             TextSize = fontSize,
-            Typeface = SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal),
+            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
+                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
+                    ?? SKTypeface.Default,
         };
 
         // Baseline: vertically centred within the header band
@@ -198,7 +200,7 @@ public class MetroManiaRenderer
         canvas.DrawText(leftText, padding, textY, textPaint);
 
         // Right side: score
-        string rightText = $"score: {score} points";
+        string rightText = $"score: {score}";
         float rightTextWidth = textPaint.MeasureText(rightText);
         canvas.DrawText(rightText, totalWidth - padding - rightTextWidth, textY, textPaint);
     }
