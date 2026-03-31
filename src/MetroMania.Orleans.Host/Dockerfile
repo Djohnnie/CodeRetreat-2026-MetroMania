@@ -18,7 +18,14 @@ RUN dotnet publish src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj -c
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 # SkiaSharp native dependencies for game engine rendering
-RUN apt-get update && apt-get install -y --no-install-recommends libfontconfig1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libfontconfig1 \
+    libfreetype6 \
+    libpng16-16 \
+    libglib2.0-0 \
+    libharfbuzz0b \
+    libexpat1 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY --from=build /app/publish .
