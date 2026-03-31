@@ -129,25 +129,34 @@ public class ServiceBusWorker(
                 await sender.Send(new SaveSubmissionRendersCommand(submissionId, allRenders), ct);
 
             // Check if any level run failed
-            var runnerFailures = results.Where(r => !r.Success).ToList();
-            if (runnerFailures.Count > 0)
+            var runnerFailures = levels
+                .Zip(results, (level, result) => (level, result))
+                .Where(x => !x.result.Success)
+                .ToList();
+
+            var renderFailures = levels
+                .Zip(renderResults, (level, result) => (level, result))
+                .Where(x => !x.result.Success)
+                .ToList();
+
+            if (runnerFailures.Count > 0 || renderFailures.Count > 0)
             {
-                foreach (var failure in runnerFailures)
-                    logger.LogError("Level run failed: {Error}", failure.Error);
+                var messageLines = new List<string>();
 
-                await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
-                await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Failed);
-                logger.LogInformation("Submission {SubmissionId} failed", submissionId);
-                return;
-            }
+                foreach (var (level, result) in runnerFailures)
+                {
+                    logger.LogError("Level run failed [{Level}]: {Error}", level.Title, result.Error);
+                    messageLines.Add($"[{level.Title}] Run: {result.Error}");
+                }
 
-            var renderFailures = renderResults.Where(r => !r.Success).ToList();
-            if (renderFailures.Count > 0)
-            {
-                foreach (var failure in renderFailures)
-                    logger.LogError("Level run failed: {Error}", failure.Error);
+                foreach (var (level, result) in renderFailures)
+                {
+                    logger.LogError("Level render failed [{Level}]: {Error}", level.Title, result.Error);
+                    messageLines.Add($"[{level.Title}] Render: {result.Error}");
+                }
 
-                await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
+                var message = string.Join("\n", messageLines);
+                await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed, message), ct);
                 await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Failed);
                 logger.LogInformation("Submission {SubmissionId} failed", submissionId);
                 return;
@@ -165,7 +174,8 @@ public class ServiceBusWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Submission {SubmissionId} failed during execution", submissionId);
-            await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed), ct);
+            var message = ex.InnerException?.Message ?? ex.Message;
+            await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Failed, message), ct);
             await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Failed);
         }
     }

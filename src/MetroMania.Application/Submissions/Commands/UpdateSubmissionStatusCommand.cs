@@ -4,7 +4,7 @@ using MetroMania.Domain.Interfaces;
 
 namespace MetroMania.Application.Submissions.Commands;
 
-public record UpdateSubmissionStatusCommand(Guid SubmissionId, SubmissionStatus Status) : IRequest;
+public record UpdateSubmissionStatusCommand(Guid SubmissionId, SubmissionStatus Status, string? Message = null) : IRequest;
 
 public class UpdateSubmissionStatusCommandHandler(ISubmissionRepository submissionRepository)
     : IRequestHandler<UpdateSubmissionStatusCommand>
@@ -15,6 +15,7 @@ public class UpdateSubmissionStatusCommandHandler(ISubmissionRepository submissi
             ?? throw new InvalidOperationException($"Submission {request.SubmissionId} not found.");
 
         submission.Status = request.Status;
+        submission.Message = request.Message;
         await submissionRepository.UpdateAsync(submission);
     }
 }

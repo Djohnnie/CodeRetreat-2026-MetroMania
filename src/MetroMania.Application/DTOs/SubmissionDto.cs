@@ -10,6 +10,7 @@ public record SubmissionDto(
     int Version,
     string Code,
     SubmissionStatus Status,
+    string? Message,
     DateTime SubmittedAt,
     List<SubmissionScoreDto> Scores,
     int TotalScore)
@@ -50,6 +51,7 @@ public record SubmissionDto(
             submission.Version,
             submission.Code.Base64Decode(),
             submission.Status,
+            submission.Message,
             submission.SubmittedAt,
             scoreDtos,
             scoreDtos.Sum(s => s.Score));

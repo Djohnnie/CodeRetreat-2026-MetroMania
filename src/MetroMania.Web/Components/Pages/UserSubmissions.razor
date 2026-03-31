@@ -83,6 +83,13 @@ else
                     <MudTr>
                         <td colspan="5" style="padding: 0;">
                             <div class="pa-4" style="background: var(--mud-palette-background-grey);">
+                                @if (!string.IsNullOrWhiteSpace(context.Message))
+                                {
+                                    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                                        <MudText Typo="Typo.subtitle2" Style="font-weight: 600;" Class="mb-1">@Loc["FailureDetails"]</MudText>
+                                        <pre style="margin: 0; white-space: pre-wrap; word-break: break-word; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 12px;">@context.Message</pre>
+                                    </MudAlert>
+                                }
                                 @if (context.Scores.Count > 0)
                                 {
                                     <MudTable Items="context.Scores" Dense="true" Hover="true" Elevation="0"

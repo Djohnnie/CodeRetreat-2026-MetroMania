@@ -9,6 +9,7 @@ public class Submission
     public int Version { get; set; }
     public string Code { get; set; } = string.Empty;
     public SubmissionStatus Status { get; set; } = SubmissionStatus.Waiting;
+    public string? Message { get; set; }
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;

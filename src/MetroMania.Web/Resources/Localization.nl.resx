@@ -108,6 +108,7 @@
   <data name="Submission" xml:space="preserve"><value>Inzending</value></data>
   <data name="RevertToThis" xml:space="preserve"><value>Terugzetten naar deze versie</value></data>
   <data name="LoadToEditor" xml:space="preserve"><value>Laden in editor</value></data>
+  <data name="FailureDetails" xml:space="preserve"><value>Foutdetails</value></data>
   <!-- SubmissionStatus enum values -->
   <data name="Waiting" xml:space="preserve"><value>Wachtend</value></data>
   <data name="Running" xml:space="preserve"><value>Bezig</value></data>
