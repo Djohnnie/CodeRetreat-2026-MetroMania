@@ -19,7 +19,7 @@ Feature: Passenger Pickup and Delivery
         And a weekly gift override for week 1 with resource type Line
         And the player will create a line connecting stations at (0,0) and (3,0)
         And the player will then add a vehicle to the created line at station (0,0)
-        When the simulation runs for 5 hours
+        When the simulation runs for 10 hours
         Then the vehicle should have at least 1 passenger onboard
 
     Scenario: Train drops off passengers at the correct destination

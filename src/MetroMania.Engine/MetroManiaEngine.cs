@@ -119,7 +119,7 @@ public class MetroManiaEngine
                         .ToArray();
                     if (validDestTypes.Length == 0) continue;
                     var destType = validDestTypes[random.Next(validDestTypes.Length)];
-                    state.Passengers.Add(new Passenger(destType));
+                    state.Passengers.Add(new Passenger(destType, totalHour));
                     totalPassengersSpawned++;
                     runner.OnPassengerWaiting(
                         CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity),
@@ -153,7 +153,7 @@ public class MetroManiaEngine
                     CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
             }
 
-            totalScore += ProcessStationStops(vehicles, lines, activeStations, vehicleCapacity);
+            totalScore += ProcessStationStops(vehicles, lines, activeStations, vehicleCapacity, totalHour);
             MoveVehicles(vehicles, lines, activeStations);
 
             var action = runner.OnHourTick(
@@ -259,7 +259,7 @@ public class MetroManiaEngine
 
                     var destType = validDestTypes[random.Next(validDestTypes.Length)];
 
-                    state.Passengers.Add(new Passenger(destType));
+                    state.Passengers.Add(new Passenger(destType, totalHour));
                     totalPassengersSpawned++;
 
                     runner.OnPassengerWaiting(
@@ -297,7 +297,7 @@ public class MetroManiaEngine
             }
 
             // Process passenger pickup and dropoff at stations (before moving)
-            totalScore += ProcessStationStops(vehicles, lines, activeStations, vehicleCapacity);
+            totalScore += ProcessStationStops(vehicles, lines, activeStations, vehicleCapacity, totalHour);
 
             // Move vehicles along their lines before the player acts
             MoveVehicles(vehicles, lines, activeStations);
@@ -500,7 +500,7 @@ public class MetroManiaEngine
                     VehicleId = v.ResourceId,
                     LineId = v.LineResourceId,
                     SegmentIndex = v.SegmentIndex,
-                    Progress = v.Direction == -1 ? 1.0f - v.Progress : v.Progress,
+                    Progress = v.Progress,
                     Direction = v.Direction,
                     StationId = stationId,
                     Capacity = vehicleCapacity,
@@ -622,16 +622,13 @@ public class MetroManiaEngine
     /// </summary>
     private static int ProcessStationStops(
         List<VehicleState> vehicles, List<LineState> lines,
-        Dictionary<Location, StationState> activeStations, int vehicleCapacity)
+        Dictionary<Location, StationState> activeStations, int vehicleCapacity, int currentHour)
     {
         int delivered = 0;
         var stationById = activeStations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp);
 
         foreach (var vehicle in vehicles)
         {
-            // Only process if vehicle is exactly at a station and not already dwelling
-            if (vehicle.DwellTicksRemaining > 0) continue;
-
             var line = lines.FirstOrDefault(l => l.ResourceId == vehicle.LineResourceId);
             if (line is null) continue;
 
@@ -646,55 +643,45 @@ public class MetroManiaEngine
 
             var station = stationEntry.Value;
             int totalCapacity = vehicleCapacity * (1 + vehicle.WagonIds.Count);
-            int actions = 0;
 
-            // Phase 1: Drop off passengers whose destination matches this station's type
-            var toDropOff = vehicle.Passengers
-                .Where(p => p.DestinationType == station.Type)
-                .ToList();
-            foreach (var passenger in toDropOff)
+            // Phase 1: Drop off one passenger whose destination matches this station type.
+            // Drop-offs always take priority over pick-ups; only one action per tick.
+            var toDropOff = vehicle.Passengers.FirstOrDefault(p => p.DestinationType == station.Type);
+            if (toDropOff is not null)
             {
-                vehicle.Passengers.Remove(passenger);
+                vehicle.Passengers.Remove(toDropOff);
                 delivered++;
-                actions++;
+                vehicle.DwellTicksRemaining = 1;
+                continue;
             }
 
-            // Phase 2: Pick up passengers that can be delivered via reachable stations
-            // Build the set of stations reachable from this station via connected lines
-            var reachableStations = GetReachableStations(currentStationId.Value, lines, stationById);
-
-            // For each waiting passenger, check if their destination type is reachable
-            // and if the shortest path is via THIS vehicle's line
-            var waitingPassengers = station.Passengers.ToList();
-            foreach (var passenger in waitingPassengers)
+            // Phase 2: Pick up one eligible passenger (spawned before this hour, first-spawned first).
+            if (vehicle.Passengers.Count < totalCapacity)
             {
-                if (vehicle.Passengers.Count >= totalCapacity) break;
+                var eligible = station.Passengers
+                    .Where(p => p.SpawnedAtHour < currentHour)
+                    .ToList();
 
-                // Find the closest station of the destination type reachable from here
-                var closestViaNetwork = FindClosestStationOfType(
-                    currentStationId.Value, passenger.DestinationType,
-                    lines, stationById, activeStations);
+                foreach (var passenger in eligible)
+                {
+                    var closestViaNetwork = FindClosestStationOfType(
+                        currentStationId.Value, passenger.DestinationType,
+                        lines, stationById, activeStations);
+                    if (closestViaNetwork is null) continue;
 
-                if (closestViaNetwork is null) continue;
+                    var closestViaThisLine = FindClosestStationOfTypeOnLine(
+                        currentStationId.Value, passenger.DestinationType,
+                        vehicle.Direction, vehicle.SegmentIndex, vehicle.Progress,
+                        line, stationById, activeStations);
+                    if (closestViaThisLine is null) continue;
+                    if (closestViaNetwork.Value.distance < closestViaThisLine.Value.distance - 0.001f) continue;
 
-                // Find the closest station of the destination type reachable via this vehicle's line
-                var closestViaThisLine = FindClosestStationOfTypeOnLine(
-                    currentStationId.Value, passenger.DestinationType,
-                    vehicle.Direction, vehicle.SegmentIndex, vehicle.Progress,
-                    line, stationById, activeStations);
-
-                // If the closest overall is NOT on this line's direct path, leave the passenger
-                // for a better-routed train
-                if (closestViaThisLine is null) continue;
-                if (closestViaNetwork.Value.distance < closestViaThisLine.Value.distance - 0.001f) continue;
-
-                station.Passengers.Remove(passenger);
-                vehicle.Passengers.Add(passenger);
-                actions++;
+                    station.Passengers.Remove(passenger);
+                    vehicle.Passengers.Add(passenger);
+                    vehicle.DwellTicksRemaining = 1;
+                    break; // One pick-up per tick
+                }
             }
-
-            if (actions > 0)
-                vehicle.DwellTicksRemaining = actions;
         }
 
         return delivered;

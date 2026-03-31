@@ -221,7 +221,7 @@ namespace MetroMania.Engine.Tests.Features
         await testRunner.AndAsync("the player will then add a vehicle to the created line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 22
-        await testRunner.WhenAsync("the simulation runs for 5 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("the simulation runs for 10 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 23
         await testRunner.ThenAsync("the vehicle should have at least 1 passenger onboard", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
