@@ -82,7 +82,12 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         if (!string.IsNullOrWhiteSpace(configured))
             return configured;
 
-        // Default: resources/ at repo root, 5 levels above the binary output directory
+        // In Docker the resources are copied alongside the app binary at /app/resources
+        var dockerPath = Path.Combine(AppContext.BaseDirectory, "resources");
+        if (Directory.Exists(dockerPath))
+            return dockerPath;
+
+        // Local development fallback: resources/ at repo root, 5 levels above the binary output directory
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "resources"));
     }
 

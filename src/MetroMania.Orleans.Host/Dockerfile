@@ -29,5 +29,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY --from=build /app/publish .
+
+# Copy SVG tile resources for the game renderer
+COPY resources/ /app/resources/
+
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "MetroMania.Orleans.Host.dll"]
