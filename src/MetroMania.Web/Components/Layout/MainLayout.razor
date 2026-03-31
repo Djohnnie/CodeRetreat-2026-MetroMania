@@ -15,98 +15,100 @@
 
 <CascadingValue Value="_isDarkMode" Name="IsDarkMode">
 
-<MudLayout>
-    <MudAppBar Elevation="0" Dense="true" Class="appbar-blur">
-        <MudIconButton Icon="@(_drawerOpen ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
-                       Color="Color.Inherit" Edge="Edge.Start"
-                       OnClick="ToggleDrawer"
-                       Class="hamburger-btn" />
-        <a href="/" style="display: flex; align-items: center; text-decoration: none; color: inherit; cursor: pointer;">
-            <MudIcon Icon="@Icons.Material.Filled.Train" Class="ml-2" />
-            <MudText Typo="Typo.h6" Class="ml-2" Style="font-weight: 600; letter-spacing: 0.5px;">@Loc["AppName"]</MudText>
-        </a>
-        <MudSpacer />
-        <AuthorizeView>
-            <Authorized>
-                <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true"
-                         AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                    <MudMenuItem OnClick='() => ChangeLanguage("en")'>
-                        🇬🇧 English
-                    </MudMenuItem>
-                    <MudMenuItem OnClick='() => ChangeLanguage("nl")'>
-                        🇳🇱 Nederlands
-                    </MudMenuItem>
-                </MudMenu>
-                <MudTooltip Text="@(_isDarkMode ? Loc["SwitchToLight"] : Loc["SwitchToDark"])">
-                    <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                                   Color="Color.Inherit" OnClick="ToggleTheme"
-                                   Class="theme-toggle-btn" />
-                </MudTooltip>
-                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
-                         Class="mx-1" Icon="@Icons.Material.Filled.Person">
-                    @context.User.Identity?.Name
-                </MudChip>
-                <MudTooltip Text="@Loc["Logout"]">
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="LogoutAsync" />
-                </MudTooltip>
-            </Authorized>
-            <NotAuthorized>
-                <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true"
-                         AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                    <MudMenuItem OnClick='() => ChangeLanguage("en")'>
-                        🇬🇧 English
-                    </MudMenuItem>
-                    <MudMenuItem OnClick='() => ChangeLanguage("nl")'>
-                        🇳🇱 Nederlands
-                    </MudMenuItem>
-                </MudMenu>
-                <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">@Loc["Login"]</MudButton>
-                <MudButton Href="/register" Color="Color.Inherit" Variant="Variant.Text">@Loc["Register"]</MudButton>
-            </NotAuthorized>
-        </AuthorizeView>
-    </MudAppBar>
-
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" ClipMode="DrawerClipMode.Always"
-               Class="drawer-animate" Variant="DrawerVariant.Responsive">
-        <MudNavMenu Class="mt-2">
-            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
-                @Loc["Dashboard"]
-            </MudNavLink>
+    <MudLayout>
+        <MudAppBar Elevation="0" Dense="true" Class="appbar-blur">
+            <MudIconButton Icon="@(_drawerOpen? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)"
+                           Color="Color.Inherit" Edge="Edge.Start"
+                           OnClick="ToggleDrawer"
+                           Class="hamburger-btn" />
+            <a href="/" style="display: flex; align-items: center; text-decoration: none; color: inherit; cursor: pointer;">
+                <MudIcon Icon="@Icons.Material.Filled.Train" Class="ml-2" />
+                <MudText Typo="Typo.h6" Class="ml-2" Style="font-weight: 600; letter-spacing: 0.5px;">@Loc["AppName"]</MudText>
+            </a>
+            <MudSpacer />
             <AuthorizeView>
                 <Authorized>
-                    <MudNavLink Href="/info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Info">
-                        @Loc["GameInfo"]
-                    </MudNavLink>
-                    <MudNavLink Href="/play" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SportsEsports">
-                        @Loc["Play"]
-                    </MudNavLink>
-                    <MudNavLink Href="/leaderboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.EmojiEvents">
-                        @Loc["Leaderboard"]
-                    </MudNavLink>
+                    <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true"
+                             AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <MudMenuItem OnClick='() => ChangeLanguage("en")'>
+                            🇬🇧 English
+                        </MudMenuItem>
+                        <MudMenuItem OnClick='() => ChangeLanguage("nl")'>
+                            🇳🇱 Nederlands
+                        </MudMenuItem>
+                    </MudMenu>
+                    <MudTooltip Text="@(_isDarkMode? Loc["SwitchToLight"] : Loc["SwitchToDark"])">
+                        <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                                       Color="Color.Inherit" OnClick="ToggleTheme"
+                                       Class="theme-toggle-btn" />
+                    </MudTooltip>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
+                             Class="mx-1" Icon="@Icons.Material.Filled.Person">
+                        @context.User.Identity?.Name
+                    </MudChip>
+                    <MudTooltip Text="@Loc["Logout"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="LogoutAsync" />
+                    </MudTooltip>
                 </Authorized>
+                <NotAuthorized>
+                    <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true"
+                             AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <MudMenuItem OnClick='() => ChangeLanguage("en")'>
+                            🇬🇧 English
+                        </MudMenuItem>
+                        <MudMenuItem OnClick='() => ChangeLanguage("nl")'>
+                            🇳🇱 Nederlands
+                        </MudMenuItem>
+                    </MudMenu>
+                    <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">@Loc["Login"]</MudButton>
+                    <MudButton Href="/register" Color="Color.Inherit" Variant="Variant.Text">@Loc["Register"]</MudButton>
+                </NotAuthorized>
             </AuthorizeView>
-            <AuthorizeView Roles="Admin">
-                <Authorized>
-                    <MudNavLink Href="/admin/users" Icon="@Icons.Material.Filled.People">
-                        @Loc["UserManagement"]
-                    </MudNavLink>
-                    <MudNavLink Href="/admin/levels" Icon="@Icons.Material.Filled.Layers">
-                        @Loc["Levels"]
-                    </MudNavLink>
-                    <MudNavLink Href="/admin/submissions" Icon="@Icons.Material.Filled.History">
-                        @Loc["Submissions"]
-                    </MudNavLink>
-                </Authorized>
-            </AuthorizeView>
-        </MudNavMenu>
-    </MudDrawer>
+        </MudAppBar>
 
-    <MudMainContent Class="pt-16 px-4">
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-4 page-enter">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="0" ClipMode="DrawerClipMode.Always"
+                   Class="drawer-animate" Variant="DrawerVariant.Responsive">
+            <MudNavMenu Class="mt-2">
+                <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                    @Loc["Dashboard"]
+                </MudNavLink>
+                <AuthorizeView>
+                    <Authorized>
+                        <MudNavLink Href="/info" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Info">
+                            @Loc["GameInfo"]
+                        </MudNavLink>
+                        <MudNavLink Href="/leaderboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.EmojiEvents">
+                            @Loc["Leaderboard"]
+                        </MudNavLink>
+                        <MudNavLink Href="/play" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SportsEsports">
+                            @Loc["Play"]
+                        </MudNavLink>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <MudDivider />
+                        <MudNavLink Href="/admin/levels" Icon="@Icons.Material.Filled.Layers">
+                            @Loc["Levels"]
+                        </MudNavLink>
+                        <MudNavLink Href="/admin/submissions" Icon="@Icons.Material.Filled.History">
+                            @Loc["Submissions"]
+                        </MudNavLink>
+                        <MudDivider />
+                        <MudNavLink Href="/admin/users" Icon="@Icons.Material.Filled.People">
+                            @Loc["UserManagement"]
+                        </MudNavLink>
+                    </Authorized>
+                </AuthorizeView>
+            </MudNavMenu>
+        </MudDrawer>
+
+        <MudMainContent Class="pt-16 px-4">
+            <MudContainer MaxWidth="MaxWidth.Large" Class="my-4 page-enter">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
 </CascadingValue>
 
 <div id="blazor-error-ui" data-nosnippet>
