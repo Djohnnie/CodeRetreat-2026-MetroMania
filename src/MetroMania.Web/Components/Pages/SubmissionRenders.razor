@@ -36,7 +36,7 @@ else
 
         @* Hour counter and controls *@
         <MudPaper Elevation="0" Class="pa-3 d-flex align-center gap-3"
-                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%; max-width: 640px;">
+                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%;">
 
             <MudTooltip Text="@Loc["PreviousDay"]">
                 <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
@@ -86,8 +86,8 @@ else
 
         @* SVG frame *@
         <MudPaper Elevation="2" Class="pa-2"
-                  Style="border-radius: 12px; overflow: hidden; max-width: 640px; width: 100%;">
-            <div style="width: 100%; display: flex; justify-content: center;">
+                  Style="border-radius: 12px; overflow: auto;">
+            <div style="display: inline-block;">
                 @((MarkupString)_renders[_currentIndex].SvgContent)
             </div>
         </MudPaper>
