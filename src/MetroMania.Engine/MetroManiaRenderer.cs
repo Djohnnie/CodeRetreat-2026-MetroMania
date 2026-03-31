@@ -147,6 +147,8 @@ public class MetroManiaRenderer
         // Pass 5: trains and wagons with their onboard passengers
         DrawVehicles(canvas, snapshot, stationLocations, lineColorMap);
 
+        // Pass 6: header overlay on top of the first tile row
+        DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.TotalScore);
         canvas.Dispose();
         skStream.Dispose();
 
@@ -156,6 +158,47 @@ public class MetroManiaRenderer
         stream.Position = 0;
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
+    }
+
+    // ─── Header overlay ───────────────────────────────────────────────────────
+
+    private static void DrawHeader(SKCanvas canvas, int totalWidth, string levelTitle, GameTime time, int score)
+    {
+        const float headerHeight = TileSize;
+        const float fontSize = 13f;
+        const float padding = 8f;
+
+        // Semi-transparent dark band over the top tile row
+        using var bgPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = new SKColor(0, 0, 0, 168),
+        };
+        canvas.DrawRect(0, 0, totalWidth, headerHeight, bgPaint);
+
+        using var textPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = SKColors.White,
+            IsAntialias = true,
+            TextSize = fontSize,
+            Typeface = SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal),
+        };
+
+        // Baseline: vertically centred within the header band
+        SKFontMetrics metrics;
+        textPaint.GetFontMetrics(out metrics);
+        float textY = (headerHeight - metrics.Ascent - metrics.Descent) / 2f - metrics.Ascent;
+
+        // Left side: title + day/hour counter (e.g. "My Level  1/06:00")
+        string dayHour = $"{time.Day}/{time.Hour:D2}:00";
+        string leftText = $"{levelTitle}  {dayHour}";
+        canvas.DrawText(leftText, padding, textY, textPaint);
+
+        // Right side: score
+        string rightText = $"score: {score} points";
+        float rightTextWidth = textPaint.MeasureText(rightText);
+        canvas.DrawText(rightText, totalWidth - padding - rightTextWidth, textY, textPaint);
     }
 
     // ─── Metro lines ──────────────────────────────────────────────────────────
