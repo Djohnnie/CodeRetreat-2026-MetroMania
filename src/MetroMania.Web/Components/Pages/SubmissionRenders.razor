@@ -35,53 +35,72 @@ else
          style="outline: none; display: flex; flex-direction: column; align-items: center; gap: 16px;">
 
         @* Hour counter and controls *@
-        <MudPaper Elevation="0" Class="pa-3 d-flex align-center gap-3"
+        <MudPaper Elevation="0" Class="pa-3 d-flex align-center"
                   Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%;">
 
-            <MudTooltip Text="@Loc["PreviousDay"]">
-                <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
-                               Color="Color.Primary"
-                               Disabled="_currentIndex <= 0"
-                               OnClick="Previous" />
-            </MudTooltip>
-
-            @if (_isPlaying)
-            {
-                <MudTooltip Text="@Loc["StopPlayback"]">
-                    <MudIconButton Icon="@Icons.Material.Filled.Stop"
-                                   Color="Color.Error"
-                                   OnClick="StopPlayback" />
+            @* Left: navigation controls *@
+            <div style="display: flex; align-items: center; gap: 4px; flex: 1;">
+                <MudTooltip Text="@Loc["PreviousDay"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                                   Color="Color.Primary"
+                                   Disabled="_currentIndex <= 0"
+                                   OnClick="Previous" />
                 </MudTooltip>
-            }
-            else
-            {
-                <MudTooltip Text="@Loc["Play"]">
-                    <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
-                                   Color="Color.Success"
+
+                @if (_isPlaying)
+                {
+                    <MudTooltip Text="@Loc["StopPlayback"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Stop"
+                                       Color="Color.Error"
+                                       OnClick="StopPlayback" />
+                    </MudTooltip>
+                }
+                else
+                {
+                    <MudTooltip Text="@Loc["Play"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
+                                       Color="Color.Success"
+                                       Disabled="_currentIndex >= _renders.Count - 1"
+                                       OnClick="StartPlayback" />
+                    </MudTooltip>
+                }
+
+                <MudTooltip Text="@Loc["NextDay"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                                   Color="Color.Primary"
                                    Disabled="_currentIndex >= _renders.Count - 1"
-                                   OnClick="StartPlayback" />
+                                   OnClick="Next" />
                 </MudTooltip>
-            }
+            </div>
 
-            <MudTooltip Text="@Loc["NextDay"]">
-                <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
-                               Color="Color.Primary"
-                               Disabled="_currentIndex >= _renders.Count - 1"
-                               OnClick="Next" />
-            </MudTooltip>
-
-            <MudSpacer />
-
-            <MudText Typo="Typo.body1" Style="font-weight: 600; white-space: nowrap;">
-                @Loc["Hour"] @_renders[_currentIndex].Hour
-                <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: inline;">
-                    / @_renders[^1].Hour
+            @* Center: day/hour label *@
+            <div style="flex: none; text-align: center; white-space: nowrap;">
+                <MudText Typo="Typo.h6" Style="font-weight: 700; letter-spacing: 0.03em;">
+                    @DayHourLabel
                 </MudText>
-            </MudText>
+            </div>
 
-            <MudProgressLinear Value="@((_currentIndex + 1.0) / _renders.Count * 100)"
-                               Color="Color.Primary" Rounded="true"
-                               Style="width: 100px;" />
+            @* Right: editable hour counter + progress *@
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-end;">
+                <span style="font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                    @Loc["Hour"]
+                    <input type="text"
+                           inputmode="numeric"
+                           value="@_hourInputStr"
+                           @oninput="@(e => _hourInputStr = e.Value?.ToString() ?? string.Empty)"
+                           @onkeydown="HandleHourInputKeyDown"
+                           @onkeydown:stopPropagation="true"
+                           @onblur="@(() => { if (int.TryParse(_hourInputStr, out var h)) JumpToHour(h); })"
+                           style="width: 56px; text-align: center; background: transparent; border: none; border-bottom: 1px solid var(--mud-palette-text-primary); color: var(--mud-palette-text-primary); font-size: 1rem; font-weight: 600; font-family: inherit; outline: none;" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: inline;">
+                        / @_renders[^1].Hour
+                    </MudText>
+                </span>
+
+                <MudProgressLinear Value="@((_currentIndex + 1.0) / _renders.Count * 100)"
+                                   Color="Color.Primary" Rounded="true"
+                                   Style="width: 100px;" />
+            </div>
         </MudPaper>
 
         @* SVG frame *@
@@ -101,6 +120,7 @@ else
 
     private List<SubmissionRenderDto> _renders = [];
     private int _currentIndex;
+    private string _hourInputStr = "0";
     private bool _loading = true;
     private bool _isPlaying;
     private CancellationTokenSource? _playCts;
@@ -110,6 +130,8 @@ else
     {
         _renders = await ApiClient.GetSubmissionRendersAsync(SubmissionId, LevelId);
         _loading = false;
+        if (_renders.Count > 0)
+            _hourInputStr = _renders[0].Hour.ToString();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -131,16 +153,68 @@ else
         }
     }
 
+    private void HandleHourInputKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowUp":
+                Next();
+                break;
+            case "ArrowDown":
+                Previous();
+                break;
+            case "Enter":
+                if (int.TryParse(_hourInputStr, out var h))
+                    JumpToHour(h);
+                break;
+        }
+    }
+
+    private string DayHourLabel
+    {
+        get
+        {
+            if (_renders.Count == 0) return string.Empty;
+            int totalHour = Math.Max(0, _renders[_currentIndex].Hour - 1);
+            int day = totalHour / 24;
+            int hourOfDay = totalHour % 24;
+            return $"{day}/{hourOfDay:D2}:00";
+        }
+    }
+
+    private void SetCurrentIndex(int index)
+    {
+        _currentIndex = index;
+        if (_renders.Count > 0)
+            _hourInputStr = _renders[_currentIndex].Hour.ToString();
+    }
+
+    private void JumpToHour(int hour)
+    {
+        int bestIndex = 0;
+        int bestDiff = int.MaxValue;
+        for (int i = 0; i < _renders.Count; i++)
+        {
+            int diff = Math.Abs(_renders[i].Hour - hour);
+            if (diff < bestDiff)
+            {
+                bestDiff = diff;
+                bestIndex = i;
+            }
+        }
+        SetCurrentIndex(bestIndex);
+    }
+
     private void Previous()
     {
         if (_currentIndex > 0)
-            _currentIndex--;
+            SetCurrentIndex(_currentIndex - 1);
     }
 
     private void Next()
     {
         if (_currentIndex < _renders.Count - 1)
-            _currentIndex++;
+            SetCurrentIndex(_currentIndex + 1);
     }
 
     private void StartPlayback()
@@ -164,7 +238,7 @@ else
             while (!ct.IsCancellationRequested && _currentIndex < _renders.Count - 1)
             {
                 await Task.Delay(500, ct);
-                _currentIndex++;
+                SetCurrentIndex(_currentIndex + 1);
                 await InvokeAsync(StateHasChanged);
             }
         }
