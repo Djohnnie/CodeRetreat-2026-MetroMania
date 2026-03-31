@@ -1,4 +1,4 @@
-@page "/play/renders/{SubmissionId:guid}/{LevelId:guid}"
+@page "/play/renders"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using MetroMania.Application.DTOs
 @using MetroMania.Web.Services
@@ -96,8 +96,8 @@ else
 }
 
 @code {
-    [Parameter] public Guid SubmissionId { get; set; }
-    [Parameter] public Guid LevelId { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "submissionId")] public Guid SubmissionId { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "levelId")] public Guid LevelId { get; set; }
 
     private List<SubmissionRenderDto> _renders = [];
     private int _currentIndex;
