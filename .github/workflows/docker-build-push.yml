@@ -70,7 +70,7 @@ jobs:
             az containerapp update \
               --name metromania-web \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-web:latest
+              --image ${{ env.REGISTRY }}/metromania-web:${{ github.sha }}
 
       - name: Restart metromania-api
         uses: azure/cli@v2
@@ -80,7 +80,7 @@ jobs:
             az containerapp update \
               --name metromania-api \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-api:latest
+              --image ${{ env.REGISTRY }}/metromania-api:${{ github.sha }}
 
       - name: Restart metromania-worker
         uses: azure/cli@v2
@@ -90,7 +90,7 @@ jobs:
             az containerapp update \
               --name metromania-worker \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-worker:latest
+              --image ${{ env.REGISTRY }}/metromania-worker:${{ github.sha }}
 
       - name: Restart metromania-orleans-host
         uses: azure/cli@v2
@@ -100,7 +100,7 @@ jobs:
             az containerapp update \
               --name metromania-orleans-host \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-orleans-host:latest
+              --image ${{ env.REGISTRY }}/metromania-orleans-host:${{ github.sha }}
 
       - name: Restart metromania-orleans-vhost
         uses: azure/cli@v2
@@ -110,4 +110,4 @@ jobs:
             az containerapp update \
               --name metromania-orleans-vhost \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-orleans-validationhost:latest
+              --image ${{ env.REGISTRY }}/metromania-orleans-validationhost:${{ github.sha }}
