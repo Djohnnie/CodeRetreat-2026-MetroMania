@@ -188,7 +188,9 @@ public class MetroManiaRenderer
         // Baseline: vertically centred within the header band
         SKFontMetrics metrics;
         textPaint.GetFontMetrics(out metrics);
-        float textY = (headerHeight - metrics.Ascent - metrics.Descent) / 2f - metrics.Ascent;
+        // Ascent is negative in SkiaSharp (distance upward from baseline).
+        // This places the baseline so the text is visually centred in the band.
+        float textY = headerHeight / 2f - (metrics.Ascent + metrics.Descent) / 2f;
 
         // Left side: title + day/hour counter (e.g. "My Level  1/06:00")
         string dayHour = $"{time.Day}/{time.Hour:D2}:00";
