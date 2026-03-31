@@ -11,7 +11,7 @@ namespace MetroMania.Engine;
 /// Renders a MetroMania level at a specific point in time as an SVG file.
 /// Uses SkiaSharp with Svg.Skia to load tile SVGs and compose them onto an SVG canvas.
 /// </summary>
-public class MetroManiaRenderer
+public class MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath) : IDisposable
 {
     private const int TileSize = 32;
     private const float LineStrokeWidth = 5f;
@@ -41,14 +41,14 @@ public class MetroManiaRenderer
     /// <summary>The water color baked into the SVG tile assets.</summary>
     private const string SourceWaterColor = "rgb(182,227,243)";
 
-    private readonly MetroManiaEngine _engine;
-    private readonly string _svgResourcesPath;
+    private readonly MetroManiaEngine _engine = engine;
+    private readonly string _svgResourcesPath = svgResourcesPath;
 
-    public MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath)
-    {
-        _engine = engine;
-        _svgResourcesPath = svgResourcesPath;
-    }
+    /// <summary>
+    /// Tile picture cache shared across all Compose() calls on this renderer instance.
+    /// Keyed by tile name + color map fingerprint so different level color themes coexist.
+    /// </summary>
+    private readonly Dictionary<string, SKPicture> _tileCache = new();
 
     /// <summary>
     /// Runs the engine for the given number of hours, then renders the level state as an SVG file.
@@ -84,7 +84,6 @@ public class MetroManiaRenderer
             level.LevelData.WaterTiles.Select(w => (w.GridX, w.GridY)));
 
         var colorMap = BuildColorMap(level.LevelData);
-        var tileCache = new Dictionary<string, SKPicture>();
 
         // Map each line's GUID to a display color, using index order for consistency.
         var lineColorMap = snapshot.Lines
@@ -107,7 +106,7 @@ public class MetroManiaRenderer
                 float px = x * TileSize;
                 float py = y * TileSize;
 
-                DrawTile(canvas, tileCache, "background", px, py, colorMap);
+                DrawTile(canvas, "background", px, py, colorMap);
 
                 if (waterSet.Contains((x, y)))
                 {
@@ -126,7 +125,7 @@ public class MetroManiaRenderer
                     bool nw = w && n && IsWaterOrEdge(x - 1, y - 1);
 
                     string tileName = GetWaterTileName(n, ne, e, se, s, sw, w, nw);
-                    DrawTile(canvas, tileCache, tileName, px, py, colorMap);
+                    DrawTile(canvas, tileName, px, py, colorMap);
                 }
             }
         }
@@ -137,7 +136,7 @@ public class MetroManiaRenderer
         // Pass 3: station tiles on top of lines
         foreach (var (loc, station) in snapshot.Stations)
         {
-            DrawTile(canvas, tileCache, GetStationTileName(station.Type),
+            DrawTile(canvas, GetStationTileName(station.Type),
                 loc.X * TileSize, loc.Y * TileSize, colorMap);
         }
 
@@ -151,9 +150,6 @@ public class MetroManiaRenderer
         DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.TotalScore);
         canvas.Dispose();
         skStream.Dispose();
-
-        foreach (var pic in tileCache.Values)
-            pic.Dispose();
 
         stream.Position = 0;
         using var reader = new StreamReader(stream);
@@ -620,21 +616,31 @@ public class MetroManiaRenderer
 
     private void DrawTile(
         SKCanvas canvas,
-        Dictionary<string, SKPicture> cache,
         string tileName,
         float x, float y,
         Dictionary<string, string> colorMap)
     {
-        if (!cache.TryGetValue(tileName, out var picture))
+        // Cache key includes a color-map fingerprint so different level themes coexist.
+        var cacheKey = colorMap.Count == 0 ? tileName
+            : tileName + "|" + string.Join(",", colorMap.Select(kv => $"{kv.Key}={kv.Value}"));
+
+        if (!_tileCache.TryGetValue(cacheKey, out var picture))
         {
             picture = LoadSvgPicture(tileName, colorMap);
-            cache[tileName] = picture;
+            _tileCache[cacheKey] = picture;
         }
 
         canvas.Save();
         canvas.Translate(x, y);
         canvas.DrawPicture(picture);
         canvas.Restore();
+    }
+
+    public void Dispose()
+    {
+        foreach (var pic in _tileCache.Values)
+            pic.Dispose();
+        _tileCache.Clear();
     }
 
     private SKPicture LoadSvgPicture(string tileName, Dictionary<string, string> colorMap)

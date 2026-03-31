@@ -21,11 +21,11 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
 
             var svgResourcesPath = ResolveSvgResourcesPath();
 
-            // Validate script by compiling for diagnostics using the run wrapper
-            var runWrapper = WrapInRunScript(base64Code);
-            var runCompiler = new ScriptCompiler<GameResult>();
+            // Validate script by compiling for diagnostics
+            var snapshotWrapper = WrapInSnapshotScript(base64Code);
+            var snapshotCompiler = new ScriptCompiler<IReadOnlyList<GameSnapshot>>();
 
-            var diagnostics = await runCompiler.CompileForDiagnostics(runWrapper);
+            var diagnostics = await snapshotCompiler.CompileForDiagnostics(snapshotWrapper);
             var errors = diagnostics
                 .Where(d => d.Severity == DiagnosticSeverity.Error)
                 .Select(d => d.GetMessage())
@@ -34,25 +34,15 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
             if (errors.Count > 0)
                 return new ScriptRenderResult { Success = false, Error = string.Join("; ", errors) };
 
-            // Run full game to determine scores (also validates the script executes correctly)
-            var runScript = await runCompiler.CompileForExecution(runWrapper);
-            var fullResult = await runScript.Invoke(new ScriptGlobals(level));
-
-            if (fullResult is null)
-                return new ScriptRenderResult { Success = false, Error = "Script returned null." };
-
-            // Compile the snapshot wrapper (returns GameSnapshot instead of GameResult)
-            var snapshotWrapper = WrapInSnapshotScript(base64Code);
-            var snapshotCompiler = new ScriptCompiler<IReadOnlyList<GameSnapshot>>();
+            // Run the simulation once to get all hourly snapshots
             var snapshotScript = await snapshotCompiler.CompileForExecution(snapshotWrapper);
-
             var hourlySnapshots = await snapshotScript.Invoke(new ScriptGlobals(level));
             if (hourlySnapshots is null)
                 return new ScriptRenderResult { Success = false, Error = "Snapshot script returned null." };
 
             var engine = new MetroManiaEngine();
-            var renderer = new MetroManiaRenderer(engine, svgResourcesPath);
-            var renders = new List<FrameRender>();
+            using var renderer = new MetroManiaRenderer(engine, svgResourcesPath);
+            var renders = new List<FrameRender>(hourlySnapshots.Count);
 
             // Render one frame per in-game hour (1-indexed)
             for (int i = 0; i < hourlySnapshots.Count; i++)
@@ -88,22 +78,6 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
 
         // Local development fallback: resources/ at repo root, 5 levels above the binary output directory
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "resources"));
-    }
-
-    private static string WrapInRunScript(string base64PlayerCode)
-    {
-        var playerCode = base64PlayerCode.Base64Decode();
-
-        var outerScript = """
-            var engine = new MetroManiaEngine();
-            var runner = new MyMetroManiaRunner();
-            var result = engine.Run(runner, Level);
-            return result;
-
-            <<PLACEHOLDER>>
-            """;
-
-        return outerScript.Replace("<<PLACEHOLDER>>", playerCode).Base64Encode();
     }
 
     private static string WrapInSnapshotScript(string base64PlayerCode)
