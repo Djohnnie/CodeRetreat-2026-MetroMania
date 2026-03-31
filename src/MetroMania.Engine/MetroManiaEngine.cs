@@ -161,7 +161,7 @@ public class MetroManiaEngine
             ProcessAction(action, resources, lines, vehicles);
             hoursElapsed++;
 
-            snapshots.Add(CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
+            snapshots.Add(CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity, action));
         }
 
         return snapshots;
@@ -462,7 +462,7 @@ public class MetroManiaEngine
         GameTime time, int hoursElapsed, bool gameOver,
         Dictionary<Location, StationState> activeStations, int totalScore,
         List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles,
-        int vehicleCapacity)
+        int vehicleCapacity, PlayerAction? lastAction = null)
     {
         var snapshot = new GameSnapshot
         {
@@ -470,6 +470,7 @@ public class MetroManiaEngine
             TotalHoursElapsed = hoursElapsed,
             GameOver = gameOver,
             TotalScore = totalScore,
+            LastAction = lastAction,
             Stations = activeStations.ToDictionary(
                 kvp => kvp.Key,
                 kvp => new StationSnapshot

@@ -25,6 +25,12 @@ public class GameSnapshot
     public required IReadOnlyList<ResourceSnapshot> Resources { get; init; }
 
     /// <summary>
+    /// The player action that was performed during this hour's tick, if any.
+    /// Only populated on hourly snapshots produced by <see cref="MetroManiaEngine.RunWithHourlySnapshots"/>.
+    /// </summary>
+    public PlayerAction? LastAction { get; init; }
+
+    /// <summary>
     /// All active metro lines the player has created.
     /// </summary>
     public required IReadOnlyList<LineSnapshot> Lines { get; init; }

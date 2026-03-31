@@ -148,6 +148,14 @@ public class MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath
 
         // Pass 6: header overlay on top of the first tile row
         DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.TotalScore);
+
+        // Pass 7: resource availability counts in the bottom-left column
+        DrawResourceCounts(canvas, level.GridHeight, snapshot);
+
+        // Pass 8: player action overlay in the bottom-right (only when an action was taken)
+        if (snapshot.LastAction is not null and not NoAction)
+            DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction);
+
         canvas.Dispose();
         skStream.Dispose();
 
@@ -202,6 +210,151 @@ public class MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath
         using var rightPath = textPaint.GetTextPath(rightText, totalWidth - padding - rightTextWidth, textY);
         canvas.DrawPath(rightPath, textPaint);
     }
+
+    // ─── Resource counts HUD ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Draws the available resource counts in the bottom three tiles of the first column.
+    /// Each tile shows a resource icon (line / train / wagon) and the available count.
+    /// </summary>
+    private static void DrawResourceCounts(SKCanvas canvas, int gridHeight, GameSnapshot snapshot)
+    {
+        int availableLines  = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Line);
+        int availableTrains = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Train);
+        int availableWagons = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Wagon);
+
+        // Bottom 3 tiles of column 0, from top to bottom: line, train, wagon
+        (int RowOffset, ResourceType Type, int Count)[] items =
+        [
+            (-3, ResourceType.Line,  availableLines),
+            (-2, ResourceType.Train, availableTrains),
+            (-1, ResourceType.Wagon, availableWagons),
+        ];
+
+        using var bgPaint   = new SKPaint { Style = SKPaintStyle.Fill, Color = new SKColor(0, 0, 0, 168) };
+        using var iconFill  = new SKPaint { Style = SKPaintStyle.Fill,   Color = SKColors.White, IsAntialias = true };
+        using var iconStroke = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            Color = SKColors.White,
+            StrokeWidth = 4f,
+            StrokeCap = SKStrokeCap.Round,
+            IsAntialias = true,
+        };
+        using var textPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = SKColors.White,
+            IsAntialias = true,
+            TextSize = 11f,
+            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
+                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
+                    ?? SKTypeface.Default,
+        };
+
+        textPaint.GetFontMetrics(out var metrics);
+
+        foreach (var (rowOffset, type, count) in items)
+        {
+            int row = gridHeight + rowOffset;
+            if (row < 0) continue;
+
+            float tileY      = row * TileSize;
+            float tileCenterY = tileY + TileSize / 2f;
+
+            // Semi-transparent dark background tile
+            canvas.DrawRect(0, tileY, TileSize, TileSize, bgPaint);
+
+            // Icon centered at x=10, vertically centered
+            DrawResourceIcon(canvas, type, 10f, tileCenterY, iconFill, iconStroke);
+
+            // Count number starting at x=20, vertically centered
+            string countStr = count.ToString();
+            float textY = tileCenterY - (metrics.Ascent + metrics.Descent) / 2f;
+            using var textPath = textPaint.GetTextPath(countStr, 20f, textY);
+            canvas.DrawPath(textPath, textPaint);
+        }
+    }
+
+    /// <summary>
+    /// Draws a small icon representing the given resource type, centered at (<paramref name="cx"/>, <paramref name="cy"/>).
+    /// </summary>
+    private static void DrawResourceIcon(
+        SKCanvas canvas, ResourceType type, float cx, float cy,
+        SKPaint fillPaint, SKPaint strokePaint)
+    {
+        switch (type)
+        {
+            case ResourceType.Line:
+                // Horizontal line with rounded caps — resembles a metro line segment
+                canvas.DrawLine(cx - 7f, cy, cx + 7f, cy, strokePaint);
+                break;
+
+            case ResourceType.Train:
+                // Larger rounded rectangle — locomotive silhouette
+                canvas.DrawRoundRect(SKRect.Create(cx - 8f, cy - 5f, 16f, 10f), 2f, 2f, fillPaint);
+                break;
+
+            case ResourceType.Wagon:
+                // Smaller rounded rectangle — wagon car, visually distinct from train
+                canvas.DrawRoundRect(SKRect.Create(cx - 6f, cy - 4f, 12f, 8f), 1.5f, 1.5f, fillPaint);
+                break;
+        }
+    }
+
+    // ─── Player action overlay ────────────────────────────────────────────────
+
+    /// <summary>
+    /// Draws a short description of the player's action in the bottom-right corner,
+    /// covering the bottom tile row height and aligned to the right edge.
+    /// </summary>
+    private static void DrawPlayerAction(SKCanvas canvas, int totalWidth, int gridHeight, PlayerAction action)
+    {
+        string? text = DescribeAction(action);
+        if (text is null) return;
+
+        const float fontSize = 13f;
+        const float padding  = 8f;
+
+        using var textPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = SKColors.White,
+            IsAntialias = true,
+            TextSize = fontSize,
+            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
+                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
+                    ?? SKTypeface.Default,
+        };
+
+        float textWidth = textPaint.MeasureText(text);
+        float bgWidth   = textWidth + padding * 2f;
+        float tileY     = (gridHeight - 1) * TileSize;
+
+        using var bgPaint = new SKPaint { Style = SKPaintStyle.Fill, Color = new SKColor(0, 0, 0, 168) };
+        canvas.DrawRect(totalWidth - bgWidth, tileY, bgWidth, TileSize, bgPaint);
+
+        textPaint.GetFontMetrics(out var metrics);
+        float textY = tileY + TileSize / 2f - (metrics.Ascent + metrics.Descent) / 2f;
+        float textX = totalWidth - padding - textWidth;
+
+        using var textPath = textPaint.GetTextPath(text, textX, textY);
+        canvas.DrawPath(textPath, textPaint);
+    }
+
+    private static string? DescribeAction(PlayerAction action) => action switch
+    {
+        NoAction              => null,
+        CreateLine            => "Line created",
+        RemoveLine            => "Line removed",
+        AddVehicleToLine      => "Train deployed",
+        RemoveVehicle         => "Train removed",
+        ExtendLine            => "Line extended",
+        InsertStationInLine   => "Station inserted",
+        AddWagonToTrain       => "Wagon added",
+        MoveWagonBetweenTrains => "Wagon moved",
+        _                     => null,
+    };
 
     // ─── Metro lines ──────────────────────────────────────────────────────────
 
