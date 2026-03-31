@@ -351,8 +351,8 @@ public class MetroManiaRenderer
         var (ax, ay) = StationCenter(locA);
         var (bx, by) = StationCenter(locB);
 
-        vx = ax + (bx - ax) * vehicle.Progress;
-        vy = ay + (by - ay) * vehicle.Progress;
+        vx = ax + (bx - ax) * (float)vehicle.Progress;
+        vy = ay + (by - ay) * (float)vehicle.Progress;
 
         // Angle points in the direction of travel; flip 180° when moving backward.
         angle = MathF.Atan2(by - ay, bx - ax);

@@ -29,11 +29,11 @@ public class VehicleMovementStepDefinitions(EngineTestContext ctx)
     }
 
     [Then(@"the vehicle should have segment index (\d+) with progress ([\d.]+) and direction (-?\d+)")]
-    public void ThenTheVehicleShouldHaveSegmentIndexProgressAndDirection(int segmentIndex, float progress, int direction)
+    public void ThenTheVehicleShouldHaveSegmentIndexProgressAndDirection(int segmentIndex, decimal progress, int direction)
     {
         var vehicle = Assert.Single(ctx.Snapshot!.Vehicles);
         Assert.Equal(segmentIndex, vehicle.SegmentIndex);
-        Assert.Equal(progress, vehicle.Progress, 0.01f);
+        Assert.Equal(progress, vehicle.Progress);
         Assert.Equal(direction, vehicle.Direction);
     }
 

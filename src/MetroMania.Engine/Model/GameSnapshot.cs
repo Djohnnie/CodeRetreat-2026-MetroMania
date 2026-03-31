@@ -137,7 +137,7 @@ public class VehicleSnapshot
     public required Guid VehicleId { get; init; }
     public required Guid LineId { get; init; }
     public required int SegmentIndex { get; init; }
-    public required float Progress { get; init; }
+    public required decimal Progress { get; init; }
     public required int Direction { get; init; }
     public required Guid? StationId { get; init; }
 
