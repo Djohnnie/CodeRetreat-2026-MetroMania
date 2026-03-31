@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ILevelRepository, LevelRepository>();
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
         services.AddScoped<ISubmissionScoreRepository, SubmissionScoreRepository>();
+        services.AddScoped<ISubmissionRenderRepository, SubmissionRenderRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;

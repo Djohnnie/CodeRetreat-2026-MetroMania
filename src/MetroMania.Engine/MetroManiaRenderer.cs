@@ -49,6 +49,12 @@ public class MetroManiaRenderer
         return Compose(level, snapshot);
     }
 
+    /// <summary>
+    /// Renders an existing game snapshot as an SVG string without running the engine.
+    /// </summary>
+    public string RenderSnapshot(Level level, GameSnapshot snapshot)
+        => Compose(level, snapshot);
+
     private string Compose(Level level, GameSnapshot snapshot)
     {
         int width = level.GridWidth * TileSize;

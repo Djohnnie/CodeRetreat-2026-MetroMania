@@ -71,6 +71,7 @@ public class ServiceBusWorker(
         using var scope = scopeFactory.CreateScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         var gameRunnerService = scope.ServiceProvider.GetRequiredService<IGameRunnerService>();
+        var gameRendererService = scope.ServiceProvider.GetRequiredService<IGameRendererService>();
 
         var submission = await sender.Send(new GetSubmissionByIdQuery(submissionId), ct)
             ?? throw new InvalidOperationException($"Submission {submissionId} not found.");
@@ -89,17 +90,25 @@ public class ServiceBusWorker(
 
         try
         {
-            // Run the script against each level in parallel via Orleans grains
-            var tasks = levels.Select(level =>
+            // Start all grain tasks in parallel: scoring and rendering per level
+            var base64Code = submission.Code.Base64Encode();
+
+            var runTasks = levels.Select(level =>
             {
                 logger.LogInformation("Running script for level {LevelId} ({LevelTitle})", level.Id, level.Title);
-                var levelEntity = ToLevelEntity(level);
-                var levelDataJson = JsonSerializer.Serialize(levelEntity);
-                var base64Code = submission.Code.Base64Encode();
+                var levelDataJson = JsonSerializer.Serialize(ToLevelEntity(level));
                 return gameRunnerService.RunScriptAsync(level.Id, base64Code, levelDataJson);
             }).ToList();
 
-            var results = await Task.WhenAll(tasks);
+            var renderTasks = levels.Select(level =>
+            {
+                logger.LogInformation("Rendering script for level {LevelId} ({LevelTitle})", level.Id, level.Title);
+                var levelDataJson = JsonSerializer.Serialize(ToLevelEntity(level));
+                return gameRendererService.RenderScriptAsync(level.Id, base64Code, levelDataJson);
+            }).ToList();
+
+            var results = await Task.WhenAll(runTasks);
+            var renderResults = await Task.WhenAll(renderTasks);
 
             // Build scores from results (score = 0 for failed levels)
             var scores = levels.Zip(results, (level, result) =>
@@ -107,6 +116,17 @@ public class ServiceBusWorker(
                 .ToList();
 
             await sender.Send(new SaveSubmissionScoresCommand(submissionId, scores), ct);
+
+            // Save all renders from successful levels
+            var allRenders = levels.Zip(renderResults, (level, renderResult) =>
+                renderResult.Success
+                    ? renderResult.Renders.Select(r => new SaveSubmissionRendersCommand.LevelRender(level.Id, r.Day, r.SvgContent))
+                    : Enumerable.Empty<SaveSubmissionRendersCommand.LevelRender>())
+                .SelectMany(r => r)
+                .ToList();
+
+            if (allRenders.Count > 0)
+                await sender.Send(new SaveSubmissionRendersCommand(submissionId, allRenders), ct);
 
             // Check if any level run failed
             var failures = results.Where(r => !r.Success).ToList();
@@ -122,8 +142,9 @@ public class ServiceBusWorker(
             }
 
             for (var i = 0; i < levels.Count; i++)
-                logger.LogInformation("Level {LevelTitle}: Score={Score}, Days={Days}, Time={Time}ms",
-                    levels[i].Title, results[i].Score, results[i].DaysSurvived, results[i].TimeTakenMs);
+                logger.LogInformation("Level {LevelTitle}: Score={Score}, Days={Days}, Time={Time}ms, Renders={Renders}",
+                    levels[i].Title, results[i].Score, results[i].DaysSurvived, results[i].TimeTakenMs,
+                    renderResults[i].Renders.Count);
 
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Succeeded), ct);
             await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Succeeded);

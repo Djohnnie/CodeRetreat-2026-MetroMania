@@ -191,8 +191,16 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return await response.Content.ReadFromJsonAsync<bool>(JsonOptions);
     }
 
-    // ── Leaderboard ──────────────────────────────────────────────
+    // ── Renders ───────────────────────────────────────────────────
 
+    public async Task<List<SubmissionRenderDto>> GetSubmissionRendersAsync(Guid submissionId, Guid levelId)
+    {
+        SetAuthHeader();
+        return (await httpClient.GetFromJsonAsync<List<SubmissionRenderDto>>(
+            $"/api/submissions/{submissionId}/levels/{levelId}/renders", JsonOptions))!;
+    }
+
+    // ── Leaderboard ──────────────────────────────────────────────
     public async Task<List<LeaderboardEntryDto>> GetLeaderboardAsync()
     {
         SetAuthHeader();

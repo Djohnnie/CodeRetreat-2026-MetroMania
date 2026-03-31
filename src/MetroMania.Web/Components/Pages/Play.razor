@@ -135,6 +135,10 @@ else
                             <HeaderContent>
                                 <MudTh>@Loc["LevelName"]</MudTh>
                                 <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
+                                @if (submission.Status == SubmissionStatus.Succeeded)
+                                {
+                                    <MudTh Style="width: 0;" />
+                                }
                             </HeaderContent>
                             <RowTemplate>
                                 <MudTd DataLabel="@Loc["LevelName"]">
@@ -149,6 +153,17 @@ else
                                         @context.Score.ToString("N0")
                                     </MudChip>
                                 </MudTd>
+                                @if (submission.Status == SubmissionStatus.Succeeded)
+                                {
+                                    <MudTd>
+                                        <MudTooltip Text="@Loc["WatchReplays"]">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Slideshow"
+                                                           Size="Size.Small"
+                                                           Color="Color.Primary"
+                                                           Href="@($"/play/renders/{submission.Id}/{context.LevelId}")" />
+                                        </MudTooltip>
+                                    </MudTd>
+                                }
                             </RowTemplate>
                             <FooterContent>
                                 <MudTFootRow>
@@ -158,6 +173,10 @@ else
                                             @submission.TotalScore.ToString("N0")
                                         </MudChip>
                                     </MudTd>
+                                    @if (submission.Status == SubmissionStatus.Succeeded)
+                                    {
+                                        <MudTd />
+                                    }
                                 </MudTFootRow>
                             </FooterContent>
                         </MudTable>

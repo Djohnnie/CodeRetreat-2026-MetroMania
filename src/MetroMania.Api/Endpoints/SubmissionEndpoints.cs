@@ -31,6 +31,12 @@ public static class SubmissionEndpoints
             return Results.Ok(base64Code);
         });
 
+        group.MapGet("/{submissionId:guid}/levels/{levelId:guid}/renders", async (Guid submissionId, Guid levelId, IMediator mediator) =>
+        {
+            var renders = await mediator.Send(new GetSubmissionRendersQuery(submissionId, levelId));
+            return Results.Ok(renders);
+        });
+
         group.MapPost("/", async (SubmitCodeRequest request, IMediator mediator) =>
         {
             var result = await mediator.Send(new SubmitCodeCommand(request.UserId, request.Code));

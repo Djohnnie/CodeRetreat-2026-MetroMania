@@ -210,6 +210,16 @@
   <data name="TotalScore" xml:space="preserve"><value>Total Score</value></data>
   <data name="LevelName" xml:space="preserve"><value>Level</value></data>
 
+  <!-- Renders / Replay -->
+  <data name="WatchReplays" xml:space="preserve"><value>Watch Replays</value></data>
+  <data name="Replay" xml:space="preserve"><value>Replay</value></data>
+  <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigate through the per-day renders for this submission.</value></data>
+  <data name="NoRendersAvailable" xml:space="preserve"><value>No renders are available for this submission and level yet. Renders are generated when the submission is processed.</value></data>
+  <data name="Day" xml:space="preserve"><value>Day</value></data>
+  <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
+  <data name="PreviousDay" xml:space="preserve"><value>Previous day</value></data>
+  <data name="NextDay" xml:space="preserve"><value>Next day</value></data>
+
   <!-- Leaderboard -->
   <data name="Leaderboard" xml:space="preserve"><value>Leaderboard</value></data>
   <data name="LeaderboardSubtitle" xml:space="preserve"><value>Rankings based on each player's latest submission scores.</value></data>

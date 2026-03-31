@@ -1,0 +1,185 @@
+@page "/play/renders/{SubmissionId:guid}/{LevelId:guid}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using MetroMania.Application.DTOs
+@using MetroMania.Web.Services
+@implements IAsyncDisposable
+@inject MetroManiaApiClient ApiClient
+@inject IStringLocalizer<Localization> Loc
+@inject NavigationManager Navigation
+
+<PageTitle>MetroMania - @Loc["Replay"]</PageTitle>
+
+<div class="d-flex align-center mb-1">
+    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                   Size="Size.Small"
+                   OnClick="@(() => Navigation.NavigateTo("/play"))"
+                   Class="mr-1" />
+    <MudIcon Icon="@Icons.Material.Filled.Slideshow" Class="mr-2" Color="Color.Primary" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["Replay"]</MudText>
+</div>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["ReplaysSubtitle"]</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+}
+else if (_renders.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        @Loc["NoRendersAvailable"]
+    </MudAlert>
+}
+else
+{
+    <div @ref="_containerRef" tabindex="0" @onkeydown="HandleKeyDown"
+         style="outline: none; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+
+        @* Day counter and controls *@
+        <MudPaper Elevation="0" Class="pa-3 d-flex align-center gap-3"
+                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%; max-width: 640px;">
+
+            <MudTooltip Text="@Loc["PreviousDay"]">
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                               Color="Color.Primary"
+                               Disabled="_currentIndex <= 0"
+                               OnClick="Previous" />
+            </MudTooltip>
+
+            @if (_isPlaying)
+            {
+                <MudTooltip Text="@Loc["StopPlayback"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.Stop"
+                                   Color="Color.Error"
+                                   OnClick="StopPlayback" />
+                </MudTooltip>
+            }
+            else
+            {
+                <MudTooltip Text="@Loc["Play"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
+                                   Color="Color.Success"
+                                   Disabled="_currentIndex >= _renders.Count - 1"
+                                   OnClick="StartPlayback" />
+                </MudTooltip>
+            }
+
+            <MudTooltip Text="@Loc["NextDay"]">
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                               Color="Color.Primary"
+                               Disabled="_currentIndex >= _renders.Count - 1"
+                               OnClick="Next" />
+            </MudTooltip>
+
+            <MudSpacer />
+
+            <MudText Typo="Typo.body1" Style="font-weight: 600; white-space: nowrap;">
+                @Loc["Day"] @_renders[_currentIndex].Day
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: inline;">
+                    / @_renders[^1].Day
+                </MudText>
+            </MudText>
+
+            <MudProgressLinear Value="@((_currentIndex + 1.0) / _renders.Count * 100)"
+                               Color="Color.Primary" Rounded="true"
+                               Style="width: 100px;" />
+        </MudPaper>
+
+        @* SVG frame *@
+        <MudPaper Elevation="2" Class="pa-2"
+                  Style="border-radius: 12px; overflow: hidden; max-width: 640px; width: 100%;">
+            <div style="width: 100%; display: flex; justify-content: center;">
+                @((MarkupString)_renders[_currentIndex].SvgContent)
+            </div>
+        </MudPaper>
+
+    </div>
+}
+
+@code {
+    [Parameter] public Guid SubmissionId { get; set; }
+    [Parameter] public Guid LevelId { get; set; }
+
+    private List<SubmissionRenderDto> _renders = [];
+    private int _currentIndex;
+    private bool _loading = true;
+    private bool _isPlaying;
+    private CancellationTokenSource? _playCts;
+    private ElementReference _containerRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _renders = await ApiClient.GetSubmissionRendersAsync(SubmissionId, LevelId);
+        _loading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _renders.Count > 0)
+            await _containerRef.FocusAsync();
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowLeft":
+                Previous();
+                break;
+            case "ArrowRight":
+                Next();
+                break;
+        }
+    }
+
+    private void Previous()
+    {
+        if (_currentIndex > 0)
+            _currentIndex--;
+    }
+
+    private void Next()
+    {
+        if (_currentIndex < _renders.Count - 1)
+            _currentIndex++;
+    }
+
+    private void StartPlayback()
+    {
+        if (_isPlaying) return;
+        _playCts = new CancellationTokenSource();
+        _isPlaying = true;
+        _ = RunPlaybackAsync(_playCts.Token);
+    }
+
+    private void StopPlayback()
+    {
+        _playCts?.Cancel();
+        _isPlaying = false;
+    }
+
+    private async Task RunPlaybackAsync(CancellationToken ct)
+    {
+        try
+        {
+            while (!ct.IsCancellationRequested && _currentIndex < _renders.Count - 1)
+            {
+                await Task.Delay(800, ct);
+                _currentIndex++;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            _isPlaying = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _playCts?.Cancel();
+        _playCts?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

@@ -210,6 +210,16 @@
   <data name="TotalScore" xml:space="preserve"><value>Totaalscore</value></data>
   <data name="LevelName" xml:space="preserve"><value>Level</value></data>
 
+  <!-- Renders / Replay -->
+  <data name="WatchReplays" xml:space="preserve"><value>Terugkijken</value></data>
+  <data name="Replay" xml:space="preserve"><value>Terugspelen</value></data>
+  <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigeer door de dagelijkse weergaven van deze inzending.</value></data>
+  <data name="NoRendersAvailable" xml:space="preserve"><value>Er zijn nog geen weergaven beschikbaar voor deze inzending en dit level. Weergaven worden gegenereerd tijdens de verwerking.</value></data>
+  <data name="Day" xml:space="preserve"><value>Dag</value></data>
+  <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
+  <data name="PreviousDay" xml:space="preserve"><value>Vorige dag</value></data>
+  <data name="NextDay" xml:space="preserve"><value>Volgende dag</value></data>
+
   <!-- Leaderboard -->
   <data name="Leaderboard" xml:space="preserve"><value>Klassement</value></data>
   <data name="LeaderboardSubtitle" xml:space="preserve"><value>Ranglijst op basis van de scores van de laatste inzending per speler.</value></data>
