@@ -22,7 +22,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).IsClustered(false);
+            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.HasIndex(e => e.Name).IsUnique();
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.PasswordHash).IsRequired();
@@ -33,7 +35,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<Level>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).IsClustered(false);
+            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(2000);
             entity.HasIndex(e => e.SortOrder);
@@ -53,7 +57,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<Submission>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).IsClustered(false);
+            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.Property(e => e.Code).IsRequired();
             entity.Property(e => e.Status).HasConversion<string>();
             entity.Property(e => e.Message).HasMaxLength(4000);
@@ -63,7 +69,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<SubmissionScore>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).IsClustered(false);
+            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.HasIndex(e => new { e.SubmissionId, e.LevelId }).IsUnique();
             entity.HasOne(e => e.Submission).WithMany(s => s.Scores)
                 .HasForeignKey(e => e.SubmissionId).OnDelete(DeleteBehavior.Cascade);
@@ -73,7 +81,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<SubmissionRender>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.Id).IsClustered(false);
+            entity.Property(e => e.SysId).UseIdentityColumn();
+            entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.HasIndex(e => new { e.SubmissionId, e.LevelId, e.Hour }).IsUnique();
             entity.Property(e => e.SvgContent).HasColumnType("nvarchar(max)").IsRequired();
             entity.HasOne(e => e.Submission).WithMany()

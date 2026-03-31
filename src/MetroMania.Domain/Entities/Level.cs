@@ -3,6 +3,7 @@ namespace MetroMania.Domain.Entities;
 public class Level
 {
     public Guid Id { get; set; }
+    public int SysId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int GridWidth { get; set; } = 10;

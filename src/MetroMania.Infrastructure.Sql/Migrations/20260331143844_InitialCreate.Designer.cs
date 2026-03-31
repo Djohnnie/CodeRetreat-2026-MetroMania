@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MetroMania.Infrastructure.Sql.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260331093331_AddSubmissionRenders")]
-    partial class AddSubmissionRenders
+    [Migration("20260331143844_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +53,12 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                     b.Property<int>("SortOrder")
                         .HasColumnType("int");
 
+                    b.Property<int>("SysId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SysId"));
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -60,7 +66,14 @@ namespace MetroMania.Infrastructure.Sql.Migrations
 
                     b.HasKey("Id");
 
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+
                     b.HasIndex("SortOrder");
+
+                    b.HasIndex("SysId")
+                        .IsUnique();
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("SysId"));
 
                     b.ToTable("Levels");
                 });
@@ -75,12 +88,22 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Message")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("SubmittedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("SysId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SysId"));
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -89,6 +112,13 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+
+                    b.HasIndex("SysId")
+                        .IsUnique();
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("SysId"));
 
                     b.HasIndex("UserId", "Version")
                         .IsUnique();
@@ -102,7 +132,7 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Day")
+                    b.Property<int>("Hour")
                         .HasColumnType("int");
 
                     b.Property<Guid>("LevelId")
@@ -115,11 +145,24 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SysId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SysId"));
+
                     b.HasKey("Id");
+
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
 
                     b.HasIndex("LevelId");
 
-                    b.HasIndex("SubmissionId", "LevelId", "Day")
+                    b.HasIndex("SysId")
+                        .IsUnique();
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("SysId"));
+
+                    b.HasIndex("SubmissionId", "LevelId", "Hour")
                         .IsUnique();
 
                     b.ToTable("SubmissionRenders");
@@ -140,9 +183,22 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                     b.Property<Guid>("SubmissionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("SysId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SysId"));
+
                     b.HasKey("Id");
 
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
+
                     b.HasIndex("LevelId");
+
+                    b.HasIndex("SysId")
+                        .IsUnique();
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("SysId"));
 
                     b.HasIndex("SubmissionId", "LevelId")
                         .IsUnique();
@@ -186,10 +242,23 @@ namespace MetroMania.Infrastructure.Sql.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SysId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SysId"));
+
                     b.HasKey("Id");
+
+                    SqlServerKeyBuilderExtensions.IsClustered(b.HasKey("Id"), false);
 
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.HasIndex("SysId")
+                        .IsUnique();
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("SysId"));
 
                     b.ToTable("Users");
                 });

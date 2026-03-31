@@ -5,6 +5,7 @@ namespace MetroMania.Domain.Entities;
 public class Submission
 {
     public Guid Id { get; set; }
+    public int SysId { get; set; }
     public Guid UserId { get; set; }
     public int Version { get; set; }
     public string Code { get; set; } = string.Empty;
