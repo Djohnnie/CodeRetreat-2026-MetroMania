@@ -97,6 +97,7 @@ else
                                         <HeaderContent>
                                             <MudTh>@Loc["LevelName"]</MudTh>
                                             <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
+                                            <MudTh Style="width: 0;" />
                                         </HeaderContent>
                                         <RowTemplate Context="scoreCtx">
                                             <MudTd DataLabel="@Loc["LevelName"]">
@@ -110,6 +111,14 @@ else
                                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary">
                                                     @scoreCtx.Score.ToString("N0")
                                                 </MudChip>
+                                            </MudTd>
+                                            <MudTd>
+                                                <MudTooltip Text="@Loc["ViewRenders"]">
+                                                    <MudIconButton Size="Size.Small"
+                                                                   Icon="@Icons.Material.Filled.Slideshow"
+                                                                   Color="Color.Primary"
+                                                                   Href="@($"/play/renders?submissionId={context.Id}&levelId={scoreCtx.LevelId}")" />
+                                                </MudTooltip>
                                             </MudTd>
                                         </RowTemplate>
                                         <FooterContent>

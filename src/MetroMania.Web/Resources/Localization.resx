@@ -213,6 +213,7 @@
 
   <!-- Renders / Replay -->
   <data name="WatchReplays" xml:space="preserve"><value>Watch Replays</value></data>
+  <data name="ViewRenders" xml:space="preserve"><value>View Renders</value></data>
   <data name="Replay" xml:space="preserve"><value>Replay</value></data>
   <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigate through the per-day renders for this submission.</value></data>
   <data name="NoRendersAvailable" xml:space="preserve"><value>No renders are available for this submission and level yet. Renders are generated when the submission is processed.</value></data>
