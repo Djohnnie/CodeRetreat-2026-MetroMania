@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
@@ -107,15 +108,25 @@ public class ServiceBusWorker(
                 return gameRendererService.RenderScriptAsync(level.Id, base64Code, levelDataJson);
             }).ToList();
 
+            var runSw = Stopwatch.StartNew();
             var results = await Task.WhenAll(runTasks);
+            runSw.Stop();
+            logger.LogInformation("Ran scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, runSw.ElapsedMilliseconds);
+
+            var renderSw = Stopwatch.StartNew();
             var renderResults = await Task.WhenAll(renderTasks);
+            renderSw.Stop();
+            logger.LogInformation("Rendered scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, renderSw.ElapsedMilliseconds);
 
             // Build scores from results (score = 0 for failed levels)
             var scores = levels.Zip(results, (level, result) =>
                 new SaveSubmissionScoresCommand.LevelScore(level.Id, result.Success ? result.Score : 0))
                 .ToList();
 
+            var saveScoresSw = Stopwatch.StartNew();
             await sender.Send(new SaveSubmissionScoresCommand(submissionId, scores), ct);
+            saveScoresSw.Stop();
+            logger.LogInformation("Saved scores for {LevelCount} levels in {ElapsedMs}ms", levels.Count, saveScoresSw.ElapsedMilliseconds);
 
             // Save all renders from successful levels
             var allRenders = levels.Zip(renderResults, (level, renderResult) =>
@@ -126,7 +137,12 @@ public class ServiceBusWorker(
                 .ToList();
 
             if (allRenders.Count > 0)
+            {
+                var saveRendersSw = Stopwatch.StartNew();
                 await sender.Send(new SaveSubmissionRendersCommand(submissionId, allRenders), ct);
+                saveRendersSw.Stop();
+                logger.LogInformation("Saved {RenderCount} renders for {LevelCount} levels in {ElapsedMs}ms", allRenders.Count, levels.Count, saveRendersSw.ElapsedMilliseconds);
+            }
 
             // Check if any level run failed
             var runnerFailures = levels
