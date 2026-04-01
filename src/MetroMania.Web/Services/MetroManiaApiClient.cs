@@ -216,19 +216,18 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
 
     // ── Conductor ─────────────────────────────────────────────────
 
-    public async Task<string> ChatWithConductorAsync(string conversationId, string message, CancellationToken ct = default)
+    public async Task<List<ChatMessageDto>> GetChatHistoryAsync(Guid userId, CancellationToken ct = default)
     {
         SetAuthHeader();
-        var response = await httpClient.PostAsJsonAsync("/api/conductor/chat", new { conversationId, message }, ct);
-        response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<ConductorChatResponse>(JsonOptions, ct))!.Reply;
+        return (await httpClient.GetFromJsonAsync<List<ChatMessageDto>>($"/api/conductor/history/{userId}", JsonOptions, ct))!;
     }
 
-    public async Task ClearConductorConversationAsync(string conversationId, CancellationToken ct = default)
+    public async Task<string> ChatWithConductorAsync(Guid userId, string message, CancellationToken ct = default)
     {
         SetAuthHeader();
-        var response = await httpClient.DeleteAsync($"/api/conductor/chat/{conversationId}", ct);
+        var response = await httpClient.PostAsJsonAsync("/api/conductor/chat", new { userId, message }, ct);
         response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<ConductorChatResponse>(JsonOptions, ct))!.Reply;
     }
 }
 

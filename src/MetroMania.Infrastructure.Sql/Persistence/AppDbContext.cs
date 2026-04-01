@@ -18,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Submission> Submissions => Set<Submission>();
     public DbSet<SubmissionScore> SubmissionScores => Set<SubmissionScore>();
     public DbSet<SubmissionRender> SubmissionRenders => Set<SubmissionRender>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -91,6 +92,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(e => e.SubmissionId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.Level).WithMany()
                 .HasForeignKey(e => e.LevelId).OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<ChatMessage>(entity =>
+        {
+            entity.HasKey(e => e.Id).IsClustered(false);
+            entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+            entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
+            entity.Property(e => e.Content).IsRequired();
+            entity.Property(e => e.Author).HasConversion<string>();
+            entity.HasIndex(e => new { e.UserId, e.Timestamp });
+            entity.HasOne(e => e.User).WithMany()
+                .HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

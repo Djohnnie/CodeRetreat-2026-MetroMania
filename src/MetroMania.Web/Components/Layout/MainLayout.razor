@@ -195,12 +195,9 @@
     private bool _conductorOpen = false;
     private string _conductorMessage = string.Empty;
     private bool _conductorSending = false;
-    private string _conductorConversationId = Guid.NewGuid().ToString();
+    private Guid _userId;
     private ElementReference _conductorScrollAnchor;
-    private List<ConductorMessage> _conductorMessages =
-    [
-        new(false, "👋 Hi! I'm <strong>Conductor</strong>, your metro network assistant. I can help you with game strategy, explain the rules, or review your bot code. What would you like to know?")
-    ];
+    private List<ConductorMessage> _conductorMessages = [];
     private string _currentLanguage = "en";
 
     private readonly MudTheme _theme = new()
@@ -250,6 +247,9 @@
             var user = authState.User;
             if (user.Identity?.IsAuthenticated == true)
             {
+                if (Guid.TryParse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var uid))
+                    _userId = uid;
+
                 var darkClaim = user.FindFirst("IsDarkMode")?.Value;
                 _isDarkMode = darkClaim == "True";
 
@@ -278,7 +278,28 @@
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 
-    private void ToggleConductor() => _conductorOpen = !_conductorOpen;
+    private async Task ToggleConductor()
+    {
+        _conductorOpen = !_conductorOpen;
+        if (_conductorOpen && _userId != Guid.Empty)
+            await LoadChatHistoryAsync();
+    }
+
+    private async Task LoadChatHistoryAsync()
+    {
+        try
+        {
+            var history = await ApiClient.GetChatHistoryAsync(_userId);
+            _conductorMessages = history
+                .Select(m => new ConductorMessage(
+                    m.Author == MetroMania.Domain.Enums.ChatMessageAuthor.User,
+                    System.Web.HttpUtility.HtmlEncode(m.Content)))
+                .ToList();
+            StateHasChanged();
+            await ScrollConductorToBottomAsync();
+        }
+        catch { /* ignore — keep current messages */ }
+    }
 
     private async Task SendConductorMessageAsync()
     {
@@ -293,7 +314,7 @@
 
         try
         {
-            var reply = await ApiClient.ChatWithConductorAsync(_conductorConversationId, text);
+            var reply = await ApiClient.ChatWithConductorAsync(_userId, text);
             _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(reply)));
         }
         catch

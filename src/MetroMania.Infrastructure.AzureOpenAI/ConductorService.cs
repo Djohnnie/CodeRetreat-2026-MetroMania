@@ -1,6 +1,7 @@
+using MetroMania.Application.DTOs;
 using MetroMania.Application.Interfaces;
+using MetroMania.Domain.Enums;
 using Microsoft.Extensions.AI;
-using System.Collections.Concurrent;
 
 namespace MetroMania.Infrastructure.AzureOpenAI;
 
@@ -17,39 +18,26 @@ public sealed class ConductorService(IChatClient chatClient) : IConductorService
         their metro strategies. Be concise, friendly, and encouraging.
         """;
 
-    private readonly ConcurrentDictionary<string, ConversationState> _conversations = new();
-
-    public async Task<string> ChatAsync(string conversationId, string userMessage, CancellationToken cancellationToken = default)
+    public async Task<string> ChatAsync(
+        IReadOnlyList<ChatMessageDto> history,
+        string userMessage,
+        CancellationToken cancellationToken = default)
     {
-        var state = _conversations.GetOrAdd(conversationId, _ => new ConversationState(SystemPrompt));
-
-        await state.Lock.WaitAsync(cancellationToken);
-        try
+        var messages = new List<ChatMessage>
         {
-            state.History.Add(new ChatMessage(ChatRole.User, userMessage));
+            new(ChatRole.System, SystemPrompt)
+        };
 
-            var response = await chatClient.GetResponseAsync(state.History, cancellationToken: cancellationToken);
-
-            state.History.AddRange(response.Messages);
-
-            return response.Text ?? string.Empty;
-        }
-        finally
+        foreach (var msg in history)
         {
-            state.Lock.Release();
+            var role = msg.Author == ChatMessageAuthor.User ? ChatRole.User : ChatRole.Assistant;
+            messages.Add(new ChatMessage(role, msg.Content));
         }
-    }
 
-    public void ClearConversation(string conversationId) =>
-        _conversations.TryRemove(conversationId, out _);
+        messages.Add(new ChatMessage(ChatRole.User, userMessage));
 
-    private sealed class ConversationState(string systemPrompt)
-    {
-        public List<ChatMessage> History { get; } =
-        [
-            new ChatMessage(ChatRole.System, systemPrompt)
-        ];
-
-        public SemaphoreSlim Lock { get; } = new(1, 1);
+        var response = await chatClient.GetResponseAsync(messages, cancellationToken: cancellationToken);
+        return response.Text ?? string.Empty;
     }
 }
+
