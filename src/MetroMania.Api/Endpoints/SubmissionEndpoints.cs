@@ -47,6 +47,12 @@ public static class SubmissionEndpoints
             return Results.Created($"/api/submissions/{result.Submission!.Id}", result.Submission);
         });
 
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            await mediator.Send(new DeleteSubmissionCommand(id));
+            return Results.NoContent();
+        }).RequireAuthorization("Admin");
+
         // Internal endpoint for the Worker to broadcast submission status changes via SignalR
         group.MapPost("/notify", async (NotifySubmissionRequest request, IHubContext<SubmissionHub> hubContext) =>
         {

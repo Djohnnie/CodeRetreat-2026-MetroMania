@@ -194,6 +194,9 @@
   <data name="UserSubmissions" xml:space="preserve"><value>User Submissions</value></data>
   <data name="UserSubmissionsTitle" xml:space="preserve"><value>Submissions by {0}</value></data>
   <data name="UserSubmissionsSubtitle" xml:space="preserve"><value>All submissions ordered from most recent to oldest.</value></data>
+  <data name="DeleteSubmission" xml:space="preserve"><value>Delete submission</value></data>
+  <data name="SubmissionDeleted" xml:space="preserve"><value>Submission v{0} deleted.</value></data>
+  <data name="SubmissionDeleteFailed" xml:space="preserve"><value>Failed to delete submission.</value></data>
   <data name="BackToSubmissions" xml:space="preserve"><value>Back to all users</value></data>
   <data name="Version" xml:space="preserve"><value>Version</value></data>
   <data name="SubmittedAt" xml:space="preserve"><value>Submitted At</value></data>

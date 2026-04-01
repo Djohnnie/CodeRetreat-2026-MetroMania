@@ -200,6 +200,13 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
             $"/api/submissions/{submissionId}/levels/{levelId}/renders", JsonOptions))!;
     }
 
+    public async Task<bool> DeleteSubmissionAsync(Guid submissionId)
+    {
+        SetAuthHeader();
+        var response = await httpClient.DeleteAsync($"/api/submissions/{submissionId}");
+        return response.IsSuccessStatusCode;
+    }
+
     // ── Leaderboard ──────────────────────────────────────────────
     public async Task<List<LeaderboardEntryDto>> GetLeaderboardAsync()
     {

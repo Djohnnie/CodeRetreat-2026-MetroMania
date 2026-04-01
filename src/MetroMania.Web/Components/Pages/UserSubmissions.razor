@@ -42,6 +42,11 @@ else if (_submissions is null || _submissions.Count == 0)
 else
 {
     <MudPaper Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); overflow: hidden;">
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <MudAlert Severity="_messageSeverity" Class="ma-3" Variant="Variant.Outlined" Dense="true"
+                      ShowCloseIcon="true" CloseIconClicked="() => _message = null">@_message</MudAlert>
+        }
         <MudTable Items="_submissions" Hover="true" Elevation="0" Dense="true" Breakpoint="Breakpoint.Sm">
             <HeaderContent>
                 <MudTh Style="width: 0;" />
@@ -49,6 +54,7 @@ else
                 <MudTh>@Loc["TotalScore"]</MudTh>
                 <MudTh>@Loc["SubmittedAt"]</MudTh>
                 <MudTh>@Loc["CodePreview"]</MudTh>
+                <MudTh Style="width: 0;" />
             </HeaderContent>
             <RowTemplate>
                 <MudTd>
@@ -76,12 +82,18 @@ else
                         @Truncate(context.Code, 100)
                     </MudText>
                 </MudTd>
+                <MudTd Style="text-align: right;">
+                    <MudTooltip Text="@Loc["DeleteSubmission"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                                       OnClick="() => DeleteSubmission(context.Id, context.Version)" />
+                    </MudTooltip>
+                </MudTd>
             </RowTemplate>
             <ChildRowContent>
                 @if (_expandedRows.Contains(context.Id))
                 {
                     <MudTr>
-                        <td colspan="5" style="padding: 0;">
+                        <td colspan="6" style="padding: 0;">
                             <div class="pa-4" style="background: var(--mud-palette-background-grey);">
                                 @if (!string.IsNullOrWhiteSpace(context.Message))
                                 {
@@ -158,6 +170,8 @@ else
     private bool _loading = true;
     private bool _previousDarkMode;
     private readonly HashSet<Guid> _expandedRows = [];
+    private string? _message;
+    private Severity _messageSeverity;
 
     protected override async Task OnInitializedAsync()
     {
@@ -218,5 +232,17 @@ else
     {
         if (!_expandedRows.Remove(id))
             _expandedRows.Add(id);
+    }
+
+    private async Task DeleteSubmission(Guid submissionId, int version)
+    {
+        _expandedRows.Remove(submissionId);
+        var success = await ApiClient.DeleteSubmissionAsync(submissionId);
+        _message = success
+            ? string.Format(Loc["SubmissionDeleted"], version)
+            : Loc["SubmissionDeleteFailed"].Value;
+        _messageSeverity = success ? Severity.Success : Severity.Error;
+        if (success)
+            _submissions = await ApiClient.GetUserSubmissionsAsync(UserId);
     }
 }

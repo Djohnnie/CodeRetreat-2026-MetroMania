@@ -194,6 +194,9 @@
   <data name="UserSubmissions" xml:space="preserve"><value>Gebruikersinzendingen</value></data>
   <data name="UserSubmissionsTitle" xml:space="preserve"><value>Inzendingen van {0}</value></data>
   <data name="UserSubmissionsSubtitle" xml:space="preserve"><value>Alle inzendingen van meest recent naar oudste.</value></data>
+  <data name="DeleteSubmission" xml:space="preserve"><value>Inzending verwijderen</value></data>
+  <data name="SubmissionDeleted" xml:space="preserve"><value>Inzending v{0} verwijderd.</value></data>
+  <data name="SubmissionDeleteFailed" xml:space="preserve"><value>Verwijderen van inzending mislukt.</value></data>
   <data name="BackToSubmissions" xml:space="preserve"><value>Terug naar alle gebruikers</value></data>
   <data name="Version" xml:space="preserve"><value>Versie</value></data>
   <data name="SubmittedAt" xml:space="preserve"><value>Ingediend op</value></data>
