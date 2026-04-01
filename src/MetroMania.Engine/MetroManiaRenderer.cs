@@ -278,28 +278,41 @@ public class MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath
 
     /// <summary>
     /// Draws a small icon representing the given resource type, centered at (<paramref name="cx"/>, <paramref name="cy"/>).
+    /// Uses the Material Design SVG path for each resource type, scaled to 16×16.
     /// </summary>
     private static void DrawResourceIcon(
         SKCanvas canvas, ResourceType type, float cx, float cy,
         SKPaint fillPaint, SKPaint strokePaint)
     {
-        switch (type)
+        // Material Design icon path data (24×24 viewbox)
+        string? pathData = type switch
         {
-            case ResourceType.Line:
-                // Horizontal line with rounded caps — resembles a metro line segment
-                canvas.DrawLine(cx - 7f, cy, cx + 7f, cy, strokePaint);
-                break;
+            ResourceType.Line  => "M19.5,9.5c-1.03,0-1.9,0.62-2.29,1.5h-2.92C13.9,10.12,13.03,9.5,12,9.5s-1.9,0.62-2.29,1.5H6.79" +
+                                  " C6.4,10.12,5.53,9.5,4.5,9.5C3.12,9.5,2,10.62,2,12s1.12,2.5,2.5,2.5c1.03,0,1.9-0.62,2.29-1.5h2.92" +
+                                  "c0.39,0.88,1.26,1.5,2.29,1.5s1.9-0.62,2.29-1.5h2.92c0.39,0.88,1.26,1.5,2.29,1.5c1.38,0,2.5-1.12,2.5-2.5" +
+                                  "S20.88,9.5,19.5,9.5z",
+            ResourceType.Train => "M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 19" +
+                                  "c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14" +
+                                  "s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5" +
+                                  "s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z",
+            ResourceType.Wagon => "M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5.5c0 1.65 1.34 3 3 3s3-1.35 3-3H23" +
+                                  "v-5l-6-6zM3 11V7h4v4H3zm3 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
+                                  "m7-6.5H9V7h4v4zm4.5 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
+                                  "M15 11V7h1l4 4h-5z",
+            _ => null
+        };
 
-            case ResourceType.Train:
-                // Larger rounded rectangle — locomotive silhouette
-                canvas.DrawRoundRect(SKRect.Create(cx - 8f, cy - 5f, 16f, 10f), 2f, 2f, fillPaint);
-                break;
+        if (pathData is null) return;
 
-            case ResourceType.Wagon:
-                // Smaller rounded rectangle — wagon car, visually distinct from train
-                canvas.DrawRoundRect(SKRect.Create(cx - 6f, cy - 4f, 12f, 8f), 1.5f, 1.5f, fillPaint);
-                break;
-        }
+        const float iconSize = 16f;
+        const float scale = iconSize / 24f;
+
+        using var iconPath = SKPath.ParseSvgPathData(pathData);
+        canvas.Save();
+        canvas.Translate(cx - iconSize / 2f, cy - iconSize / 2f);
+        canvas.Scale(scale);
+        canvas.DrawPath(iconPath, fillPaint);
+        canvas.Restore();
     }
 
     // ─── Player action overlay ────────────────────────────────────────────────
