@@ -1,43 +1,130 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using MetroMania.Domain.Enums
+@using MetroMania.Web.Services
+@using MetroMania.Application.DTOs
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IStringLocalizer<Localization> Loc
+@inject MetroManiaApiClient ApiClient
 
 <PageTitle>MetroMania - @Loc["Dashboard"]</PageTitle>
 
 <AuthorizeView>
     <Authorized>
+        @* Welcome *@
         <MudText Typo="Typo.h4" Class="mb-1" Style="font-weight: 700;">@string.Format(Loc["WelcomeUser"], context.User.Identity?.Name)</MudText>
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["DashboardOverview"]</MudText>
-        <MudGrid Spacing="4">
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
-                    <div class="d-flex align-center mb-3">
-                        <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Train" />
-                        </MudAvatar>
-                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["AppName"]</MudText>
-                    </div>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        @Loc["TransitDescription"]
-                    </MudText>
-                </MudPaper>
+
+        @* Navigation tiles *@
+        <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">@Loc["QuickLinks"]</MudText>
+        <MudGrid Spacing="3" Class="mb-8">
+            <MudItem xs="12" sm="4">
+                <a href="/info" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                    <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); height: 100%;">
+                        <div class="d-flex align-center mb-3">
+                            <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Info" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["GameInfo"]</MudText>
+                        </div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc["GameInfoSubtitle"]</MudText>
+                    </MudPaper>
+                </a>
             </MudItem>
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
-                    <div class="d-flex align-center mb-3">
-                        <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
-                            <MudIcon Icon="@Icons.Material.Filled.Person" />
-                        </MudAvatar>
-                        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["YourProfile"]</MudText>
-                    </div>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        @Loc["Role"]: <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</MudChip>
-                    </MudText>
-                </MudPaper>
+            <MudItem xs="12" sm="4">
+                <a href="/leaderboard" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                    <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); height: 100%;">
+                        <div class="d-flex align-center mb-3">
+                            <MudAvatar Color="Color.Warning" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
+                                <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["Leaderboard"]</MudText>
+                        </div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc["LeaderboardSubtitle"]</MudText>
+                    </MudPaper>
+                </a>
             </MudItem>
-            <AuthorizeView Roles="Admin">
-                <Authorized Context="adminContext">
+            <MudItem xs="12" sm="4">
+                <a href="/play" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                    <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default); height: 100%;">
+                        <div class="d-flex align-center mb-3">
+                            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium" Rounded="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Code" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 600;">@Loc["Play"]</MudText>
+                        </div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc["PlaySubtitle"]</MudText>
+                    </MudPaper>
+                </a>
+            </MudItem>
+        </MudGrid>
+
+        @* Personal statistics *@
+        <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">@Loc["YourStats"]</MudText>
+        @if (_loading)
+        {
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Small" />
+        }
+        else
+        {
+            <MudGrid Spacing="3" Class="mb-8">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Class="pa-5" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <div class="d-flex align-center mb-2">
+                            <MudAvatar Color="Color.Default" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="ml-2">@Loc["TotalSubmissions"]</MudText>
+                        </div>
+                        <MudText Typo="Typo.h4" Style="font-weight: 700;">@_totalSubmissions</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudPaper Class="pa-5" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <div class="d-flex align-center mb-2">
+                            <MudAvatar Color="Color.Success" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                                <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Size="Size.Small" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="ml-2">@Loc["BestScore"]</MudText>
+                        </div>
+                        @if (_bestScore.HasValue)
+                        {
+                            <MudText Typo="Typo.h4" Style="font-weight: 700;">@_bestScore.Value.ToString("N0")</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">@Loc["NoScoreYet"]</MudText>
+                        }
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudPaper Class="pa-5" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
+                        <div class="d-flex align-center mb-2">
+                            <MudAvatar Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                                <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Small" />
+                            </MudAvatar>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="ml-2">@Loc["WorstScore"]</MudText>
+                        </div>
+                        @if (_worstScore.HasValue)
+                        {
+                            <MudText Typo="Typo.h4" Style="font-weight: 700;">@_worstScore.Value.ToString("N0")</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">@Loc["NoScoreYet"]</MudText>
+                        }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
+
+        @* Admin panel *@
+        <AuthorizeView Roles="Admin">
+            <Authorized Context="adminContext">
+                <MudDivider Class="mb-6" />
+                <MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">@Loc["Administration"]</MudText>
+                <MudGrid Spacing="3">
                     <MudItem xs="12" sm="6" md="4">
                         <MudPaper Class="pa-5 card-hover" Elevation="0" Style="border: 1px solid var(--mud-palette-lines-default);">
                             <div class="d-flex align-center mb-3">
@@ -52,9 +139,9 @@
                             </MudButton>
                         </MudPaper>
                     </MudItem>
-                </Authorized>
-            </AuthorizeView>
-        </MudGrid>
+                </MudGrid>
+            </Authorized>
+        </AuthorizeView>
     </Authorized>
     <NotAuthorized>
         <div class="d-flex flex-column align-center justify-center" style="min-height: 60vh;">
@@ -74,3 +161,40 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    private int _totalSubmissions;
+    private int? _bestScore;
+    private int? _worstScore;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userIdStr, out var userId))
+        {
+            _loading = false;
+            return;
+        }
+
+        try
+        {
+            var submissions = await ApiClient.GetUserSubmissionsAsync(userId);
+            _totalSubmissions = submissions.Count;
+
+            var succeededScores = submissions
+                .Where(s => s.Status == SubmissionStatus.Succeeded && s.TotalScore > 0)
+                .Select(s => s.TotalScore)
+                .ToList();
+
+            _bestScore = succeededScores.Count > 0 ? succeededScores.Max() : null;
+            _worstScore = succeededScores.Count > 0 ? succeededScores.Min() : null;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

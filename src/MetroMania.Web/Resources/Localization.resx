@@ -34,6 +34,12 @@
   <!-- Home - Authenticated -->
   <data name="WelcomeUser" xml:space="preserve"><value>Welcome, {0}!</value></data>
   <data name="DashboardOverview" xml:space="preserve"><value>Here's your dashboard overview.</value></data>
+  <data name="QuickLinks" xml:space="preserve"><value>Quick Links</value></data>
+  <data name="YourStats" xml:space="preserve"><value>Your Statistics</value></data>
+  <data name="TotalSubmissions" xml:space="preserve"><value>Total Submissions</value></data>
+  <data name="BestScore" xml:space="preserve"><value>Best Score</value></data>
+  <data name="WorstScore" xml:space="preserve"><value>Worst Score</value></data>
+  <data name="NoScoreYet" xml:space="preserve"><value>No score yet</value></data>
   <data name="TransitDescription" xml:space="preserve"><value>Your transit management dashboard. Use the navigation menu to access features.</value></data>
   <data name="YourProfile" xml:space="preserve"><value>Your Profile</value></data>
   <data name="Role" xml:space="preserve"><value>Role</value></data>

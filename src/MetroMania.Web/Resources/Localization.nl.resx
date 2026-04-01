@@ -34,6 +34,12 @@
   <!-- Home - Authenticated -->
   <data name="WelcomeUser" xml:space="preserve"><value>Welkom, {0}!</value></data>
   <data name="DashboardOverview" xml:space="preserve"><value>Hier is je dashboardoverzicht.</value></data>
+  <data name="QuickLinks" xml:space="preserve"><value>Snelkoppelingen</value></data>
+  <data name="YourStats" xml:space="preserve"><value>Jouw Statistieken</value></data>
+  <data name="TotalSubmissions" xml:space="preserve"><value>Totaal Inzendingen</value></data>
+  <data name="BestScore" xml:space="preserve"><value>Beste Score</value></data>
+  <data name="WorstScore" xml:space="preserve"><value>Slechtste Score</value></data>
+  <data name="NoScoreYet" xml:space="preserve"><value>Nog geen score</value></data>
   <data name="TransitDescription" xml:space="preserve"><value>Je dashboard voor OV-beheer. Gebruik het navigatiemenu om functies te openen.</value></data>
   <data name="YourProfile" xml:space="preserve"><value>Je profiel</value></data>
   <data name="Role" xml:space="preserve"><value>Rol</value></data>
