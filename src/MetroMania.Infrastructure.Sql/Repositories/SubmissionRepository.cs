@@ -33,15 +33,8 @@ public class SubmissionRepository(AppDbContext db) : ISubmissionRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Guid id)
-    {
-        var submission = await db.Submissions.FindAsync(id);
-        if (submission is not null)
-        {
-            db.Submissions.Remove(submission);
-            await db.SaveChangesAsync();
-        }
-    }
+    public async Task DeleteAsync(Guid id) =>
+        await db.Submissions.Where(s => s.Id == id).ExecuteDeleteAsync();
 
     public async Task<Dictionary<Guid, (int Count, DateTime? LastSubmittedAt)>>GetSubmissionStatsByUserAsync()
     {

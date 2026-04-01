@@ -13,6 +13,12 @@ public class SubmissionRenderRepository(AppDbContext db) : ISubmissionRenderRepo
             .OrderBy(r => r.Hour)
             .ToListAsync();
 
+    public async Task<List<string>> GetLocationsBySubmissionIdAsync(Guid submissionId) =>
+        await db.SubmissionRenders
+            .Where(r => r.SubmissionId == submissionId)
+            .Select(r => r.SvgLocation)
+            .ToListAsync();
+
     public async Task AddManyAsync(IEnumerable<SubmissionRender> renders)
     {
         db.SubmissionRenders.AddRange(renders);

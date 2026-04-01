@@ -26,4 +26,10 @@ public class BlobRepository
         var response = await blobClient.DownloadContentAsync(ct);
         return response.Value.Content.ToString();
     }
+
+    public async Task DeleteAsync(string blobName, CancellationToken ct = default)
+    {
+        var blobClient = _container.GetBlobClient(blobName);
+        await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+    }
 }
