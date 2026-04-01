@@ -4,6 +4,8 @@ public enum SubmissionStatus
 {
     Waiting,
     Running,
+    Rendering,
+    Saving,
     Succeeded,
     Failed
 }

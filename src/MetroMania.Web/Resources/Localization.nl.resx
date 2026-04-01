@@ -112,6 +112,8 @@
   <!-- SubmissionStatus enum values -->
   <data name="Waiting" xml:space="preserve"><value>Wachtend</value></data>
   <data name="Running" xml:space="preserve"><value>Bezig</value></data>
+  <data name="Rendering" xml:space="preserve"><value>Renderen</value></data>
+  <data name="Saving" xml:space="preserve"><value>Opslaan</value></data>
   <data name="Succeeded" xml:space="preserve"><value>Geslaagd</value></data>
   <data name="Failed" xml:space="preserve"><value>Mislukt</value></data>
 

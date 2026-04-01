@@ -400,6 +400,8 @@ else
     {
         SubmissionStatus.Waiting => Color.Default,
         SubmissionStatus.Running => Color.Info,
+        SubmissionStatus.Rendering => Color.Info,
+        SubmissionStatus.Saving => Color.Info,
         SubmissionStatus.Succeeded => Color.Success,
         SubmissionStatus.Failed => Color.Error,
         _ => Color.Default

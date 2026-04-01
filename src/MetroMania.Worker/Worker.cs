@@ -91,15 +91,24 @@ public class ServiceBusWorker(
 
         try
         {
-            // Start all grain tasks in parallel: scoring and rendering per level
             var base64Code = submission.Code.Base64Encode();
 
+            // Phase 1: Run scripts
             var runTasks = levels.Select(level =>
             {
                 logger.LogInformation("Running script for level {LevelId} ({LevelTitle})", level.Id, level.Title);
                 var levelDataJson = JsonSerializer.Serialize(ToLevelEntity(level));
                 return gameRunnerService.RunScriptAsync(level.Id, base64Code, levelDataJson);
             }).ToList();
+
+            var runSw = Stopwatch.StartNew();
+            var results = await Task.WhenAll(runTasks);
+            runSw.Stop();
+            logger.LogInformation("Ran scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, runSw.ElapsedMilliseconds);
+
+            // Phase 2: Render scripts
+            await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Rendering), ct);
+            await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Rendering);
 
             var renderTasks = levels.Select(level =>
             {
@@ -108,15 +117,14 @@ public class ServiceBusWorker(
                 return gameRendererService.RenderScriptAsync(level.Id, base64Code, levelDataJson);
             }).ToList();
 
-            var runSw = Stopwatch.StartNew();
-            var results = await Task.WhenAll(runTasks);
-            runSw.Stop();
-            logger.LogInformation("Ran scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, runSw.ElapsedMilliseconds);
-
             var renderSw = Stopwatch.StartNew();
             var renderResults = await Task.WhenAll(renderTasks);
             renderSw.Stop();
             logger.LogInformation("Rendered scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, renderSw.ElapsedMilliseconds);
+
+            // Phase 3: Save scores and renders
+            await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Saving), ct);
+            await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Saving);
 
             // Build scores from results (score = 0 for failed levels)
             var scores = levels.Zip(results, (level, result) =>
