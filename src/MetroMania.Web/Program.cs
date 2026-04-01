@@ -150,6 +150,36 @@ app.MapGet("/api/auth/logout", async (HttpContext context) =>
     return Results.Redirect("/login");
 });
 
+// Re-signs the auth cookie with the new language claim and sets the culture cookie.
+// Called by the language switcher so the JWT (built from cookie claims) picks up the change.
+app.MapGet("/api/auth/update-language", async (HttpContext context, string language, string? returnUrl) =>
+{
+    var result = await context.AuthenticateAsync("BlazorServer");
+    if (result.Principal is null)
+        return Results.Redirect("/login");
+
+    var updatedClaims = result.Principal.Claims
+        .Where(c => c.Type != "Language")
+        .Append(new Claim("Language", language))
+        .ToList();
+
+    var principal = new ClaimsPrincipal(new ClaimsIdentity(updatedClaims, "BlazorServer"));
+    await context.SignInAsync("BlazorServer", principal, new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+    });
+
+    // Also update the culture cookie so ASP.NET Core's localization middleware applies immediately.
+    context.Response.Cookies.Append(
+        ".AspNetCore.Culture",
+        $"c={language}|uic={language}",
+        new CookieOptions { MaxAge = TimeSpan.FromDays(365), Path = "/" });
+
+    var redirect = string.IsNullOrEmpty(returnUrl) ? "/" : Uri.UnescapeDataString(returnUrl);
+    return Results.Redirect(redirect);
+});
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

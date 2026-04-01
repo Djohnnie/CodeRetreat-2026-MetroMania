@@ -7,25 +7,33 @@ namespace MetroMania.Infrastructure.AzureOpenAI;
 
 public sealed class ConductorService(IChatClient chatClient) : IConductorService
 {
-    private const string SystemPrompt =
-        """
-        You are Conductor, an AI assistant for the MetroMania coding challenge.
-        MetroMania is a game where players write C# bot code to build metro networks,
-        inspired by the Mini Metro game. Players implement the IMetroManiaRunner interface
-        and earn points by efficiently connecting stations and transporting passengers.
-        
-        Help players understand the game rules, write better C# bot code, and optimize
-        their metro strategies. Be concise, friendly, and encouraging.
-        """;
-
     public async Task<string> ChatAsync(
         IReadOnlyList<ChatMessageDto> history,
+        string userName,
+        string language,
         string userMessage,
         CancellationToken cancellationToken = default)
     {
+        var languageName = language == "nl" ? "Dutch" : "English";
+        var botName = language == "nl" ? "Conducteur" : "Conductor";
+
+        var systemPrompt =
+            $"""
+            You are {botName}, an AI assistant for the MetroMania coding challenge.
+            You are talking to {userName}. Always address them by their name to keep the conversation personal.
+            MetroMania is a game where players write C# bot code to build metro networks,
+            inspired by the Mini Metro game. Players implement the IMetroManiaRunner interface
+            and earn points by efficiently connecting stations and transporting passengers.
+
+            Help players understand the game rules, write better C# bot code, and optimize
+            their metro strategies. Be concise, friendly, and encouraging.
+
+            IMPORTANT: Always respond in {languageName}. Never switch languages.
+            """;
+
         var messages = new List<ChatMessage>
         {
-            new(ChatRole.System, SystemPrompt)
+            new(ChatRole.System, systemPrompt)
         };
 
         foreach (var msg in history)

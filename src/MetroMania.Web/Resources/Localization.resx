@@ -137,6 +137,12 @@
   <!-- Language -->
   <data name="Language" xml:space="preserve"><value>Language</value></data>
 
+  <!-- Conductor -->
+  <data name="ConductorName" xml:space="preserve"><value>Conductor</value></data>
+  <data name="ConductorOnline" xml:space="preserve"><value>● Online</value></data>
+  <data name="AskConductor" xml:space="preserve"><value>Ask Conductor...</value></data>
+  <data name="ConductorError" xml:space="preserve"><value>⚠️ Sorry, I'm having trouble connecting right now. Please try again.</value></data>
+
   <!-- Level Editor -->
   <data name="Levels" xml:space="preserve"><value>Levels</value></data>
   <data name="LevelEditorSubtitle" xml:space="preserve"><value>Create, edit, reorder, and remove levels.</value></data>

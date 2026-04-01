@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using MediatR;
 using MetroMania.Application.Conductor.Commands;
 using MetroMania.Application.Conductor.Queries;
@@ -12,16 +13,20 @@ public static class ConductorEndpoints
     {
         var group = app.MapGroup("/api/conductor").WithTags("Conductor").RequireAuthorization();
 
-        group.MapGet("/history/{userId:guid}", async (Guid userId, IMediator mediator) =>
+        group.MapGet("/history/{userId:guid}", async (Guid userId, ClaimsPrincipal user, IMediator mediator) =>
         {
             var history = await mediator.Send(new GetChatHistoryQuery(userId));
 
             if (history.Count == 0)
             {
-                const string welcome =
-                    "👋 Hi! I'm **Conductor**, your metro network assistant. " +
-                    "I can help you with game strategy, explain the rules, or review your bot code. " +
-                    "What would you like to know?";
+                var language = user.FindFirst("Language")?.Value ?? "en";
+                var welcome = language == "nl"
+                    ? "👋 Hallo! Ik ben **Conducteur**, jouw metro netwerk assistent. " +
+                      "Ik kan je helpen met spelstrategie, de regels uitleggen of je bot-code beoordelen. " +
+                      "Wat wil je weten?"
+                    : "👋 Hi! I'm **Conductor**, your metro network assistant. " +
+                      "I can help you with game strategy, explain the rules, or review your bot code. " +
+                      "What would you like to know?";
                 var seeded = await mediator.Send(new SaveChatMessageCommand(userId, welcome, ChatMessageAuthor.Bot));
                 history = [seeded];
             }
@@ -29,14 +34,17 @@ public static class ConductorEndpoints
             return Results.Ok(history);
         });
 
-        group.MapPost("/chat", async (ConductorChatRequest request, IConductorService conductor, IMediator mediator, CancellationToken ct) =>
+        group.MapPost("/chat", async (ConductorChatRequest request, ClaimsPrincipal user, IConductorService conductor, IMediator mediator, CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(request.Message))
                 return Results.BadRequest("Message cannot be empty.");
 
+            var userName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Player";
+            var language = user.FindFirst("Language")?.Value ?? "en";
+
             // Load prior history, then get AI reply
             var history = await mediator.Send(new GetChatHistoryQuery(request.UserId), ct);
-            var reply = await conductor.ChatAsync(history, request.Message, ct);
+            var reply = await conductor.ChatAsync(history, userName, language, request.Message, ct);
 
             // Persist both turns
             await mediator.Send(new SaveChatMessageCommand(request.UserId, request.Message, ChatMessageAuthor.User), ct);

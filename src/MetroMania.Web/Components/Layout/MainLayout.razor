@@ -50,7 +50,7 @@
                     <MudTooltip Text="@Loc["Logout"]">
                         <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="LogoutAsync" />
                     </MudTooltip>
-                    <MudTooltip Text="Conductor">
+                    <MudTooltip Text="@Loc["ConductorName"]">
                         <MudIconButton Icon="@Icons.Material.Filled.SmartToy"
                                        Color="@(_conductorOpen ? Color.Primary : Color.Inherit)"
                                        Edge="Edge.End"
@@ -122,8 +122,8 @@
                     <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3">
                         <MudIcon Icon="@Icons.Material.Filled.SmartToy" />
                         <MudStack Spacing="0" Class="ml-2">
-                            <MudText Typo="Typo.subtitle1" Style="font-weight: 700; line-height: 1.2;">Conductor</MudText>
-                            <MudText Typo="Typo.caption" Color="Color.Success" Style="line-height: 1.2;">● Online</MudText>
+                            <MudText Typo="Typo.subtitle1" Style="font-weight: 700; line-height: 1.2;">@Loc["ConductorName"]</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Success" Style="line-height: 1.2;">@Loc["ConductorOnline"]</MudText>
                         </MudStack>
                         <MudSpacer />
                         <MudIconButton Icon="@Icons.Material.Filled.Close"
@@ -156,8 +156,9 @@
                 <div class="conductor-input">
                     <MudDivider />
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="pa-2">
-                        <MudTextField @bind-Value="_conductorMessage"
-                                      Placeholder="Ask Conductor..."
+                        <MudTextField @ref="_conductorInputRef"
+                                      @bind-Value="_conductorMessage"
+                                      Placeholder="@Loc["AskConductor"]"
                                       Variant="Variant.Outlined"
                                       Margin="Margin.Dense"
                                       Class="flex-grow-1"
@@ -192,6 +193,7 @@
     private MudThemeProvider _themeProvider = null!;
     private bool _isDarkMode;
     private bool _drawerOpen = true;
+    private MudTextField<string>? _conductorInputRef;
     private bool _conductorOpen = false;
     private string _conductorMessage = string.Empty;
     private bool _conductorSending = false;
@@ -297,6 +299,9 @@
                 .ToList();
             StateHasChanged();
             await ScrollConductorToBottomAsync();
+            await Task.Delay(50); // allow drawer animation to complete
+            if (_conductorInputRef is not null)
+                await _conductorInputRef.FocusAsync();
         }
         catch { /* ignore — keep current messages */ }
     }
@@ -319,7 +324,7 @@
         }
         catch
         {
-            _conductorMessages.Add(new(false, "⚠️ Sorry, I'm having trouble connecting right now. Please try again."));
+            _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(Loc["ConductorError"])));
         }
         finally
         {
@@ -365,9 +370,10 @@
             await ApiClient.ChangeLanguageAsync(userId, language);
         }
 
-        // Set the culture cookie and reload — the middleware will apply the culture
-        await SetCultureCookieAsync(language);
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        // Re-sign the auth cookie with the updated Language claim so the JWT reflects it,
+        // and set the culture cookie — both handled by the server-side endpoint.
+        var returnUrl = Uri.EscapeDataString(Navigation.Uri);
+        Navigation.NavigateTo($"/api/auth/update-language?language={language}&returnUrl={returnUrl}", forceLoad: true);
     }
 
     private async Task SetCultureCookieAsync(string language)

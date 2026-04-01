@@ -137,6 +137,12 @@
   <!-- Language -->
   <data name="Language" xml:space="preserve"><value>Taal</value></data>
 
+  <!-- Conductor -->
+  <data name="ConductorName" xml:space="preserve"><value>Conducteur</value></data>
+  <data name="ConductorOnline" xml:space="preserve"><value>● Online</value></data>
+  <data name="AskConductor" xml:space="preserve"><value>Stel een vraag aan Conducteur...</value></data>
+  <data name="ConductorError" xml:space="preserve"><value>⚠️ Sorry, ik heb momenteel verbindingsproblemen. Probeer het opnieuw.</value></data>
+
   <!-- Level Editor -->
   <data name="Levels" xml:space="preserve"><value>Levels</value></data>
   <data name="LevelEditorSubtitle" xml:space="preserve"><value>Maak, bewerk, herorden en verwijder levels.</value></data>
