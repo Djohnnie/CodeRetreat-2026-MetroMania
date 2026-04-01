@@ -1,4 +1,5 @@
 using Azure.Data.Tables;
+using MetroMania.Infrastructure.BlobStorage;
 using MetroMania.Infrastructure.Orleans;
 using MetroMania.Infrastructure.ServiceBus;
 using MetroMania.Infrastructure.Sql;
@@ -12,6 +13,12 @@ var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING
     ?? builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("Set the SQL_CONNECTION_STRING environment variable or configure ConnectionStrings:Default.");
 builder.Services.AddInfrastructure(connectionString);
+
+// Blob Storage (renders)
+var blobStorageConnectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING")
+    ?? builder.Configuration.GetValue<string>("AZURE_STORAGE_CONNECTION_STRING")
+    ?? throw new InvalidOperationException("Set the AZURE_STORAGE_CONNECTION_STRING environment variable.");
+builder.Services.AddBlobStorage(blobStorageConnectionString);
 
 // Service Bus
 builder.Services.AddServiceBus();
