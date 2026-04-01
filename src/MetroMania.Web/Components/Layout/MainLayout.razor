@@ -12,6 +12,7 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<MudXProvider />
 
 <CascadingValue Value="_isDarkMode" Name="IsDarkMode">
 
@@ -48,6 +49,13 @@
                     </MudChip>
                     <MudTooltip Text="@Loc["Logout"]">
                         <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="LogoutAsync" />
+                    </MudTooltip>
+                    <MudTooltip Text="Conductor">
+                        <MudIconButton Icon="@Icons.Material.Filled.SmartToy"
+                                       Color="@(_conductorOpen ? Color.Primary : Color.Inherit)"
+                                       Edge="Edge.End"
+                                       OnClick="ToggleConductor"
+                                       Class="conductor-btn" />
                     </MudTooltip>
                 </Authorized>
                 <NotAuthorized>
@@ -103,6 +111,69 @@
             </MudNavMenu>
         </MudDrawer>
 
+        <MudDrawer @bind-Open="_conductorOpen"
+                   Anchor="Anchor.Right"
+                   Elevation="2"
+                   Variant="DrawerVariant.Temporary"
+                   Width="380px"
+                   Class="conductor-drawer">
+            <div class="conductor-drawer-inner">
+                <div class="conductor-drawer-header">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3">
+                        <MudIcon Icon="@Icons.Material.Filled.SmartToy" />
+                        <MudStack Spacing="0" Class="ml-2">
+                            <MudText Typo="Typo.subtitle1" Style="font-weight: 700; line-height: 1.2;">Conductor</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Success" Style="line-height: 1.2;">● Online</MudText>
+                        </MudStack>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                       Color="Color.Inherit"
+                                       Size="Size.Small"
+                                       OnClick="ToggleConductor" />
+                    </MudStack>
+                    <MudDivider />
+                </div>
+
+                <div class="conductor-messages">
+                    @foreach (var msg in _conductorMessages)
+                    {
+                        <MudXChat ChatPosition="@(msg.IsUser ? ChatBubblePosition.End : ChatBubblePosition.Start)"
+                                  Dense="true" Class="mb-2">
+                            <MudXChatBubble>@((MarkupString)msg.Html)</MudXChatBubble>
+                        </MudXChat>
+                    }
+                    @if (_conductorSending)
+                    {
+                        <MudXChat ChatPosition="ChatBubblePosition.Start" Dense="true" Class="mb-2">
+                            <MudXChatBubble>
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            </MudXChatBubble>
+                        </MudXChat>
+                    }
+                    <div @ref="_conductorScrollAnchor"></div>
+                </div>
+
+                <div class="conductor-input">
+                    <MudDivider />
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="pa-2">
+                        <MudTextField @bind-Value="_conductorMessage"
+                                      Placeholder="Ask Conductor..."
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Class="flex-grow-1"
+                                      Immediate="true"
+                                      Lines="1"
+                                      Disabled="_conductorSending"
+                                      OnKeyDown="OnConductorInputKeyDown" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Send"
+                                       Color="Color.Primary"
+                                       OnClick="SendConductorMessageAsync"
+                                       Disabled="@(string.IsNullOrWhiteSpace(_conductorMessage) || _conductorSending)" />
+                    </MudStack>
+                </div>
+            </div>
+        </MudDrawer>
+
         <MudMainContent Class="pt-16 px-4">
             <MudContainer MaxWidth="MaxWidth.Large" Class="my-4 page-enter">
                 @Body
@@ -121,6 +192,15 @@
     private MudThemeProvider _themeProvider = null!;
     private bool _isDarkMode;
     private bool _drawerOpen = true;
+    private bool _conductorOpen = false;
+    private string _conductorMessage = string.Empty;
+    private bool _conductorSending = false;
+    private string _conductorConversationId = Guid.NewGuid().ToString();
+    private ElementReference _conductorScrollAnchor;
+    private List<ConductorMessage> _conductorMessages =
+    [
+        new(false, "👋 Hi! I'm <strong>Conductor</strong>, your metro network assistant. I can help you with game strategy, explain the rules, or review your bot code. What would you like to know?")
+    ];
     private string _currentLanguage = "en";
 
     private readonly MudTheme _theme = new()
@@ -198,6 +278,52 @@
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 
+    private void ToggleConductor() => _conductorOpen = !_conductorOpen;
+
+    private async Task SendConductorMessageAsync()
+    {
+        var text = _conductorMessage.Trim();
+        if (string.IsNullOrWhiteSpace(text) || _conductorSending) return;
+
+        _conductorMessage = string.Empty;
+        _conductorSending = true;
+        _conductorMessages.Add(new(true, System.Web.HttpUtility.HtmlEncode(text)));
+        StateHasChanged();
+        await ScrollConductorToBottomAsync();
+
+        try
+        {
+            var reply = await ApiClient.ChatWithConductorAsync(_conductorConversationId, text);
+            _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(reply)));
+        }
+        catch
+        {
+            _conductorMessages.Add(new(false, "⚠️ Sorry, I'm having trouble connecting right now. Please try again."));
+        }
+        finally
+        {
+            _conductorSending = false;
+            StateHasChanged();
+            await ScrollConductorToBottomAsync();
+        }
+    }
+
+    private async Task OnConductorInputKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+            await SendConductorMessageAsync();
+    }
+
+    private async Task ScrollConductorToBottomAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("eval",
+                "document.querySelector('.conductor-messages')?.lastElementChild?.scrollIntoView({behavior:'smooth'})");
+        }
+        catch { /* ignore JS interop errors during prerender */ }
+    }
+
     private async Task ToggleTheme()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -234,4 +360,6 @@
     {
         Navigation.NavigateTo("/api/auth/logout", forceLoad: true);
     }
+
+    private sealed record ConductorMessage(bool IsUser, string Html);
 }

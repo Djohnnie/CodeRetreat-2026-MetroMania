@@ -213,8 +213,27 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         SetAuthHeader();
         return (await httpClient.GetFromJsonAsync<List<LeaderboardEntryDto>>("/api/leaderboard", JsonOptions))!;
     }
+
+    // ── Conductor ─────────────────────────────────────────────────
+
+    public async Task<string> ChatWithConductorAsync(string conversationId, string message, CancellationToken ct = default)
+    {
+        SetAuthHeader();
+        var response = await httpClient.PostAsJsonAsync("/api/conductor/chat", new { conversationId, message }, ct);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<ConductorChatResponse>(JsonOptions, ct))!.Reply;
+    }
+
+    public async Task ClearConductorConversationAsync(string conversationId, CancellationToken ct = default)
+    {
+        SetAuthHeader();
+        var response = await httpClient.DeleteAsync($"/api/conductor/chat/{conversationId}", ct);
+        response.EnsureSuccessStatusCode();
+    }
 }
 
 public record SubmitCodeResponse(bool Success, IReadOnlyList<string>? ValidationErrors, SubmissionDto? Submission);
 
 record ValidationErrorResponse(IReadOnlyList<string>? Errors);
+
+record ConductorChatResponse(string Reply);

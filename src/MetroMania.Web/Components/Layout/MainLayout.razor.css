@@ -65,3 +65,39 @@
     transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
                 transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Conductor drawer layout */
+::deep .conductor-drawer .mud-drawer-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.conductor-drawer-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.conductor-drawer-header {
+    flex-shrink: 0;
+}
+
+.conductor-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.conductor-input {
+    flex-shrink: 0;
+}
+
+/* Conductor button pulse when open */
+::deep .conductor-btn {
+    transition: color 0.2s ease;
+}

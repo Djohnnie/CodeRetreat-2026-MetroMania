@@ -1,6 +1,7 @@
 using Azure.Data.Tables;
 using MetroMania.Api.Endpoints;
 using MetroMania.Api.Hubs;
+using MetroMania.Infrastructure.AzureOpenAI;
 using MetroMania.Infrastructure.BlobStorage;
 using MetroMania.Infrastructure.Orleans;
 using MetroMania.Infrastructure.ServiceBus;
@@ -52,6 +53,9 @@ builder.Services.AddOrleansClient();
 
 // Service Bus
 builder.Services.AddServiceBus();
+
+// Azure OpenAI — Conductor chatbot agent
+builder.Services.AddAzureOpenAIConductor(builder.Configuration);
 
 // MediatR
 builder.Services.AddMediatR(cfg =>
@@ -115,5 +119,6 @@ app.MapSubmissionEndpoints();
 app.MapLeaderboardEndpoints();
 app.MapThemeEndpoints();
 app.MapLanguageEndpoints();
+app.MapConductorEndpoints();
 
 app.Run();
