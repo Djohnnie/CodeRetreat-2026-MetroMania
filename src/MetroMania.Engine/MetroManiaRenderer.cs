@@ -573,7 +573,7 @@ public class MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath
     /// </summary>
     private static void DrawPassengersInVehicle(SKCanvas canvas, IReadOnlyList<Passenger> passengers)
     {
-        const float padding = 2.5f;
+        const float padding = 2.0f;
 
         float innerW = TrainLength - padding * 2;
         float innerH = TrainHeight - padding * 2;
