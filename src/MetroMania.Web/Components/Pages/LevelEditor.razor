@@ -5,10 +5,15 @@
 @using MetroMania.Domain.Enums
 @using MetroMania.Web.Services
 @using MudBlazor.Utilities
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Microsoft.AspNetCore.Components.Forms
 @inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
 @inject IStringLocalizer<Localization> Loc
 @inject IWebHostEnvironment Env
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
 @implements IDisposable
 
 <PageTitle>MetroMania - @Loc["EditGrid"]</PageTitle>
@@ -19,10 +24,29 @@
 }
 else
 {
-    <MudButton Href="/admin/levels" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack"
-               Color="Color.Primary" Class="mb-4">
-        @Loc["BackToLevels"]
-    </MudButton>
+    <div class="d-flex align-center justify-space-between mb-4">
+        <MudButton Href="/admin/levels" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack"
+                   Color="Color.Primary">
+            @Loc["BackToLevels"]
+        </MudButton>
+        <div class="d-flex gap-2">
+            <MudTooltip Text="@Loc["ExportLevelDataTooltip"]">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.FileDownload"
+                           OnClick="ExportLevelData">
+                    @Loc["ExportLevelData"]
+                </MudButton>
+            </MudTooltip>
+            <MudTooltip Text="@Loc["ImportLevelDataTooltip"]">
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.FileUpload"
+                           OnClick="TriggerImportFileDialog">
+                    @Loc["ImportLevelData"]
+                </MudButton>
+            </MudTooltip>
+            <InputFile id="levelDataFileInput" OnChange="HandleImport" accept=".json" style="display:none;" />
+        </div>
+    </div>
 
     <div class="d-flex align-center mb-1">
         <MudIcon Icon="@Icons.Material.Filled.GridOn" Class="mr-2" Color="Color.Primary" />
@@ -533,6 +557,72 @@ else
         finally
         {
             _saveLock.Release();
+        }
+    }
+
+    // --- Import / Export ---
+
+    private static readonly JsonSerializerOptions ExportJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter() },
+        WriteIndented = true
+    };
+
+    private static readonly JsonSerializerOptions ImportJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
+    private async Task ExportLevelData()
+    {
+        var data = new LevelData
+        {
+            BackgroundColor = GetBackgroundHex(),
+            WaterColor = GetWaterHex(),
+            Seed = _seed,
+            VehicleCapacity = _vehicleCapacity,
+            MaxDays = _maxDays,
+            LocalizedContent = _level!.LocalizedContent,
+            Stations = _stations,
+            WaterTiles = _waterTiles,
+            WeeklyGiftOverrides = _weeklyGiftOverrides
+        };
+
+        var json = JsonSerializer.Serialize(data, ExportJsonOptions);
+        var safeTitle = string.Concat((_level.GetLocalizedTitle() ?? "level")
+            .ToLowerInvariant()
+            .Select(c => char.IsLetterOrDigit(c) ? c : '-'));
+        var filename = $"{safeTitle}-leveldata.json";
+        await JS.InvokeVoidAsync("downloadFile", filename, json, "application/json");
+    }
+
+    private async Task TriggerImportFileDialog() =>
+        await JS.InvokeVoidAsync("clickElementById", "levelDataFileInput");
+
+    private async Task HandleImport(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file is null) return;
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 1_048_576);
+            var levelData = await JsonSerializer.DeserializeAsync<LevelData>(stream, ImportJsonOptions);
+            if (levelData is null)
+            {
+                Snackbar.Add(Loc["ImportFailed"], Severity.Error);
+                return;
+            }
+
+            await ApiClient.UpdateGridDataAsync(LevelId, levelData);
+            Snackbar.Add(Loc["ImportSuccess"], Severity.Success);
+            Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        }
+        catch
+        {
+            Snackbar.Add(Loc["ImportFailed"], Severity.Error);
         }
     }
 

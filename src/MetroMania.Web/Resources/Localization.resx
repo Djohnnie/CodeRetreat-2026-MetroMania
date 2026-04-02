@@ -219,6 +219,12 @@
   <data name="Week" xml:space="preserve"><value>Week</value></data>
   <data name="ResourceType" xml:space="preserve"><value>Resource Type</value></data>
   <data name="AddWeek" xml:space="preserve"><value>Add Week</value></data>
+  <data name="ExportLevelData" xml:space="preserve"><value>Export JSON</value></data>
+  <data name="ExportLevelDataTooltip" xml:space="preserve"><value>Download level data as JSON file</value></data>
+  <data name="ImportLevelData" xml:space="preserve"><value>Import JSON</value></data>
+  <data name="ImportLevelDataTooltip" xml:space="preserve"><value>Replace level data from a JSON file</value></data>
+  <data name="ImportFailed" xml:space="preserve"><value>Import failed. Make sure the file is a valid level data JSON.</value></data>
+  <data name="ImportSuccess" xml:space="preserve"><value>Level data imported successfully.</value></data>
   <data name="Line" xml:space="preserve"><value>Line</value></data>
   <data name="Train" xml:space="preserve"><value>Train</value></data>
   <data name="Wagon" xml:space="preserve"><value>Wagon</value></data>
