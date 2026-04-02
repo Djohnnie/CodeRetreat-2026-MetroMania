@@ -40,15 +40,36 @@
                       Required="true" RequiredError="@Loc["TitleRequired"]" Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
         <MudTextField @bind-Value="_editDescriptionEn" Label="@Loc["DescriptionEN"]" Variant="Variant.Outlined"
-                      Lines="2" Class="mb-4"
+                      Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
+
+        <!-- Translate button -->
+        <div class="d-flex align-center mb-4" style="gap: 12px;">
+            <div style="flex: 1; height: 1px; background: var(--mud-palette-lines-default);"></div>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Translate"
+                       OnClick="TranslateFields"
+                       Disabled="@(_translating || string.IsNullOrWhiteSpace(_editTitleEn))"
+                       Style="text-transform: none; white-space: nowrap; flex-shrink: 0;">
+                @if (_translating)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" />
+                    @Loc["Translating"]
+                }
+                else
+                {
+                    @Loc["TranslateOtherLanguages"]
+                }
+            </MudButton>
+            <div style="flex: 1; height: 1px; background: var(--mud-palette-lines-default);"></div>
+        </div>
 
         <!-- Dutch -->
         <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">🇳🇱 @Loc["Dutch"]</MudText>
         <MudTextField @bind-Value="_editTitleNl" Label="@Loc["TitleNL"]" Variant="Variant.Outlined" Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
         <MudTextField @bind-Value="_editDescriptionNl" Label="@Loc["DescriptionNL"]" Variant="Variant.Outlined"
-                      Lines="2" Class="mb-4"
+                      Class="mb-4"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
 
         <!-- Arabic -->
@@ -56,7 +77,7 @@
         <MudTextField @bind-Value="_editTitleAr" Label="@Loc["TitleAR"]" Variant="Variant.Outlined" Class="mb-3"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
         <MudTextField @bind-Value="_editDescriptionAr" Label="@Loc["DescriptionAR"]" Variant="Variant.Outlined"
-                      Lines="2" Class="mb-4"
+                      Class="mb-4"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
         <div class="d-flex gap-3 mb-4">
             <MudNumericField @bind-Value="_editGridWidth" Label="@Loc["GridWidth"]" Variant="Variant.Outlined"
@@ -165,6 +186,7 @@ else
 
     private bool _editing;
     private bool _saving;
+    private bool _translating;
     private Guid? _editId;
     private string _editTitleEn = string.Empty;
     private string _editDescriptionEn = string.Empty;
@@ -178,6 +200,28 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadLevels();
+    }
+
+    private async Task TranslateFields()
+    {
+        if (string.IsNullOrWhiteSpace(_editTitleEn)) return;
+        _translating = true;
+
+        var result = await ApiClient.TranslateLevelAsync(_editTitleEn.Trim(), _editDescriptionEn.Trim());
+        if (result is not null)
+        {
+            _editTitleNl = result.TitleNl;
+            _editDescriptionNl = result.DescriptionNl;
+            _editTitleAr = result.TitleAr;
+            _editDescriptionAr = result.DescriptionAr;
+        }
+        else
+        {
+            _message = Loc["TranslationFailed"].Value;
+            _messageSeverity = Severity.Error;
+        }
+
+        _translating = false;
     }
 
     private async Task LoadLevels()

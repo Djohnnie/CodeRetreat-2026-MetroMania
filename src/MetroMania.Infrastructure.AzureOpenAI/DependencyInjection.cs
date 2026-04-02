@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddSingleton(new ConductorInstructions(template));
 
         services.AddSingleton<IConductorService, ConductorService>();
+        services.AddSingleton<ITranslationService, TranslationService>();
 
         return services;
     }

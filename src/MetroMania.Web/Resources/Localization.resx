@@ -157,6 +157,9 @@
   <data name="DescriptionEN" xml:space="preserve"><value>Description (English)</value></data>
   <data name="DescriptionNL" xml:space="preserve"><value>Description (Dutch)</value></data>
   <data name="DescriptionAR" xml:space="preserve"><value>Description (Arabic)</value></data>
+  <data name="TranslateOtherLanguages" xml:space="preserve"><value>Auto-translate to Dutch &amp; Arabic</value></data>
+  <data name="Translating" xml:space="preserve"><value>Translating…</value></data>
+  <data name="TranslationFailed" xml:space="preserve"><value>Translation failed. Please try again.</value></data>
   <data name="Order" xml:space="preserve"><value>Order</value></data>
   <data name="AddLevel" xml:space="preserve"><value>Add Level</value></data>
   <data name="EditLevel" xml:space="preserve"><value>Edit Level</value></data>

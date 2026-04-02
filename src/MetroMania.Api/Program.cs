@@ -127,5 +127,6 @@ app.MapLeaderboardEndpoints();
 app.MapThemeEndpoints();
 app.MapLanguageEndpoints();
 app.MapConductorEndpoints();
+app.MapTranslationEndpoints();
 
 app.Run();

@@ -155,6 +155,9 @@
   <data name="DescriptionEN" xml:space="preserve"><value>الوصف (بالإنجليزية)</value></data>
   <data name="DescriptionNL" xml:space="preserve"><value>الوصف (بالهولندية)</value></data>
   <data name="DescriptionAR" xml:space="preserve"><value>الوصف (بالعربية)</value></data>
+  <data name="TranslateOtherLanguages" xml:space="preserve"><value>ترجمة تلقائية إلى الهولندية والعربية</value></data>
+  <data name="Translating" xml:space="preserve"><value>جارٍ الترجمة…</value></data>
+  <data name="TranslationFailed" xml:space="preserve"><value>فشلت الترجمة. يرجى المحاولة مرة أخرى.</value></data>
   <data name="Order" xml:space="preserve"><value>الترتيب</value></data>
   <data name="AddLevel" xml:space="preserve"><value>إضافة مستوى</value></data>
   <data name="EditLevel" xml:space="preserve"><value>تعديل المستوى</value></data>

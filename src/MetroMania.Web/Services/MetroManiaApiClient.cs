@@ -214,6 +214,16 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return (await httpClient.GetFromJsonAsync<List<LeaderboardEntryDto>>("/api/leaderboard", JsonOptions))!;
     }
 
+    // ── Translation ───────────────────────────────────────────────
+
+    public async Task<LevelTranslationApiResponse?> TranslateLevelAsync(string titleEn, string descriptionEn, CancellationToken ct = default)
+    {
+        SetAuthHeader();
+        var response = await httpClient.PostAsJsonAsync("/api/translate/level", new { titleEn, descriptionEn }, ct);
+        if (!response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadFromJsonAsync<LevelTranslationApiResponse>(JsonOptions, ct);
+    }
+
     // ── Conductor ─────────────────────────────────────────────────
 
     public async Task<List<ChatMessageDto>> GetChatHistoryAsync(Guid userId, CancellationToken ct = default)
@@ -237,3 +247,5 @@ public record SubmitCodeResponse(bool Success, IReadOnlyList<string>? Validation
 record ValidationErrorResponse(IReadOnlyList<string>? Errors);
 
 record ConductorChatApiResponse(string Reply, bool HistoryCleared);
+
+public record LevelTranslationApiResponse(string TitleNl, string DescriptionNl, string TitleAr, string DescriptionAr);
