@@ -22,6 +22,7 @@ public interface IConductorService
         string userName,
         string language,
         string userMessage,
+        IReadOnlyList<string> levelTitles,
         Func<CancellationToken, Task> onClearHistory,
         Func<int?, CancellationToken, Task<string?>> onGetLatestCode,
         Func<string, CancellationToken, Task<string?>> onGetLevelData,

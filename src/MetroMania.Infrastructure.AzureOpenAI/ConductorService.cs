@@ -12,6 +12,7 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         string userName,
         string language,
         string userMessage,
+        IReadOnlyList<string> levelTitles,
         Func<CancellationToken, Task> onClearHistory,
         Func<int?, CancellationToken, Task<string?>> onGetLatestCode,
         Func<string, CancellationToken, Task<string?>> onGetLevelData,
@@ -20,10 +21,15 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         var languageName = language switch { "nl" => "Dutch", "ar" => "Arabic", _ => "English" };
         var botName = language switch { "nl" => "Conducteur", "ar" => "القائد", _ => "Conductor" };
 
+        var levelList = levelTitles.Count > 0
+            ? string.Join(", ", levelTitles.Select(t => $"\"{t}\""))
+            : "(no levels available)";
+
         var systemPrompt = instructions.MarkdownTemplate
             .Replace("{botName}", botName)
             .Replace("{userName}", userName)
-            .Replace("{languageName}", languageName);
+            .Replace("{languageName}", languageName)
+            .Replace("{levelList}", levelList);
 
         var historyCleared = false;
 

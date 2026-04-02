@@ -57,8 +57,10 @@ public static class ConductorEndpoints
 
             // Load prior history, then get AI reply (tool may archive history during this call)
             var history = await mediator.Send(new GetChatHistoryQuery(request.UserId), ct);
+            var allLevels = await mediator.Send(new GetAllLevelsQuery(), ct);
+            var levelTitles = allLevels.Select(l => l.Title).ToList();
             var result = await conductor.ChatAsync(
-                history, userName, language, request.Message,
+                history, userName, language, request.Message, levelTitles,
                 onClearHistory: async (token) =>
                     await mediator.Send(new ArchiveChatHistoryCommand(request.UserId), token),
                 onGetLatestCode: async (version, token) =>
@@ -72,8 +74,7 @@ public static class ConductorEndpoints
                 },
                 onGetLevelData: async (title, token) =>
                 {
-                    var levels = await mediator.Send(new GetAllLevelsQuery(), token);
-                    var level = levels.FirstOrDefault(l =>
+                    var level = allLevels.FirstOrDefault(l =>
                         string.Equals(l.Title, title, StringComparison.OrdinalIgnoreCase));
                     if (level is null) return null;
                     return JsonSerializer.Serialize(level, ConductorSerializerOptions.LevelData);
