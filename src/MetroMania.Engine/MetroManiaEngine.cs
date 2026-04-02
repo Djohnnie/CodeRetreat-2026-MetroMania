@@ -524,7 +524,10 @@ public class MetroManiaEngine
                         int segLen = Distance(sFrom, sTo);
                         if (v.TileOffset >= segLen)
                         {
-                            stationId = line.StationIds[v.SegmentIndex + 1];
+                            // "to-side" position — only report as "at station" when going backward
+                            // (matches ProcessStationStops logic to keep StationId consistent).
+                            if (v.Direction == -1)
+                                stationId = line.StationIds[v.SegmentIndex + 1];
                             progress = 1m;
                         }
                         else
@@ -621,20 +624,31 @@ public class MetroManiaEngine
                     vehicle.Direction = -1;
                 }
             }
-            else if (vehicle.Direction == -1 && vehicle.TileOffset <= 0)
+            // When a backward train arrives exactly at TileOffset=0 on the first segment,
+            // immediately flip direction (mirrors end-terminal behavior: direction flips on arrival).
+            else if (vehicle.Direction == -1 && vehicle.TileOffset == 0 && vehicle.SegmentIndex == 0)
+            {
+                vehicle.Direction = 1;
+            }
+            // Transition to the previous segment when the train overshoots past TileOffset=0.
+            // TileOffset == 0 is NOT transitioned here (handled by the case above for seg 0,
+            // or left for ProcessStationStops when on a mid-line segment).
+            else if (vehicle.Direction == -1 && vehicle.TileOffset < 0)
             {
                 if (vehicle.SegmentIndex > 0)
                 {
                     vehicle.SegmentIndex--;
                     if (stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var prevFrom) &&
                         stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var prevTo))
-                        vehicle.TileOffset = Distance(prevFrom, prevTo);
+                        // Carry the overshoot into the previous segment: e.g., segLen=3, TileOffset=-1 → 3+(-1)=2.
+                        vehicle.TileOffset = Distance(prevFrom, prevTo) + vehicle.TileOffset;
                     else
                         vehicle.TileOffset = 0;
                 }
                 else
                 {
-                    vehicle.TileOffset = 0;
+                    // Reflect off the start terminal (overshoot): TileOffset=-1 → TileOffset=1, Direction=+1.
+                    vehicle.TileOffset = -vehicle.TileOffset;
                     vehicle.Direction = 1;
                 }
             }
@@ -669,7 +683,7 @@ public class MetroManiaEngine
             {
                 currentStationId = line.StationIds[vehicle.SegmentIndex];
             }
-            else
+            else if (vehicle.Direction == -1) // "to-side" only fires for backward-moving trains (after terminal reversal)
             {
                 if (stationById.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var fromEntry) &&
                     stationById.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var toEntry))
