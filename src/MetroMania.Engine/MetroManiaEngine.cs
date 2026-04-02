@@ -19,7 +19,8 @@ public class MetroManiaEngine
             Score = sim.TotalScore,
             TimeTaken = stopwatch.Elapsed,
             DaysSurvived = sim.Time.Day,
-            TotalPassengersSpawned = sim.TotalPassengersSpawned
+            TotalPassengersSpawned = sim.TotalPassengersSpawned,
+            DebugInfo = new GameDebugInfo(level.LevelData, sim.HourlySnapshots)
         };
     }
 
@@ -188,6 +189,7 @@ public class MetroManiaEngine
         int hoursElapsed = 0;
         var time = new GameTime(0, 0, default);
         bool gameOver = false;
+        var hourlySnapshots = new List<GameSnapshot>();
 
         while (!gameOver && (targetHours is null || hoursElapsed < targetHours) && (maxDays <= 0 || hoursElapsed < maxDays * 24))
         {
@@ -303,13 +305,14 @@ public class MetroManiaEngine
             MoveVehicles(vehicles, lines, activeStations);
 
             // Phase 3: OnHourTick — fire last, then process the player's action
-            var action = runner.OnHourTick(
-                CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
+            var tickSnapshot = CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity);
+            var action = runner.OnHourTick(tickSnapshot);
+            hourlySnapshots.Add(tickSnapshot);
             ProcessAction(action, resources, lines, vehicles);
             hoursElapsed++;
         }
 
-        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations, resources, lines, vehicles, vehicleCapacity);
+        return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations, resources, lines, vehicles, vehicleCapacity, hourlySnapshots);
     }
 
     private static void ProcessAction(PlayerAction action, List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles)
@@ -531,7 +534,8 @@ public class MetroManiaEngine
         List<ResourceState> Resources,
         List<LineState> Lines,
         List<VehicleState> Vehicles,
-        int VehicleCapacity);
+        int VehicleCapacity,
+        List<GameSnapshot> HourlySnapshots);
 
     // Tolerance for detecting terminal arrival: handles repeating decimals like 3×(1/3) = 0.999...
     private const decimal ProgressTolerance = 1e-10m;

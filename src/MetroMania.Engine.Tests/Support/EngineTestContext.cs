@@ -54,6 +54,9 @@ public class EngineTestContext
     // Passenger delivery tracking
     public int MaxPassengersOnboard { get; set; }
     public bool DwellTimeObserved { get; set; }
+
+    // Station visit tracking — records every station the vehicle stopped at
+    public HashSet<Guid> VehicleVisitedStations { get; } = [];
     public int? VehicleCapacityOverride { get; set; }
     public int? MaxDaysOverride { get; set; }
 
@@ -120,10 +123,13 @@ public class EngineTestContext
                 EventLog.Add("OnHourTick");
 
                 // Track max passengers onboard any vehicle
+                // Track which stations each vehicle has visited
                 foreach (var v in snapshot.Vehicles)
                 {
                     if (v.Passengers.Count > MaxPassengersOnboard)
                         MaxPassengersOnboard = v.Passengers.Count;
+                    if (v.StationId.HasValue)
+                        VehicleVisitedStations.Add(v.StationId.Value);
                 }
 
                 // Track if any vehicle is dwelling (at station but not moving)
@@ -191,5 +197,6 @@ public class EngineTestContext
         Snapshot = null;
         Result = null;
         WasCancelled = false;
+        VehicleVisitedStations.Clear();
     }
 }

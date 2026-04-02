@@ -4,6 +4,7 @@ using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using MediatR;
 using MetroMania.Application.DTOs;
+using MetroMania.Application.Interfaces;
 using MetroMania.Application.Levels.Queries;
 using MetroMania.Application.Messages;
 using MetroMania.Application.Submissions.Commands;
@@ -73,6 +74,7 @@ public class ServiceBusWorker(
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         var gameRunnerService = scope.ServiceProvider.GetRequiredService<IGameRunnerService>();
         var gameRendererService = scope.ServiceProvider.GetRequiredService<IGameRendererService>();
+        var debugBlobStorage = scope.ServiceProvider.GetRequiredService<IDebugBlobStorage>();
 
         var submission = await sender.Send(new GetSubmissionByIdQuery(submissionId), ct)
             ?? throw new InvalidOperationException($"Submission {submissionId} not found.");
@@ -135,6 +137,21 @@ public class ServiceBusWorker(
             await sender.Send(new SaveSubmissionScoresCommand(submissionId, scores), ct);
             saveScoresSw.Stop();
             logger.LogInformation("Saved scores for {LevelCount} levels in {ElapsedMs}ms", levels.Count, saveScoresSw.ElapsedMilliseconds);
+
+            // Save debug JSON for each level that ran successfully
+            var debugSw = Stopwatch.StartNew();
+            var debugSaveTasks = levels
+                .Zip(results, (level, result) => (level, result))
+                .Where(x => x.result.Success && x.result.DebugJson is not null)
+                .Select(x =>
+                {
+                    var blobName = $"{submissionId}-{x.level.Id}-debug.json";
+                    return debugBlobStorage.UploadAsync(blobName, x.result.DebugJson!, ct);
+                })
+                .ToList();
+            await Task.WhenAll(debugSaveTasks);
+            debugSw.Stop();
+            logger.LogInformation("Saved {Count} debug blobs in {ElapsedMs}ms", debugSaveTasks.Count, debugSw.ElapsedMilliseconds);
 
             // Save all renders from successful levels
             var allRenders = levels.Zip(renderResults, (level, renderResult) =>

@@ -61,4 +61,12 @@ public class VehicleMovementStepDefinitions(EngineTestContext ctx)
         Assert.Equal(ctx.StationIdsByLocation[new Location(x, y)], vehicle.StationId.Value);
         Assert.Equal(direction, vehicle.Direction);
     }
+
+    [Then(@"the vehicle should have visited station \((\d+),(\d+)\)")]
+    public void ThenTheVehicleShouldHaveVisitedStation(int x, int y)
+    {
+        if (!ctx.StationIdsByLocation.TryGetValue(new Location(x, y), out var stationId))
+            Assert.Fail($"Station at ({x},{y}) was never spawned during the simulation");
+        Assert.Contains(stationId, ctx.VehicleVisitedStations);
+    }
 }
