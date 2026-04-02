@@ -55,7 +55,14 @@ builder.Services.AddOrleansClient();
 builder.Services.AddServiceBus();
 
 // Azure OpenAI — Conductor chatbot agent
-builder.Services.AddAzureOpenAIConductor(builder.Configuration);
+// Instructions are loaded from conductor-instructions.md in the Web project's wwwroot.
+// Dev: two levels up from the API content root → src/MetroMania.Web/wwwroot
+// Docker: falls back to conductor-instructions.md next to the API binary
+var webWwwroot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "MetroMania.Web", "wwwroot"));
+var conductorInstructionsPath = Path.Combine(webWwwroot, "conductor-instructions.md");
+if (!File.Exists(conductorInstructionsPath))
+    conductorInstructionsPath = Path.Combine(builder.Environment.ContentRootPath, "conductor-instructions.md");
+builder.Services.AddAzureOpenAIConductor(builder.Configuration, conductorInstructionsPath);
 
 // MediatR
 builder.Services.AddMediatR(cfg =>

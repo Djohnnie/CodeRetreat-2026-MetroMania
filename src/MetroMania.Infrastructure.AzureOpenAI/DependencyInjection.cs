@@ -12,7 +12,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddAzureOpenAIConductor(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        string instructionsFilePath)
     {
         var endpoint = configuration["AZURE_OPENAI_ENDPOINT"]
             ?? throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT is not configured.");
@@ -26,8 +27,22 @@ public static class DependencyInjection
                 .GetChatClient(model)
                 .AsIChatClient());
 
+        var template = File.Exists(instructionsFilePath)
+            ? File.ReadAllText(instructionsFilePath)
+            : FallbackTemplate;
+        services.AddSingleton(new ConductorInstructions(template));
+
         services.AddSingleton<IConductorService, ConductorService>();
 
         return services;
     }
+
+    private const string FallbackTemplate =
+        """
+        You are {botName}, an AI assistant for the MetroMania coding challenge.
+        You are talking to {userName}. Always address them by their name.
+        Help players understand the game rules, write better C# bot code, and optimize
+        their metro strategies. Be concise, friendly, and encouraging.
+        IMPORTANT: Always respond in {languageName}. Never switch languages.
+        """;
 }
