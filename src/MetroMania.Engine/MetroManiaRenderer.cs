@@ -724,10 +724,11 @@ public class MetroManiaRenderer(MetroManiaEngine engine, string svgResourcesPath
         => (tx * TileSize + TileSize / 2f, ty * TileSize + TileSize / 2f);
 
     /// <summary>
-    /// Computes metro-style routing waypoints (tile coordinates) between two stations.
-    /// The path has an optional H/V start segment, a single 45° diagonal, and an optional H/V end segment.
-    /// The straight portion is split as evenly as possible between start and end.
-    /// Total path length equals the Chebyshev distance: max(|dx|, |dy|) tiles.
+    /// Computes the tile-coordinate waypoints for a metro line segment between two stations.
+    /// Routing rule: lines are drawn as straight horizontal or vertical segments; when a direct
+    /// H/V connection is not possible, a single 45-degree diagonal is inserted between the
+    /// horizontal/vertical parts (the straight remainder is split as evenly as possible).
+    /// Total waypoint-to-waypoint path length equals the Chebyshev distance: max(|dx|, |dy|) tiles.
     /// </summary>
     private static List<(float x, float y)> ComputeMetroPath(Location a, Location b)
     {

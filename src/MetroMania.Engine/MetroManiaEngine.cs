@@ -250,6 +250,8 @@ public class MetroManiaEngine
                 if ((totalHour - state.SpawnedAtHour) % activePhase.FrequencyInHours == 0
                     && totalHour > state.SpawnedAtHour)
                 {
+                    // Rule: passengers only spawn when at least one station of a different type
+                    // exists on the map — the destination need not be connected by a line yet.
                     var validDestTypes = activeStations.Values
                         .Select(s => s.Type)
                         .Where(t => t != state.Type)
@@ -315,13 +317,21 @@ public class MetroManiaEngine
         return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations, resources, lines, vehicles, vehicleCapacity, hourlySnapshots);
     }
 
+    /// <summary>
+    /// Applies the player's action to the simulation state.
+    /// Line creation and modification actions enforce the no-loop rule:
+    /// a station may not appear more than once on the same line.
+    /// </summary>
     private static void ProcessAction(PlayerAction action, List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles, Dictionary<Location, StationState> activeStations)
     {
         switch (action)
         {
             case CreateLine createLine:
                 var lineResource = resources.FirstOrDefault(r => r.Id == createLine.LineId && r.Type == ResourceType.Line && !r.InUse);
-                if (lineResource is not null && createLine.StationIds.Count >= 2)
+                // Rule: a line needs at least 2 stations and may not form a loop (no duplicate station IDs).
+                if (lineResource is not null
+                    && createLine.StationIds.Count >= 2
+                    && createLine.StationIds.Distinct().Count() == createLine.StationIds.Count)
                 {
                     lineResource.InUse = true;
                     var line = new LineState(lineResource.Id);
@@ -424,7 +434,11 @@ public class MetroManiaEngine
                 {
                     int fromIdx = lineToInsert.StationIds.IndexOf(insertStation.FromStationId);
                     int toIdx = lineToInsert.StationIds.IndexOf(insertStation.ToStationId);
-                    if (fromIdx >= 0 && toIdx >= 0 && Math.Abs(fromIdx - toIdx) == 1)
+                    // Rule: only insert between two adjacent existing stations, and the new station
+                    // must not already be on the line (would create a loop).
+                    if (fromIdx >= 0 && toIdx >= 0
+                        && Math.Abs(fromIdx - toIdx) == 1
+                        && !lineToInsert.StationIds.Contains(insertStation.NewStationId))
                     {
                         int insertIdx = Math.Max(fromIdx, toIdx);
                         lineToInsert.StationIds.Insert(insertIdx, insertStation.NewStationId);
@@ -557,6 +571,15 @@ public class MetroManiaEngine
         int VehicleCapacity,
         List<GameSnapshot> HourlySnapshots);
 
+    /// <summary>
+    /// Advances all vehicles by one tile along their line.
+    /// Rules:
+    ///  - Trains move at exactly 1 tile per hour.
+    ///  - Distance between two stations equals the Chebyshev tile count of the routed path.
+    ///  - Trains always traverse the FULL line before turning around.
+    ///  - Direction reverses only at the terminal stations (first or last on the line).
+    ///  - While DwellTicksRemaining > 0 (loading/unloading a passenger), the train does not move.
+    /// </summary>
     private static void MoveVehicles(
         List<VehicleState> vehicles, List<LineState> lines,
         Dictionary<Location, StationState> activeStations)
@@ -619,7 +642,14 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Handles passenger dropoff and pickup when vehicles are at stations.
+    /// Handles passenger drop-off and pick-up when vehicles are at stations.
+    /// Rules:
+    ///  - Trains drop off passengers before picking up new ones (drop-off takes priority).
+    ///  - Each pick-up or drop-off takes 1 hour; the train dwells at the station while this happens.
+    ///  - Pick-ups are processed in FIFO order (oldest-spawned passenger first).
+    ///  - A passenger is skipped if their destination is unreachable via connected lines,
+    ///    or if the fastest route is via the opposite direction or a different line.
+    ///  - A passenger is skipped if the train is already at full capacity.
     /// Returns the number of passengers successfully delivered (score increase).
     /// </summary>
     private static int ProcessStationStops(
@@ -657,7 +687,8 @@ public class MetroManiaEngine
             int totalCapacity = vehicleCapacity * (1 + vehicle.WagonIds.Count);
 
             // Phase 1: Drop off one passenger whose destination matches this station type.
-            // Drop-offs always take priority over pick-ups; only one action per tick.
+            // Drop-offs always take priority over pick-ups (rule: "trains drop off before picking up").
+            // Only one passenger action per tick — the train dwells for 1 hour per action.
             var toDropOff = vehicle.Passengers.FirstOrDefault(p => p.DestinationType == station.Type);
             if (toDropOff is not null)
             {
@@ -667,11 +698,12 @@ public class MetroManiaEngine
                 continue;
             }
 
-            // Phase 2: Pick up one eligible passenger (spawned before this hour, first-spawned first).
+            // Phase 2: Pick up one eligible passenger — FIFO order (oldest spawn first).
             if (vehicle.Passengers.Count < totalCapacity)
             {
                 var eligible = station.Passengers
                     .Where(p => p.SpawnedAtHour < currentHour)
+                    .OrderBy(p => p.SpawnedAtHour)
                     .ToList();
 
                 foreach (var passenger in eligible)
@@ -686,6 +718,8 @@ public class MetroManiaEngine
                         vehicle.Direction, vehicle.SegmentIndex, vehicle.TileOffset,
                         line, stationById, activeStations);
                     if (closestViaThisLine is null) continue;
+                    // Skip passenger if the network offers a strictly shorter route —
+                    // meaning the fastest path is via the opposite direction or a different line.
                     if (closestViaNetwork.Value.distance < closestViaThisLine.Value.distance) continue;
 
                     station.Passengers.Remove(passenger);
@@ -775,9 +809,11 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Finds the closest station of the given type that the vehicle will reach on its current line,
-    /// following its current direction (and future ping-pong path).
-    /// Returns the travel distance along the line to that station.
+    /// Finds the closest station of the given type that the vehicle will reach via its current line,
+    /// searching in its current direction first, then via the ping-pong return trip.
+    /// Returns the travel distance in tiles along the line to that station.
+    /// Used to implement the skip rule: if the network can reach the destination faster
+    /// (via the opposite direction or a different line), the passenger is skipped.
     /// </summary>
     private static (Guid stationId, int distance)? FindClosestStationOfTypeOnLine(
         Guid currentStationId, StationType targetType,
@@ -899,6 +935,12 @@ public class MetroManiaEngine
         return graph;
     }
 
+    /// <summary>
+    /// Returns the tile-movement distance between two grid locations.
+    /// Uses Chebyshev distance (max of |dx|, |dy|), which equals the number of tile steps
+    /// along the routed metro path (H/V + single 45° diagonal). Always a whole number.
+    /// Example: stations 2 tiles apart horizontally → distance 2 (not 3 — that would be 2 empty tiles).
+    /// </summary>
     private static int Distance(Location a, Location b)
         => Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
 
