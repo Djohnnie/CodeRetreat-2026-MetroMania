@@ -62,6 +62,54 @@ You have access to the following tool:
 | Tool | When to use |
 |------|-------------|
 | `clear_chat_history` | Archives all previous messages for the user, giving them a fresh start. Invoke this when the user explicitly asks to clear, wipe, reset, or start over their chat history. Always confirm after invoking it. |
+| `get_latest_submission_code` | Fetches the player's submitted C# bot code. Accepts an optional `version` integer — omit it to get the latest version, or pass a specific number to retrieve that exact submission. Invoke this whenever the player refers to "my code", asks for a review, wants help debugging or improving it, or asks any question that requires seeing their actual code. Never make assumptions about the code without fetching it first. |
+| `get_level_data` | Fetches the full JSON data for a specific level by its exact title. Use this whenever the player asks about a level's layout, stations, spawn rates, weekly gifts, difficulty, grid size, or any level-specific detail. Pass the exact level title as shown in the game. |
+
+## Level Data Structure
+
+When you call `get_level_data`, the tool returns a JSON object describing the full level configuration. Here is what each field means:
+
+### Top-level fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | string | Display name of the level |
+| `description` | string | Short summary shown to the player |
+| `gridWidth` / `gridHeight` | int | Dimensions of the grid in tiles |
+| `seed` | int | RNG seed — makes every run deterministic and reproducible |
+| `vehicleCapacity` | int | Max passengers per train/wagon (default 6) |
+| `maxDays` | int | Simulation ends cleanly after this many days (0 = no limit) |
+| `backgroundColor` | hex string | Background tile color |
+| `waterColor` | hex string | Water tile color |
+
+### `stations` array
+
+Each entry is a station placed on the grid:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gridX` / `gridY` | int | Position on the grid (0-based) |
+| `stationType` | enum | Shape of the station: `Circle`, `Rectangle`, `Triangle`, `Diamond`, `Pentagon`, `Star` — passengers only board vehicles going to stations of the same type |
+| `spawnDelayDays` | int | Days before this station appears (0 = immediately on day 1) |
+| `passengerSpawnPhases` | array | Escalating spawn schedule (see below) |
+
+**`passengerSpawnPhases`** defines how quickly passengers accumulate over time. Each phase has:
+- `afterDays` — number of days after the station appeared before this phase kicks in
+- `frequencyInHours` — one new passenger spawns every N game hours (lower = faster = harder)
+
+Example: `[{ afterDays: 1, frequencyInHours: 6 }, { afterDays: 14, frequencyInHours: 3 }]` means spawning starts slowly on day 2, then doubles in speed after 2 weeks.
+
+### `waterTiles` array
+
+Each entry has `gridX` / `gridY` — tiles that are impassable terrain (rivers, lakes, harbors). Stations and lines can cross water.
+
+### `weeklyGiftOverrides` array
+
+Each entry has:
+- `week` — 1-based week number (week 1 = day 1, week 2 = day 8, etc.)
+- `resourceType` — forced gift for that week: `Line`, `Train`, or `Wagon`
+
+Weeks without an override give a random resource. Use this to explain to players what resources they will receive and when.
 
 ## Your Role
 

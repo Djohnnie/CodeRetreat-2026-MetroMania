@@ -1,8 +1,13 @@
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using MediatR;
 using MetroMania.Application.Conductor.Commands;
 using MetroMania.Application.Conductor.Queries;
 using MetroMania.Application.Interfaces;
+using MetroMania.Application.Levels.Queries;
+using MetroMania.Application.Submissions.Queries;
+using MetroMania.Application.Users.Queries;
 using MetroMania.Domain.Enums;
 
 namespace MetroMania.Api.Endpoints;
@@ -19,7 +24,8 @@ public static class ConductorEndpoints
 
             if (history.Count == 0)
             {
-                var language = user.FindFirst("Language")?.Value ?? "en";
+                var dbUser = await mediator.Send(new GetUserByIdQuery(userId));
+                var language = dbUser?.Language ?? "en";
                 var welcome = language == "nl"
                     ? "👋 Hallo! Ik ben **Conducteur**, jouw metro netwerk assistent. " +
                       "Ik kan je helpen met spelstrategie, de regels uitleggen of je bot-code beoordelen. " +
@@ -40,7 +46,9 @@ public static class ConductorEndpoints
                 return Results.BadRequest("Message cannot be empty.");
 
             var userName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Player";
-            var language = user.FindFirst("Language")?.Value ?? "en";
+
+            var dbUser = await mediator.Send(new GetUserByIdQuery(request.UserId), ct);
+            var language = dbUser?.Language ?? "en";
 
             // Load prior history, then get AI reply (tool may archive history during this call)
             var history = await mediator.Send(new GetChatHistoryQuery(request.UserId), ct);
@@ -48,6 +56,23 @@ public static class ConductorEndpoints
                 history, userName, language, request.Message,
                 onClearHistory: async (token) =>
                     await mediator.Send(new ArchiveChatHistoryCommand(request.UserId), token),
+                onGetLatestCode: async (version, token) =>
+                {
+                    var submissions = await mediator.Send(new GetUserSubmissionsQuery(request.UserId), token);
+                    if (submissions.Count == 0) return null;
+                    var match = version.HasValue
+                        ? submissions.FirstOrDefault(s => s.Version == version.Value)
+                        : submissions.MaxBy(s => s.Version);
+                    return match?.Code;
+                },
+                onGetLevelData: async (title, token) =>
+                {
+                    var levels = await mediator.Send(new GetAllLevelsQuery(), token);
+                    var level = levels.FirstOrDefault(l =>
+                        string.Equals(l.Title, title, StringComparison.OrdinalIgnoreCase));
+                    if (level is null) return null;
+                    return JsonSerializer.Serialize(level, ConductorSerializerOptions.LevelData);
+                },
                 ct);
 
             // Persist both turns (after any archiving has already happened)
@@ -63,3 +88,13 @@ public static class ConductorEndpoints
 
 record ConductorChatRequest(Guid UserId, string Message);
 record ConductorChatResponse(string Reply, bool HistoryCleared);
+
+file static class ConductorSerializerOptions
+{
+    internal static readonly JsonSerializerOptions LevelData = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false,
+        Converters = { new JsonStringEnumConverter() }
+    };
+}
