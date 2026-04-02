@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#0d1f0d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ecca3"/>
+      <stop offset="50%" stop-color="#f9a825"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ecca3"/>
+      <stop offset="50%" stop-color="#f9a825"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="#0d1f0d"/>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="4" fill="url(#tb)"/>
+
+  <text x="640" y="66" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="52" font-weight="900" fill="url(#tg)" letter-spacing="-1">برمِج روبوتك</text>
+  <line x1="120" y1="80" x2="1160" y2="80" stroke="#4ecca3" stroke-width="1" opacity="0.15"/>
+
+  <!-- Column headers -->
+  <text x="310" y="102" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="14" fill="#4a7a4a" letter-spacing="2" font-weight="600">الاستدعاءات</text>
+  <text x="960" y="102" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="14" fill="#4a7a4a" letter-spacing="2" font-weight="600">الإجراءات</text>
+
+  <!-- Panel divider -->
+  <line x1="626" y1="92" x2="626" y2="625" stroke="#ffffff" stroke-width="1" opacity="0.05"/>
+
+  
+  <rect x="28" y="118" width="568" height="58" rx="10"
+    fill="#f9a825" fill-opacity="0.18" stroke="#f9a825" stroke-width="1.5" stroke-opacity="0.5"/>
+  <text x="48" y="153" font-family="monospace,Arial,sans-serif"
+    font-size="15" fill="#f9a825" font-weight="700">OnHourTick  ★  يُعيد PlayerAction</text>
+  <rect x="28" y="190" width="568" height="58" rx="10"
+    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
+  <text x="48" y="225" font-family="monospace,Arial,sans-serif"
+    font-size="14" fill="#8888aa" font-weight="400">OnDayStart</text>
+  <rect x="28" y="262" width="568" height="58" rx="10"
+    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
+  <text x="48" y="297" font-family="monospace,Arial,sans-serif"
+    font-size="14" fill="#8888aa" font-weight="400">OnWeeklyGift</text>
+  <rect x="28" y="334" width="568" height="58" rx="10"
+    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
+  <text x="48" y="369" font-family="monospace,Arial,sans-serif"
+    font-size="14" fill="#8888aa" font-weight="400">OnStationSpawned</text>
+  <rect x="28" y="406" width="568" height="58" rx="10"
+    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
+  <text x="48" y="441" font-family="monospace,Arial,sans-serif"
+    font-size="14" fill="#8888aa" font-weight="400">OnPassengerWaiting</text>
+  <rect x="28" y="478" width="568" height="58" rx="10"
+    fill="#e94560" fill-opacity="0.05" stroke="#e94560" stroke-width="0.8" stroke-opacity="0.5"/>
+  <text x="48" y="513" font-family="monospace,Arial,sans-serif"
+    font-size="14" fill="#e94560" font-weight="400">OnStationOverrun</text>
+  <rect x="28" y="550" width="568" height="58" rx="10"
+    fill="#e94560" fill-opacity="0.05" stroke="#e94560" stroke-width="0.8" stroke-opacity="0.5"/>
+  <text x="48" y="585" font-family="monospace,Arial,sans-serif"
+    font-size="14" fill="#e94560" font-weight="400">OnGameOver</text>
+  
+  <rect x="660" y="118" width="195" height="58" rx="10"
+    fill="#4ecca3" fill-opacity="0.10" stroke="#4ecca3" stroke-width="1.2"/>
+  <text x="757" y="153" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#4ecca3" font-weight="600">CreateLine</text>
+  <rect x="870" y="118" width="195" height="58" rx="10"
+    fill="#4ecca3" fill-opacity="0.10" stroke="#4ecca3" stroke-width="1.2"/>
+  <text x="967" y="153" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#4ecca3" font-weight="600">ExtendLine</text>
+  <rect x="1080" y="118" width="195" height="58" rx="10"
+    fill="#4ecca3" fill-opacity="0.10" stroke="#4ecca3" stroke-width="1.2"/>
+  <text x="1177" y="153" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#4ecca3" font-weight="600">InsertStationInLine</text>
+  <rect x="660" y="200" width="195" height="58" rx="10"
+    fill="#e94560" fill-opacity="0.10" stroke="#e94560" stroke-width="1.2"/>
+  <text x="757" y="235" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#e94560" font-weight="600">RemoveLine</text>
+  <rect x="870" y="200" width="195" height="58" rx="10"
+    fill="#60a5fa" fill-opacity="0.10" stroke="#60a5fa" stroke-width="1.2"/>
+  <text x="967" y="235" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#60a5fa" font-weight="600">AddVehicleToLine</text>
+  <rect x="1080" y="200" width="195" height="58" rx="10"
+    fill="#60a5fa" fill-opacity="0.10" stroke="#60a5fa" stroke-width="1.2"/>
+  <text x="1177" y="235" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#60a5fa" font-weight="600">RemoveVehicle</text>
+  <rect x="660" y="282" width="195" height="58" rx="10"
+    fill="#a78bfa" fill-opacity="0.10" stroke="#a78bfa" stroke-width="1.2"/>
+  <text x="757" y="317" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#a78bfa" font-weight="600">AddWagonToTrain</text>
+  <rect x="870" y="282" width="195" height="58" rx="10"
+    fill="#a78bfa" fill-opacity="0.10" stroke="#a78bfa" stroke-width="1.2"/>
+  <text x="967" y="317" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#a78bfa" font-weight="600">MoveWagonBetweenTrains</text>
+  <rect x="1080" y="282" width="195" height="58" rx="10"
+    fill="#8888aa" fill-opacity="0.10" stroke="#8888aa" stroke-width="1.2"/>
+  <text x="1177" y="317" text-anchor="middle" font-family="monospace,Arial,sans-serif"
+    font-size="13" fill="#8888aa" font-weight="600">NoAction</text>
+
+  <!-- Footer bar -->
+  <rect x="55" y="634" width="1170" height="52" rx="10"
+    fill="#f9a825" fill-opacity="0.08" stroke="#f9a825" stroke-width="1.2"/>
+  <text x="640" y="666" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c8a030">OnHourTick يُطلَق كل ساعة ويُعيد PlayerAction واحداً — حلقة التحكم الرئيسية</text>
+
+  <text x="640" y="706" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a3a1a">شريحة ٤ / ٤  —  روبوتك</text>
+</svg>

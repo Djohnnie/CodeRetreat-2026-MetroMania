@@ -63,7 +63,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName is "nl" ? "nl" : "en";
+        _lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
+        {
+            "nl" => "nl",
+            "ar" => "ar",
+            _ => "en"
+        };
 
         // Discover slides dynamically from wwwroot filenames
         _slides = Directory.GetFiles(Env.WebRootPath, "user-info-*.svg")

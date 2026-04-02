@@ -19,80 +19,80 @@
   <rect width="1280" height="4" fill="url(#tb)"/>
 
   <text x="640" y="68" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="52" font-weight="900" fill="url(#tg)" letter-spacing="-1">CONNECT THE CITY</text>
+    font-size="52" font-weight="900" fill="url(#tg)" letter-spacing="-1">اربط المدينة</text>
   <line x1="160" y1="82" x2="1120" y2="82" stroke="#4ecca3" stroke-width="1" opacity="0.18"/>
 
   <!-- Station type label -->
   <text x="225" y="102" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="14" fill="#5a7a9a" letter-spacing="2" font-weight="600">STATION TYPES</text>
+    font-size="14" fill="#5a7a9a" letter-spacing="2" font-weight="600">أنواع المحطات</text>
   
   <rect x="30" y="108" width="175" height="130" rx="12"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <circle cx="117" cy="168" r="28" fill="none" stroke="#e94560" stroke-width="4"/>
   <text x="117" y="212" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Circle</text>
+    font-size="15" fill="#c0c0d8">دائرة</text>
   <rect x="220" y="108" width="175" height="130" rx="12"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <rect x="294" y="146" width="56" height="44" fill="none" stroke="#60a5fa" stroke-width="4"/>
   <text x="322" y="212" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Rectangle</text>
+    font-size="15" fill="#c0c0d8">مستطيل</text>
   <rect x="30" y="260" width="175" height="130" rx="12"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <polygon points="117,290 141,332 93,332" fill="none" stroke="#4ecca3" stroke-width="4"/>
   <text x="117" y="362" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Triangle</text>
+    font-size="15" fill="#c0c0d8">مثلث</text>
   <rect x="220" y="260" width="175" height="130" rx="12"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <polygon points="322,290 350,318 322,346 294,318" fill="none" stroke="#f9a825" stroke-width="4"/>
   <text x="322" y="362" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Diamond</text>
+    font-size="15" fill="#c0c0d8">معين</text>
   <rect x="30" y="412" width="175" height="130" rx="12"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <polygon points="117.0,461.0 142.7,479.7 132.9,509.8 101.1,509.8 91.3,479.7" fill="none" stroke="#a78bfa" stroke-width="4"/>
   <text x="117" y="532" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Pentagon</text>
+    font-size="15" fill="#c0c0d8">خماسي</text>
   <rect x="220" y="412" width="175" height="130" rx="12"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <polygon points="322.0,461.0 327.5,478.5 345.4,474.5 333.0,488.0 345.4,501.5 327.5,497.5 322.0,515.0 316.5,497.5 298.6,501.5 311.0,488.0 298.6,474.5 316.5,478.5" fill="none" stroke="#f9a825" stroke-width="4"/>
   <text x="322" y="532" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Star</text>
+    font-size="15" fill="#c0c0d8">نجمة</text>
 
   <!-- Panel divider -->
   <line x1="418" y1="95" x2="418" y2="620" stroke="#ffffff" stroke-width="1" opacity="0.06"/>
 
   <!-- How it works label -->
   <text x="855" y="102" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="14" fill="#5a8a7a" letter-spacing="2" font-weight="600">HOW IT WORKS</text>
+    font-size="14" fill="#5a8a7a" letter-spacing="2" font-weight="600">كيف تعمل اللعبة</text>
 
   <!-- Step 1 -->
   <circle cx="448" cy="180" r="16" fill="#e94560" fill-opacity="0.20" stroke="#e94560" stroke-width="2"/>
   <text x="448" y="186" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#e94560" font-weight="700">1</text>
-  <text x="476" y="174" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Passengers spawn at stations</text>
-  <text x="476" y="196" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Each wants a matching destination shape</text>
+  <text x="476" y="174" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">ينشأ الركاب في المحطات</text>
+  <text x="476" y="196" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">كل راكب يريد الوصول لشكل وجهة مطابق</text>
 
   <!-- Step 2 -->
   <circle cx="448" cy="260" r="16" fill="#4ecca3" fill-opacity="0.20" stroke="#4ecca3" stroke-width="2"/>
   <text x="448" y="266" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#4ecca3" font-weight="700">2</text>
-  <text x="476" y="254" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Your lines connect stations</text>
-  <text x="476" y="276" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Trains carry passengers toward their goal</text>
+  <text x="476" y="254" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">خطوطك تربط المحطات</text>
+  <text x="476" y="276" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">تحمل القطارات الركاب نحو أهدافهم</text>
 
   <!-- Step 3 -->
   <circle cx="448" cy="340" r="16" fill="#f9a825" fill-opacity="0.20" stroke="#f9a825" stroke-width="2"/>
   <text x="448" y="346" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#f9a825" font-weight="700">3</text>
-  <text x="476" y="334" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Deliver — or fall behind</text>
-  <text x="476" y="356" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Undelivered passengers accumulate fast</text>
+  <text x="476" y="334" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">وصِّل — أو تأخّر</text>
+  <text x="476" y="356" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">الركاب غير الموصَّلين يتراكمون بسرعة</text>
 
   <!-- Warning box -->
   <rect x="430" y="392" width="820" height="76" rx="10"
     fill="#f9a825" fill-opacity="0.08" stroke="#f9a825" stroke-width="1.5"/>
-  <text x="458" y="420" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">&#x26A0;  OVERRUN WARNING</text>
-  <text x="458" y="448" font-family="Arial,sans-serif" font-size="14" fill="#b0a060">10+ passengers at a station triggers OnStationOverrun — act now!</text>
+  <text x="458" y="420" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">&#x26A0;  تحذير اكتظاظ</text>
+  <text x="458" y="448" font-family="Arial,sans-serif" font-size="14" fill="#b0a060">+10 ركاب في محطة يُشغّل OnStationOverrun — تصرف الآن!</text>
 
   <!-- Game over box -->
   <rect x="430" y="484" width="820" height="76" rx="10"
     fill="#e94560" fill-opacity="0.08" stroke="#e94560" stroke-width="1.5"/>
-  <text x="458" y="512" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">&#x2716;  GAME OVER</text>
-  <text x="458" y="540" font-family="Arial,sans-serif" font-size="14" fill="#a06070">20+ passengers at any station = immediate game over</text>
+  <text x="458" y="512" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">&#x2716;  انتهت اللعبة</text>
+  <text x="458" y="540" font-family="Arial,sans-serif" font-size="14" fill="#a06070">+20 راكب في أي محطة = انتهاء فوري للعبة</text>
 
-  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#2a4a5a">Slide 2 / 4  —  Stations &amp; Passengers</text>
+  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#2a4a5a">شريحة ٢ / ٤  —  المحطات والركاب</text>
 </svg>

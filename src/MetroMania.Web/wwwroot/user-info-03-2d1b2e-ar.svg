@@ -20,7 +20,7 @@
   <rect width="1280" height="4" fill="url(#tb)"/>
 
   <text x="640" y="66" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="50" font-weight="900" fill="url(#tg)" letter-spacing="-1">MANAGE YOUR RESOURCES</text>
+    font-size="50" font-weight="900" fill="url(#tg)" letter-spacing="-1">أدِر مواردك</text>
   <line x1="120" y1="80" x2="1160" y2="80" stroke="#a78bfa" stroke-width="1" opacity="0.18"/>
 
   <!-- Card 1: LINE (x=55, red) -->
@@ -33,11 +33,11 @@
   <!-- Train on line -->
   <rect x="205" y="185" width="40" height="20" rx="10" fill="#e94560" opacity="0.8"/>
   <text x="231" y="256" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="36" font-weight="900" fill="#e94560">LINE</text>
-  <text x="231" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Define a route</text>
-  <text x="231" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">between stations</text>
+    font-size="36" font-weight="900" fill="#e94560">خط</text>
+  <text x="231" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">يُعرِّف مساراً</text>
+  <text x="231" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">بين المحطات</text>
   <rect x="75" y="340" width="312" height="54" rx="27" fill="#e94560" fill-opacity="0.15" stroke="#e94560" stroke-width="1"/>
-  <text x="231" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e94560" font-weight="700">Start with: 1</text>
+  <text x="231" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e94560" font-weight="700">تبدأ بـ: 1</text>
 
   <!-- Card 2: TRAIN (x=464, blue) -->
   <rect x="464" y="105" width="352" height="310" rx="16"
@@ -50,11 +50,11 @@
   <circle cx="548" cy="207" r="8" fill="#60a5fa" fill-opacity="0.20" stroke="#60a5fa" stroke-width="2"/>
   <circle cx="638" cy="207" r="8" fill="#60a5fa" fill-opacity="0.20" stroke="#60a5fa" stroke-width="2"/>
   <text x="640" y="256" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="36" font-weight="900" fill="#60a5fa">TRAIN</text>
-  <text x="640" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Vehicle that shuttles</text>
-  <text x="640" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">along a line</text>
+    font-size="36" font-weight="900" fill="#60a5fa">قطار</text>
+  <text x="640" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">مركبة تسير</text>
+  <text x="640" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">ذهاباً وإياباً على خط</text>
   <rect x="484" y="340" width="312" height="54" rx="27" fill="#60a5fa" fill-opacity="0.15" stroke="#60a5fa" stroke-width="1"/>
-  <text x="640" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#60a5fa" font-weight="700">Start with: 1</text>
+  <text x="640" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#60a5fa" font-weight="700">تبدأ بـ: 1</text>
 
   <!-- Card 3: WAGON (x=873, teal) -->
   <rect x="873" y="105" width="352" height="310" rx="16"
@@ -64,27 +64,27 @@
   <rect x="990" y="182" width="40" height="18" rx="5" fill="#4ecca3" fill-opacity="0.18" stroke="#4ecca3" stroke-width="2" stroke-dasharray="3,2"/>
   <text x="972" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="#4ecca3" font-weight="700">+1</text>
   <text x="1049" y="256" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="36" font-weight="900" fill="#4ecca3">WAGON</text>
-  <text x="1049" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">+1 passenger capacity</text>
-  <text x="1049" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">when attached to train</text>
+    font-size="36" font-weight="900" fill="#4ecca3">عربة</text>
+  <text x="1049" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">+1 سعة ركاب</text>
+  <text x="1049" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">عند الإرفاق بالقطار</text>
   <rect x="893" y="340" width="312" height="54" rx="27" fill="#4ecca3" fill-opacity="0.15" stroke="#4ecca3" stroke-width="1"/>
-  <text x="1049" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#4ecca3" font-weight="700">Earned weekly</text>
+  <text x="1049" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#4ecca3" font-weight="700">مكافأة أسبوعية</text>
 
   <!-- Bottom info bar -->
   <rect x="55" y="448" width="360" height="64" rx="10"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <text x="235" y="472" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#a78bfa" font-weight="700" letter-spacing="1">START</text>
-  <text x="235" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Start: 1 Line + 1 Train</text>
+  <text x="235" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">البداية: خط 1 + قطار 1</text>
 
   <rect x="460" y="448" width="360" height="64" rx="10"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <text x="640" y="472" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#a78bfa" font-weight="700" letter-spacing="1">WEEKLY</text>
-  <text x="640" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Every Monday: free gift</text>
+  <text x="640" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">كل اثنين: هدية مجانية</text>
 
   <rect x="865" y="448" width="360" height="64" rx="10"
     fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
   <text x="1045" y="472" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#a78bfa" font-weight="700" letter-spacing="1">CAPACITY</text>
-  <text x="1045" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Default capacity: 6 / train</text>
+  <text x="1045" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">السعة الافتراضية: 6 / قطار</text>
 
-  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#4a2a4a">Slide 3 / 4  —  Resources &amp; Time</text>
+  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#4a2a4a">شريحة ٣ / ٤  —  الموارد والوقت</text>
 </svg>

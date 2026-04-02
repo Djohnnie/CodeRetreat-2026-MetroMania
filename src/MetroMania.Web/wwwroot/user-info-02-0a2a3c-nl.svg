@@ -1,55 +1,98 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
-  <rect width="1280" height="720" fill="#0a2a3c" />
+  <defs>
+    <radialGradient id="bg" cx="30%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#0a2a3c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ecca3"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4ecca3"/>
+      <stop offset="50%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="#0a2a3c"/>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="4" fill="url(#tb)"/>
 
-  <!-- Section title -->
-  <text x="640" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e94560">
-    Hoe Het Werkt
-  </text>
+  <text x="640" y="68" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="52" font-weight="900" fill="url(#tg)" letter-spacing="-1">VERBIND DE STAD</text>
+  <line x1="160" y1="82" x2="1120" y2="82" stroke="#4ecca3" stroke-width="1" opacity="0.18"/>
 
-  <!-- Circle station -->
-  <circle cx="220" cy="220" r="40" fill="none" stroke="#e94560" stroke-width="4" />
-  <text x="220" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#a0a0c0">
-    Cirkelstation
-  </text>
+  <!-- Station type label -->
+  <text x="225" y="102" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="14" fill="#5a7a9a" letter-spacing="2" font-weight="600">STATIONSTYPES</text>
+  
+  <rect x="30" y="108" width="175" height="130" rx="12"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <circle cx="117" cy="168" r="28" fill="none" stroke="#e94560" stroke-width="4"/>
+  <text x="117" y="212" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c0c0d8">Cirkel</text>
+  <rect x="220" y="108" width="175" height="130" rx="12"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <rect x="294" y="146" width="56" height="44" fill="none" stroke="#60a5fa" stroke-width="4"/>
+  <text x="322" y="212" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c0c0d8">Rechthoek</text>
+  <rect x="30" y="260" width="175" height="130" rx="12"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <polygon points="117,290 141,332 93,332" fill="none" stroke="#4ecca3" stroke-width="4"/>
+  <text x="117" y="362" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c0c0d8">Driehoek</text>
+  <rect x="220" y="260" width="175" height="130" rx="12"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <polygon points="322,290 350,318 322,346 294,318" fill="none" stroke="#f9a825" stroke-width="4"/>
+  <text x="322" y="362" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c0c0d8">Ruit</text>
+  <rect x="30" y="412" width="175" height="130" rx="12"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <polygon points="117.0,461.0 142.7,479.7 132.9,509.8 101.1,509.8 91.3,479.7" fill="none" stroke="#a78bfa" stroke-width="4"/>
+  <text x="117" y="532" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c0c0d8">Vijfhoek</text>
+  <rect x="220" y="412" width="175" height="130" rx="12"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <polygon points="322.0,461.0 327.5,478.5 345.4,474.5 333.0,488.0 345.4,501.5 327.5,497.5 322.0,515.0 316.5,497.5 298.6,501.5 311.0,488.0 298.6,474.5 316.5,478.5" fill="none" stroke="#f9a825" stroke-width="4"/>
+  <text x="322" y="532" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="15" fill="#c0c0d8">Ster</text>
 
-  <!-- Square station -->
-  <rect x="580" y="180" width="80" height="80" fill="none" stroke="#4ecca3" stroke-width="4" />
-  <text x="620" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#a0a0c0">
-    Vierkant Station
-  </text>
+  <!-- Panel divider -->
+  <line x1="418" y1="95" x2="418" y2="620" stroke="#ffffff" stroke-width="1" opacity="0.06"/>
 
-  <!-- Triangle station -->
-  <polygon points="1020,180 1060,260 980,260" fill="none" stroke="#f9a825" stroke-width="4" />
-  <text x="1020" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#a0a0c0">
-    Driehoekstation
-  </text>
+  <!-- How it works label -->
+  <text x="855" y="102" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="14" fill="#5a8a7a" letter-spacing="2" font-weight="600">HOE HET WERKT</text>
 
-  <!-- Metro lines connecting stations -->
-  <line x1="260" y1="220" x2="580" y2="220" stroke="#e94560" stroke-width="6" stroke-linecap="round" />
-  <line x1="660" y1="220" x2="980" y2="220" stroke="#4ecca3" stroke-width="6" stroke-linecap="round" />
+  <!-- Step 1 -->
+  <circle cx="448" cy="180" r="16" fill="#e94560" fill-opacity="0.20" stroke="#e94560" stroke-width="2"/>
+  <text x="448" y="186" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#e94560" font-weight="700">1</text>
+  <text x="476" y="174" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Reizigers spawnen bij stations</text>
+  <text x="476" y="196" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Elke reiziger wil een passend bestemmingstype</text>
 
-  <!-- Passengers -->
-  <circle cx="400" cy="205" r="10" fill="#e94560" />
-  <circle cx="430" cy="205" r="10" fill="#4ecca3" />
-  <circle cx="800" cy="205" r="10" fill="#f9a825" />
+  <!-- Step 2 -->
+  <circle cx="448" cy="260" r="16" fill="#4ecca3" fill-opacity="0.20" stroke="#4ecca3" stroke-width="2"/>
+  <text x="448" y="266" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#4ecca3" font-weight="700">2</text>
+  <text x="476" y="254" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Jouw lijnen verbinden stations</text>
+  <text x="476" y="276" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Treinen vervoeren reizigers naar hun doel</text>
 
-  <!-- Description box -->
-  <rect x="140" y="360" width="1000" height="200" rx="16" fill="#0f3460" opacity="0.5" />
-  <text x="640" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
-    Stations verschijnen als verschillende vormen op de kaart.
-  </text>
-  <text x="640" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
-    Passagiers verschijnen bij stations en willen een station
-  </text>
-  <text x="640" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
-    bereiken dat overeenkomt met hun type. Verbind stations
-  </text>
-  <text x="640" y="530" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#e0e0f0">
-    met metrolijnen om ze naar hun bestemming te vervoeren!
-  </text>
+  <!-- Step 3 -->
+  <circle cx="448" cy="340" r="16" fill="#f9a825" fill-opacity="0.20" stroke="#f9a825" stroke-width="2"/>
+  <text x="448" y="346" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#f9a825" font-weight="700">3</text>
+  <text x="476" y="334" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Bezorg — of raak achterop</text>
+  <text x="476" y="356" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Niet-bezorgde reizigers hopen snel op</text>
 
-  <!-- Slide indicator -->
-  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
-    Dia 2 van 3 — Spelmechanismen
-  </text>
+  <!-- Warning box -->
+  <rect x="430" y="392" width="820" height="76" rx="10"
+    fill="#f9a825" fill-opacity="0.08" stroke="#f9a825" stroke-width="1.5"/>
+  <text x="458" y="420" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">&#x26A0;  OVERBELASTINGSWAARSCHUWING</text>
+  <text x="458" y="448" font-family="Arial,sans-serif" font-size="14" fill="#b0a060">10+ reizigers op een station activeert OnStationOverrun!</text>
+
+  <!-- Game over box -->
+  <rect x="430" y="484" width="820" height="76" rx="10"
+    fill="#e94560" fill-opacity="0.08" stroke="#e94560" stroke-width="1.5"/>
+  <text x="458" y="512" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">&#x2716;  GAME OVER</text>
+  <text x="458" y="540" font-family="Arial,sans-serif" font-size="14" fill="#a06070">20+ reizigers op een station = onmiddellijk game over</text>
+
+  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#2a4a5a">Dia 2 / 4  —  Stations &amp; Reizigers</text>
 </svg>

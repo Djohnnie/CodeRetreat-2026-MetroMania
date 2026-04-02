@@ -1,64 +1,90 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
-  <rect width="1280" height="720" fill="#2d1b2e" />
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#2d1b2e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
+    </linearGradient>
+    <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="#2d1b2e"/>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="4" fill="url(#tb)"/>
 
-  <!-- Section title -->
-  <text x="640" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#e94560">
-    De Uitdaging
-  </text>
+  <text x="640" y="66" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="50" font-weight="900" fill="url(#tg)" letter-spacing="-1">BEHEER JE MIDDELEN</text>
+  <line x1="120" y1="80" x2="1160" y2="80" stroke="#a78bfa" stroke-width="1" opacity="0.18"/>
 
-  <!-- Bot icon placeholder -->
-  <rect x="540" y="130" width="200" height="140" rx="20" fill="none" stroke="#4ecca3" stroke-width="4" />
-  <circle cx="590" cy="190" r="16" fill="#4ecca3" />
-  <circle cx="690" cy="190" r="16" fill="#4ecca3" />
-  <rect x="580" y="230" width="120" height="10" rx="5" fill="#4ecca3" />
-  <text x="640" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#a0a0c0">
-    Jouw Bot
-  </text>
+  <!-- Card 1: LINE (x=55, red) -->
+  <rect x="55" y="105" width="352" height="310" rx="16"
+    fill="#e94560" fill-opacity="0.07" stroke="#e94560" stroke-width="1.5"/>
+  <!-- Line icon: two endpoint circles connected -->
+  <circle cx="175" cy="195" r="14" fill="#e94560" fill-opacity="0.25" stroke="#e94560" stroke-width="2.5"/>
+  <line x1="175" y1="195" x2="285" y2="195" stroke="#e94560" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="285" cy="195" r="14" fill="#e94560" fill-opacity="0.25" stroke="#e94560" stroke-width="2.5"/>
+  <!-- Train on line -->
+  <rect x="205" y="185" width="40" height="20" rx="10" fill="#e94560" opacity="0.8"/>
+  <text x="231" y="256" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="36" font-weight="900" fill="#e94560">LIJN</text>
+  <text x="231" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Definieer een route</text>
+  <text x="231" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">tussen stations</text>
+  <rect x="75" y="340" width="312" height="54" rx="27" fill="#e94560" fill-opacity="0.15" stroke="#e94560" stroke-width="1"/>
+  <text x="231" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e94560" font-weight="700">Begin met: 1</text>
 
-  <!-- Arrow down -->
-  <polygon points="640,320 660,350 650,350 650,380 630,380 630,350 620,350" fill="#e94560" />
+  <!-- Card 2: TRAIN (x=464, blue) -->
+  <rect x="464" y="105" width="352" height="310" rx="16"
+    fill="#60a5fa" fill-opacity="0.07" stroke="#60a5fa" stroke-width="1.5"/>
+  <!-- Train icon -->
+  <rect x="570" y="175" width="80" height="32" rx="8" fill="#60a5fa" fill-opacity="0.25" stroke="#60a5fa" stroke-width="2.5"/>
+  <rect x="575" y="169" width="12" height="6" rx="2" fill="#60a5fa" opacity="0.6"/>
+  <rect x="593" y="169" width="12" height="6" rx="2" fill="#60a5fa" opacity="0.6"/>
+  <line x1="536" y1="207" x2="650" y2="207" stroke="#60a5fa" stroke-width="3" opacity="0.5"/>
+  <circle cx="548" cy="207" r="8" fill="#60a5fa" fill-opacity="0.20" stroke="#60a5fa" stroke-width="2"/>
+  <circle cx="638" cy="207" r="8" fill="#60a5fa" fill-opacity="0.20" stroke="#60a5fa" stroke-width="2"/>
+  <text x="640" y="256" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="36" font-weight="900" fill="#60a5fa">TREIN</text>
+  <text x="640" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Voertuig dat pendelt</text>
+  <text x="640" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">over een lijn</text>
+  <rect x="484" y="340" width="312" height="54" rx="27" fill="#60a5fa" fill-opacity="0.15" stroke="#60a5fa" stroke-width="1"/>
+  <text x="640" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#60a5fa" font-weight="700">Begin met: 1</text>
 
-  <!-- Challenge items -->
-  <rect x="140" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
-  <text x="290" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#e94560">
-    ⚡ Verbinden
-  </text>
-  <text x="290" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
-    Teken metrolijnen tussen
-  </text>
-  <text x="290" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
-    stations op strategische wijze
-  </text>
+  <!-- Card 3: WAGON (x=873, teal) -->
+  <rect x="873" y="105" width="352" height="310" rx="16"
+    fill="#4ecca3" fill-opacity="0.07" stroke="#4ecca3" stroke-width="1.5"/>
+  <!-- Wagon icon: train + attached wagon -->
+  <rect x="930" y="178" width="56" height="26" rx="6" fill="#4ecca3" fill-opacity="0.25" stroke="#4ecca3" stroke-width="2.5"/>
+  <rect x="990" y="182" width="40" height="18" rx="5" fill="#4ecca3" fill-opacity="0.18" stroke="#4ecca3" stroke-width="2" stroke-dasharray="3,2"/>
+  <text x="972" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="#4ecca3" font-weight="700">+1</text>
+  <text x="1049" y="256" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="36" font-weight="900" fill="#4ecca3">WAGON</text>
+  <text x="1049" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">+1 reizigercapaciteit</text>
+  <text x="1049" y="316" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">bij koppeling aan trein</text>
+  <rect x="893" y="340" width="312" height="54" rx="27" fill="#4ecca3" fill-opacity="0.15" stroke="#4ecca3" stroke-width="1"/>
+  <text x="1049" y="373" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#4ecca3" font-weight="700">Wekelijks verdiend</text>
 
-  <rect x="490" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
-  <text x="640" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#4ecca3">
-    🚇 Vervoeren
-  </text>
-  <text x="640" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
-    Breng passagiers naar hun
-  </text>
-  <text x="640" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
-    bijpassende stationstype
-  </text>
+  <!-- Bottom info bar -->
+  <rect x="55" y="448" width="360" height="64" rx="10"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="235" y="472" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#a78bfa" font-weight="700" letter-spacing="1">START</text>
+  <text x="235" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Start: 1 Lijn + 1 Trein</text>
 
-  <rect x="840" y="400" width="300" height="120" rx="12" fill="#0f3460" opacity="0.6" />
-  <text x="990" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#f9a825">
-    🏆 Overleven
-  </text>
-  <text x="990" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
-    Houd het netwerk draaiende
-  </text>
-  <text x="990" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#a0a0c0">
-    terwijl de vraag groeit
-  </text>
+  <rect x="460" y="448" width="360" height="64" rx="10"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="640" y="472" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#a78bfa" font-weight="700" letter-spacing="1">WEEKLY</text>
+  <text x="640" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Elke maandag: gratis cadeau</text>
 
-  <!-- Bottom tagline -->
-  <text x="640" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#e0e0f0">
-    Kan jouw bot de stad in beweging houden?
-  </text>
+  <rect x="865" y="448" width="360" height="64" rx="10"
+    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="1045" y="472" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#a78bfa" font-weight="700" letter-spacing="1">CAPACITY</text>
+  <text x="1045" y="496" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0">Standaardcapaciteit: 6 / trein</text>
 
-  <!-- Slide indicator -->
-  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
-    Dia 3 van 3 — Jouw Missie
-  </text>
+  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#4a2a4a">Dia 3 / 4  —  Middelen &amp; Tijd</text>
 </svg>

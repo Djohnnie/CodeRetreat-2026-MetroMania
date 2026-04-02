@@ -1,30 +1,92 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
-  <rect width="1280" height="720" fill="#1a1a2e" />
+  <defs>
+    <radialGradient id="gl" cx="18%" cy="52%" r="52%">
+      <stop offset="0%" stop-color="#e94560" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#1a1a2e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gr" cx="82%" cy="48%" r="52%">
+      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#1a1a2e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="55%" stop-color="#f9a825"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
+    </linearGradient>
+    <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="50%" stop-color="#f9a825"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
+    </linearGradient>
+    <filter id="gf" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="#1a1a2e"/>
+  <rect width="1280" height="720" fill="url(#gl)"/>
+  <rect width="1280" height="720" fill="url(#gr)"/>
+  <rect width="1280" height="4" fill="url(#tb)"/>
 
-  <!-- Decorative metro lines -->
-  <line x1="0" y1="200" x2="1280" y2="200" stroke="#e94560" stroke-width="4" opacity="0.3" />
-  <line x1="0" y1="520" x2="1280" y2="520" stroke="#0f3460" stroke-width="4" opacity="0.3" />
-  <circle cx="300" cy="200" r="12" fill="#e94560" opacity="0.5" />
-  <circle cx="640" cy="200" r="12" fill="#e94560" opacity="0.5" />
-  <circle cx="980" cy="200" r="12" fill="#e94560" opacity="0.5" />
+  <!-- Metro network art (left panel 0-640) -->
+  <polyline points="40,230 170,230 300,350 460,350 575,230 630,230"
+    stroke="#e94560" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.80"/>
+  <polyline points="40,450 145,450 250,535 400,535 510,450 630,450"
+    stroke="#4ecca3" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.80"/>
+  <line x1="300" y1="350" x2="250" y2="535" stroke="#f9a825" stroke-width="5" stroke-linecap="round" opacity="0.80"/>
+  <line x1="460" y1="350" x2="400" y2="535" stroke="#f9a825" stroke-width="5" stroke-linecap="round" opacity="0.80"/>
 
-  <!-- Title -->
-  <text x="640" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#e94560">
-    Metro Mania
-  </text>
+  <!-- Stations: red line -->
+  <circle cx="170" cy="230" r="13" fill="#1a1a2e" stroke="#e94560" stroke-width="3" filter="url(#gf)"/>
+  <rect x="287" y="337" width="26" height="26" fill="#1a1a2e" stroke="#f9a825" stroke-width="3" filter="url(#gf)"/>
+  <circle cx="460" cy="350" r="13" fill="#1a1a2e" stroke="#e94560" stroke-width="3" filter="url(#gf)"/>
+  <polygon points="575,216 590,244 560,244" fill="#1a1a2e" stroke="#e94560" stroke-width="3" filter="url(#gf)"/>
 
-  <!-- Subtitle -->
-  <text x="640" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#a0a0c0">
-    Bouw je bot. Verbind de stad. Houd passagiers in beweging.
-  </text>
+  <!-- Stations: teal line -->
+  <polygon points="145,436 159,450 145,464 131,450" fill="#1a1a2e" stroke="#4ecca3" stroke-width="3" filter="url(#gf)"/>
+  <circle cx="250" cy="535" r="13" fill="#1a1a2e" stroke="#4ecca3" stroke-width="3" filter="url(#gf)"/>
+  <polygon points="400,521 414,535 400,549 386,535" fill="#1a1a2e" stroke="#f9a825" stroke-width="3" filter="url(#gf)"/>
+  <polygon points="510,436 524,464 496,464" fill="#1a1a2e" stroke="#4ecca3" stroke-width="3" filter="url(#gf)"/>
 
-  <!-- Slide indicator -->
-  <text x="640" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#555580">
-    Dia 1 van 3 — Introductie
-  </text>
+  <!-- Train cars -->
+  <rect x="196" y="221" width="48" height="18" rx="9" fill="#e94560" opacity="0.95"/>
+  <circle cx="207" cy="230" r="4" fill="#ff8888" opacity="0.7"/>
+  <rect x="295" y="441" width="48" height="18" rx="9" fill="#4ecca3" opacity="0.95"/>
+  <circle cx="306" cy="450" r="4" fill="#aafff0" opacity="0.7"/>
 
-  <!-- Decorative station shapes -->
-  <circle cx="440" cy="480" r="24" fill="none" stroke="#e94560" stroke-width="3" />
-  <rect x="606" y="456" width="48" height="48" fill="none" stroke="#0f3460" stroke-width="3" />
-  <polygon points="840,456 864,504 816,504" fill="none" stroke="#e94560" stroke-width="3" />
+  <!-- Passenger dots -->
+  <circle cx="158" cy="213" r="6" fill="#e0e0f0" opacity="0.55"/>
+  <circle cx="168" cy="208" r="6" fill="#e0e0f0" opacity="0.55"/>
+  <circle cx="238" cy="517" r="6" fill="#e0e0f0" opacity="0.55"/>
+  <circle cx="249" cy="512" r="6" fill="#e0e0f0" opacity="0.55"/>
+  <circle cx="389" cy="517" r="6" fill="#e0e0f0" opacity="0.55"/>
+
+  <!-- Panel divider -->
+  <line x1="658" y1="30" x2="658" y2="690" stroke="#ffffff" stroke-width="1" opacity="0.05"/>
+
+  <!-- Right panel: Title -->
+  <text x="964" y="258" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="96" font-weight="900" fill="url(#tg)" letter-spacing="-2">METRO</text>
+  <text x="964" y="362" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+    font-size="96" font-weight="900" fill="url(#tg)" letter-spacing="-2">MANIA</text>
+
+  <line x1="700" y1="384" x2="1228" y2="384" stroke="#e94560" stroke-width="1" opacity="0.30"/>
+
+  <text x="964" y="420" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="17" fill="#7878a0" letter-spacing="3" font-weight="600">EEN C# PROGRAMMEERUITDAGING</text>
+  <text x="964" y="462" text-anchor="middle" font-family="Arial,sans-serif"
+    font-size="21" fill="#c0c0d8">Bouw een bot. Verbind stations. Bezorg reizigers.</text>
+
+  <!-- Stat pills -->
+  <rect x="670" y="496" width="158" height="46" rx="23" fill="#e94560" fill-opacity="0.14" stroke="#e94560" stroke-width="1.5"/>
+  <text x="749" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">6 VORMEN</text>
+
+  <rect x="843" y="496" width="188" height="46" rx="23" fill="#4ecca3" fill-opacity="0.14" stroke="#4ecca3" stroke-width="1.5"/>
+  <text x="937" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#4ecca3" font-weight="700">3 MIDDELEN</text>
+
+  <rect x="1046" y="496" width="158" height="46" rx="23" fill="#f9a825" fill-opacity="0.14" stroke="#f9a825" stroke-width="1.5"/>
+  <text x="1125" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">9 ACTIES</text>
+
+  <!-- Bottom indicator -->
+  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#3a3a5a">Dia 1 / 4  —  Introductie</text>
 </svg>

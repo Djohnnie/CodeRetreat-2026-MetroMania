@@ -73,20 +73,20 @@
   <line x1="700" y1="384" x2="1228" y2="384" stroke="#e94560" stroke-width="1" opacity="0.30"/>
 
   <text x="964" y="420" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="17" fill="#7878a0" letter-spacing="3" font-weight="600">A C# CODING CHALLENGE</text>
+    font-size="17" fill="#7878a0" letter-spacing="3" font-weight="600">تحدي برمجة C#</text>
   <text x="964" y="462" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="21" fill="#c0c0d8">Build a bot. Connect stations. Deliver passengers.</text>
+    font-size="21" fill="#c0c0d8">ابنِ روبوتك. اربط المحطات. وصِّل الركاب.</text>
 
   <!-- Stat pills -->
   <rect x="670" y="496" width="158" height="46" rx="23" fill="#e94560" fill-opacity="0.14" stroke="#e94560" stroke-width="1.5"/>
-  <text x="749" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">6 SHAPES</text>
+  <text x="749" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">٦ أشكال</text>
 
   <rect x="843" y="496" width="188" height="46" rx="23" fill="#4ecca3" fill-opacity="0.14" stroke="#4ecca3" stroke-width="1.5"/>
-  <text x="937" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#4ecca3" font-weight="700">3 RESOURCES</text>
+  <text x="937" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#4ecca3" font-weight="700">٣ موارد</text>
 
   <rect x="1046" y="496" width="158" height="46" rx="23" fill="#f9a825" fill-opacity="0.14" stroke="#f9a825" stroke-width="1.5"/>
-  <text x="1125" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">9 ACTIONS</text>
+  <text x="1125" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">٩ إجراءات</text>
 
   <!-- Bottom indicator -->
-  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#3a3a5a">Slide 1 / 4  —  Introduction</text>
+  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#3a3a5a">شريحة ١ / ٤  —  مقدمة</text>
 </svg>
