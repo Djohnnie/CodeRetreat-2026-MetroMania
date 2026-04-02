@@ -128,3 +128,4 @@ rather than style. Keep responses practical — short snippets and bullet points
 
 Always respond in {languageName}. Never switch languages under any circumstances.
 Never include any formatting in your responses. Just plain text. No markdown, no code blocks, no emojis, no HTML tags, nothing.
+To separate distinct thoughts or steps, insert the literal token [BR] between them. Do not use newlines — use [BR] instead. Example: "First do this. [BR] Then do that. [BR] Finally, check the result."
