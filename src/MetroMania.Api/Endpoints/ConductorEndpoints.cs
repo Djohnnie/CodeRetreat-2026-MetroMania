@@ -26,13 +26,18 @@ public static class ConductorEndpoints
             {
                 var dbUser = await mediator.Send(new GetUserByIdQuery(userId));
                 var language = dbUser?.Language ?? "en";
-                var welcome = language == "nl"
-                    ? "👋 Hallo! Ik ben **Conducteur**, jouw metro netwerk assistent. " +
-                      "Ik kan je helpen met spelstrategie, de regels uitleggen of je bot-code beoordelen. " +
-                      "Wat wil je weten?"
-                    : "👋 Hi! I'm **Conductor**, your metro network assistant. " +
-                      "I can help you with game strategy, explain the rules, or review your bot code. " +
-                      "What would you like to know?";
+                var welcome = language switch
+                {
+                    "nl" => "👋 Hallo! Ik ben **Conducteur**, jouw metro netwerk assistent. " +
+                            "Ik kan je helpen met spelstrategie, de regels uitleggen of je bot-code beoordelen. " +
+                            "Wat wil je weten?",
+                    "ar" => "👋 مرحباً! أنا **القائد**، مساعدك لشبكة المترو. " +
+                            "يمكنني مساعدتك في استراتيجية اللعبة وشرح القواعد أو مراجعة كود البوت الخاص بك. " +
+                            "ماذا تريد أن تعرف؟",
+                    _ => "👋 Hi! I'm **Conductor**, your metro network assistant. " +
+                         "I can help you with game strategy, explain the rules, or review your bot code. " +
+                         "What would you like to know?"
+                };
                 var seeded = await mediator.Send(new SaveChatMessageCommand(userId, welcome, ChatMessageAuthor.Bot));
                 history = [seeded];
             }

@@ -150,10 +150,13 @@
   <data name="LevelDescription" xml:space="preserve"><value>Description</value></data>
   <data name="English" xml:space="preserve"><value>English</value></data>
   <data name="Dutch" xml:space="preserve"><value>Dutch</value></data>
+  <data name="Arabic" xml:space="preserve"><value>Arabic</value></data>
   <data name="TitleEN" xml:space="preserve"><value>Title (English)</value></data>
   <data name="TitleNL" xml:space="preserve"><value>Title (Dutch)</value></data>
+  <data name="TitleAR" xml:space="preserve"><value>Title (Arabic)</value></data>
   <data name="DescriptionEN" xml:space="preserve"><value>Description (English)</value></data>
   <data name="DescriptionNL" xml:space="preserve"><value>Description (Dutch)</value></data>
+  <data name="DescriptionAR" xml:space="preserve"><value>Description (Arabic)</value></data>
   <data name="Order" xml:space="preserve"><value>Order</value></data>
   <data name="AddLevel" xml:space="preserve"><value>Add Level</value></data>
   <data name="EditLevel" xml:space="preserve"><value>Edit Level</value></data>

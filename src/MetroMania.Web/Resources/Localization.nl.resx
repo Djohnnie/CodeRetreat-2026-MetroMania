@@ -150,10 +150,13 @@
   <data name="LevelDescription" xml:space="preserve"><value>Beschrijving</value></data>
   <data name="English" xml:space="preserve"><value>Engels</value></data>
   <data name="Dutch" xml:space="preserve"><value>Nederlands</value></data>
+  <data name="Arabic" xml:space="preserve"><value>Arabisch</value></data>
   <data name="TitleEN" xml:space="preserve"><value>Titel (Engels)</value></data>
   <data name="TitleNL" xml:space="preserve"><value>Titel (Nederlands)</value></data>
+  <data name="TitleAR" xml:space="preserve"><value>Titel (Arabisch)</value></data>
   <data name="DescriptionEN" xml:space="preserve"><value>Omschrijving (Engels)</value></data>
   <data name="DescriptionNL" xml:space="preserve"><value>Omschrijving (Nederlands)</value></data>
+  <data name="DescriptionAR" xml:space="preserve"><value>Omschrijving (Arabisch)</value></data>
   <data name="Order" xml:space="preserve"><value>Volgorde</value></data>
   <data name="AddLevel" xml:space="preserve"><value>Level toevoegen</value></data>
   <data name="EditLevel" xml:space="preserve"><value>Level bewerken</value></data>

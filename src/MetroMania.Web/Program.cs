@@ -104,7 +104,7 @@ app.UseForwardedHeaders(forwardedHeadersOptions);
 app.UseHttpsRedirection();
 
 // Culture middleware
-var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("nl") };
+var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("nl"), new CultureInfo("ar") };
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture("en"),

@@ -4,6 +4,11 @@ html, body {
     font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
+/* Arabic — use a system font with good Arabic script coverage */
+:lang(ar) {
+    font-family: 'Inter', 'Segoe UI', system-ui, 'Arial', sans-serif;
+}
+
 h1:focus {
     outline: none;
 }

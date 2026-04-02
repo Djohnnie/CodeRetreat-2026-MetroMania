@@ -15,7 +15,7 @@
     #blazor-error-ui .dismiss {
         cursor: pointer;
         position: absolute;
-        right: 0.75rem;
+        inset-inline-end: 0.75rem;
         top: 0.5rem;
     }
 

@@ -50,6 +50,14 @@
         <MudTextField @bind-Value="_editDescriptionNl" Label="@Loc["DescriptionNL"]" Variant="Variant.Outlined"
                       Lines="2" Class="mb-4"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
+
+        <!-- Arabic -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: 600;">🇸🇦 @Loc["Arabic"]</MudText>
+        <MudTextField @bind-Value="_editTitleAr" Label="@Loc["TitleAR"]" Variant="Variant.Outlined" Class="mb-3"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Title" />
+        <MudTextField @bind-Value="_editDescriptionAr" Label="@Loc["DescriptionAR"]" Variant="Variant.Outlined"
+                      Lines="2" Class="mb-4"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description" />
         <div class="d-flex gap-3 mb-4">
             <MudNumericField @bind-Value="_editGridWidth" Label="@Loc["GridWidth"]" Variant="Variant.Outlined"
                              Min="3" Max="30" Style="max-width: 150px;"
@@ -162,6 +170,8 @@ else
     private string _editDescriptionEn = string.Empty;
     private string _editTitleNl = string.Empty;
     private string _editDescriptionNl = string.Empty;
+    private string _editTitleAr = string.Empty;
+    private string _editDescriptionAr = string.Empty;
     private int _editGridWidth = 10;
     private int _editGridHeight = 8;
 
@@ -182,6 +192,8 @@ else
         _editDescriptionEn = string.Empty;
         _editTitleNl = string.Empty;
         _editDescriptionNl = string.Empty;
+        _editTitleAr = string.Empty;
+        _editDescriptionAr = string.Empty;
         _editGridWidth = 10;
         _editGridHeight = 8;
         _editing = true;
@@ -194,6 +206,8 @@ else
         _editDescriptionEn = level.LocalizedContent.TryGetValue("en", out var enD) ? enD.Description : level.Description;
         _editTitleNl = level.LocalizedContent.TryGetValue("nl", out var nl) ? nl.Title : string.Empty;
         _editDescriptionNl = level.LocalizedContent.TryGetValue("nl", out var nlD) ? nlD.Description : string.Empty;
+        _editTitleAr = level.LocalizedContent.TryGetValue("ar", out var ar) ? ar.Title : string.Empty;
+        _editDescriptionAr = level.LocalizedContent.TryGetValue("ar", out var arD) ? arD.Description : string.Empty;
         _editGridWidth = level.GridWidth;
         _editGridHeight = level.GridHeight;
         _editing = true;
@@ -213,7 +227,8 @@ else
         var localizedContent = new Dictionary<string, LocalizedLevelText>
         {
             ["en"] = new() { Title = _editTitleEn.Trim(), Description = _editDescriptionEn.Trim() },
-            ["nl"] = new() { Title = _editTitleNl.Trim(), Description = _editDescriptionNl.Trim() }
+            ["nl"] = new() { Title = _editTitleNl.Trim(), Description = _editDescriptionNl.Trim() },
+            ["ar"] = new() { Title = _editTitleAr.Trim(), Description = _editDescriptionAr.Trim() }
         };
 
         if (_editId is null)

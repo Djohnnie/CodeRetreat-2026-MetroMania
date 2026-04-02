@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+
+  <!-- App -->
+  <data name="AppName" xml:space="preserve"><value>MetroMania</value></data>
+
+  <!-- Nav / Layout -->
+  <data name="Dashboard" xml:space="preserve"><value>لوحة التحكم</value></data>
+  <data name="UserManagement" xml:space="preserve"><value>إدارة المستخدمين</value></data>
+  <data name="Login" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="Register" xml:space="preserve"><value>التسجيل</value></data>
+  <data name="Logout" xml:space="preserve"><value>تسجيل الخروج</value></data>
+  <data name="SwitchToLight" xml:space="preserve"><value>التبديل إلى الوضع الفاتح</value></data>
+  <data name="SwitchToDark" xml:space="preserve"><value>التبديل إلى الوضع الداكن</value></data>
+
+  <!-- Home - Authenticated -->
+  <data name="WelcomeUser" xml:space="preserve"><value>مرحباً، {0}!</value></data>
+  <data name="DashboardOverview" xml:space="preserve"><value>إليك نظرة عامة على لوحة التحكم.</value></data>
+  <data name="QuickLinks" xml:space="preserve"><value>روابط سريعة</value></data>
+  <data name="YourStats" xml:space="preserve"><value>إحصائياتك</value></data>
+  <data name="TotalSubmissions" xml:space="preserve"><value>إجمالي التقديمات</value></data>
+  <data name="BestScore" xml:space="preserve"><value>أفضل نتيجة</value></data>
+  <data name="WorstScore" xml:space="preserve"><value>أسوأ نتيجة</value></data>
+  <data name="NoScoreYet" xml:space="preserve"><value>لا توجد نتيجة بعد</value></data>
+  <data name="TransitDescription" xml:space="preserve"><value>لوحة إدارة النقل. استخدم قائمة التنقل للوصول إلى الميزات.</value></data>
+  <data name="YourProfile" xml:space="preserve"><value>ملفك الشخصي</value></data>
+  <data name="Role" xml:space="preserve"><value>الدور</value></data>
+  <data name="Administration" xml:space="preserve"><value>الإدارة</value></data>
+  <data name="ManageUsers" xml:space="preserve"><value>إدارة المستخدمين</value></data>
+
+  <!-- Status -->
+  <data name="Pending" xml:space="preserve"><value>قيد الانتظار</value></data>
+  <data name="Approved" xml:space="preserve"><value>معتمد</value></data>
+  <data name="Rejected" xml:space="preserve"><value>مرفوض</value></data>
+
+  <!-- Login -->
+  <data name="WelcomeGuest" xml:space="preserve"><value>يرجى تسجيل الدخول أو التسجيل للمتابعة.</value></data>
+  <data name="WelcomeBack" xml:space="preserve"><value>مرحباً بعودتك</value></data>
+  <data name="SignInSubtitle" xml:space="preserve"><value>تسجيل الدخول إلى حسابك</value></data>
+  <data name="Username" xml:space="preserve"><value>اسم المستخدم</value></data>
+  <data name="UsernameRequired" xml:space="preserve"><value>اسم المستخدم مطلوب</value></data>
+  <data name="Password" xml:space="preserve"><value>كلمة المرور</value></data>
+  <data name="PasswordRequired" xml:space="preserve"><value>كلمة المرور مطلوبة</value></data>
+  <data name="SignIn" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="NoAccountPrompt" xml:space="preserve"><value>ليس لديك حساب؟</value></data>
+  <data name="CreateOne" xml:space="preserve"><value>إنشاء حساب</value></data>
+  <data name="LoginFailed" xml:space="preserve"><value>فشل تسجيل الدخول.</value></data>
+  <data name="ErrorOccurred" xml:space="preserve"><value>حدث خطأ: {0}</value></data>
+
+  <!-- Register -->
+  <data name="CreateAccount" xml:space="preserve"><value>إنشاء حساب</value></data>
+  <data name="JoinApp" xml:space="preserve"><value>انضم إلى MetroMania</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>تأكيد كلمة المرور</value></data>
+  <data name="ConfirmPasswordRequired" xml:space="preserve"><value>يرجى تأكيد كلمة المرور</value></data>
+  <data name="CreateAccountBtn" xml:space="preserve"><value>إنشاء الحساب</value></data>
+  <data name="HasAccountPrompt" xml:space="preserve"><value>هل لديك حساب بالفعل؟</value></data>
+  <data name="SignInLink" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="GoToLogin" xml:space="preserve"><value>الذهاب إلى تسجيل الدخول</value></data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve"><value>كلمتا المرور غير متطابقتين.</value></data>
+  <data name="RegistrationFailed" xml:space="preserve"><value>فشل التسجيل.</value></data>
+  <data name="RegSuccessAdmin" xml:space="preserve"><value>تم التسجيل بنجاح! أنت أول مستخدم وقد مُنحت صلاحيات المشرف. يمكنك تسجيل الدخول الآن.</value></data>
+  <data name="RegSuccessPending" xml:space="preserve"><value>تم التسجيل بنجاح! حسابك قيد مراجعة المشرف.</value></data>
+
+  <!-- User Management -->
+  <data name="UserMgmtSubtitle" xml:space="preserve"><value>اعتماد أو رفض أو حذف حسابات المستخدمين.</value></data>
+  <data name="Name" xml:space="preserve"><value>الاسم</value></data>
+  <data name="Status" xml:space="preserve"><value>الحالة</value></data>
+  <data name="Registered" xml:space="preserve"><value>مسجل</value></data>
+  <data name="Actions" xml:space="preserve"><value>الإجراءات</value></data>
+  <data name="Approve" xml:space="preserve"><value>اعتماد</value></data>
+  <data name="Reject" xml:space="preserve"><value>رفض</value></data>
+  <data name="Delete" xml:space="preserve"><value>حذف</value></data>
+  <data name="UserApproved" xml:space="preserve"><value>تم اعتماد المستخدم بنجاح.</value></data>
+  <data name="UserApproveFailed" xml:space="preserve"><value>فشل اعتماد المستخدم.</value></data>
+  <data name="UserRejected" xml:space="preserve"><value>تم رفض المستخدم.</value></data>
+  <data name="UserRejectFailed" xml:space="preserve"><value>فشل رفض المستخدم.</value></data>
+  <data name="UserDeleted" xml:space="preserve"><value>تم حذف المستخدم '{0}'.</value></data>
+  <data name="UserDeleteFailed" xml:space="preserve"><value>فشل حذف المستخدم.</value></data>
+
+  <!-- Game Info -->
+  <data name="GameInfo" xml:space="preserve"><value>معلومات اللعبة</value></data>
+  <data name="GameInfoSubtitle" xml:space="preserve"><value>تعرّف على كيفية عمل تحدي MetroMania البرمجي.</value></data>
+
+  <!-- Play -->
+  <data name="Play" xml:space="preserve"><value>العب</value></data>
+  <data name="PlaySubtitle" xml:space="preserve"><value>أرسل كود بوت C# الخاص بك للعب.</value></data>
+  <data name="BotCode" xml:space="preserve"><value>كود البوت (C#)</value></data>
+  <data name="BotCodePlaceholder" xml:space="preserve"><value>الصق أو اكتب كود بوت C# هنا...</value></data>
+  <data name="Paste" xml:space="preserve"><value>لصق</value></data>
+  <data name="Clear" xml:space="preserve"><value>مسح</value></data>
+  <data name="Submit" xml:space="preserve"><value>إرسال</value></data>
+  <data name="ValidationFailed" xml:space="preserve"><value>فشل التحقق</value></data>
+  <data name="SubmissionHistory" xml:space="preserve"><value>سجل التقديمات</value></data>
+  <data name="NoSubmissionsYet" xml:space="preserve"><value>لا توجد تقديمات بعد. أرسل كود البوت لرؤية سجلك هنا.</value></data>
+  <data name="Submission" xml:space="preserve"><value>تقديم</value></data>
+  <data name="RevertToThis" xml:space="preserve"><value>العودة إلى هذا الإصدار</value></data>
+  <data name="LoadToEditor" xml:space="preserve"><value>تحميل في المحرر</value></data>
+  <data name="FailureDetails" xml:space="preserve"><value>تفاصيل الفشل</value></data>
+
+  <!-- Submission status -->
+  <data name="Waiting" xml:space="preserve"><value>قيد الانتظار</value></data>
+  <data name="Running" xml:space="preserve"><value>قيد التشغيل</value></data>
+  <data name="Rendering" xml:space="preserve"><value>جاري العرض</value></data>
+  <data name="Saving" xml:space="preserve"><value>جاري الحفظ</value></data>
+  <data name="Succeeded" xml:space="preserve"><value>نجح</value></data>
+  <data name="Failed" xml:space="preserve"><value>فشل</value></data>
+
+  <!-- Errors / Not Found -->
+  <data name="PageNotFound" xml:space="preserve"><value>الصفحة غير موجودة</value></data>
+  <data name="NotFoundMessage" xml:space="preserve"><value>عذراً، المحتوى الذي تبحث عنه غير موجود.</value></data>
+  <data name="BackToDashboard" xml:space="preserve"><value>العودة إلى لوحة التحكم</value></data>
+  <data name="Error" xml:space="preserve"><value>خطأ</value></data>
+  <data name="ErrorMessage" xml:space="preserve"><value>حدث خطأ أثناء معالجة طلبك.</value></data>
+  <data name="RequestId" xml:space="preserve"><value>معرف الطلب</value></data>
+  <data name="BackToHome" xml:space="preserve"><value>العودة إلى الرئيسية</value></data>
+
+  <!-- Language -->
+  <data name="Language" xml:space="preserve"><value>اللغة</value></data>
+
+  <!-- Conductor -->
+  <data name="ConductorName" xml:space="preserve"><value>القائد</value></data>
+  <data name="ConductorOnline" xml:space="preserve"><value>● متصل</value></data>
+  <data name="AskConductor" xml:space="preserve"><value>اسأل القائد...</value></data>
+  <data name="ConductorError" xml:space="preserve"><value>⚠️ عذراً، أواجه صعوبة في الاتصال الآن. يرجى المحاولة مرة أخرى.</value></data>
+
+  <!-- Levels -->
+  <data name="Levels" xml:space="preserve"><value>المستويات</value></data>
+  <data name="LevelEditorSubtitle" xml:space="preserve"><value>إنشاء المستويات وتحريرها وإعادة ترتيبها وحذفها.</value></data>
+  <data name="LevelTitle" xml:space="preserve"><value>العنوان</value></data>
+  <data name="LevelDescription" xml:space="preserve"><value>الوصف</value></data>
+  <data name="English" xml:space="preserve"><value>الإنجليزية</value></data>
+  <data name="Dutch" xml:space="preserve"><value>الهولندية</value></data>
+  <data name="Arabic" xml:space="preserve"><value>العربية</value></data>
+  <data name="TitleEN" xml:space="preserve"><value>العنوان (بالإنجليزية)</value></data>
+  <data name="TitleNL" xml:space="preserve"><value>العنوان (بالهولندية)</value></data>
+  <data name="TitleAR" xml:space="preserve"><value>العنوان (بالعربية)</value></data>
+  <data name="DescriptionEN" xml:space="preserve"><value>الوصف (بالإنجليزية)</value></data>
+  <data name="DescriptionNL" xml:space="preserve"><value>الوصف (بالهولندية)</value></data>
+  <data name="DescriptionAR" xml:space="preserve"><value>الوصف (بالعربية)</value></data>
+  <data name="Order" xml:space="preserve"><value>الترتيب</value></data>
+  <data name="AddLevel" xml:space="preserve"><value>إضافة مستوى</value></data>
+  <data name="EditLevel" xml:space="preserve"><value>تعديل المستوى</value></data>
+  <data name="SaveLevel" xml:space="preserve"><value>حفظ</value></data>
+  <data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>تحريك لأعلى</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>تحريك لأسفل</value></data>
+  <data name="Edit" xml:space="preserve"><value>تعديل</value></data>
+  <data name="LevelCreated" xml:space="preserve"><value>تم إنشاء المستوى.</value></data>
+  <data name="LevelUpdated" xml:space="preserve"><value>تم تحديث المستوى.</value></data>
+  <data name="LevelDeleted" xml:space="preserve"><value>تم حذف المستوى.</value></data>
+  <data name="LevelDeleteFailed" xml:space="preserve"><value>فشل حذف المستوى.</value></data>
+  <data name="TitleRequired" xml:space="preserve"><value>العنوان مطلوب</value></data>
+  <data name="NoLevelsYet" xml:space="preserve"><value>لا توجد مستويات بعد. انقر على "إضافة مستوى" لإنشاء أول مستوى.</value></data>
+
+  <!-- Level Editor / Grid -->
+  <data name="GridSize" xml:space="preserve"><value>الشبكة</value></data>
+  <data name="GridWidth" xml:space="preserve"><value>العرض</value></data>
+  <data name="GridHeight" xml:space="preserve"><value>الارتفاع</value></data>
+  <data name="EditGrid" xml:space="preserve"><value>تعديل الشبكة</value></data>
+  <data name="BackToLevels" xml:space="preserve"><value>العودة إلى جميع المستويات</value></data>
+  <data name="EditGridSubtitle" xml:space="preserve"><value>انقر على نوع محطة، ثم انقر على خلية لوضعها. انقر مرة أخرى لإزالتها.</value></data>
+  <data name="StationTypes" xml:space="preserve"><value>المحطات</value></data>
+  <data name="Beginner" xml:space="preserve"><value>مبتدئ</value></data>
+  <data name="Advanced" xml:space="preserve"><value>متقدم</value></data>
+  <data name="Eraser" xml:space="preserve"><value>ممحاة</value></data>
+  <data name="Circle" xml:space="preserve"><value>دائرة</value></data>
+  <data name="Rectangle" xml:space="preserve"><value>مستطيل</value></data>
+  <data name="Triangle" xml:space="preserve"><value>مثلث</value></data>
+  <data name="Diamond" xml:space="preserve"><value>معين</value></data>
+  <data name="Pentagon" xml:space="preserve"><value>خماسي</value></data>
+  <data name="Star" xml:space="preserve"><value>نجمة</value></data>
+  <data name="BackgroundColor" xml:space="preserve"><value>الخلفية</value></data>
+  <data name="WaterColor" xml:space="preserve"><value>لون الماء</value></data>
+  <data name="Water" xml:space="preserve"><value>الماء</value></data>
+  <data name="StationProperties" xml:space="preserve"><value>خصائص المحطة</value></data>
+  <data name="SpawnDelay" xml:space="preserve"><value>تأخير الظهور (أيام)</value></data>
+  <data name="Shape" xml:space="preserve"><value>الشكل</value></data>
+  <data name="SpawnFrequency" xml:space="preserve"><value>مراحل ظهور الركاب</value></data>
+  <data name="AfterDays" xml:space="preserve"><value>بعد أيام</value></data>
+  <data name="FrequencyInHours" xml:space="preserve"><value>كل N ساعة</value></data>
+  <data name="AddPhase" xml:space="preserve"><value>إضافة مرحلة</value></data>
+  <data name="Seed" xml:space="preserve"><value>البذرة</value></data>
+  <data name="VehicleCapacity" xml:space="preserve"><value>سعة المركبة</value></data>
+  <data name="MaxDays" xml:space="preserve"><value>الحد الأقصى للأيام</value></data>
+  <data name="Save" xml:space="preserve"><value>حفظ</value></data>
+
+  <!-- Submissions (Admin) -->
+  <data name="Submissions" xml:space="preserve"><value>التقديمات</value></data>
+  <data name="SubmissionMgmtSubtitle" xml:space="preserve"><value>عرض سجل التقديمات لجميع المستخدمين.</value></data>
+  <data name="SubmissionCount" xml:space="preserve"><value>التقديمات</value></data>
+  <data name="LastSubmission" xml:space="preserve"><value>آخر تقديم</value></data>
+  <data name="ViewSubmissions" xml:space="preserve"><value>عرض التقديمات</value></data>
+  <data name="UserSubmissions" xml:space="preserve"><value>تقديمات المستخدم</value></data>
+  <data name="UserSubmissionsTitle" xml:space="preserve"><value>تقديمات {0}</value></data>
+  <data name="UserSubmissionsSubtitle" xml:space="preserve"><value>جميع التقديمات مرتبة من الأحدث إلى الأقدم.</value></data>
+  <data name="DeleteSubmission" xml:space="preserve"><value>حذف التقديم</value></data>
+  <data name="SubmissionDeleted" xml:space="preserve"><value>تم حذف التقديم v{0}.</value></data>
+  <data name="SubmissionDeleteFailed" xml:space="preserve"><value>فشل حذف التقديم.</value></data>
+  <data name="BackToSubmissions" xml:space="preserve"><value>العودة إلى جميع المستخدمين</value></data>
+  <data name="Version" xml:space="preserve"><value>الإصدار</value></data>
+  <data name="SubmittedAt" xml:space="preserve"><value>تم الإرسال في</value></data>
+  <data name="CodePreview" xml:space="preserve"><value>معاينة الكود</value></data>
+
+  <!-- Weekly Gift Overrides -->
+  <data name="WeeklyGiftOverrides" xml:space="preserve"><value>تجاوزات الهدايا الأسبوعية</value></data>
+  <data name="Week" xml:space="preserve"><value>الأسبوع</value></data>
+  <data name="ResourceType" xml:space="preserve"><value>نوع المورد</value></data>
+  <data name="AddWeek" xml:space="preserve"><value>إضافة أسبوع</value></data>
+
+  <!-- Import / Export -->
+  <data name="ExportLevelData" xml:space="preserve"><value>تصدير JSON</value></data>
+  <data name="ExportLevelDataTooltip" xml:space="preserve"><value>تنزيل بيانات المستوى كملف JSON</value></data>
+  <data name="ImportLevelData" xml:space="preserve"><value>استيراد JSON</value></data>
+  <data name="ImportLevelDataTooltip" xml:space="preserve"><value>استبدال بيانات المستوى من ملف JSON</value></data>
+  <data name="ImportFailed" xml:space="preserve"><value>فشل الاستيراد. تأكد من أن الملف هو JSON صالح لبيانات المستوى.</value></data>
+  <data name="ImportSuccess" xml:space="preserve"><value>تم استيراد بيانات المستوى بنجاح.</value></data>
+
+  <!-- Resources -->
+  <data name="Line" xml:space="preserve"><value>خط</value></data>
+  <data name="Train" xml:space="preserve"><value>قطار</value></data>
+  <data name="Wagon" xml:space="preserve"><value>عربة</value></data>
+
+  <!-- Scores -->
+  <data name="Score" xml:space="preserve"><value>النتيجة</value></data>
+  <data name="TotalScore" xml:space="preserve"><value>النتيجة الإجمالية</value></data>
+  <data name="LevelName" xml:space="preserve"><value>المستوى</value></data>
+
+  <!-- Renders / Replay -->
+  <data name="WatchReplays" xml:space="preserve"><value>مشاهدة التشغيل</value></data>
+  <data name="ViewRenders" xml:space="preserve"><value>عرض المقاطع</value></data>
+  <data name="Replay" xml:space="preserve"><value>إعادة التشغيل</value></data>
+  <data name="ReplaysSubtitle" xml:space="preserve"><value>التنقل خلال مقاطع اليوم لهذا التقديم.</value></data>
+  <data name="NoRendersAvailable" xml:space="preserve"><value>لا تتوفر مقاطع لهذا التقديم والمستوى بعد. يتم إنشاء المقاطع عند معالجة التقديم.</value></data>
+  <data name="Day" xml:space="preserve"><value>اليوم</value></data>
+  <data name="Hour" xml:space="preserve"><value>الساعة</value></data>
+  <data name="StopPlayback" xml:space="preserve"><value>إيقاف</value></data>
+  <data name="PreviousDay" xml:space="preserve"><value>الساعة السابقة</value></data>
+  <data name="NextDay" xml:space="preserve"><value>الساعة التالية</value></data>
+
+  <!-- Leaderboard -->
+  <data name="Leaderboard" xml:space="preserve"><value>لوحة المتصدرين</value></data>
+  <data name="LeaderboardSubtitle" xml:space="preserve"><value>التصنيفات بناءً على أحدث نتائج تقديم كل لاعب.</value></data>
+  <data name="Rank" xml:space="preserve"><value>الترتيب</value></data>
+  <data name="FirstPlace" xml:space="preserve"><value>المركز الأول</value></data>
+  <data name="SecondPlace" xml:space="preserve"><value>المركز الثاني</value></data>
+  <data name="ThirdPlace" xml:space="preserve"><value>المركز الثالث</value></data>
+  <data name="NoScoresAvailable" xml:space="preserve"><value>لا تتوفر نتائج لهذا التقديم.</value></data>
+</root>

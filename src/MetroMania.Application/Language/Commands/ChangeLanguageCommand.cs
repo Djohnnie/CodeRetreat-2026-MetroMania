@@ -8,7 +8,7 @@ public record ChangeLanguageCommand(Guid UserId, string Language) : IRequest<boo
 public class ChangeLanguageCommandHandler(IUserRepository userRepository)
     : IRequestHandler<ChangeLanguageCommand, bool>
 {
-    private static readonly HashSet<string> SupportedLanguages = ["en", "nl"];
+    private static readonly HashSet<string> SupportedLanguages = ["en", "nl", "ar"];
 
     public async Task<bool> Handle(ChangeLanguageCommand request, CancellationToken cancellationToken)
     {

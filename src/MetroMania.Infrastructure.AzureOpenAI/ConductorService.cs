@@ -17,8 +17,8 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         Func<string, CancellationToken, Task<string?>> onGetLevelData,
         CancellationToken cancellationToken = default)
     {
-        var languageName = language == "nl" ? "Dutch" : "English";
-        var botName = language == "nl" ? "Conducteur" : "Conductor";
+        var languageName = language switch { "nl" => "Dutch", "ar" => "Arabic", _ => "English" };
+        var botName = language switch { "nl" => "Conducteur", "ar" => "القائد", _ => "Conductor" };
 
         var systemPrompt = instructions.MarkdownTemplate
             .Replace("{botName}", botName)
@@ -32,18 +32,24 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         {
             await onClearHistory(cancellationToken);
             historyCleared = true;
-            return language == "nl"
-                ? "Gespreksgeschiedenis succesvol gearchiveerd."
-                : "Chat history successfully archived.";
+            return language switch
+            {
+                "nl" => "Gespreksgeschiedenis succesvol gearchiveerd.",
+                "ar" => "تم أرشفة سجل المحادثة بنجاح.",
+                _ => "Chat history successfully archived."
+            };
         }
 
         async Task<string> DoGetLatestCode(int? version = null)
         {
             var code = await onGetLatestCode(version, cancellationToken);
             if (code is null)
-                return language == "nl"
-                    ? "De speler heeft nog geen code ingediend."
-                    : "The player has not submitted any code yet.";
+                return language switch
+                {
+                    "nl" => "De speler heeft nog geen code ingediend.",
+                    "ar" => "لم يقدم اللاعب أي كود بعد.",
+                    _ => "The player has not submitted any code yet."
+                };
             return code;
         }
 
@@ -51,9 +57,12 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         {
             var json = await onGetLevelData(title, cancellationToken);
             if (json is null)
-                return language == "nl"
-                    ? $"Geen level gevonden met de titel '{title}'."
-                    : $"No level found with the title '{title}'.";
+                return language switch
+                {
+                    "nl" => $"Geen level gevonden met de titel '{title}'.",
+                    "ar" => $"لم يُعثر على مستوى بعنوان '{title}'.",
+                    _ => $"No level found with the title '{title}'."
+                };
             return json;
         }
 

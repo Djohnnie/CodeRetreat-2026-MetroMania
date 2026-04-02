@@ -14,6 +14,7 @@
 <MudSnackbarProvider />
 <MudXProvider />
 
+<MudRTLProvider RightToLeft="@(_currentLanguage == "ar")">
 <CascadingValue Value="_isDarkMode" Name="IsDarkMode">
 
     <MudLayout>
@@ -36,6 +37,9 @@
                         </MudMenuItem>
                         <MudMenuItem OnClick='() => ChangeLanguage("nl")'>
                             🇳🇱 Nederlands
+                        </MudMenuItem>
+                        <MudMenuItem OnClick='() => ChangeLanguage("ar")'>
+                            🇸🇦 العربية
                         </MudMenuItem>
                     </MudMenu>
                     <MudTooltip Text="@(_isDarkMode? Loc["SwitchToLight"] : Loc["SwitchToDark"])">
@@ -67,8 +71,11 @@
                         <MudMenuItem OnClick='() => ChangeLanguage("nl")'>
                             🇳🇱 Nederlands
                         </MudMenuItem>
+                        <MudMenuItem OnClick='() => ChangeLanguage("ar")'>
+                            🇸🇦 العربية
+                        </MudMenuItem>
                     </MudMenu>
-                    <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">@Loc["Login"]</MudButton>
+                    <MudButton Href="/login"Color="Color.Inherit" Variant="Variant.Text">@Loc["Login"]</MudButton>
                     <MudButton Href="/register" Color="Color.Inherit" Variant="Variant.Text">@Loc["Register"]</MudButton>
                 </NotAuthorized>
             </AuthorizeView>
@@ -112,7 +119,7 @@
         </MudDrawer>
 
         <MudDrawer @bind-Open="_conductorOpen"
-                   Anchor="Anchor.Right"
+                   Anchor="@(_currentLanguage == "ar" ? Anchor.Left : Anchor.Right)"
                    Elevation="2"
                    Variant="DrawerVariant.Temporary"
                    Width="380px"
@@ -182,6 +189,7 @@
         </MudMainContent>
     </MudLayout>
 </CascadingValue>
+</MudRTLProvider>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -200,7 +208,7 @@
     private Guid _userId;
     private ElementReference _conductorScrollAnchor;
     private List<ConductorMessage> _conductorMessages = [];
-    private string _currentLanguage = "en";
+    private string _currentLanguage = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
     private readonly MudTheme _theme = new()
     {
