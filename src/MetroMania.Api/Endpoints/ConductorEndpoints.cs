@@ -42,15 +42,19 @@ public static class ConductorEndpoints
             var userName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Player";
             var language = user.FindFirst("Language")?.Value ?? "en";
 
-            // Load prior history, then get AI reply
+            // Load prior history, then get AI reply (tool may archive history during this call)
             var history = await mediator.Send(new GetChatHistoryQuery(request.UserId), ct);
-            var reply = await conductor.ChatAsync(history, userName, language, request.Message, ct);
+            var result = await conductor.ChatAsync(
+                history, userName, language, request.Message,
+                onClearHistory: async (token) =>
+                    await mediator.Send(new ArchiveChatHistoryCommand(request.UserId), token),
+                ct);
 
-            // Persist both turns
+            // Persist both turns (after any archiving has already happened)
             await mediator.Send(new SaveChatMessageCommand(request.UserId, request.Message, ChatMessageAuthor.User), ct);
-            await mediator.Send(new SaveChatMessageCommand(request.UserId, reply, ChatMessageAuthor.Bot), ct);
+            await mediator.Send(new SaveChatMessageCommand(request.UserId, result.Reply, ChatMessageAuthor.Bot), ct);
 
-            return Results.Ok(new ConductorChatResponse(reply));
+            return Results.Ok(new ConductorChatResponse(result.Reply, result.HistoryCleared));
         });
 
         return app;
@@ -58,4 +62,4 @@ public static class ConductorEndpoints
 }
 
 record ConductorChatRequest(Guid UserId, string Message);
-record ConductorChatResponse(string Reply);
+record ConductorChatResponse(string Reply, bool HistoryCleared);

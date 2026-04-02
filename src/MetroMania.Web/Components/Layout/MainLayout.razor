@@ -319,8 +319,10 @@
 
         try
         {
-            var reply = await ApiClient.ChatWithConductorAsync(_userId, text);
-            _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(reply)));
+            var result = await ApiClient.ChatWithConductorAsync(_userId, text);
+            _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(result.Reply)));
+            if (result.HistoryCleared)
+                await LoadChatHistoryAsync();
         }
         catch
         {

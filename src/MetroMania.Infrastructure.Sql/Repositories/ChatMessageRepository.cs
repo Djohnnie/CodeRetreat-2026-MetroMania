@@ -21,4 +21,9 @@ public class ChatMessageRepository(AppDbContext db) : IChatMessageRepository
 
     public async Task DeleteAsync(Guid id) =>
         await db.ChatMessages.Where(m => m.Id == id).ExecuteDeleteAsync();
+
+    public async Task ArchiveAllByUserIdAsync(Guid userId) =>
+        await db.ChatMessages
+            .Where(m => m.UserId == userId && !m.IsArchived)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.IsArchived, true));
 }

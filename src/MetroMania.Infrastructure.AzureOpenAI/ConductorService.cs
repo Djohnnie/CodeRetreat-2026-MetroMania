@@ -7,11 +7,12 @@ namespace MetroMania.Infrastructure.AzureOpenAI;
 
 public sealed class ConductorService(IChatClient chatClient, ConductorInstructions instructions) : IConductorService
 {
-    public async Task<string> ChatAsync(
+    public async Task<ConductorChatResult> ChatAsync(
         IReadOnlyList<ChatMessageDto> history,
         string userName,
         string language,
         string userMessage,
+        Func<CancellationToken, Task> onClearHistory,
         CancellationToken cancellationToken = default)
     {
         var languageName = language == "nl" ? "Dutch" : "English";
@@ -21,6 +22,24 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
             .Replace("{botName}", botName)
             .Replace("{userName}", userName)
             .Replace("{languageName}", languageName);
+
+        var historyCleared = false;
+
+        // Local function used as the AI tool — captures closure vars so no parameters needed.
+        async Task<string> DoClearHistory()
+        {
+            await onClearHistory(cancellationToken);
+            historyCleared = true;
+            return language == "nl"
+                ? "Gespreksgeschiedenis succesvol gearchiveerd."
+                : "Chat history successfully archived.";
+        }
+
+        var clearHistoryTool = AIFunctionFactory.Create(
+            DoClearHistory,
+            "clear_chat_history",
+            "Archives all previous chat messages for the current user, giving them a fresh start. " +
+            "Invoke this when the user explicitly asks to clear, wipe, reset, or start over their chat history.");
 
         var messages = new List<ChatMessage>
         {
@@ -35,8 +54,11 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
 
         messages.Add(new ChatMessage(ChatRole.User, userMessage));
 
-        var response = await chatClient.GetResponseAsync(messages, cancellationToken: cancellationToken);
-        return response.Text ?? string.Empty;
+        // UseFunctionInvocation() middleware (registered in DI) handles the tool-call loop automatically.
+        var options = new ChatOptions { Tools = [clearHistoryTool] };
+        var response = await chatClient.GetResponseAsync(messages, options, cancellationToken);
+
+        return new ConductorChatResult(response.Text ?? string.Empty, historyCleared);
     }
 }
 

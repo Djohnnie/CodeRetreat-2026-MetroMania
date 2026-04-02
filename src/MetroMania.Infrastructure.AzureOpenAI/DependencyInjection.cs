@@ -25,7 +25,10 @@ public static class DependencyInjection
         services.AddSingleton(_ =>
             new AzureOpenAIClient(new Uri(endpoint), new ApiKeyCredential(apiKey))
                 .GetChatClient(model)
-                .AsIChatClient());
+                .AsIChatClient()
+                .AsBuilder()
+                .UseFunctionInvocation()
+                .Build());
 
         var template = File.Exists(instructionsFilePath)
             ? File.ReadAllText(instructionsFilePath)
