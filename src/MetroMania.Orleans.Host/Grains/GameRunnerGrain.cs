@@ -15,7 +15,8 @@ public class GameRunnerGrain : Grain, IGameRunnerGrain
     private static readonly JsonSerializerOptions DebugJsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
-        WriteIndented = false
+        WriteIndented = false,
+        Converters = { new LocationJsonConverter() }
     };
 
     public Task<string> PingAsync() => Task.FromResult("pong");
