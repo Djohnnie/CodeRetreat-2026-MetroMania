@@ -159,7 +159,7 @@ public class MetroManiaEngine
 
             var action = runner.OnHourTick(
                 CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity));
-            ProcessAction(action, resources, lines, vehicles);
+            ProcessAction(action, resources, lines, vehicles, activeStations);
             hoursElapsed++;
 
             snapshots.Add(CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity, action));
@@ -308,14 +308,14 @@ public class MetroManiaEngine
             var tickSnapshot = CreateSnapshot(time, hoursElapsed, gameOver, activeStations, totalScore, resources, lines, vehicles, vehicleCapacity);
             var action = runner.OnHourTick(tickSnapshot);
             hourlySnapshots.Add(tickSnapshot);
-            ProcessAction(action, resources, lines, vehicles);
+            ProcessAction(action, resources, lines, vehicles, activeStations);
             hoursElapsed++;
         }
 
         return new SimulationResult(time, hoursElapsed, gameOver, totalPassengersSpawned, totalScore, activeStations, resources, lines, vehicles, vehicleCapacity, hourlySnapshots);
     }
 
-    private static void ProcessAction(PlayerAction action, List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles)
+    private static void ProcessAction(PlayerAction action, List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles, Dictionary<Location, StationState> activeStations)
     {
         switch (action)
         {
@@ -363,24 +363,27 @@ public class MetroManiaEngine
                     vehicleResource.InUse = true;
                     int stationIdx = targetLine.StationIds.IndexOf(addVehicle.StationId);
                     int numSegments = targetLine.StationIds.Count - 1;
+                    var stationLocations = activeStations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
                     int segIdx;
-                    decimal prog;
+                    int tileOffset;
                     int dir;
                     if (stationIdx >= numSegments)
                     {
                         segIdx = numSegments - 1;
-                        prog = 1.0m;
+                        tileOffset = stationLocations.TryGetValue(targetLine.StationIds[segIdx], out var aFrom) &&
+                                     stationLocations.TryGetValue(targetLine.StationIds[segIdx + 1], out var aTo)
+                            ? Distance(aFrom, aTo) : 0;
                         dir = -1;
                     }
                     else
                     {
                         segIdx = stationIdx;
-                        prog = 0.0m;
+                        tileOffset = 0;
                         dir = 1;
                     }
 
-                    vehicles.Add(new VehicleState(vehicleResource.Id, targetLine.ResourceId, segIdx, prog, dir));
+                    vehicles.Add(new VehicleState(vehicleResource.Id, targetLine.ResourceId, segIdx, tileOffset, dir));
                 }
                 break;
 
@@ -467,6 +470,7 @@ public class MetroManiaEngine
         List<ResourceState> resources, List<LineState> lines, List<VehicleState> vehicles,
         int vehicleCapacity, PlayerAction? lastAction = null)
     {
+        var stationLocationsForSnap = activeStations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
         var snapshot = new GameSnapshot
         {
             Time = time,
@@ -492,19 +496,35 @@ public class MetroManiaEngine
             {
                 var line = lines.FirstOrDefault(l => l.ResourceId == v.LineResourceId);
                 Guid? stationId = null;
+                decimal progress = 0m;
                 if (line is not null)
                 {
-                    if (v.Progress <= 0.0m)
+                    if (v.TileOffset == 0)
+                    {
                         stationId = line.StationIds[v.SegmentIndex];
-                    else if (v.Progress >= 1.0m)
-                        stationId = line.StationIds[v.SegmentIndex + 1];
+                        progress = 0m;
+                    }
+                    else if (stationLocationsForSnap.TryGetValue(line.StationIds[v.SegmentIndex], out var sFrom) &&
+                             stationLocationsForSnap.TryGetValue(line.StationIds[v.SegmentIndex + 1], out var sTo))
+                    {
+                        int segLen = Distance(sFrom, sTo);
+                        if (v.TileOffset >= segLen)
+                        {
+                            stationId = line.StationIds[v.SegmentIndex + 1];
+                            progress = 1m;
+                        }
+                        else
+                        {
+                            progress = segLen > 0 ? (decimal)v.TileOffset / segLen : 0m;
+                        }
+                    }
                 }
                 return new VehicleSnapshot
                 {
                     VehicleId = v.ResourceId,
                     LineId = v.LineResourceId,
                     SegmentIndex = v.SegmentIndex,
-                    Progress = v.Progress,
+                    Progress = progress,
                     Direction = v.Direction,
                     StationId = stationId,
                     Capacity = vehicleCapacity,
@@ -537,18 +557,14 @@ public class MetroManiaEngine
         int VehicleCapacity,
         List<GameSnapshot> HourlySnapshots);
 
-    // Tolerance for detecting terminal arrival: handles repeating decimals like 3×(1/3) = 0.999...
-    private const decimal ProgressTolerance = 1e-10m;
-
     private static void MoveVehicles(
         List<VehicleState> vehicles, List<LineState> lines,
-        Dictionary<Location, StationState> activeStations, decimal speedPerHour = 1.0m)
+        Dictionary<Location, StationState> activeStations)
     {
         var stationLocations = activeStations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
         foreach (var vehicle in vehicles)
         {
-            // Vehicles dwelling at a station (loading/unloading) don't move
             if (vehicle.DwellTicksRemaining > 0)
             {
                 vehicle.DwellTicksRemaining--;
@@ -556,75 +572,47 @@ public class MetroManiaEngine
             }
 
             var line = lines.FirstOrDefault(l => l.ResourceId == vehicle.LineResourceId);
-            if (line is null || line.StationIds.Count < 2)
-                continue;
+            if (line is null || line.StationIds.Count < 2) continue;
 
             int numSegments = line.StationIds.Count - 1;
-            decimal remainingSpeed = speedPerHour;
 
-            while (remainingSpeed > 0.001m)
+            if (!stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var fromLoc) ||
+                !stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var toLoc))
+                continue;
+
+            int segLen = Distance(fromLoc, toLoc);
+            if (segLen == 0) continue;
+
+            vehicle.TileOffset += vehicle.Direction;
+
+            if (vehicle.Direction == 1 && vehicle.TileOffset >= segLen)
             {
-                if (!stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var fromLoc) ||
-                    !stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var toLoc))
-                    break;
-
-                decimal segmentLength = (decimal)Distance(fromLoc, toLoc);
-                if (segmentLength < 0.001m)
-                    break;
-
-                decimal progressDelta = remainingSpeed / segmentLength;
-
-                if (vehicle.Direction == 1)
+                if (vehicle.SegmentIndex < numSegments - 1)
                 {
-                    decimal newProgress = vehicle.Progress + progressDelta;
-                    // Treat as reaching 1.0 when within tolerance (handles repeating decimals, e.g. 3×(1/3))
-                    if (newProgress < 1.0m - ProgressTolerance)
-                    {
-                        vehicle.Progress = newProgress;
-                        remainingSpeed = 0;
-                    }
-                    else
-                    {
-                        remainingSpeed = newProgress > 1.0m ? (newProgress - 1.0m) * segmentLength : 0m;
-                        if (vehicle.SegmentIndex < numSegments - 1)
-                        {
-                            vehicle.SegmentIndex++;
-                            vehicle.Progress = 0.0m;
-                        }
-                        else
-                        {
-                            // Terminal station: stop here so ProcessStationStops can handle it next tick
-                            vehicle.Progress = 1.0m;
-                            vehicle.Direction = -1;
-                            remainingSpeed = 0;
-                        }
-                    }
+                    vehicle.SegmentIndex++;
+                    vehicle.TileOffset = 0;
                 }
                 else
                 {
-                    decimal newProgress = vehicle.Progress - progressDelta;
-                    // Treat as reaching 0.0 when within tolerance (handles repeating decimals, e.g. 3×(1/3))
-                    if (newProgress > ProgressTolerance)
-                    {
-                        vehicle.Progress = newProgress;
-                        remainingSpeed = 0;
-                    }
+                    vehicle.TileOffset = segLen;
+                    vehicle.Direction = -1;
+                }
+            }
+            else if (vehicle.Direction == -1 && vehicle.TileOffset <= 0)
+            {
+                if (vehicle.SegmentIndex > 0)
+                {
+                    vehicle.SegmentIndex--;
+                    if (stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var prevFrom) &&
+                        stationLocations.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var prevTo))
+                        vehicle.TileOffset = Distance(prevFrom, prevTo);
                     else
-                    {
-                        remainingSpeed = newProgress < 0.0m ? (0.0m - newProgress) * segmentLength : 0m;
-                        if (vehicle.SegmentIndex > 0)
-                        {
-                            vehicle.SegmentIndex--;
-                            vehicle.Progress = 1.0m;
-                        }
-                        else
-                        {
-                            // Terminal station: stop here so ProcessStationStops can handle it next tick
-                            vehicle.Progress = 0.0m;
-                            vehicle.Direction = 1;
-                            remainingSpeed = 0;
-                        }
-                    }
+                        vehicle.TileOffset = 0;
+                }
+                else
+                {
+                    vehicle.TileOffset = 0;
+                    vehicle.Direction = 1;
                 }
             }
         }
@@ -646,16 +634,21 @@ public class MetroManiaEngine
             var line = lines.FirstOrDefault(l => l.ResourceId == vehicle.LineResourceId);
             if (line is null) continue;
 
-            // Use a small epsilon for terminal stations to tolerate floating-point accumulation.
-            // Intermediate stations still require exact 0.0/1.0 (they're passed through, not stopped at).
-            const decimal terminalEpsilon = 0.01m;
-            int lastSegIdx = line.StationIds.Count - 2;
-
             Guid? currentStationId = null;
-            if (vehicle.Progress <= 0.0m || (vehicle.SegmentIndex == 0 && vehicle.Progress <= terminalEpsilon))
+            if (vehicle.TileOffset == 0)
+            {
                 currentStationId = line.StationIds[vehicle.SegmentIndex];
-            else if (vehicle.Progress >= 1.0m || (vehicle.SegmentIndex == lastSegIdx && vehicle.Progress >= 1.0m - terminalEpsilon))
-                currentStationId = line.StationIds[vehicle.SegmentIndex + 1];
+            }
+            else
+            {
+                if (stationById.TryGetValue(line.StationIds[vehicle.SegmentIndex], out var fromEntry) &&
+                    stationById.TryGetValue(line.StationIds[vehicle.SegmentIndex + 1], out var toEntry))
+                {
+                    int segLen = Distance(fromEntry.Key, toEntry.Key);
+                    if (vehicle.TileOffset == segLen)
+                        currentStationId = line.StationIds[vehicle.SegmentIndex + 1];
+                }
+            }
 
             if (currentStationId is null) continue;
             if (!stationById.TryGetValue(currentStationId.Value, out var stationEntry)) continue;
@@ -690,10 +683,10 @@ public class MetroManiaEngine
 
                     var closestViaThisLine = FindClosestStationOfTypeOnLine(
                         currentStationId.Value, passenger.DestinationType,
-                        vehicle.Direction, vehicle.SegmentIndex, vehicle.Progress,
+                        vehicle.Direction, vehicle.SegmentIndex, vehicle.TileOffset,
                         line, stationById, activeStations);
                     if (closestViaThisLine is null) continue;
-                    if (closestViaNetwork.Value.distance < closestViaThisLine.Value.distance - 0.001f) continue;
+                    if (closestViaNetwork.Value.distance < closestViaThisLine.Value.distance) continue;
 
                     station.Passengers.Remove(passenger);
                     vehicle.Passengers.Add(passenger);
@@ -738,26 +731,24 @@ public class MetroManiaEngine
     /// <summary>
     /// Finds the closest station of the given type reachable via the entire network (BFS by distance).
     /// </summary>
-    private static (Guid stationId, float distance)? FindClosestStationOfType(
+    private static (Guid stationId, int distance)? FindClosestStationOfType(
         Guid fromStationId, StationType targetType,
         List<LineState> lines,
         Dictionary<Guid, KeyValuePair<Location, StationState>> stationById,
         Dictionary<Location, StationState> activeStations)
     {
-        // Build an adjacency graph with distances
         var graph = BuildStationGraph(lines, stationById, activeStations);
 
-        // Dijkstra from fromStationId
-        var dist = new Dictionary<Guid, float> { [fromStationId] = 0 };
-        var pq = new PriorityQueue<Guid, float>();
+        var dist = new Dictionary<Guid, int> { [fromStationId] = 0 };
+        var pq = new PriorityQueue<Guid, int>();
         pq.Enqueue(fromStationId, 0);
 
-        (Guid stationId, float distance)? best = null;
+        (Guid stationId, int distance)? best = null;
 
         while (pq.Count > 0)
         {
             var current = pq.Dequeue();
-            float currentDist = dist[current];
+            int currentDist = dist[current];
 
             if (best.HasValue && currentDist >= best.Value.distance) break;
 
@@ -771,7 +762,7 @@ public class MetroManiaEngine
             if (!graph.TryGetValue(current, out var neighbors)) continue;
             foreach (var (neighbor, edgeDist) in neighbors)
             {
-                float newDist = currentDist + edgeDist;
+                int newDist = currentDist + edgeDist;
                 if (!dist.ContainsKey(neighbor) || newDist < dist[neighbor])
                 {
                     dist[neighbor] = newDist;
@@ -788,15 +779,15 @@ public class MetroManiaEngine
     /// following its current direction (and future ping-pong path).
     /// Returns the travel distance along the line to that station.
     /// </summary>
-    private static (Guid stationId, float distance)? FindClosestStationOfTypeOnLine(
+    private static (Guid stationId, int distance)? FindClosestStationOfTypeOnLine(
         Guid currentStationId, StationType targetType,
-        int direction, int segmentIndex, decimal progress,
+        int direction, int segmentIndex, int tileOffset,
         LineState line,
         Dictionary<Guid, KeyValuePair<Location, StationState>> stationById,
         Dictionary<Location, StationState> activeStations)
     {
         // Collect all stations on this line and their cumulative distances from station[0]
-        var cumulativeDist = new float[line.StationIds.Count];
+        var cumulativeDist = new int[line.StationIds.Count];
         cumulativeDist[0] = 0;
         for (int i = 1; i < line.StationIds.Count; i++)
         {
@@ -808,11 +799,10 @@ public class MetroManiaEngine
         }
 
         // Current position as cumulative distance from station[0]
-        float currentPos = cumulativeDist[segmentIndex] +
-            (float)progress * (segmentIndex + 1 < line.StationIds.Count ? cumulativeDist[segmentIndex + 1] - cumulativeDist[segmentIndex] : 0);
+        int currentPos = cumulativeDist[segmentIndex] + tileOffset;
 
         // Search in the direction of travel first, then the other direction (ping-pong)
-        float bestDist = float.MaxValue;
+        int bestDist = int.MaxValue;
         Guid? bestStation = null;
 
         // Forward pass (in current direction)
@@ -821,10 +811,10 @@ public class MetroManiaEngine
             // Check stations ahead (higher index)
             for (int i = 0; i < line.StationIds.Count; i++)
             {
-                if (cumulativeDist[i] <= currentPos + 0.001f) continue;
+                if (cumulativeDist[i] <= currentPos) continue;
                 if (stationById.TryGetValue(line.StationIds[i], out var entry) && entry.Value.Type == targetType)
                 {
-                    float d = cumulativeDist[i] - currentPos;
+                    int d = cumulativeDist[i] - currentPos;
                     if (d < bestDist) { bestDist = d; bestStation = line.StationIds[i]; }
                     break;
                 }
@@ -832,13 +822,13 @@ public class MetroManiaEngine
             // Also check ping-pong: stations behind (after reaching end and coming back)
             if (!bestStation.HasValue)
             {
-                float totalLength = cumulativeDist[^1];
-                float distToEnd = totalLength - currentPos;
+                int totalLength = cumulativeDist[^1];
+                int distToEnd = totalLength - currentPos;
                 for (int i = line.StationIds.Count - 2; i >= 0; i--)
                 {
                     if (stationById.TryGetValue(line.StationIds[i], out var entry) && entry.Value.Type == targetType)
                     {
-                        float d = distToEnd + (totalLength - cumulativeDist[i]);
+                        int d = distToEnd + (totalLength - cumulativeDist[i]);
                         if (d < bestDist) { bestDist = d; bestStation = line.StationIds[i]; }
                         break;
                     }
@@ -850,10 +840,10 @@ public class MetroManiaEngine
             // Check stations behind (lower index)
             for (int i = line.StationIds.Count - 1; i >= 0; i--)
             {
-                if (cumulativeDist[i] >= currentPos - 0.001f) continue;
+                if (cumulativeDist[i] >= currentPos) continue;
                 if (stationById.TryGetValue(line.StationIds[i], out var entry) && entry.Value.Type == targetType)
                 {
-                    float d = currentPos - cumulativeDist[i];
+                    int d = currentPos - cumulativeDist[i];
                     if (d < bestDist) { bestDist = d; bestStation = line.StationIds[i]; }
                     break;
                 }
@@ -861,12 +851,12 @@ public class MetroManiaEngine
             // Ping-pong: reach start, then forward
             if (!bestStation.HasValue)
             {
-                float distToStart = currentPos;
+                int distToStart = currentPos;
                 for (int i = 1; i < line.StationIds.Count; i++)
                 {
                     if (stationById.TryGetValue(line.StationIds[i], out var entry) && entry.Value.Type == targetType)
                     {
-                        float d = distToStart + cumulativeDist[i];
+                        int d = distToStart + cumulativeDist[i];
                         if (d < bestDist) { bestDist = d; bestStation = line.StationIds[i]; }
                         break;
                     }
@@ -878,14 +868,14 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Builds an adjacency graph of station connections with Euclidean distances.
+    /// Builds an adjacency graph of station connections with Chebyshev distances.
     /// </summary>
-    private static Dictionary<Guid, List<(Guid neighbor, float distance)>> BuildStationGraph(
+    private static Dictionary<Guid, List<(Guid neighbor, int distance)>> BuildStationGraph(
         List<LineState> lines,
         Dictionary<Guid, KeyValuePair<Location, StationState>> stationById,
         Dictionary<Location, StationState> activeStations)
     {
-        var graph = new Dictionary<Guid, List<(Guid, float)>>();
+        var graph = new Dictionary<Guid, List<(Guid, int)>>();
 
         foreach (var line in lines)
         {
@@ -896,7 +886,7 @@ public class MetroManiaEngine
 
                 if (stationById.TryGetValue(a, out var entryA) && stationById.TryGetValue(b, out var entryB))
                 {
-                    float d = Distance(entryA.Key, entryB.Key);
+                    int d = Distance(entryA.Key, entryB.Key);
 
                     if (!graph.ContainsKey(a)) graph[a] = [];
                     if (!graph.ContainsKey(b)) graph[b] = [];
@@ -909,7 +899,7 @@ public class MetroManiaEngine
         return graph;
     }
 
-    private static float Distance(Location a, Location b)
+    private static int Distance(Location a, Location b)
         => Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
 
     private class StationState(Guid id, StationType type, List<PassengerSpawnPhase> phases, int spawnedOnDay)
@@ -935,12 +925,12 @@ public class MetroManiaEngine
         public List<Guid> StationIds { get; } = [];
     }
 
-    private class VehicleState(Guid resourceId, Guid lineResourceId, int segmentIndex, decimal progress, int direction)
+    private class VehicleState(Guid resourceId, Guid lineResourceId, int segmentIndex, int tileOffset, int direction)
     {
         public Guid ResourceId { get; } = resourceId;
         public Guid LineResourceId { get; } = lineResourceId;
         public int SegmentIndex { get; set; } = segmentIndex;
-        public decimal Progress { get; set; } = progress;
+        public int TileOffset { get; set; } = tileOffset;
         public int Direction { get; set; } = direction;
         public List<Guid> WagonIds { get; } = [];
         public List<Passenger> Passengers { get; } = [];
