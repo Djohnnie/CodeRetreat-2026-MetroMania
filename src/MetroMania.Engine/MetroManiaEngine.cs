@@ -505,8 +505,17 @@ public class MetroManiaEngine
 
         if (existingLine is null)
         {
-            // Resource not yet in use — create a new line and mark the resource as used
+            // Resource not yet in use — create a new line and mark the resource as used.
             if (resource.InUse)
+                return snapshot;
+
+            // Both station IDs must differ — a line cannot start and end at the same station.
+            if (action.FromStationId == action.ToStationId)
+                return snapshot;
+
+            // Reject if these two stations are already directly connected (adjacent) on any line.
+            // "Directly connected" means they appear next to each other in some line's station list.
+            if (AreDirectlyConnected(snapshot.Lines, action.FromStationId, action.ToStationId))
                 return snapshot;
 
             var newLine = new Line { LineId = action.LineId, StationIds = [action.FromStationId, action.ToStationId] };
@@ -518,7 +527,7 @@ public class MetroManiaEngine
             };
         }
 
-        // Line already exists — try to extend it if one end matches FromStationId
+        // Line already exists — try to extend it if one end matches FromStationId.
         var stationIds = existingLine.StationIds.ToList();
 
         if (stationIds[^1] == action.FromStationId)
@@ -526,13 +535,42 @@ public class MetroManiaEngine
         else if (stationIds[0] == action.FromStationId)
             stationIds.Insert(0, action.ToStationId);
         else
-            return snapshot; // FromStationId is not at either end — ignore
+            return snapshot; // FromStationId is not at either end — ignore.
+
+        // The new terminal station must not already appear anywhere in this line.
+        // This prevents duplicates and loops (e.g. extending back to a mid-line station).
+        if (existingLine.StationIds.Contains(action.ToStationId))
+            return snapshot;
+
+        // The new segment must not duplicate a direct connection that already exists on any line.
+        if (AreDirectlyConnected(snapshot.Lines, action.FromStationId, action.ToStationId))
+            return snapshot;
 
         var extendedLine = existingLine with { StationIds = stationIds };
         return snapshot with
         {
             Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), extendedLine],
         };
+    }
+
+    /// <summary>
+    /// Returns true when <paramref name="stationA"/> and <paramref name="stationB"/> are
+    /// already directly connected — i.e. they appear as adjacent entries in any existing line.
+    /// </summary>
+    private static bool AreDirectlyConnected(IReadOnlyList<Line> lines, Guid stationA, Guid stationB)
+    {
+        foreach (var line in lines)
+        {
+            var ids = line.StationIds;
+            for (int i = 0; i < ids.Count - 1; i++)
+            {
+                // Check both orderings because lines are traversed in both directions.
+                if ((ids[i] == stationA && ids[i + 1] == stationB) ||
+                    (ids[i] == stationB && ids[i + 1] == stationA))
+                    return true;
+            }
+        }
+        return false;
     }
 
     private static GameSnapshot ApplyAddVehicleToLine(GameSnapshot snapshot, AddVehicleToLine action)
