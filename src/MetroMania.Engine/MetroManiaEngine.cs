@@ -60,7 +60,7 @@ public class MetroManiaEngine
             {
                 Time = gameTime,
                 TotalHoursElapsed = absoluteHour,
-                Score = 0, // TODO: calculate score based on game state
+                Score = snapshot.Score, // carried forward; incremented by ProcessTrains
                 Resources = [.. snapshot.Resources],
                 Stations = new Dictionary<Location, Station>(snapshot.Stations),
                 Lines = [.. snapshot.Lines],
@@ -85,9 +85,7 @@ public class MetroManiaEngine
             foreach (var (stationId, passenger) in spawnedPassengers)
                 runner.OnPassengerSpawned(snapshot, stationId, passenger.Id);
 
-            snapshot = MoveTrains(snapshot);
-
-            TransportPassengers(level, snapshot);
+            snapshot = ProcessTrains(level, snapshot);
 
             // Give weekly gift
             if (dayOfWeek == DayOfWeek.Monday && hourOfDay == 0)
@@ -111,7 +109,7 @@ public class MetroManiaEngine
 
         return new SimulationResult
         {
-            TotalScore = 0,
+            TotalScore = snapshots.Count > 0 ? snapshots[^1].Score : 0,
             DaysSurvived = absoluteHour / 24,
             TotalPassengersSpawned = 0,
             NumberOfPlayerActions = snapshots.Count(x => x.LastAction is not NoAction),
@@ -182,7 +180,14 @@ public class MetroManiaEngine
         }
     }
 
-    private static GameSnapshot MoveTrains(GameSnapshot snapshot)
+    /// <summary>
+    /// Processes all trains for one hour tick:
+    /// - If a train is at a station and has passengers to drop off, drop one (earn 1 point) and stay.
+    /// - Else if a train is at a station with passengers it can deliver further on the line, pick one up and stay.
+    /// - Otherwise, move the train one tile (reversing at terminals).
+    /// Only one passenger action (drop or pick-up) happens per train per hour.
+    /// </summary>
+    private static GameSnapshot ProcessTrains(Level level, GameSnapshot snapshot)
     {
         if (snapshot.Trains.Count == 0)
             return snapshot;
@@ -190,56 +195,114 @@ public class MetroManiaEngine
         var stationLocations = snapshot.Stations
             .ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
-        var updatedTrains = new List<Train>(snapshot.Trains.Count);
-        bool anyChanged = false;
+        // Work on mutable copies; we commit everything at the end in one with-expression.
+        var trains = snapshot.Trains.ToList();
+        var waitingPassengers = snapshot.Passengers.ToList();
+        int pointsScored = 0;
 
-        foreach (var train in snapshot.Trains)
+        for (int t = 0; t < trains.Count; t++)
         {
+            var train = trains[t];
+
             var line = snapshot.Lines.FirstOrDefault(l => l.LineId == train.LineId);
-            if (line is null)
+            if (line is null) continue;
+
+            var tilePath = LinePathHelper.ComputeTilePath(line, stationLocations);
+            if (tilePath.Count == 0) continue;
+
+            // ── At a station? ──────────────────────────────────────────────────
+            if (snapshot.Stations.TryGetValue(train.TilePosition, out var currentStation))
             {
-                updatedTrains.Add(train);
+                // 1. Drop off one passenger whose destination matches this station type.
+                var toDrop = train.Passengers.FirstOrDefault(p => p.DestinationType == currentStation.StationType);
+                if (toDrop is not null)
+                {
+                    trains[t] = train with
+                    {
+                        Passengers = train.Passengers.Where(p => p.Id != toDrop.Id).ToList()
+                    };
+                    pointsScored++;
+                    continue; // train stays this tick
+                }
+
+                // 2. Pick up one waiting passenger deliverable in the current travel direction.
+                //    FIFO: sort by spawn time so the oldest waiting passenger boards first.
+                //    Terminal edge-case: if we're at a terminal the next move will flip direction,
+                //    so use the outgoing (reversed) direction for reachability check.
+                int currentIndex = tilePath.IndexOf(train.TilePosition);
+                // Use the outgoing direction: if the current direction would step off the path
+                // (train needs to reverse), flip it. This handles both the terminal edge case
+                // (a travelling train about to reverse) and a newly deployed train at index 0
+                // whose direction already points into the path (no flip needed).
+                bool wouldStepOffPath = currentIndex + train.Direction < 0 || currentIndex + train.Direction >= tilePath.Count;
+                int effectiveDirection = wouldStepOffPath ? -train.Direction : train.Direction;
+                var futureTypes = GetFutureStationTypes(tilePath, currentIndex, effectiveDirection, snapshot.Stations);
+
+                var toPickUp = waitingPassengers
+                    .Where(p =>
+                        p.StationId == currentStation.Id &&
+                        train.Passengers.Count < level.LevelData.VehicleCapacity &&
+                        futureTypes.Contains(p.DestinationType))
+                    .MinBy(p => p.SpawnedAtHour);
+
+                if (toPickUp is not null)
+                {
+                    waitingPassengers.Remove(toPickUp);
+                    trains[t] = train with
+                    {
+                        Passengers = [.. train.Passengers, toPickUp with { StationId = null }]
+                    };
+                    continue; // train stays this tick
+                }
+            }
+
+            // ── Move one tile ──────────────────────────────────────────────────
+            if (tilePath.Count < 2) continue;
+
+            int idx = tilePath.IndexOf(train.TilePosition);
+            if (idx == -1)
+            {
+                trains[t] = train with { TilePosition = tilePath[0], Direction = 1 };
                 continue;
             }
 
-            var path = LinePathHelper.ComputeTilePath(line, stationLocations);
-            if (path.Count < 2)
+            int dir = train.Direction;
+            int nextIdx = idx + dir;
+            if (nextIdx < 0 || nextIdx >= tilePath.Count)
             {
-                updatedTrains.Add(train);
-                continue;
+                dir = -dir;
+                nextIdx = idx + dir;
             }
+            nextIdx = Math.Clamp(nextIdx, 0, tilePath.Count - 1);
 
-            var currentIndex = path.IndexOf(train.TilePosition);
-            if (currentIndex == -1)
-            {
-                // Position no longer on the path — snap to the start and face forward.
-                updatedTrains.Add(train with { TilePosition = path[0], Direction = 1 });
-                anyChanged = true;
-                continue;
-            }
-
-            int direction = train.Direction;
-            int nextIndex = currentIndex + direction;
-
-            // At a terminal: flip direction then step (train never pauses at ends)
-            if (nextIndex < 0 || nextIndex >= path.Count)
-            {
-                direction = -direction;
-                nextIndex = currentIndex + direction;
-            }
-
-            nextIndex = Math.Clamp(nextIndex, 0, path.Count - 1);
-
-            updatedTrains.Add(train with { TilePosition = path[nextIndex], Direction = direction });
-            anyChanged = true;
+            trains[t] = train with { TilePosition = tilePath[nextIdx], Direction = dir };
         }
 
-        return anyChanged ? snapshot with { Trains = updatedTrains } : snapshot;
+        return snapshot with
+        {
+            Trains    = trains,
+            Passengers = waitingPassengers,
+            Score     = snapshot.Score + pointsScored,
+        };
     }
 
-    private static void TransportPassengers(Level level, GameSnapshot snapshot)
+    /// <summary>
+    /// Returns the set of station types reachable from the current tile index moving in
+    /// <paramref name="direction"/> without reversing, i.e. stations the train will visit
+    /// before reaching its current terminal.
+    /// </summary>
+    private static HashSet<StationType> GetFutureStationTypes(
+        List<Location> tilePath, int currentIndex, int direction,
+        Dictionary<Location, Station> stations)
     {
-        // Not yet implemented
+        var types = new HashSet<StationType>();
+        int step = direction >= 0 ? 1 : -1;
+        for (int i = currentIndex + step; i >= 0 && i < tilePath.Count; i += step)
+        {
+            if (stations.TryGetValue(tilePath[i], out var station))
+                types.Add(station.StationType);
+        }
+        return types;
     }
 
     private static ResourceType GetWeeklyGift(Level level, GameSnapshot snapshot)

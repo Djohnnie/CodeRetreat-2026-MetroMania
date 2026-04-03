@@ -556,7 +556,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                     nextTile.X - train.TilePosition.X);
             }
 
-            DrawVehicleRect(canvas, vx, vy, angle, lineColor, []);
+            DrawVehicleRect(canvas, vx, vy, angle, lineColor, train.Passengers);
         }
     }
 

@@ -16,4 +16,7 @@ public record Train
     /// -1 = moving toward the start (lower indices). Reverses at terminals.
     /// </summary>
     public int Direction { get; init; } = 1;
+
+    /// <summary>Passengers currently riding this train.</summary>
+    public IReadOnlyList<Passenger> Passengers { get; init; } = [];
 }
