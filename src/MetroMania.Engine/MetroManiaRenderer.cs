@@ -561,8 +561,19 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     }
 
     /// <summary>
-    /// Draws a single train rectangle, oriented along <paramref name="angle"/> and
-    /// centered at (<paramref name="cx"/>, <paramref name="cy"/>).
+    /// Draws a single train oriented along <paramref name="angle"/> and centered at
+    /// (<paramref name="cx"/>, <paramref name="cy"/>).
+    ///
+    /// Shape: rectangular body with two rounded rear corners and a triangular point
+    /// at the front so the travel direction is immediately obvious.
+    ///
+    ///   rear              front
+    ///  _______________________
+    /// |                        \
+    /// |           body          > tip
+    /// |_______________________/
+    ///
+    /// The canvas is rotated so +X = travel direction before drawing.
     /// </summary>
     private static void DrawVehicleRect(
         SKCanvas canvas, float cx, float cy, float angle,
@@ -572,7 +583,34 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         canvas.Translate(cx, cy);
         canvas.RotateDegrees(angle * (180f / MathF.PI));
 
-        var rect = SKRect.Create(-TrainLength / 2f, -TrainHeight / 2f, TrainLength, TrainHeight);
+        float xl = -TrainLength / 2f;   // rear (left) edge
+        float xr =  TrainLength / 2f;   // frontmost X (tip)
+        float yt = -TrainHeight / 2f;   // top edge
+        float yb =  TrainHeight / 2f;   // bottom edge
+        float r  =  TrainCornerRadius;
+
+        // How far the angled front bevel extends horizontally back from the tip.
+        // A small notch gives a subtle directional bevel without eating into the
+        // passenger area. ~1/4 of the height keeps the angle gentle (≈ 17°).
+        float notch = TrainHeight / 4f;
+
+        // Build the pointy-front path:
+        //   top-left arc → top line → front bevel → tip → front bevel → bottom line
+        //   → bottom-left arc → rear left edge → back to start
+        var path = new SKPath();
+        path.MoveTo(xl + r, yt);                        // start just right of top-left corner
+        path.LineTo(xr - notch, yt);                    // top edge
+        path.LineTo(xr, 0f);                            // top-front bevel to tip
+        path.LineTo(xr - notch, yb);                    // tip to bottom-front bevel
+        path.LineTo(xl + r, yb);                        // bottom edge
+
+        // Bottom-left rounded corner: arc from (xl+r, yb) → (xl, yb-r)
+        path.ArcTo(new SKRect(xl, yb - 2 * r, xl + 2 * r, yb), 90f, 90f, false);
+        // Rear left straight edge
+        path.LineTo(xl, yt + r);
+        // Top-left rounded corner: arc from (xl, yt+r) → (xl+r, yt)
+        path.ArcTo(new SKRect(xl, yt, xl + 2 * r, yt + 2 * r), 180f, 90f, false);
+        path.Close();
 
         using var bodyPaint = new SKPaint
         {
@@ -580,7 +618,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             Color = lineColor,
             IsAntialias = true,
         };
-        canvas.DrawRoundRect(rect, TrainCornerRadius, TrainCornerRadius, bodyPaint);
+        canvas.DrawPath(path, bodyPaint);
 
         using var borderPaint = new SKPaint
         {
@@ -589,7 +627,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             StrokeWidth = TrainBorderWidth,
             IsAntialias = true,
         };
-        canvas.DrawRoundRect(rect, TrainCornerRadius, TrainCornerRadius, borderPaint);
+        canvas.DrawPath(path, borderPaint);
 
         if (passengers.Count > 0)
             DrawPassengersInVehicle(canvas, passengers);

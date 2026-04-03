@@ -22,6 +22,7 @@ internal static class Level2
                 new MetroStation { GridX = 3,  GridY = 3, StationType = StationType.Circle,    SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 8 }] },
                 new MetroStation { GridX = 12, GridY = 5, StationType = StationType.Rectangle, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 12 }] },
                 new MetroStation { GridX = 10, GridY = 7, StationType = StationType.Triangle, SpawnDelayDays = 2, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 16 }] },
+                new MetroStation { GridX = 2, GridY = 8, StationType = StationType.Circle, SpawnDelayDays = 18, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 16 }] },
             ]
         }
     };

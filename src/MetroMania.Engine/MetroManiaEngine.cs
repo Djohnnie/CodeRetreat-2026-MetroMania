@@ -181,11 +181,39 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Processes all trains for one hour tick:
-    /// - If a train is at a station and has passengers to drop off, drop one (earn 1 point) and stay.
-    /// - Else if a train is at a station with passengers it can deliver further on the line, pick one up and stay.
-    /// - Otherwise, move the train one tile (reversing at terminals).
-    /// Only one passenger action (drop or pick-up) happens per train per hour.
+    /// Per-tick decision for a single train, computed during Phase 1 of <see cref="ProcessTrains"/>
+    /// and potentially revised during Phase 2 collision resolution.
+    /// </summary>
+    private record struct TrainTick(
+        /// <summary>True when the train is staying at a station to perform a passenger operation.</summary>
+        bool HasWork,
+        /// <summary>Passenger to drop off this tick; null if none.</summary>
+        Passenger? DropOff,
+        /// <summary>Passenger to pick up this tick; null if none.</summary>
+        Passenger? PickUp,
+        /// <summary>Tile the train will occupy after this tick (its current tile when blocked or working).</summary>
+        Location FinalTile,
+        /// <summary>Travel direction the train carries into the next tick.</summary>
+        int FinalDirection
+    );
+
+    /// <summary>
+    /// Processes all trains for one simulation tick using a three-phase pipeline:
+    ///   Phase 1 – Each train independently decides what it WANTS to do (work or move).
+    ///             All reads use the STARTING snapshot so decisions are simultaneous.
+    ///   Phase 2 – Collision resolution: blocking is propagated iteratively to a
+    ///             fixed point so that newly blocked trains can themselves block
+    ///             trains behind them.
+    ///   Phase 3 – Results are applied: passenger operations execute and trains move.
+    ///
+    /// Collision rules enforced:
+    ///   A. Station occupation (direction-agnostic): only one train at a station tile at a time.
+    ///      A train that would enter an occupied station is held at its current tile.
+    ///   B. Non-station same-direction: a blocked (held) train on open track prevents
+    ///      trains behind it (same direction) from advancing into its tile.
+    ///      Trains going in the opposite direction may cross freely.
+    ///   C. Simultaneous station arrival: when two moving trains target the same station
+    ///      in the same tick the lower-index train wins; the other is blocked.
     /// </summary>
     private static GameSnapshot ProcessTrains(Level level, GameSnapshot snapshot)
     {
@@ -194,49 +222,59 @@ public class MetroManiaEngine
 
         var stationLocations = snapshot.Stations
             .ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        var stationTiles = new HashSet<Location>(snapshot.Stations.Keys);
 
-        // Work on mutable copies; we commit everything at the end in one with-expression.
+        // Work on mutable copies; committed in a single with-expression at the end.
         var trains = snapshot.Trains.ToList();
         var waitingPassengers = snapshot.Passengers.ToList();
         int pointsScored = 0;
 
+        // ── Precompute tile paths once – reused across all three phases ────────────
+        var tilePaths = trains
+            .Select(t =>
+            {
+                var line = snapshot.Lines.FirstOrDefault(l => l.LineId == t.LineId);
+                return line is null ? (List<Location>)[] : LinePathHelper.ComputeTilePath(line, stationLocations);
+            })
+            .ToArray();
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // PHASE 1: Compute desired action for every train independently.
+        // ══════════════════════════════════════════════════════════════════════════
+        var ticks = new TrainTick[trains.Count];
+
         for (int t = 0; t < trains.Count; t++)
         {
             var train = trains[t];
+            var tilePath = tilePaths[t];
 
-            var line = snapshot.Lines.FirstOrDefault(l => l.LineId == train.LineId);
-            if (line is null) continue;
+            if (tilePath.Count == 0)
+            {
+                // Line has no computable path yet — train idles in place.
+                ticks[t] = new TrainTick(false, null, null, train.TilePosition, train.Direction);
+                continue;
+            }
 
-            var tilePath = LinePathHelper.ComputeTilePath(line, stationLocations);
-            if (tilePath.Count == 0) continue;
-
-            // ── At a station? ──────────────────────────────────────────────────
+            // ── Train is at a station: check for passenger work ────────────────
             if (snapshot.Stations.TryGetValue(train.TilePosition, out var currentStation))
             {
-                // 1. Drop off one passenger whose destination matches this station type.
+                // 1. Drop off a passenger whose destination type matches this station.
                 var toDrop = train.Passengers.FirstOrDefault(p => p.DestinationType == currentStation.StationType);
                 if (toDrop is not null)
                 {
-                    trains[t] = train with
-                    {
-                        Passengers = train.Passengers.Where(p => p.Id != toDrop.Id).ToList()
-                    };
-                    pointsScored++;
-                    continue; // train stays this tick
+                    ticks[t] = new TrainTick(true, toDrop, null, train.TilePosition, train.Direction);
+                    continue;
                 }
 
-                // 2. Pick up one waiting passenger deliverable in the current travel direction.
-                //    FIFO: sort by spawn time so the oldest waiting passenger boards first.
-                //    Terminal edge-case: if we're at a terminal the next move will flip direction,
-                //    so use the outgoing (reversed) direction for reachability check.
+                // 2. Pick up the oldest waiting passenger (FIFO) whose destination is
+                //    reachable in the outgoing travel direction.
+                //    At a terminal, the next move flips direction, so we look ahead
+                //    using the post-flip direction instead of the stored one.
                 int currentIndex = tilePath.IndexOf(train.TilePosition);
-                // Use the outgoing direction: if the current direction would step off the path
-                // (train needs to reverse), flip it. This handles both the terminal edge case
-                // (a travelling train about to reverse) and a newly deployed train at index 0
-                // whose direction already points into the path (no flip needed).
-                bool wouldStepOffPath = currentIndex + train.Direction < 0 || currentIndex + train.Direction >= tilePath.Count;
-                int effectiveDirection = wouldStepOffPath ? -train.Direction : train.Direction;
-                var futureTypes = GetFutureStationTypes(tilePath, currentIndex, effectiveDirection, snapshot.Stations);
+                bool wouldStepOffPath = currentIndex + train.Direction < 0
+                                     || currentIndex + train.Direction >= tilePath.Count;
+                int effectiveDir = wouldStepOffPath ? -train.Direction : train.Direction;
+                var futureTypes = GetFutureStationTypes(tilePath, currentIndex, effectiveDir, snapshot.Stations);
 
                 var toPickUp = waitingPassengers
                     .Where(p =>
@@ -247,27 +285,31 @@ public class MetroManiaEngine
 
                 if (toPickUp is not null)
                 {
-                    waitingPassengers.Remove(toPickUp);
-                    trains[t] = train with
-                    {
-                        Passengers = [.. train.Passengers, toPickUp with { StationId = null }]
-                    };
-                    continue; // train stays this tick
+                    ticks[t] = new TrainTick(true, null, toPickUp, train.TilePosition, train.Direction);
+                    continue;
                 }
             }
 
-            // ── Move one tile ──────────────────────────────────────────────────
-            if (tilePath.Count < 2) continue;
+            // ── No work at this tick — compute movement ────────────────────────
+            if (tilePath.Count < 2)
+            {
+                // Single-tile path; train cannot move.
+                ticks[t] = new TrainTick(false, null, null, train.TilePosition, train.Direction);
+                continue;
+            }
 
             int idx = tilePath.IndexOf(train.TilePosition);
             if (idx == -1)
             {
-                trains[t] = train with { TilePosition = tilePath[0], Direction = 1 };
+                // Position is not on the current path (e.g. path shrank) — snap to start.
+                ticks[t] = new TrainTick(false, null, null, tilePath[0], 1);
                 continue;
             }
 
             int dir = train.Direction;
             int nextIdx = idx + dir;
+
+            // Reverse direction when reaching either terminal of the line.
             if (nextIdx < 0 || nextIdx >= tilePath.Count)
             {
                 dir = -dir;
@@ -275,7 +317,136 @@ public class MetroManiaEngine
             }
             nextIdx = Math.Clamp(nextIdx, 0, tilePath.Count - 1);
 
-            trains[t] = train with { TilePosition = tilePath[nextIdx], Direction = dir };
+            ticks[t] = new TrainTick(false, null, null, tilePath[nextIdx], dir);
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // PHASE 2: Collision resolution — iterate to a fixed point.
+        //
+        // Each pass rebuilds the occupied-tile sets from scratch so that trains
+        // newly blocked in the current pass can cascade their blocking to trains
+        // behind them in subsequent passes.
+        // ══════════════════════════════════════════════════════════════════════════
+        bool anyChange;
+        do
+        {
+            anyChange = false;
+
+            // ── Build the current occupied-tile sets from all staying trains ────
+            // A staying train is one whose FinalTile equals its starting position
+            // (it is either working at a station or was blocked in a previous pass).
+            var occupiedStations = new HashSet<Location>();
+            var occupiedNonStationByDir = new HashSet<(Location Tile, int Dir)>();
+
+            for (int t = 0; t < trains.Count; t++)
+            {
+                var tick = ticks[t];
+                bool isStaying = tick.FinalTile == trains[t].TilePosition;
+                if (!isStaying) continue;
+
+                if (stationTiles.Contains(tick.FinalTile))
+                    // Rule A: station tiles block all trains regardless of direction.
+                    occupiedStations.Add(tick.FinalTile);
+                else
+                    // Rule B: non-station tiles only block trains going the same way.
+                    occupiedNonStationByDir.Add((tick.FinalTile, trains[t].Direction));
+            }
+
+            // ── Rule C: two moving trains targeting the same station ─────────────
+            // Trains are processed in list order; the first to claim a station wins.
+            // The loser is blocked at its current tile.
+            var stationClaims = new Dictionary<Location, int>(); // tile → winning train index
+            for (int t = 0; t < trains.Count; t++)
+            {
+                var tick = ticks[t];
+                bool isMoving = tick.FinalTile != trains[t].TilePosition;
+                if (!isMoving || !stationTiles.Contains(tick.FinalTile)) continue;
+
+                if (!stationClaims.TryAdd(tick.FinalTile, t))
+                {
+                    // A lower-index train already claimed this station — block this one.
+                    ticks[t] = tick with
+                    {
+                        FinalTile      = trains[t].TilePosition,
+                        FinalDirection = trains[t].Direction
+                    };
+                    anyChange = true;
+                }
+            }
+
+            // ── Rules A and B: block trains targeting occupied tiles ─────────────
+            for (int t = 0; t < trains.Count; t++)
+            {
+                var tick = ticks[t];
+                bool isMoving = tick.FinalTile != trains[t].TilePosition;
+                if (!isMoving) continue; // already staying — nothing to do
+
+                // Rule A: target station is held by a working or previously blocked train.
+                if (occupiedStations.Contains(tick.FinalTile))
+                {
+                    ticks[t] = tick with
+                    {
+                        FinalTile      = trains[t].TilePosition,
+                        FinalDirection = trains[t].Direction
+                    };
+                    anyChange = true;
+                    continue;
+                }
+
+                // Rule B: target non-station tile is held by a same-direction train.
+                if (occupiedNonStationByDir.Contains((tick.FinalTile, tick.FinalDirection)))
+                {
+                    ticks[t] = tick with
+                    {
+                        FinalTile      = trains[t].TilePosition,
+                        FinalDirection = trains[t].Direction
+                    };
+                    anyChange = true;
+                }
+            }
+        } while (anyChange);
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // PHASE 3: Apply resolved tick results.
+        // Working trains perform their passenger operation and stay in place.
+        // All other trains move to their resolved FinalTile (or stay if blocked).
+        // ══════════════════════════════════════════════════════════════════════════
+        for (int t = 0; t < trains.Count; t++)
+        {
+            var tick  = ticks[t];
+            var train = trains[t];
+
+            if (tick.HasWork)
+            {
+                if (tick.DropOff is not null)
+                {
+                    // Passenger delivered — remove from train and award a point.
+                    trains[t] = train with
+                    {
+                        Passengers = train.Passengers.Where(p => p.Id != tick.DropOff.Id).ToList()
+                    };
+                    pointsScored++;
+                }
+                else if (tick.PickUp is not null)
+                {
+                    // Passenger boarded — remove from the platform and add to the train.
+                    waitingPassengers.Remove(tick.PickUp);
+                    trains[t] = train with
+                    {
+                        Passengers = [.. train.Passengers, tick.PickUp with { StationId = null }]
+                    };
+                }
+                // TilePosition and Direction are unchanged — train stays at station.
+            }
+            else
+            {
+                // Move to resolved position (same tile as start when blocked).
+                trains[t] = train with
+                {
+                    TilePosition = tick.FinalTile,
+                    Direction    = tick.FinalDirection,
+                };
+            }
         }
 
         return snapshot with
@@ -366,24 +537,35 @@ public class MetroManiaEngine
 
     private static GameSnapshot ApplyAddVehicleToLine(GameSnapshot snapshot, AddVehicleToLine action)
     {
-        // Must be an available (not in-use) Train resource
+        // Must be an available (not in-use) Train resource.
         var resource = snapshot.Resources.FirstOrDefault(
             r => r.Id == action.VehicleId && r.Type == ResourceType.Train && !r.InUse);
         if (resource is null)
             return snapshot;
 
-        // Line must exist and be in use
+        // Line must exist and be in use.
         var line = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
         if (line is null)
             return snapshot;
 
-        // The spawn station must be on the line
+        // The spawn station must be on the line.
         if (!line.StationIds.Contains(action.StationId))
             return snapshot;
 
-        // Resolve the station to a tile location
+        // Resolve the station to a tile location.
         var stationEntry = snapshot.Stations.FirstOrDefault(kvp => kvp.Value.Id == action.StationId);
         if (stationEntry.Value is null)
+            return snapshot;
+
+        // A line cannot have more trains than it has stations (e.g. 3 stations → max 3 trains).
+        // This keeps minimum spacing between trains and guarantees the shuttle pattern makes sense.
+        var trainsOnLine = snapshot.Trains.Count(t => t.LineId == action.LineId);
+        if (trainsOnLine >= line.StationIds.Count)
+            return snapshot;
+
+        // Cannot deploy a train at a tile already occupied by another train.
+        // This enforces the single-occupancy invariant at the moment of deployment.
+        if (snapshot.Trains.Any(t => t.TilePosition == stationEntry.Key))
             return snapshot;
 
         var newTrain = new Train
