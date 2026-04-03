@@ -1,4 +1,3 @@
-using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
 using MetroMania.Engine.Model;
 using MetroMania.Engine.Tests.Support;
@@ -9,117 +8,74 @@ namespace MetroMania.Engine.Tests.StepDefinitions;
 [Binding]
 public class PassengerSpawningStepDefinitions(EngineTestContext ctx)
 {
-    [Given(@"a level with a (\w+) station at \((\d+),(\d+)\) with a spawn delay of (\d+) days? and no passenger spawn phases")]
-    public void GivenAStationWithNoSpawnPhases(string type, int x, int y, int delay)
+    [Then(@"the last snapshot should contain (\d+) passengers?")]
+    public void ThenSnapshotContainsNPassengers(int expected)
     {
-        ctx.Stations.Add(new MetroStation
-        {
-            GridX = x,
-            GridY = y,
-            StationType = Enum.Parse<StationType>(type),
-            SpawnDelayDays = delay,
-            PassengerSpawnPhases = []
-        });
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.Equal(expected, ctx.LastSnapshot.Passengers.Count);
     }
 
-    [Given(@"a level with a (\w+) station at \((\d+),(\d+)\) with a spawn delay of (\d+) days? and the following spawn phases:")]
-    public void GivenAStationWithSpawnPhases(string type, int x, int y, int delay, DataTable table)
+    [Then(@"all spawned passengers should have unique IDs")]
+    public void ThenAllPassengersHaveUniqueIds()
     {
-        var phases = table.Rows.Select(row => new PassengerSpawnPhase
-        {
-            AfterDays = int.Parse(row["AfterDays"]),
-            FrequencyInHours = int.Parse(row["FrequencyInHours"])
-        }).ToList();
-
-        ctx.Stations.Add(new MetroStation
-        {
-            GridX = x,
-            GridY = y,
-            StationType = Enum.Parse<StationType>(type),
-            SpawnDelayDays = delay,
-            PassengerSpawnPhases = phases
-        });
+        var ids = ctx.PassengerSpawnedCalls.Select(e => e.PassengerId).ToList();
+        Assert.Equal(ids.Count, ids.Distinct().Count());
     }
 
-    [Given(@"the simulation will be cancelled after (\d+) hours")]
-    public void GivenTheSimulationWillBeCancelledAfterHours(int hours)
+    [Then(@"all passenger spawn events should reference the station at \((\d+),(\d+)\)")]
+    public void ThenAllPassengersReferenceStationAt(int x, int y)
     {
-        ctx.CancelAfterHours = hours;
+        Assert.NotEmpty(ctx.PassengerSpawnedCalls);
+        var expectedStationId = ctx.StationIdsByLocation[new Location(x, y)];
+        Assert.All(ctx.PassengerSpawnedCalls,
+            e => Assert.Equal(expectedStationId, e.StationId));
     }
 
-    [When(@"the simulation runs until game over or cancellation")]
-    public void WhenTheSimulationRunsUntilGameOverOrCancellation()
+    [Then(@"all passenger spawn events should reference the (\w+) station at \((\d+),(\d+)\)")]
+    public void ThenAllPassengersReferenceNamedStationAt(string type, int x, int y)
     {
-        try
-        {
-            var level = ctx.BuildLevel();
-            ctx.Result = ctx.Engine.Run(ctx.Runner.Object, level, ctx.Cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            ctx.WasCancelled = true;
-        }
+        Assert.NotEmpty(ctx.PassengerSpawnedCalls);
+        var expectedStationId = ctx.StationIdsByLocation[new Location(x, y)];
+        Assert.All(ctx.PassengerSpawnedCalls,
+            e => Assert.Equal(expectedStationId, e.StationId));
     }
 
-    [Then(@"the simulation should have been cancelled")]
-    public void ThenTheSimulationShouldHaveBeenCancelled()
+    [Then(@"all spawned passengers should have a destination type different from (\w+)")]
+    public void ThenAllPassengersHaveDifferentDestinationType(string stationTypeName)
     {
-        Assert.True(ctx.WasCancelled, "Expected the simulation to have been cancelled");
+        var disallowed = Enum.Parse<StationType>(stationTypeName);
+        Assert.NotEmpty(ctx.PassengerSpawnedCalls);
+        Assert.All(ctx.PassengerSpawnedCalls,
+            e => Assert.NotEqual(disallowed, e.DestinationType));
     }
 
-    [Then(@"the passenger waiting events should be:")]
-    public void ThenThePassengerWaitingEventsShouldBe(DataTable table)
+    [Then(@"all spawned passengers should have a destination type different from the type of their origin station")]
+    public void ThenAllPassengersHaveDifferentDestinationFromOrigin()
     {
-        var expected = table.Rows.Select(row => new
+        Assert.NotEmpty(ctx.PassengerSpawnedCalls);
+        foreach (var ev in ctx.PassengerSpawnedCalls)
         {
-            Day = int.Parse(row["Day"]),
-            Hour = int.Parse(row["Hour"]),
-            X = int.Parse(row["X"]),
-            Y = int.Parse(row["Y"]),
-            PassengerCount = int.Parse(row["PassengerCount"])
-        }).ToList();
-
-        Assert.Equal(expected.Count, ctx.PassengerWaitingCalls.Count);
-
-        for (int i = 0; i < expected.Count; i++)
-        {
-            var exp = expected[i];
-            var actual = ctx.PassengerWaitingCalls[i];
-
-            Assert.Equal(exp.Day, actual.Time.Day);
-            Assert.Equal(exp.Hour, actual.Time.Hour);
-            Assert.Equal(new Location(exp.X, exp.Y), actual.Location);
-            Assert.Equal(exp.PassengerCount, actual.Passengers.Count);
+            var stationEntry = ctx.LastSnapshot!.Stations.FirstOrDefault(s => s.Value.Id == ev.StationId);
+            Assert.NotEqual(Guid.Empty, stationEntry.Value?.Id ?? Guid.Empty);
+            Assert.NotEqual(stationEntry.Value!.StationType, ev.DestinationType);
         }
     }
 
-    [Then(@"all passengers should have a destination type different from their origin station type")]
-    public void ThenAllPassengersShouldHaveDifferentDestinationType()
+    [Then(@"passenger spawn events should reference both stations")]
+    public void ThenPassengerEventsReferenceBothStations()
     {
-        Assert.NotEmpty(ctx.PassengerWaitingCalls);
-        foreach (var evt in ctx.PassengerWaitingCalls)
-        {
-            var stationDef = ctx.Stations.First(s => s.GridX == evt.Location.X && s.GridY == evt.Location.Y);
-            foreach (var passenger in evt.Passengers)
-            {
-                Assert.NotEqual(stationDef.StationType, passenger.DestinationType);
-            }
-        }
+        Assert.NotEmpty(ctx.PassengerSpawnedCalls);
+        var referencedIds = ctx.PassengerSpawnedCalls.Select(e => e.StationId).Distinct().ToHashSet();
+        Assert.True(referencedIds.Count >= 2,
+            $"Expected passenger events to reference at least 2 distinct stations, but got {referencedIds.Count}");
     }
 
-    [Then(@"all passengers should have a destination type that exists among spawned station types")]
-    public void ThenAllPassengersShouldHaveExistingDestinationType()
+    [Then(@"no passenger spawn events should reference the station at \((\d+),(\d+)\)")]
+    public void ThenNoPassengerEventsReferenceStationAt(int x, int y)
     {
-        Assert.NotEmpty(ctx.PassengerWaitingCalls);
-        Assert.NotNull(ctx.Snapshot);
-        var spawnedTypes = ctx.Snapshot.Stations.Values.Select(s => s.Type).Distinct().ToHashSet();
+        if (!ctx.StationIdsByLocation.TryGetValue(new Location(x, y), out var stationId))
+            return; // station never spawned — trivially satisfied
 
-        foreach (var evt in ctx.PassengerWaitingCalls)
-        {
-            foreach (var passenger in evt.Passengers)
-            {
-                Assert.Contains(passenger.DestinationType, spawnedTypes);
-            }
-        }
+        Assert.DoesNotContain(ctx.PassengerSpawnedCalls, e => e.StationId == stationId);
     }
 }

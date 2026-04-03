@@ -1,67 +1,91 @@
 Feature: Event Ordering
-    The game engine fires events on the IMetroManiaRunner in a strict three-phase order
-    on every hour tick:
+    Within each tick the engine fires events in a strict order:
+      1. OnDayStart          — only at hour 0 of each day
+      2. OnStationSpawned    — once per station that spawns this tick
+      3. OnPassengerSpawned  — once per passenger that spawns this tick
+      4. OnWeeklyGiftReceived — only on Monday (day 2, 9, 16, ...) at hour 0
+      5. OnHourTicked        — every tick, always last
 
-      Phase 1 — "Other" events fire first:
-                OnStationSpawned, OnWeeklyGift, OnPassengerWaiting,
-                OnStationOverrun, OnGameOver
-      Phase 2 — OnDayStart fires second (only at midnight / hour 0)
-      Phase 3 — OnHourTick fires last (every hour)
+    Scenario: On the first tick OnDayStart fires before OnHourTicked
+        Given an empty level
+        When the simulation runs for 1 hour
+        Then "OnDayStart" should have fired before "OnHourTicked"
 
-    Scenario: Station spawn fires before day start which fires before hour tick
+    Scenario: First-tick event sequence on an empty level is OnDayStart then OnHourTicked
+        Given an empty level
+        When the simulation runs for 1 hour
+        Then the event log should be "OnDayStart", "OnHourTicked"
+
+    Scenario: Station spawn fires after OnDayStart and before OnHourTicked
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days
         When the simulation runs for 1 hour
-        Then "OnStationSpawned" should have fired before "OnDayStart"
-        And "OnDayStart" should have fired before "OnHourTick"
+        Then "OnDayStart" should have fired before "OnStationSpawned"
+        And "OnStationSpawned" should have fired before "OnHourTicked"
 
-    Scenario: OnDayStart fires exactly once per day at midnight
-        Given an empty level
-        When the simulation runs for 48 hours
-        Then "OnDayStart" should have fired exactly 2 times
-        And "OnDayStart" should have fired for days 1 and 2
-
-    Scenario: OnDayStart always fires immediately before OnHourTick on day boundaries
-        Given an empty level
-        When the simulation runs for 25 hours
-        Then on each day boundary "OnDayStart" should fire directly before "OnHourTick"
-
-    Scenario: OnHourTick fires every hour with the correct day and hour values
-        Given an empty level
-        When the simulation runs for 48 hours
-        Then "OnHourTick" should have fired 48 times
-        And each hour tick should report the correct day and hour
-
-    Scenario: Weekly gift fires before day start on Monday
-        Given an empty level
-        When the simulation runs for 1 hour
-        Then "OnWeeklyGift" should have fired before "OnDayStart"
-
-    Scenario: Passenger waiting fires before day start when both occur on the same tick
-        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 24 hours
-        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
-        When the simulation runs for 25 hours
-        Then the first "OnPassengerWaiting" should appear before the second "OnDayStart"
-
-    Scenario: Station overrun notification fires before the player gets to act
-        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
-        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
-        When the simulation runs for 11 hours
-        Then "OnStationOverrun" should have fired directly before "OnHourTick"
-
-    Scenario: Game over is the final event and ends the simulation immediately
-        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
-        And a level with a Triangle station at (9,9) with a spawn delay of 0 days
-        When the simulation runs until game over
-        Then "OnGameOver" should have fired exactly 1 time
-        And "OnGameOver" should be the last event fired
-
-    Scenario: All event types respect the three-phase ordering on day 1
+    Scenario: First-tick event sequence with a delay-0 station is OnDayStart, OnStationSpawned, OnHourTicked
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days
         When the simulation runs for 1 hour
-        Then the first 4 events should be "OnStationSpawned", "OnWeeklyGift", "OnDayStart", "OnHourTick"
+        Then the event log should be "OnDayStart", "OnStationSpawned", "OnHourTicked"
 
-    Scenario: Non-midnight hours produce only hour tick events
+    Scenario: Passenger spawn fires after station spawn and before OnHourTicked
+        Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 1 hour
+        And a level with a Triangle station at (9,0) with a spawn delay of 0 days and no passenger spawn phases
+        When the simulation runs for 1 hour
+        Then "OnStationSpawned" should have fired before "OnPassengerSpawned"
+        And "OnPassengerSpawned" should have fired before "OnHourTicked"
+
+    Scenario: OnDayStart does not fire on the second tick (hour 1)
+        Given an empty level
+        When the simulation runs for 2 hours
+        Then the event log should start with "OnDayStart", "OnHourTicked", "OnHourTicked"
+
+    Scenario: OnHourTicked is always the last event in every tick
         Given an empty level
         When the simulation runs for 3 hours
-        Then "OnDayStart" should have fired exactly 1 time
-        And "OnHourTick" should have fired 3 times
+        Then "OnHourTicked" should be the last event fired
+
+    Scenario: Weekly gift fires after OnDayStart and before OnHourTicked on Monday
+        Given an empty level
+        When the simulation runs for 25 hours
+        Then "OnDayStart" should have fired before "OnWeeklyGiftReceived"
+        And "OnWeeklyGiftReceived" should have fired before "OnHourTicked"
+
+    Scenario: Weekly gift fires only once on Monday not on the preceding Sunday ticks
+        Given an empty level
+        When the simulation runs for 48 hours
+        Then "OnWeeklyGiftReceived" should have fired exactly 1 time
+
+    Scenario: Monday tick sequence on an empty level is OnDayStart, OnWeeklyGiftReceived, OnHourTicked
+        Given an empty level
+        When the simulation runs for 25 hours
+        Then the last 3 events should be "OnDayStart", "OnWeeklyGiftReceived", "OnHourTicked"
+
+    Scenario: When a station spawns on Monday the full sequence includes all four events
+        Given a level with a Circle station at (0,0) with a spawn delay of 1 day
+        When the simulation runs for 25 hours
+        Then the last 4 events should be "OnDayStart", "OnStationSpawned", "OnWeeklyGiftReceived", "OnHourTicked"
+
+    Scenario: Passenger spawn event falls between station spawn and weekly gift on a Monday spawn tick
+        Given a level with a Circle station at (0,0) with a spawn delay of 1 day and passengers every 24 hours
+        And a level with a Triangle station at (9,0) with a spawn delay of 0 days and no passenger spawn phases
+        When the simulation runs for 25 hours
+        Then the last 5 events should be "OnDayStart", "OnStationSpawned", "OnPassengerSpawned", "OnWeeklyGiftReceived", "OnHourTicked"
+
+    Scenario: OnDayStart fires exactly once at midnight of each new day across 3 days
+        Given an empty level
+        When the simulation runs for 72 hours
+        Then "OnDayStart" should have fired exactly 3 times
+
+    Scenario: OnHourTicked fires for every single hour of the simulation
+        Given an empty level
+        When the simulation runs for 72 hours
+        Then "OnHourTicked" should have fired exactly 72 times
+
+    Scenario: Two stations spawning on the same tick both fire OnStationSpawned before OnHourTicked
+        Given a level with the following stations:
+            | X | Y | Type     | SpawnDelay |
+            | 0 | 0 | Circle   | 0          |
+            | 1 | 0 | Triangle | 0          |
+        When the simulation runs for 1 hour
+        Then "OnStationSpawned" should have fired before "OnHourTicked"
+        And "OnStationSpawned" should have fired exactly 2 times

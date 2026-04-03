@@ -26,14 +26,12 @@ namespace MetroMania.Engine.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Event Ordering", @"    The game engine fires events on the IMetroManiaRunner in a strict three-phase order
-    on every hour tick:
-
-      Phase 1 — ""Other"" events fire first:
-                OnStationSpawned, OnWeeklyGift, OnPassengerWaiting,
-                OnStationOverrun, OnGameOver
-      Phase 2 — OnDayStart fires second (only at midnight / hour 0)
-      Phase 3 — OnHourTick fires last (every hour)", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Event Ordering", @"    Within each tick the engine fires events in a strict order:
+      1. OnDayStart          — only at hour 0 of each day
+      2. OnStationSpawned    — once per station that spawns this tick
+      3. OnPassengerSpawned  — once per passenger that spawns this tick
+      4. OnWeeklyGiftReceived — only on Monday (day 2, 9, 16, ...) at hour 0
+      5. OnHourTicked        — every tick, always last", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "EventOrdering.feature"
 #line hidden
@@ -112,7 +110,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/EventOrdering.feature.ndjson", 12);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/EventOrdering.feature.ndjson", 17);
         }
         
         async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
@@ -140,18 +138,18 @@ namespace MetroMania.Engine.Tests.Features
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Station spawn fires before day start which fires before hour tick")]
+        [global::Xunit.FactAttribute(DisplayName="On the first tick OnDayStart fires before OnHourTicked")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "Station spawn fires before day start which fires before hour tick")]
-        public async global::System.Threading.Tasks.Task StationSpawnFiresBeforeDayStartWhichFiresBeforeHourTick()
+        [global::Xunit.TraitAttribute("Description", "On the first tick OnDayStart fires before OnHourTicked")]
+        public async global::System.Threading.Tasks.Task OnTheFirstTickOnDayStartFiresBeforeOnHourTicked()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Station spawn fires before day start which fires before hour tick", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("On the first tick OnDayStart fires before OnHourTicked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 11
+#line 9
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -161,34 +159,31 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 12
-        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 10
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 13
+#line 11
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 14
-        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired before \"OnDayStart\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 15
-        await testRunner.AndAsync("\"OnDayStart\" should have fired before \"OnHourTick\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 12
+        await testRunner.ThenAsync("\"OnDayStart\" should have fired before \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="OnDayStart fires exactly once per day at midnight")]
+        [global::Xunit.FactAttribute(DisplayName="First-tick event sequence on an empty level is OnDayStart then OnHourTicked")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "OnDayStart fires exactly once per day at midnight")]
-        public async global::System.Threading.Tasks.Task OnDayStartFiresExactlyOncePerDayAtMidnight()
+        [global::Xunit.TraitAttribute("Description", "First-tick event sequence on an empty level is OnDayStart then OnHourTicked")]
+        public async global::System.Threading.Tasks.Task First_TickEventSequenceOnAnEmptyLevelIsOnDayStartThenOnHourTicked()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnDayStart fires exactly once per day at midnight", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("First-tick event sequence on an empty level is OnDayStart then OnHourTicked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 17
+#line 14
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -198,34 +193,31 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 18
+#line 15
         await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 19
-        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 16
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 20
-        await testRunner.ThenAsync("\"OnDayStart\" should have fired exactly 2 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 21
-        await testRunner.AndAsync("\"OnDayStart\" should have fired for days 1 and 2", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 17
+        await testRunner.ThenAsync("the event log should be \"OnDayStart\", \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="OnDayStart always fires immediately before OnHourTick on day boundaries")]
+        [global::Xunit.FactAttribute(DisplayName="Station spawn fires after OnDayStart and before OnHourTicked")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "OnDayStart always fires immediately before OnHourTick on day boundaries")]
-        public async global::System.Threading.Tasks.Task OnDayStartAlwaysFiresImmediatelyBeforeOnHourTickOnDayBoundaries()
+        [global::Xunit.TraitAttribute("Description", "Station spawn fires after OnDayStart and before OnHourTicked")]
+        public async global::System.Threading.Tasks.Task StationSpawnFiresAfterOnDayStartAndBeforeOnHourTicked()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnDayStart always fires immediately before OnHourTick on day boundaries", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Station spawn fires after OnDayStart and before OnHourTicked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 23
+#line 19
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -235,31 +227,37 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 24
-        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 20
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 25
-        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 21
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 26
-        await testRunner.ThenAsync("on each day boundary \"OnDayStart\" should fire directly before \"OnHourTick\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 22
+        await testRunner.ThenAsync("\"OnDayStart\" should have fired before \"OnStationSpawned\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 23
+        await testRunner.AndAsync("\"OnStationSpawned\" should have fired before \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="OnHourTick fires every hour with the correct day and hour values")]
+        [global::Xunit.FactAttribute(DisplayName="First-tick event sequence with a delay-0 station is OnDayStart, OnStationSpawned," +
+            " OnHourTicked")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "OnHourTick fires every hour with the correct day and hour values")]
-        public async global::System.Threading.Tasks.Task OnHourTickFiresEveryHourWithTheCorrectDayAndHourValues()
+        [global::Xunit.TraitAttribute("Description", "First-tick event sequence with a delay-0 station is OnDayStart, OnStationSpawned," +
+            " OnHourTicked")]
+        public async global::System.Threading.Tasks.Task First_TickEventSequenceWithADelay_0StationIsOnDayStartOnStationSpawnedOnHourTicked()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnHourTick fires every hour with the correct day and hour values", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("First-tick event sequence with a delay-0 station is OnDayStart, OnStationSpawned," +
+                    " OnHourTicked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 28
+#line 25
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -269,34 +267,31 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 29
-        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 26
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 30
-        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 27
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 31
-        await testRunner.ThenAsync("\"OnHourTick\" should have fired 48 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 32
-        await testRunner.AndAsync("each hour tick should report the correct day and hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 28
+        await testRunner.ThenAsync("the event log should be \"OnDayStart\", \"OnStationSpawned\", \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Weekly gift fires before day start on Monday")]
+        [global::Xunit.FactAttribute(DisplayName="Passenger spawn fires after station spawn and before OnHourTicked")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "Weekly gift fires before day start on Monday")]
-        public async global::System.Threading.Tasks.Task WeeklyGiftFiresBeforeDayStartOnMonday()
+        [global::Xunit.TraitAttribute("Description", "Passenger spawn fires after station spawn and before OnHourTicked")]
+        public async global::System.Threading.Tasks.Task PassengerSpawnFiresAfterStationSpawnAndBeforeOnHourTicked()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Weekly gift fires before day start on Monday", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Passenger spawn fires after station spawn and before OnHourTicked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 34
+#line 30
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -306,31 +301,39 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 35
-        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 31
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
+                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 36
+#line 32
+        await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
+                        "enger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 33
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 37
-        await testRunner.ThenAsync("\"OnWeeklyGift\" should have fired before \"OnDayStart\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 34
+        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired before \"OnPassengerSpawned\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 35
+        await testRunner.AndAsync("\"OnPassengerSpawned\" should have fired before \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Passenger waiting fires before day start when both occur on the same tick")]
+        [global::Xunit.FactAttribute(DisplayName="OnDayStart does not fire on the second tick (hour 1)")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "Passenger waiting fires before day start when both occur on the same tick")]
-        public async global::System.Threading.Tasks.Task PassengerWaitingFiresBeforeDayStartWhenBothOccurOnTheSameTick()
+        [global::Xunit.TraitAttribute("Description", "OnDayStart does not fire on the second tick (hour 1)")]
+        public async global::System.Threading.Tasks.Task OnDayStartDoesNotFireOnTheSecondTickHour1()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "5";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Passenger waiting fires before day start when both occur on the same tick", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnDayStart does not fire on the second tick (hour 1)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 39
+#line 37
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -340,35 +343,31 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 38
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 39
+        await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
 #line 40
-        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
-                        "s every 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 41
-        await testRunner.AndAsync("a level with a Triangle station at (9,9) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 42
-        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 43
-        await testRunner.ThenAsync("the first \"OnPassengerWaiting\" should appear before the second \"OnDayStart\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the event log should start with \"OnDayStart\", \"OnHourTicked\", \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Station overrun notification fires before the player gets to act")]
+        [global::Xunit.FactAttribute(DisplayName="OnHourTicked is always the last event in every tick")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "Station overrun notification fires before the player gets to act")]
-        public async global::System.Threading.Tasks.Task StationOverrunNotificationFiresBeforeThePlayerGetsToAct()
+        [global::Xunit.TraitAttribute("Description", "OnHourTicked is always the last event in every tick")]
+        public async global::System.Threading.Tasks.Task OnHourTickedIsAlwaysTheLastEventInEveryTick()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "6";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Station overrun notification fires before the player gets to act", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnHourTicked is always the last event in every tick", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 45
+#line 42
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -378,35 +377,31 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 46
-        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
-                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 43
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 47
-        await testRunner.AndAsync("a level with a Triangle station at (9,9) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 44
+        await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 48
-        await testRunner.WhenAsync("the simulation runs for 11 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 49
-        await testRunner.ThenAsync("\"OnStationOverrun\" should have fired directly before \"OnHourTick\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 45
+        await testRunner.ThenAsync("\"OnHourTicked\" should be the last event fired", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Game over is the final event and ends the simulation immediately")]
+        [global::Xunit.FactAttribute(DisplayName="Weekly gift fires after OnDayStart and before OnHourTicked on Monday")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "Game over is the final event and ends the simulation immediately")]
-        public async global::System.Threading.Tasks.Task GameOverIsTheFinalEventAndEndsTheSimulationImmediately()
+        [global::Xunit.TraitAttribute("Description", "Weekly gift fires after OnDayStart and before OnHourTicked on Monday")]
+        public async global::System.Threading.Tasks.Task WeeklyGiftFiresAfterOnDayStartAndBeforeOnHourTickedOnMonday()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "7";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Game over is the final event and ends the simulation immediately", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Weekly gift fires after OnDayStart and before OnHourTicked on Monday", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 51
+#line 47
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -416,35 +411,68 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 52
-        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and passenger" +
-                        "s every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 48
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 53
-        await testRunner.AndAsync("a level with a Triangle station at (9,9) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 49
+        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 54
-        await testRunner.WhenAsync("the simulation runs until game over", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 50
+        await testRunner.ThenAsync("\"OnDayStart\" should have fired before \"OnWeeklyGiftReceived\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 55
-        await testRunner.ThenAsync("\"OnGameOver\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 56
-        await testRunner.AndAsync("\"OnGameOver\" should be the last event fired", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 51
+        await testRunner.AndAsync("\"OnWeeklyGiftReceived\" should have fired before \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="All event types respect the three-phase ordering on day 1")]
+        [global::Xunit.FactAttribute(DisplayName="Weekly gift fires only once on Monday not on the preceding Sunday ticks")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "All event types respect the three-phase ordering on day 1")]
-        public async global::System.Threading.Tasks.Task AllEventTypesRespectTheThree_PhaseOrderingOnDay1()
+        [global::Xunit.TraitAttribute("Description", "Weekly gift fires only once on Monday not on the preceding Sunday ticks")]
+        public async global::System.Threading.Tasks.Task WeeklyGiftFiresOnlyOnceOnMondayNotOnThePrecedingSundayTicks()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "8";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("All event types respect the three-phase ordering on day 1", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Weekly gift fires only once on Monday not on the preceding Sunday ticks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 53
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 54
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 55
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 56
+        await testRunner.ThenAsync("\"OnWeeklyGiftReceived\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Monday tick sequence on an empty level is OnDayStart, OnWeeklyGiftReceived, OnHou" +
+            "rTicked")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
+        [global::Xunit.TraitAttribute("Description", "Monday tick sequence on an empty level is OnDayStart, OnWeeklyGiftReceived, OnHou" +
+            "rTicked")]
+        public async global::System.Threading.Tasks.Task MondayTickSequenceOnAnEmptyLevelIsOnDayStartOnWeeklyGiftReceivedOnHourTicked()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Monday tick sequence on an empty level is OnDayStart, OnWeeklyGiftReceived, OnHou" +
+                    "rTicked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 58
@@ -458,28 +486,27 @@ namespace MetroMania.Engine.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 59
-        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 60
-        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 61
-        await testRunner.ThenAsync("the first 4 events should be \"OnStationSpawned\", \"OnWeeklyGift\", \"OnDayStart\", \"O" +
-                        "nHourTick\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the last 3 events should be \"OnDayStart\", \"OnWeeklyGiftReceived\", \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Non-midnight hours produce only hour tick events")]
+        [global::Xunit.FactAttribute(DisplayName="When a station spawns on Monday the full sequence includes all four events")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
-        [global::Xunit.TraitAttribute("Description", "Non-midnight hours produce only hour tick events")]
-        public async global::System.Threading.Tasks.Task Non_MidnightHoursProduceOnlyHourTickEvents()
+        [global::Xunit.TraitAttribute("Description", "When a station spawns on Monday the full sequence includes all four events")]
+        public async global::System.Threading.Tasks.Task WhenAStationSpawnsOnMondayTheFullSequenceIncludesAllFourEvents()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "9";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Non-midnight hours produce only hour tick events", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("When a station spawns on Monday the full sequence includes all four events", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 63
@@ -493,16 +520,180 @@ namespace MetroMania.Engine.Tests.Features
             {
                 await this.ScenarioStartAsync();
 #line 64
-        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 1 day", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 65
-        await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 66
-        await testRunner.ThenAsync("\"OnDayStart\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the last 4 events should be \"OnDayStart\", \"OnStationSpawned\", \"OnWeeklyGiftReceiv" +
+                        "ed\", \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 67
-        await testRunner.AndAsync("\"OnHourTick\" should have fired 3 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Passenger spawn event falls between station spawn and weekly gift on a Monday spa" +
+            "wn tick")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
+        [global::Xunit.TraitAttribute("Description", "Passenger spawn event falls between station spawn and weekly gift on a Monday spa" +
+            "wn tick")]
+        public async global::System.Threading.Tasks.Task PassengerSpawnEventFallsBetweenStationSpawnAndWeeklyGiftOnAMondaySpawnTick()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "11";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Passenger spawn event falls between station spawn and weekly gift on a Monday spa" +
+                    "wn tick", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 68
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 69
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 1 day and passengers" +
+                        " every 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 70
+        await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
+                        "enger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 71
+        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 72
+        await testRunner.ThenAsync("the last 5 events should be \"OnDayStart\", \"OnStationSpawned\", \"OnPassengerSpawned" +
+                        "\", \"OnWeeklyGiftReceived\", \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="OnDayStart fires exactly once at midnight of each new day across 3 days")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
+        [global::Xunit.TraitAttribute("Description", "OnDayStart fires exactly once at midnight of each new day across 3 days")]
+        public async global::System.Threading.Tasks.Task OnDayStartFiresExactlyOnceAtMidnightOfEachNewDayAcross3Days()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "12";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnDayStart fires exactly once at midnight of each new day across 3 days", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 74
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 75
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 76
+        await testRunner.WhenAsync("the simulation runs for 72 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 77
+        await testRunner.ThenAsync("\"OnDayStart\" should have fired exactly 3 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="OnHourTicked fires for every single hour of the simulation")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
+        [global::Xunit.TraitAttribute("Description", "OnHourTicked fires for every single hour of the simulation")]
+        public async global::System.Threading.Tasks.Task OnHourTickedFiresForEverySingleHourOfTheSimulation()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "13";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("OnHourTicked fires for every single hour of the simulation", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 79
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 80
+        await testRunner.GivenAsync("an empty level", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 81
+        await testRunner.WhenAsync("the simulation runs for 72 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 82
+        await testRunner.ThenAsync("\"OnHourTicked\" should have fired exactly 72 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Two stations spawning on the same tick both fire OnStationSpawned before OnHourTi" +
+            "cked")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Event Ordering")]
+        [global::Xunit.TraitAttribute("Description", "Two stations spawning on the same tick both fire OnStationSpawned before OnHourTi" +
+            "cked")]
+        public async global::System.Threading.Tasks.Task TwoStationsSpawningOnTheSameTickBothFireOnStationSpawnedBeforeOnHourTicked()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "14";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Two stations spawning on the same tick both fire OnStationSpawned before OnHourTi" +
+                    "cked", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 84
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                            "X",
+                            "Y",
+                            "Type",
+                            "SpawnDelay"});
+                table1.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Circle",
+                            "0"});
+                table1.AddRow(new string[] {
+                            "1",
+                            "0",
+                            "Triangle",
+                            "0"});
+#line 85
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table1, "Given ");
+#line hidden
+#line 89
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 90
+        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired before \"OnHourTicked\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 91
+        await testRunner.AndAsync("\"OnStationSpawned\" should have fired exactly 2 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

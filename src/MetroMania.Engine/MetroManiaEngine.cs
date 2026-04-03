@@ -176,12 +176,12 @@ public class MetroManiaEngine
 
     private static void MoveTrains(Level level, GameSnapshot snapshot)
     {
-        throw new NotImplementedException();
+        // Not yet implemented
     }
 
     private static void TransportPassengers(Level level, GameSnapshot snapshot)
     {
-        throw new NotImplementedException();
+        // Not yet implemented
     }
 
     private static ResourceType GetWeeklyGift(Level level, GameSnapshot snapshot)

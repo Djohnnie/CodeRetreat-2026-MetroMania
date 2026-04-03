@@ -26,9 +26,10 @@ namespace MetroMania.Engine.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Station Spawning", "    Metro stations appear on the map based on their SpawnDelayDays configuration." +
-                "\r\n    A delay of 0 means the station appears immediately at the start of the gam" +
-                "e.\r\n    A delay of N days means the station appears at midnight on day N+1.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Station Spawning", @"    Metro stations appear on the map based on their SpawnDelayDays configuration.
+    A delay of N means the station spawns at hour 0 of day N+1 (spawnDay = N+1).
+    OnStationSpawned fires exactly once per station at that moment and the station
+    is added to the snapshot's Stations dictionary for all subsequent ticks.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "StationSpawning.feature"
 #line hidden
@@ -107,7 +108,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/StationSpawning.feature.ndjson", 13);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/StationSpawning.feature.ndjson", 32);
         }
         
         async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
@@ -135,15 +136,327 @@ namespace MetroMania.Engine.Tests.Features
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.TheoryAttribute(DisplayName="Stations spawn at the correct time based on their delay")]
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 0 spawns on the first tick")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "Stations spawn at the correct time based on their delay")]
-        [global::Xunit.InlineDataAttribute("Circle", "0", "0", "0", "1", "should have spawned", "0", new string[0])]
-        [global::Xunit.InlineDataAttribute("Circle", "0", "0", "1", "24", "should not have spawned", "1", new string[0])]
-        [global::Xunit.InlineDataAttribute("Circle", "0", "0", "1", "25", "should have spawned", "2", new string[0])]
-        [global::Xunit.InlineDataAttribute("Triangle", "0", "0", "5", "120", "should not have spawned", "3", new string[0])]
-        [global::Xunit.InlineDataAttribute("Triangle", "0", "0", "5", "121", "should have spawned", "4", new string[0])]
-        public async global::System.Threading.Tasks.Task StationsSpawnAtTheCorrectTimeBasedOnTheirDelay(string type, string x, string y, string delay, string hours, string expectation, string @__pickleIndex, string[] exampleTags)
+        [global::Xunit.TraitAttribute("Description", "A station with delay 0 spawns on the first tick")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay0SpawnsOnTheFirstTick()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "0";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 0 spawns on the first tick", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 7
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 8
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 9
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 10
+        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 0 spawns exactly once across many ticks")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 0 spawns exactly once across many ticks")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay0SpawnsExactlyOnceAcrossManyTicks()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "1";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 0 spawns exactly once across many ticks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 12
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 13
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 14
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 15
+        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 1 does not spawn within the first 24 ticks")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 1 does not spawn within the first 24 ticks")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay1DoesNotSpawnWithinTheFirst24Ticks()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "2";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 1 does not spawn within the first 24 ticks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 17
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 18
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 1 day", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 19
+        await testRunner.WhenAsync("the simulation runs for 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 20
+        await testRunner.ThenAsync("the Circle station at (0,0) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 1 spawns at the start of day 2")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 1 spawns at the start of day 2")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay1SpawnsAtTheStartOfDay2()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "3";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 1 spawns at the start of day 2", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 22
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 23
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 1 day", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 24
+        await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 25
+        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 1 spawns exactly once over 72 hours")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 1 spawns exactly once over 72 hours")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay1SpawnsExactlyOnceOver72Hours()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "4";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 1 spawns exactly once over 72 hours", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 27
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 28
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 1 day", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 29
+        await testRunner.WhenAsync("the simulation runs for 72 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 30
+        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 2 does not spawn within the first 48 ticks")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 2 does not spawn within the first 48 ticks")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay2DoesNotSpawnWithinTheFirst48Ticks()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "5";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 2 does not spawn within the first 48 ticks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 32
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 33
+        await testRunner.GivenAsync("a level with a Triangle station at (2,3) with a spawn delay of 2 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 34
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 35
+        await testRunner.ThenAsync("the Triangle station at (2,3) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 2 spawns at the start of day 3")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 2 spawns at the start of day 3")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay2SpawnsAtTheStartOfDay3()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "6";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 2 spawns at the start of day 3", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 37
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 38
+        await testRunner.GivenAsync("a level with a Triangle station at (2,3) with a spawn delay of 2 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 39
+        await testRunner.WhenAsync("the simulation runs for 49 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 40
+        await testRunner.ThenAsync("the Triangle station at (2,3) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 5 does not spawn within the first 120 ticks")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 5 does not spawn within the first 120 ticks")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay5DoesNotSpawnWithinTheFirst120Ticks()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 5 does not spawn within the first 120 ticks", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 42
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 43
+        await testRunner.GivenAsync("a level with a Diamond station at (5,5) with a spawn delay of 5 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 44
+        await testRunner.WhenAsync("the simulation runs for 120 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 45
+        await testRunner.ThenAsync("the Diamond station at (5,5) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station with delay 5 spawns at the start of day 6")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station with delay 5 spawns at the start of day 6")]
+        public async global::System.Threading.Tasks.Task AStationWithDelay5SpawnsAtTheStartOfDay6()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station with delay 5 spawns at the start of day 6", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 47
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 48
+        await testRunner.GivenAsync("a level with a Diamond station at (5,5) with a spawn delay of 5 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 49
+        await testRunner.WhenAsync("the simulation runs for 121 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 50
+        await testRunner.ThenAsync("the Diamond station at (5,5) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.TheoryAttribute(DisplayName="Stations spawn at the correct tick based on their delay")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Stations spawn at the correct tick based on their delay")]
+        [global::Xunit.InlineDataAttribute("Rectangle", "1", "0", "1", "24", "should not have spawned", "9", new string[0])]
+        [global::Xunit.InlineDataAttribute("Triangle", "2", "0", "2", "48", "should not have spawned", "10", new string[0])]
+        [global::Xunit.InlineDataAttribute("Diamond", "3", "0", "3", "72", "should not have spawned", "11", new string[0])]
+        [global::Xunit.InlineDataAttribute("Pentagon", "4", "0", "4", "96", "should not have spawned", "12", new string[0])]
+        [global::Xunit.InlineDataAttribute("Star", "5", "0", "5", "120", "should not have spawned", "13", new string[0])]
+        [global::Xunit.InlineDataAttribute("Circle", "0", "0", "0", "1", "should have spawned", "14", new string[0])]
+        [global::Xunit.InlineDataAttribute("Rectangle", "1", "0", "1", "25", "should have spawned", "15", new string[0])]
+        [global::Xunit.InlineDataAttribute("Triangle", "2", "0", "2", "49", "should have spawned", "16", new string[0])]
+        [global::Xunit.InlineDataAttribute("Diamond", "3", "0", "3", "73", "should have spawned", "17", new string[0])]
+        [global::Xunit.InlineDataAttribute("Pentagon", "4", "0", "4", "97", "should have spawned", "18", new string[0])]
+        [global::Xunit.InlineDataAttribute("Star", "5", "0", "5", "121", "should have spawned", "19", new string[0])]
+        public async global::System.Threading.Tasks.Task StationsSpawnAtTheCorrectTickBasedOnTheirDelay(string type, string x, string y, string delay, string hours, string expectation, string @__pickleIndex, string[] exampleTags)
         {
             string[] tagsOfScenario = exampleTags;
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
@@ -154,10 +467,10 @@ namespace MetroMania.Engine.Tests.Features
             argumentsOfScenario.Add("hours", hours);
             argumentsOfScenario.Add("expectation", expectation);
             string pickleIndex = @__pickleIndex;
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Stations spawn at the correct time based on their delay", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Stations spawn at the correct tick based on their delay", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 6
+#line 52
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -167,34 +480,31 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 7
+#line 53
         await testRunner.GivenAsync(string.Format("a level with a {0} station at ({1},{2}) with a spawn delay of {3} days", type, x, y, delay), ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 8
+#line 54
         await testRunner.WhenAsync(string.Format("the simulation runs for {0} hours", hours), ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 9
+#line 55
         await testRunner.ThenAsync(string.Format("the {0} station at ({1},{2}) {3}", type, x, y, expectation), ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Only the immediate station has spawned after 1 hour when multiple stations have d" +
-            "ifferent delays")]
+        [global::Xunit.FactAttribute(DisplayName="A spawned station is present in the game snapshot")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "Only the immediate station has spawned after 1 hour when multiple stations have d" +
-            "ifferent delays")]
-        public async global::System.Threading.Tasks.Task OnlyTheImmediateStationHasSpawnedAfter1HourWhenMultipleStationsHaveDifferentDelays()
+        [global::Xunit.TraitAttribute("Description", "A spawned station is present in the game snapshot")]
+        public async global::System.Threading.Tasks.Task ASpawnedStationIsPresentInTheGameSnapshot()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "5";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Only the immediate station has spawned after 1 hour when multiple stations have d" +
-                    "ifferent delays", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "20";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A spawned station is present in the game snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 25
+#line 74
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -204,49 +514,65 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
-                            "X",
-                            "Y",
-                            "Type",
-                            "SpawnDelay"});
-                table7.AddRow(new string[] {
-                            "0",
-                            "0",
-                            "Circle",
-                            "0"});
-                table7.AddRow(new string[] {
-                            "1",
-                            "0",
-                            "Triangle",
-                            "2"});
-#line 26
-        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table7, "Given ");
+#line 75
+        await testRunner.GivenAsync("a level with a Diamond station at (3,4) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 30
+#line 76
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 31
-        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 32
-        await testRunner.AndAsync("the Triangle station at (1,0) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 77
+        await testRunner.ThenAsync("the game snapshot should contain a Diamond station at (3,4)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Both stations have spawned once enough game days have passed")]
+        [global::Xunit.FactAttribute(DisplayName="A station that has not yet spawned is absent from the game snapshot")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "Both stations have spawned once enough game days have passed")]
-        public async global::System.Threading.Tasks.Task BothStationsHaveSpawnedOnceEnoughGameDaysHavePassed()
+        [global::Xunit.TraitAttribute("Description", "A station that has not yet spawned is absent from the game snapshot")]
+        public async global::System.Threading.Tasks.Task AStationThatHasNotYetSpawnedIsAbsentFromTheGameSnapshot()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "6";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Both stations have spawned once enough game days have passed", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "21";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station that has not yet spawned is absent from the game snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 34
+#line 79
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 80
+        await testRunner.GivenAsync("a level with a Diamond station at (3,4) with a spawn delay of 3 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 81
+        await testRunner.WhenAsync("the simulation runs for 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 82
+        await testRunner.ThenAsync("the game snapshot should contain no stations", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="All spawned stations are assigned unique IDs")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "All spawned stations are assigned unique IDs")]
+        public async global::System.Threading.Tasks.Task AllSpawnedStationsAreAssignedUniqueIDs()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "22";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("All spawned stations are assigned unique IDs", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 84
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -270,103 +596,53 @@ namespace MetroMania.Engine.Tests.Features
                             "1",
                             "0",
                             "Triangle",
-                            "2"});
-#line 35
+                            "0"});
+                table8.AddRow(new string[] {
+                            "2",
+                            "0",
+                            "Diamond",
+                            "0"});
+                table8.AddRow(new string[] {
+                            "3",
+                            "0",
+                            "Rectangle",
+                            "0"});
+                table8.AddRow(new string[] {
+                            "4",
+                            "0",
+                            "Pentagon",
+                            "0"});
+#line 85
         await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table8, "Given ");
 #line hidden
-#line 39
-        await testRunner.WhenAsync("the simulation runs for 49 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 40
-        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 41
-        await testRunner.AndAsync("the Triangle station at (1,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::Xunit.FactAttribute(DisplayName="An immediately spawned station is present in the game snapshot")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "An immediately spawned station is present in the game snapshot")]
-        public async global::System.Threading.Tasks.Task AnImmediatelySpawnedStationIsPresentInTheGameSnapshot()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "7";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("An immediately spawned station is present in the game snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 43
-    this.ScenarioInitialize(scenarioInfo, ruleInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 44
-        await testRunner.GivenAsync("a level with a Diamond station at (3,4) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 45
+#line 92
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 46
-        await testRunner.ThenAsync("the game snapshot should contain a Diamond station at (3,4)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 93
+        await testRunner.ThenAsync("all spawned stations should have unique IDs", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 94
+        await testRunner.AndAsync("\"OnStationSpawned\" should have fired exactly 5 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="A station that has not yet spawned is absent from the game snapshot")]
+        [global::Xunit.FactAttribute(DisplayName="Only the immediate station has spawned when a later station has not yet reached i" +
+            "ts day")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "A station that has not yet spawned is absent from the game snapshot")]
-        public async global::System.Threading.Tasks.Task AStationThatHasNotYetSpawnedIsAbsentFromTheGameSnapshot()
+        [global::Xunit.TraitAttribute("Description", "Only the immediate station has spawned when a later station has not yet reached i" +
+            "ts day")]
+        public async global::System.Threading.Tasks.Task OnlyTheImmediateStationHasSpawnedWhenALaterStationHasNotYetReachedItsDay()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "8";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station that has not yet spawned is absent from the game snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "23";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Only the immediate station has spawned when a later station has not yet reached i" +
+                    "ts day", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 48
-    this.ScenarioInitialize(scenarioInfo, ruleInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 49
-        await testRunner.GivenAsync("a level with a Diamond station at (3,4) with a spawn delay of 3 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 50
-        await testRunner.WhenAsync("the simulation runs for 24 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 51
-        await testRunner.ThenAsync("the game snapshot should contain no stations", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::Xunit.FactAttribute(DisplayName="Two stations at the same location with different delays — only first spawns")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "Two stations at the same location with different delays — only first spawns")]
-        public async global::System.Threading.Tasks.Task TwoStationsAtTheSameLocationWithDifferentDelaysOnlyFirstSpawns()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "9";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Two stations at the same location with different delays — only first spawns", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 53
+#line 96
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -387,41 +663,38 @@ namespace MetroMania.Engine.Tests.Features
                             "Circle",
                             "0"});
                 table9.AddRow(new string[] {
-                            "0",
+                            "1",
                             "0",
                             "Triangle",
                             "2"});
-#line 54
+#line 97
         await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table9, "Given ");
 #line hidden
-#line 58
-        await testRunner.WhenAsync("the simulation runs for 73 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 101
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 59
+#line 102
         await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 60
-        await testRunner.AndAsync("the Triangle station at (0,0) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 61
-        await testRunner.AndAsync("the game snapshot should contain a Circle station at (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 103
+        await testRunner.AndAsync("the Triangle station at (1,0) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Each spawned station has a unique Id")]
+        [global::Xunit.FactAttribute(DisplayName="Both stations have spawned once enough days have passed")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
-        [global::Xunit.TraitAttribute("Description", "Each spawned station has a unique Id")]
-        public async global::System.Threading.Tasks.Task EachSpawnedStationHasAUniqueId()
+        [global::Xunit.TraitAttribute("Description", "Both stations have spawned once enough days have passed")]
+        public async global::System.Threading.Tasks.Task BothStationsHaveSpawnedOnceEnoughDaysHavePassed()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "10";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Each spawned station has a unique Id", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "24";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Both stations have spawned once enough days have passed", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 63
+#line 105
     this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -445,20 +718,305 @@ namespace MetroMania.Engine.Tests.Features
                             "1",
                             "0",
                             "Triangle",
+                            "2"});
+#line 106
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table10, "Given ");
+#line hidden
+#line 110
+        await testRunner.WhenAsync("the simulation runs for 49 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 111
+        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 112
+        await testRunner.AndAsync("the Triangle station at (1,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 113
+        await testRunner.AndAsync("\"OnStationSpawned\" should have fired exactly 2 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station does not re-spawn on subsequent days")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station does not re-spawn on subsequent days")]
+        public async global::System.Threading.Tasks.Task AStationDoesNotRe_SpawnOnSubsequentDays()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "25";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station does not re-spawn on subsequent days", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 115
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 116
+        await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 117
+        await testRunner.WhenAsync("the simulation runs for 168 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 118
+        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired exactly 1 time", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="All six station types can be spawned")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "All six station types can be spawned")]
+        public async global::System.Threading.Tasks.Task AllSixStationTypesCanBeSpawned()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "26";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("All six station types can be spawned", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 120
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
+                            "X",
+                            "Y",
+                            "Type",
+                            "SpawnDelay"});
+                table11.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Circle",
                             "0"});
-                table10.AddRow(new string[] {
+                table11.AddRow(new string[] {
+                            "1",
+                            "0",
+                            "Rectangle",
+                            "0"});
+                table11.AddRow(new string[] {
                             "2",
+                            "0",
+                            "Triangle",
+                            "0"});
+                table11.AddRow(new string[] {
+                            "3",
                             "0",
                             "Diamond",
                             "0"});
-#line 64
-        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table10, "Given ");
+                table11.AddRow(new string[] {
+                            "4",
+                            "0",
+                            "Pentagon",
+                            "0"});
+                table11.AddRow(new string[] {
+                            "5",
+                            "0",
+                            "Star",
+                            "0"});
+#line 121
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table11, "Given ");
 #line hidden
-#line 69
+#line 129
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 70
-        await testRunner.ThenAsync("all spawned stations should have unique Ids", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line 130
+        await testRunner.ThenAsync("\"OnStationSpawned\" should have fired exactly 6 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 131
+        await testRunner.AndAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 132
+        await testRunner.AndAsync("the Rectangle station at (1,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 133
+        await testRunner.AndAsync("the Triangle station at (2,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 134
+        await testRunner.AndAsync("the Diamond station at (3,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 135
+        await testRunner.AndAsync("the Pentagon station at (4,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 136
+        await testRunner.AndAsync("the Star station at (5,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="A station at a non-zero grid location spawns correctly")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "A station at a non-zero grid location spawns correctly")]
+        public async global::System.Threading.Tasks.Task AStationAtANon_ZeroGridLocationSpawnsCorrectly()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "27";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("A station at a non-zero grid location spawns correctly", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 138
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 139
+        await testRunner.GivenAsync("a level with a Star station at (7,3) with a spawn delay of 0 days", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 140
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 141
+        await testRunner.ThenAsync("the Star station at (7,3) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 142
+        await testRunner.AndAsync("the game snapshot should contain a Star station at (7,3)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Three stations with staggered delays all spawn in the correct order")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Three stations with staggered delays all spawn in the correct order")]
+        public async global::System.Threading.Tasks.Task ThreeStationsWithStaggeredDelaysAllSpawnInTheCorrectOrder()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "28";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Three stations with staggered delays all spawn in the correct order", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 144
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                            "X",
+                            "Y",
+                            "Type",
+                            "SpawnDelay"});
+                table12.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Circle",
+                            "0"});
+                table12.AddRow(new string[] {
+                            "1",
+                            "0",
+                            "Triangle",
+                            "1"});
+                table12.AddRow(new string[] {
+                            "2",
+                            "0",
+                            "Pentagon",
+                            "3"});
+#line 145
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table12, "Given ");
+#line hidden
+#line 150
+        await testRunner.WhenAsync("the simulation runs for 73 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 151
+        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 152
+        await testRunner.AndAsync("the Triangle station at (1,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 153
+        await testRunner.AndAsync("the Pentagon station at (2,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 154
+        await testRunner.AndAsync("\"OnStationSpawned\" should have fired exactly 3 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Third station has not yet spawned when only first two days have passed")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Station Spawning")]
+        [global::Xunit.TraitAttribute("Description", "Third station has not yet spawned when only first two days have passed")]
+        public async global::System.Threading.Tasks.Task ThirdStationHasNotYetSpawnedWhenOnlyFirstTwoDaysHavePassed()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "29";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Third station has not yet spawned when only first two days have passed", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 156
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
+                            "X",
+                            "Y",
+                            "Type",
+                            "SpawnDelay"});
+                table13.AddRow(new string[] {
+                            "0",
+                            "0",
+                            "Circle",
+                            "0"});
+                table13.AddRow(new string[] {
+                            "1",
+                            "0",
+                            "Triangle",
+                            "1"});
+                table13.AddRow(new string[] {
+                            "2",
+                            "0",
+                            "Pentagon",
+                            "3"});
+#line 157
+        await testRunner.GivenAsync("a level with the following stations:", ((string)(null)), table13, "Given ");
+#line hidden
+#line 162
+        await testRunner.WhenAsync("the simulation runs for 48 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 163
+        await testRunner.ThenAsync("the Circle station at (0,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 164
+        await testRunner.AndAsync("the Triangle station at (1,0) should have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 165
+        await testRunner.AndAsync("the Pentagon station at (2,0) should not have spawned", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 166
+        await testRunner.AndAsync("\"OnStationSpawned\" should have fired exactly 2 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
