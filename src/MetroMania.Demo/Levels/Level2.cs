@@ -19,8 +19,9 @@ internal static class Level2
             MaxDays = 50,
             Stations =
             [
-                new MetroStation { GridX = 3,  GridY = 4, StationType = StationType.Circle,    SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 3 }] },
-                new MetroStation { GridX = 12, GridY = 4, StationType = StationType.Rectangle, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 5 }] },
+                new MetroStation { GridX = 3,  GridY = 3, StationType = StationType.Circle,    SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 3 }] },
+                new MetroStation { GridX = 12, GridY = 5, StationType = StationType.Rectangle, SpawnDelayDays = 1, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 5 }] },
+                new MetroStation { GridX = 10, GridY = 7, StationType = StationType.Triangle, SpawnDelayDays = 2, PassengerSpawnPhases = [new() { AfterDays = 3, FrequencyInHours = 7 }] },
             ]
         }
     };

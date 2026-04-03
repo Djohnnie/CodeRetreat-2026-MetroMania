@@ -1,5 +1,6 @@
 using MetroMania.Demo;
 using MetroMania.Demo.Levels;
+using MetroMania.Demo.Runners;
 using MetroMania.Engine;
 
 // ── Resolve paths ────────────────────────────────────────────────────────────
@@ -20,7 +21,7 @@ foreach (var level in new[] { Level1.Level, Level2.Level })
     var levelOutputPath = Path.Combine(outputPath, level.Title.Replace(" ", "-").ToLowerInvariant());
     Directory.CreateDirectory(levelOutputPath);
 
-    var runner = new MyMetroManiaRunner();
+    var runner = new SimpleRunner();
     var engine = new MetroManiaEngine();
 
     Console.WriteLine($"Running simulation for level: {level.Title}");

@@ -105,7 +105,7 @@ public class MetroManiaEngine
             // Get player action for the hour
             lastPlayerAction = runner.OnHourTicked(snapshot);
 
-            // TODO: apply player action to game state and update snapshot accordingly
+            snapshot = ApplyPlayerAction(snapshot, lastPlayerAction);
 
             snapshots.Add(snapshot);
             absoluteHour++;
@@ -204,5 +204,51 @@ public class MetroManiaEngine
 
         var rng = new Random(level.LevelData.Seed + weekNumber);
         return rng.Next(2) == 0 ? ResourceType.Line : ResourceType.Train;
+    }
+
+    private static GameSnapshot ApplyPlayerAction(GameSnapshot snapshot, PlayerAction action) => action switch
+    {
+        CreateLine createLine => ApplyCreateLine(snapshot, createLine),
+        _ => snapshot
+    };
+
+    private static GameSnapshot ApplyCreateLine(GameSnapshot snapshot, CreateLine action)
+    {
+        var resource = snapshot.Resources.FirstOrDefault(r => r.Id == action.LineId && r.Type == ResourceType.Line);
+        if (resource is null)
+            return snapshot;
+
+        var existingLine = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
+
+        if (existingLine is null)
+        {
+            // Resource not yet in use — create a new line and mark the resource as used
+            if (resource.InUse)
+                return snapshot;
+
+            var newLine = new Line { LineId = action.LineId, StationIds = [action.FromStationId, action.ToStationId] };
+            var updatedResource = resource with { InUse = true };
+            return snapshot with
+            {
+                Lines     = [.. snapshot.Lines, newLine],
+                Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), updatedResource],
+            };
+        }
+
+        // Line already exists — try to extend it if one end matches FromStationId
+        var stationIds = existingLine.StationIds.ToList();
+
+        if (stationIds[^1] == action.FromStationId)
+            stationIds.Add(action.ToStationId);
+        else if (stationIds[0] == action.FromStationId)
+            stationIds.Insert(0, action.ToStationId);
+        else
+            return snapshot; // FromStationId is not at either end — ignore
+
+        var extendedLine = existingLine with { StationIds = stationIds };
+        return snapshot with
+        {
+            Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), extendedLine],
+        };
     }
 }

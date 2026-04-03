@@ -64,6 +64,15 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
         var colorMap = BuildColorMap(level.LevelData);
 
+        // Map each line's GUID to a display color, using index order for consistency.
+        var lineColorMap = snapshot.Lines
+            .Select((line, i) => (line.LineId, Color: LineColors[i % LineColors.Length]))
+            .ToDictionary(x => x.LineId, x => x.Color);
+
+        // Reverse-lookup: station GUID → grid location, needed to position lines.
+        var stationLocations = snapshot.Stations
+            .ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+
         using var stream = new MemoryStream();
         using var skStream = new SKManagedWStream(stream);
         using var canvas = SKSvgCanvas.Create(SKRect.Create(width, height), skStream);
@@ -99,23 +108,26 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             }
         }
 
-        // Pass 2: station tiles
+        // Pass 2: metro lines drawn beneath station tiles
+        DrawLines(canvas, snapshot, stationLocations, lineColorMap);
+
+        // Pass 3: station tiles on top of lines
         foreach (var (loc, station) in snapshot.Stations)
         {
             DrawTile(canvas, GetStationTileName(station.StationType),
                 loc.X * TileSize, loc.Y * TileSize, colorMap);
         }
 
-        // Pass 3: passengers waiting at stations, rendered above station icons
+        // Pass 4: passengers waiting at stations, rendered above station icons
         DrawWaitingPassengers(canvas, snapshot);
 
-        // Pass 4: header overlay on top of the first tile row
+        // Pass 5: header overlay on top of the first tile row
         DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.Score);
 
-        // Pass 5: resource availability counts in the bottom-left column
+        // Pass 6: resource availability counts in the bottom-left column
         DrawResourceCounts(canvas, level.GridHeight, snapshot);
 
-        // Pass 6: player action overlay in the bottom-right (only when an action was taken)
+        // Pass 7: player action overlay in the bottom-right (only when an action was taken)
         if (snapshot.LastAction is not null and not NoAction)
             DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction);
 
@@ -450,6 +462,44 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         if (w) parts.Add("W");
         if (w && n && nw) parts.Add("NW");
         return parts.Count == 0 ? "water" : "water-" + string.Join("-", parts);
+    }
+
+    // ─── Metro lines ──────────────────────────────────────────────────────────
+
+    private static void DrawLines(
+        SKCanvas canvas,
+        GameSnapshot snapshot,
+        Dictionary<Guid, Location> stationLocations,
+        Dictionary<Guid, SKColor> lineColorMap)
+    {
+        using var paint = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = LineStrokeWidth,
+            IsAntialias = true,
+            StrokeCap = SKStrokeCap.Round,
+            StrokeJoin = SKStrokeJoin.Round,
+        };
+
+        foreach (var line in snapshot.Lines)
+        {
+            if (!lineColorMap.TryGetValue(line.LineId, out var color)) continue;
+            paint.Color = color;
+
+            for (int i = 0; i < line.StationIds.Count - 1; i++)
+            {
+                if (!stationLocations.TryGetValue(line.StationIds[i],     out var locA)) continue;
+                if (!stationLocations.TryGetValue(line.StationIds[i + 1], out var locB)) continue;
+
+                var waypoints = ComputeMetroPath(locA, locB);
+                for (int j = 0; j < waypoints.Count - 1; j++)
+                {
+                    var (ax, ay) = TileToPixel(waypoints[j].x,     waypoints[j].y);
+                    var (bx, by) = TileToPixel(waypoints[j + 1].x, waypoints[j + 1].y);
+                    canvas.DrawLine(ax, ay, bx, by, paint);
+                }
+            }
+        }
     }
 
     // ─── Waiting passengers ───────────────────────────────────────────────────
