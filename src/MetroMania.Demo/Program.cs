@@ -12,44 +12,51 @@ Directory.CreateDirectory(outputPath);
 
 // ── Run simulation ────────────────────────────────────────────────────────────
 
-var level  = Level1.Level;
-var runner = new MyMetroManiaRunner();
-var engine = new MetroManiaEngine();
-
-Console.WriteLine($"Running simulation for level: {level.Title}");
-Console.WriteLine($"Max days: {level.LevelData.MaxDays}");
-
-var result = engine.Run(runner, level, maxHours: level.LevelData.MaxDays * 24);
-
-Console.WriteLine($"Simulation complete: {result.DaysSurvived} days survived, {result.GameSnapshots.Count} snapshots");
-
-// ── Render and save snapshots ─────────────────────────────────────────────────
-
 using var renderer = new MetroManiaRenderer(resourcesPath);
+var templatePath = Path.Combine(AppContext.BaseDirectory, "viewer.html");
 
-Console.WriteLine($"Rendering {result.GameSnapshots.Count} snapshots to: {outputPath}");
-
-for (int i = 0; i < result.GameSnapshots.Count; i++)
+foreach (var level in new[] { Level1.Level, Level2.Level })
 {
-    var snapshot = result.GameSnapshots[i];
-    var svg      = renderer.RenderSnapshot(level, snapshot);
-    var fileName = $"{i + 1:D5}.svg";
-    var filePath = Path.Combine(outputPath, fileName);
+    var levelOutputPath = Path.Combine(outputPath, level.Title.Replace(" ", "-").ToLowerInvariant());
+    Directory.CreateDirectory(levelOutputPath);
 
-    await File.WriteAllTextAsync(filePath, svg);
+    var runner = new MyMetroManiaRunner();
+    var engine = new MetroManiaEngine();
 
-    if (i % 100 == 0 || i == result.GameSnapshots.Count - 1)
-        Console.WriteLine($"  [{i + 1}/{result.GameSnapshots.Count}] Day {snapshot.Time.Day} Hour {snapshot.Time.Hour:D2} → {fileName}");
+    Console.WriteLine($"Running simulation for level: {level.Title}");
+    Console.WriteLine($"Max days: {level.LevelData.MaxDays}");
+
+    var result = engine.Run(runner, level, maxHours: level.LevelData.MaxDays * 24);
+
+    Console.WriteLine($"Simulation complete: {result.DaysSurvived} days survived, {result.GameSnapshots.Count} snapshots");
+
+    // ── Render and save snapshots ─────────────────────────────────────────────
+
+    Console.WriteLine($"Rendering {result.GameSnapshots.Count} snapshots to: {levelOutputPath}");
+
+    for (int i = 0; i < result.GameSnapshots.Count; i++)
+    {
+        var snapshot = result.GameSnapshots[i];
+        var svg      = renderer.RenderSnapshot(level, snapshot);
+        var fileName = $"{i + 1:D5}.svg";
+        var filePath = Path.Combine(levelOutputPath, fileName);
+
+        await File.WriteAllTextAsync(filePath, svg);
+
+        if (i % 100 == 0 || i == result.GameSnapshots.Count - 1)
+            Console.WriteLine($"  [{i + 1}/{result.GameSnapshots.Count}] Day {snapshot.Time.Day} Hour {snapshot.Time.Hour:D2} → {fileName}");
+    }
+
+    // ── Write viewer HTML ─────────────────────────────────────────────────────
+
+    var viewerHtml = (await File.ReadAllTextAsync(templatePath))
+        .Replace("%%TOTAL%%", result.GameSnapshots.Count.ToString())
+        .Replace("%%LEVEL_TITLE%%", level.Title);
+    await File.WriteAllTextAsync(Path.Combine(levelOutputPath, "viewer.html"), viewerHtml);
+
+    Console.WriteLine($"Viewer saved → {Path.Combine(levelOutputPath, "viewer.html")}");
 }
 
-// ── Write viewer HTML ─────────────────────────────────────────────────────────
-
-var templatePath = Path.Combine(AppContext.BaseDirectory, "viewer.html");
-var viewerHtml = (await File.ReadAllTextAsync(templatePath))
-    .Replace("%%TOTAL%%", result.GameSnapshots.Count.ToString());
-await File.WriteAllTextAsync(Path.Combine(outputPath, "viewer.html"), viewerHtml);
-
-Console.WriteLine($"Viewer saved → {Path.Combine(outputPath, "viewer.html")}");
 Console.WriteLine("Done.");
 
 // ── Helper ────────────────────────────────────────────────────────────────────

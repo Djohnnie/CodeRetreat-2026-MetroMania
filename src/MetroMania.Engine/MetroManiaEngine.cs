@@ -62,6 +62,11 @@ public class MetroManiaEngine
                 Time = gameTime,
                 TotalHoursElapsed = absoluteHour,
                 Score = 0, // TODO: calculate score based on game state
+                Resources = [.. snapshot.Resources],
+                Stations = new Dictionary<Location, Station>(snapshot.Stations),
+                Lines = [.. snapshot.Lines],
+                Trains = [.. snapshot.Trains],
+                Passengers = [.. snapshot.Passengers],
                 LastAction = lastPlayerAction
             };
 
@@ -135,7 +140,7 @@ public class MetroManiaEngine
     private static IEnumerable<(Guid StationId, Guid PassengerId)> SpawnPassengers(Level level, GameSnapshot snapshot)
     {
         var spawned = new List<(Guid StationId, Guid PassengerId)>();
-        var passengers = (List<Passenger>)snapshot.Passengers;
+        var passengers = snapshot.Passengers.ToList();
         var allTypes = Enum.GetValues<StationType>();
 
         foreach (var (location, station) in snapshot.Stations)
