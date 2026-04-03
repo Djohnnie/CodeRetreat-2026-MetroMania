@@ -5,4 +5,5 @@ namespace MetroMania.Engine.Model;
 public record Passenger(StationType DestinationType, int SpawnedAtHour)
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid? StationId { get; init; }
 }

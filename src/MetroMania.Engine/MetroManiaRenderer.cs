@@ -106,10 +106,16 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                 loc.X * TileSize, loc.Y * TileSize, colorMap);
         }
 
-        // Pass 3: header overlay on top of the first tile row
+        // Pass 3: passengers waiting at stations, rendered above station icons
+        DrawWaitingPassengers(canvas, snapshot);
+
+        // Pass 4: header overlay on top of the first tile row
         DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.Score);
 
-        // Pass 4: player action overlay in the bottom-right (only when an action was taken)
+        // Pass 5: resource availability counts in the bottom-left column
+        DrawResourceCounts(canvas, level.GridHeight, snapshot);
+
+        // Pass 6: player action overlay in the bottom-right (only when an action was taken)
         if (snapshot.LastAction is not null and not NoAction)
             DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction);
 
@@ -444,6 +450,160 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         if (w) parts.Add("W");
         if (w && n && nw) parts.Add("NW");
         return parts.Count == 0 ? "water" : "water-" + string.Join("-", parts);
+    }
+
+    // ─── Waiting passengers ───────────────────────────────────────────────────
+
+    private static void DrawWaitingPassengers(SKCanvas canvas, GameSnapshot snapshot)
+    {
+        const int maxPerRow = 10;
+
+        using var paint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = new SKColor(0x33, 0x33, 0x33),
+            IsAntialias = true,
+        };
+
+        foreach (var (loc, station) in snapshot.Stations)
+        {
+            var passengers = snapshot.Passengers
+                .Where(p => p.StationId == station.Id)
+                .ToList();
+            if (passengers.Count == 0) continue;
+
+            var (cx, _) = StationCenter(loc);
+            float stationTopY = loc.Y * TileSize;
+
+            int row1Count = Math.Min(passengers.Count, maxPerRow);
+            int row2Count = Math.Min(passengers.Count - row1Count, maxPerRow);
+
+            // Row 1 sits just above the station tile; row 2 stacks above row 1.
+            float row1TopY = stationTopY - WaitingPassengerSize - 2f;
+            float row2TopY = row1TopY - (WaitingPassengerSize + PassengerGap);
+
+            DrawPassengerRow(canvas, paint, passengers, 0, row1Count, cx, row1TopY, WaitingPassengerSize);
+            if (row2Count > 0)
+                DrawPassengerRow(canvas, paint, passengers, row1Count, row1Count + row2Count, cx, row2TopY, WaitingPassengerSize);
+        }
+    }
+
+    private static void DrawPassengerRow(
+        SKCanvas canvas, SKPaint paint,
+        IList<Passenger> passengers, int start, int end,
+        float centerX, float topY, float size)
+    {
+        int count = end - start;
+        if (count <= 0) return;
+
+        float totalWidth = count * size + (count - 1) * PassengerGap;
+        float startX = centerX - totalWidth / 2f;
+
+        for (int i = 0; i < count; i++)
+        {
+            float px = startX + i * (size + PassengerGap);
+            DrawPassengerIcon(canvas, paint, passengers[start + i].DestinationType, px, topY, size);
+        }
+    }
+
+    // ─── Resource counts HUD ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Draws the available resource counts in the bottom three tiles of the first column.
+    /// Each tile shows a resource icon (line / train / wagon) and the available count.
+    /// </summary>
+    private static void DrawResourceCounts(SKCanvas canvas, int gridHeight, GameSnapshot snapshot)
+    {
+        int availableLines  = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Line);
+        int availableTrains = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Train);
+        int availableWagons = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Wagon);
+
+        // Bottom 3 tiles of column 0, from top to bottom: line, train, wagon
+        (int RowOffset, ResourceType Type, int Count)[] items =
+        [
+            (-3, ResourceType.Line,  availableLines),
+            (-2, ResourceType.Train, availableTrains),
+            (-1, ResourceType.Wagon, availableWagons),
+        ];
+
+        using var bgPaint    = new SKPaint { Style = SKPaintStyle.Fill, Color = new SKColor(0, 0, 0, 168) };
+        using var iconFill   = new SKPaint { Style = SKPaintStyle.Fill, Color = SKColors.White, IsAntialias = true };
+        using var iconStroke = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            Color = SKColors.White,
+            StrokeWidth = 4f,
+            StrokeCap = SKStrokeCap.Round,
+            IsAntialias = true,
+        };
+        using var textPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = SKColors.White,
+            IsAntialias = true,
+            TextSize = 11f,
+            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
+                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
+                    ?? SKTypeface.Default,
+        };
+
+        textPaint.GetFontMetrics(out var metrics);
+
+        foreach (var (rowOffset, type, count) in items)
+        {
+            int row = gridHeight + rowOffset;
+            if (row < 0) continue;
+
+            float tileY       = row * TileSize;
+            float tileCenterY = tileY + TileSize / 2f;
+
+            canvas.DrawRect(0, tileY, TileSize, TileSize, bgPaint);
+
+            DrawResourceIcon(canvas, type, 10f, tileCenterY, iconFill, iconStroke);
+
+            string countStr = count.ToString();
+            float textY = tileCenterY - (metrics.Ascent + metrics.Descent) / 2f;
+            using var textPath = textPaint.GetTextPath(countStr, 20f, textY);
+            canvas.DrawPath(textPath, textPaint);
+        }
+    }
+
+    /// <summary>
+    /// Draws a small icon representing the given resource type, centered at (<paramref name="cx"/>, <paramref name="cy"/>).
+    /// Uses the Material Design SVG path for each resource type, scaled to 16×16.
+    /// </summary>
+    private static void DrawResourceIcon(
+        SKCanvas canvas, ResourceType type, float cx, float cy,
+        SKPaint fillPaint, SKPaint strokePaint)
+    {
+        string? pathData = type switch
+        {
+            ResourceType.Line  => "M19.5,9.5c-1.03,0-1.9,0.62-2.29,1.5h-2.92C13.9,10.12,13.03,9.5,12,9.5s-1.9,0.62-2.29,1.5H6.79" +
+                                  " C6.4,10.12,5.53,9.5,4.5,9.5C3.12,9.5,2,10.62,2,12s1.12,2.5,2.5,2.5c1.03,0,1.9-0.62,2.29-1.5h2.92" +
+                                  "c0.39,0.88,1.26,1.5,2.29,1.5s1.9-0.62,2.29-1.5h2.92c0.39,0.88,1.26,1.5,2.29,1.5c1.38,0,2.5-1.12,2.5-2.5" +
+                                  "S20.88,9.5,19.5,9.5z",
+            ResourceType.Train => "M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 19" +
+                                  "c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14" +
+                                  "s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5" +
+                                  "s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z",
+            ResourceType.Wagon => "M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5.5c0 1.65 1.34 3 3 3s3-1.35 3-3H23" +
+                                  "v-5l-6-6zM3 11V7h4v4H3zm3 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
+                                  "m7-6.5H9V7h4v4zm4.5 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
+                                  "M15 11V7h1l4 4h-5z",
+            _ => null
+        };
+
+        if (pathData is null) return;
+
+        const float iconSize = 16f;
+        const float scale = iconSize / 24f;
+
+        using var iconPath = SKPath.ParseSvgPathData(pathData);
+        canvas.Save();
+        canvas.Translate(cx - iconSize / 2f, cy - iconSize / 2f);
+        canvas.Scale(scale);
+        canvas.DrawPath(iconPath, fillPaint);
+        canvas.Restore();
     }
 
     private static string GetStationTileName(StationType type) => type switch

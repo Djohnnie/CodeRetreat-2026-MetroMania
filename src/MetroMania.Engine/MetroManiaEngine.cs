@@ -81,10 +81,11 @@ public class MetroManiaEngine
                 runner.OnStationSpawned(snapshot, station.Id, station.Location, station.StationType);
             }
 
-            foreach (var (stationId, passengerId) in SpawnPassengers(level, snapshot))
-            {
-                runner.OnPassengerSpawned(snapshot, stationId, passengerId);
-            }
+            var spawnedPassengers = SpawnPassengers(level, snapshot).ToList();
+            if (spawnedPassengers.Count > 0)
+                snapshot = snapshot with { Passengers = [.. snapshot.Passengers, .. spawnedPassengers.Select(p => p.Passenger)] };
+            foreach (var (stationId, passenger) in spawnedPassengers)
+                runner.OnPassengerSpawned(snapshot, stationId, passenger.Id);
 
             MoveTrains(level, snapshot);
 
@@ -137,10 +138,8 @@ public class MetroManiaEngine
         return newlySpawned;
     }
 
-    private static IEnumerable<(Guid StationId, Guid PassengerId)> SpawnPassengers(Level level, GameSnapshot snapshot)
+    private static IEnumerable<(Guid StationId, Passenger Passenger)> SpawnPassengers(Level level, GameSnapshot snapshot)
     {
-        var spawned = new List<(Guid StationId, Guid PassengerId)>();
-        var passengers = snapshot.Passengers.ToList();
         var allTypes = Enum.GetValues<StationType>();
 
         foreach (var (location, station) in snapshot.Stations)
@@ -171,12 +170,8 @@ public class MetroManiaEngine
             var rng = new Random(level.LevelData.Seed + snapshot.TotalHoursElapsed * 100 + location.X * 10 + location.Y);
             var destinationType = otherTypes[rng.Next(otherTypes.Length)];
 
-            var passenger = new Passenger(destinationType, snapshot.TotalHoursElapsed);
-            passengers.Add(passenger);
-            spawned.Add((station.Id, passenger.Id));
+            yield return (station.Id, new Passenger(destinationType, snapshot.TotalHoursElapsed) { StationId = station.Id });
         }
-
-        return spawned;
     }
 
     private static void MoveTrains(Level level, GameSnapshot snapshot)

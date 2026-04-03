@@ -1,3 +1,9 @@
-﻿namespace MetroMania.Engine.Model;
+﻿using MetroMania.Domain.Enums;
 
-public record Resource;
+namespace MetroMania.Engine.Model;
+
+public record Resource
+{
+    public ResourceType Type { get; init; }
+    public bool InUse { get; init; }
+}
