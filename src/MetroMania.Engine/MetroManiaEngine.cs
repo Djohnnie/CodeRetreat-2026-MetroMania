@@ -140,7 +140,10 @@ public class MetroManiaEngine
 
     private static IEnumerable<(Guid StationId, Passenger Passenger)> SpawnPassengers(Level level, GameSnapshot snapshot)
     {
-        var allTypes = Enum.GetValues<StationType>();
+        var spawnedTypes = snapshot.Stations.Values
+            .Select(s => s.StationType)
+            .Distinct()
+            .ToArray();
 
         foreach (var (location, station) in snapshot.Stations)
         {
@@ -166,7 +169,10 @@ public class MetroManiaEngine
             if (hoursAlive % activePhase.FrequencyInHours != 0)
                 continue;
 
-            var otherTypes = allTypes.Where(t => t != station.StationType).ToArray();
+            var otherTypes = spawnedTypes.Where(t => t != station.StationType).ToArray();
+            if (otherTypes.Length == 0)
+                continue;
+
             var rng = new Random(level.LevelData.Seed + snapshot.TotalHoursElapsed * 100 + location.X * 10 + location.Y);
             var destinationType = otherTypes[rng.Next(otherTypes.Length)];
 
