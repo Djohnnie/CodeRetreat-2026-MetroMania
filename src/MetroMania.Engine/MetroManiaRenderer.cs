@@ -9,17 +9,41 @@ namespace MetroMania.Engine;
 /// <summary>
 /// Renders a MetroMania game snapshot as an SVG string.
 /// Uses SkiaSharp with Svg.Skia to load tile SVGs and compose them onto an SVG canvas.
+///
+/// <para>
+/// <strong>Coordinate system:</strong> grid uses integer (column, row) tile coordinates
+/// where (0, 0) is the top-left corner.  All pixel positions are derived by multiplying
+/// tile coordinates by <see cref="TileSize"/> (32 px/tile) and adding <see cref="TileSize"/>/2
+/// to reach the pixel centre of the tile.  X increases rightward, Y increases downward
+/// (standard SVG/SkiaSharp convention).
+/// </para>
 /// </summary>
 public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 {
+    // ── Tile/grid constants ───────────────────────────────────────────────────
+    /// <summary>Pixels per grid tile. Changing this scales the entire output uniformly.</summary>
     private const int TileSize = 32;
+
+    // ── Line drawing constants ────────────────────────────────────────────────
+    /// <summary>Stroke width of metro lines in pixels. Thicker values give bolder lines but may obscure station icons.</summary>
     private const float LineStrokeWidth = 5f;
+
+    // ── Train shape constants (all in pixels, drawn in local space centred at origin) ──
+    /// <summary>Full length of the train body along its travel axis, in pixels.</summary>
     private const float TrainLength = 22f;
+    /// <summary>Height (perpendicular to travel) of the train body, in pixels.</summary>
     private const float TrainHeight = 12f;
+    /// <summary>Pixel radius of the two rounded rear corners of the train rectangle.</summary>
     private const float TrainCornerRadius = 2f;
+    /// <summary>Stroke width of the white outline drawn over the filled train body, in pixels.</summary>
     private const float TrainBorderWidth = 1.5f;
+
+    // ── Passenger icon constants (all in pixels) ──────────────────────────────
+    /// <summary>Side length of each destination icon drawn above a station on the platform, in pixels.</summary>
     private const float WaitingPassengerSize = 5f;
+    /// <summary>Side length of each destination icon drawn inside a train body, in pixels.</summary>
     private const float TrainPassengerSize = 3f;
+    /// <summary>Gap between adjacent passenger icons (both on platforms and inside trains), in pixels.</summary>
     private const float PassengerGap = 1.5f;
 
     private static readonly SKColor[] LineColors =
@@ -50,10 +74,28 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     /// <summary>
     /// Renders an existing game snapshot as an SVG string.
+    /// Delegates to <see cref="Compose"/> which orchestrates all drawing passes.
     /// </summary>
     public string RenderSnapshot(Level level, GameSnapshot snapshot)
         => Compose(level, snapshot);
 
+    /// <summary>
+    /// Orchestrates all drawing passes for a single snapshot, composing the final
+    /// SVG image in strict painter's-algorithm order so that later passes appear
+    /// on top of earlier ones.
+    ///
+    /// <para><strong>Drawing pass order:</strong></para>
+    /// <list type="number">
+    ///   <item>Background and water tiles — terrain foundation, never overlaid except by the HUD.</item>
+    ///   <item>Metro lines — drawn below stations so track doesn't overdraw station icons at terminals.</item>
+    ///   <item>Station tiles — on top of lines so the icon is clearly readable at every stop.</item>
+    ///   <item>Waiting passengers — crowd indicators above station icons.</item>
+    ///   <item>Trains — always the topmost game element so trains are never occluded.</item>
+    ///   <item>Header overlay — level title, day/hour, and score across the first tile row.</item>
+    ///   <item>Resource counts HUD — available line/train/wagon counts in the bottom-left column.</item>
+    ///   <item>Player action overlay — short label in the bottom-right, only when a non-idle action occurred.</item>
+    /// </list>
+    /// </summary>
     private string Compose(Level level, GameSnapshot snapshot)
     {
         int width = level.GridWidth * TileSize;
@@ -77,7 +119,10 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         using var skStream = new SKManagedWStream(stream);
         using var canvas = SKSvgCanvas.Create(SKRect.Create(width, height), skStream);
 
-        // Pass 1: background and water tiles
+        // ── Pass 1: background and water tiles ────────────────────────────────
+        // Water tiles use an 8-directional neighbour analysis (N, NE, E, SE, S, SW, W, NW)
+        // to select the correct blended-edge SVG asset.  Grid-boundary positions are
+        // treated as water so that the map edge blends naturally.
         for (int y = 0; y < level.GridHeight; y++)
         {
             for (int x = 0; x < level.GridWidth; x++)
@@ -108,29 +153,31 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             }
         }
 
-        // Pass 2: metro lines drawn beneath station tiles
+        // ── Pass 2: metro lines drawn beneath station tiles ───────────────────
+        // Lines must be below stations so the coloured line segment doesn't overdraw
+        // the station icon at each terminal stop.
         DrawLines(canvas, snapshot, stationLocations, lineColorMap);
 
-        // Pass 3: station tiles on top of lines
+        // ── Pass 3: station tiles on top of lines ─────────────────────────────
         foreach (var (loc, station) in snapshot.Stations)
         {
             DrawTile(canvas, GetStationTileName(station.StationType),
                 loc.X * TileSize, loc.Y * TileSize, colorMap);
         }
 
-        // Pass 4: passengers waiting at stations, rendered above station icons
+        // ── Pass 4: waiting passengers above station icons ────────────────────
         DrawWaitingPassengers(canvas, snapshot);
 
-        // Pass 5: trains on top of lines and stations
+        // ── Pass 5: trains on top of all terrain and station elements ─────────
         DrawVehicles(canvas, snapshot, stationLocations, lineColorMap);
 
-        // Pass 6: header overlay on top of the first tile row
+        // ── Pass 6: header HUD — spans full width of first tile row ──────────
         DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.Score);
 
-        // Pass 7: resource availability counts in the bottom-left column
+        // ── Pass 7: resource counts HUD in the bottom-left column ─────────────
         DrawResourceCounts(canvas, level.GridHeight, snapshot);
 
-        // Pass 8: player action overlay in the bottom-right (only when an action was taken)
+        // ── Pass 8: player action overlay in the bottom-right (only when an action was taken) ──
         if (snapshot.LastAction is not null and not NoAction)
             DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction);
 
@@ -144,6 +191,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Header overlay ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Draws a semi-transparent black bar spanning the full width of the first tile row
+    /// (height = <see cref="TileSize"/> px).  The level title and current day/hour are
+    /// rendered left-aligned; the current score is right-aligned.  Text is vertically
+    /// centred using the font's ascent/descent metrics so it renders consistently
+    /// across different system typefaces.
+    /// </summary>
     private static void DrawHeader(SKCanvas canvas, int totalWidth, string levelTitle, GameTime time, int score)
     {
         const float headerHeight = TileSize;
@@ -184,6 +238,12 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Player action overlay ────────────────────────────────────────────────
 
+    /// <summary>
+    /// Draws a semi-transparent label at the bottom-right corner of the grid,
+    /// occupying the last tile row.  Only rendered when the snapshot's
+    /// <see cref="GameSnapshot.LastAction"/> is a non-idle, displayable action.
+    /// The background width is sized to fit the text snugly with horizontal padding.
+    /// </summary>
     private static void DrawPlayerAction(SKCanvas canvas, int totalWidth, int gridHeight, PlayerAction action)
     {
         string? text = DescribeAction(action);
@@ -218,6 +278,11 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         canvas.DrawPath(textPath, textPaint);
     }
 
+    /// <summary>
+    /// Maps a <see cref="PlayerAction"/> to a short human-readable label for the
+    /// bottom-right HUD overlay.  Returns <see langword="null"/> for actions that
+    /// should not be displayed (e.g. <see cref="NoAction"/> and unrecognised types).
+    /// </summary>
     private static string? DescribeAction(PlayerAction action) => action switch
     {
         NoAction          => null,
@@ -230,6 +295,14 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Passenger icon shapes ────────────────────────────────────────────────
 
+    /// <summary>
+    /// Draws a small icon representing a passenger's destination station type.
+    /// The icon shape deliberately mirrors the corresponding station shape so that
+    /// players can visually match waiting passengers to their target stops at a glance.
+    ///
+    /// The icon is drawn within the bounding box [<paramref name="x"/>, <paramref name="y"/>,
+    /// <paramref name="x"/>+<paramref name="size"/>, <paramref name="y"/>+<paramref name="size"/>].
+    /// </summary>
     private static void DrawPassengerIcon(
         SKCanvas canvas, SKPaint paint,
         StationType type, float x, float y, float size)
@@ -287,6 +360,12 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         }
     }
 
+    /// <summary>
+    /// Returns an <see cref="SKPath"/> for a regular <paramref name="sides"/>-sided polygon
+    /// centred at (<paramref name="cx"/>, <paramref name="cy"/>) with circumscribed radius
+    /// <paramref name="r"/>.  The first vertex is placed at <paramref name="startAngle"/> radians
+    /// (measured clockwise from the positive X axis in SkiaSharp's coordinate system).
+    /// </summary>
     private static SKPath MakeRegularPolygonPath(float cx, float cy, float r, int sides, float startAngle)
     {
         var path = new SKPath();
@@ -302,6 +381,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         return path;
     }
 
+    /// <summary>
+    /// Returns an <see cref="SKPath"/> for a <paramref name="points"/>-pointed star centred
+    /// at (<paramref name="cx"/>, <paramref name="cy"/>).  Outer vertices are at radius
+    /// <paramref name="outerR"/> and inner vertices (between points) are at radius
+    /// <paramref name="innerR"/>.  The first outer point is placed at the top (−π/2 radians)
+    /// so the star reads upright regardless of its size.
+    /// </summary>
     private static SKPath MakeStarPath(float cx, float cy, float outerR, float innerR, int points)
     {
         var path = new SKPath();
@@ -321,12 +407,32 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Returns the pixel coordinates of the centre of the tile at grid location
+    /// <paramref name="loc"/>.  Formula: <c>(loc.X · TileSize + TileSize/2, loc.Y · TileSize + TileSize/2)</c>.
+    /// </summary>
     private static (float x, float y) StationCenter(Location loc)
         => (loc.X * TileSize + TileSize / 2f, loc.Y * TileSize + TileSize / 2f);
 
+    /// <summary>
+    /// Converts floating-point tile coordinates to the pixel centre of that tile.
+    /// Accepts <c>float</c> inputs so sub-tile fractional positions (e.g. mid-points
+    /// between two adjacent tiles) are interpolated correctly.
+    /// Formula: <c>pixel = tile · TileSize + TileSize/2</c>.
+    /// </summary>
     private static (float px, float py) TileToPixel(float tx, float ty)
         => (tx * TileSize + TileSize / 2f, ty * TileSize + TileSize / 2f);
 
+    /// <summary>
+    /// Builds the SVG colour replacement map for a level's visual theme.
+    ///
+    /// The baked-in SVG tile assets use <see cref="SourceBackgroundColor"/> and
+    /// <see cref="SourceWaterColor"/> as placeholder colour strings.  When a level
+    /// specifies custom colours, this map drives a plain text-replace in
+    /// <see cref="LoadSvgPicture"/> before the SVG markup is rasterised by Svg.Skia.
+    /// If a level leaves a colour blank the corresponding placeholder is left unchanged,
+    /// preserving the default tile appearance.
+    /// </summary>
     private static Dictionary<string, string> BuildColorMap(LevelData data)
     {
         var map = new Dictionary<string, string>();
@@ -340,6 +446,15 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         return map;
     }
 
+    /// <summary>
+    /// Draws a 32×32 SVG tile at pixel position (<paramref name="x"/>, <paramref name="y"/>)
+    /// by translating the canvas to that position and stamping the pre-rasterised
+    /// <see cref="SKPicture"/> from the cache.
+    ///
+    /// Results are cached in <see cref="_tileCache"/> keyed by tile name + colour map
+    /// fingerprint, so each unique (tile, theme) combination is loaded and parsed only once
+    /// per renderer lifetime regardless of how many times it appears on the grid.
+    /// </summary>
     private void DrawTile(
         SKCanvas canvas,
         string tileName,
@@ -368,6 +483,16 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         _tileCache.Clear();
     }
 
+    /// <summary>
+    /// Loads an SVG asset from disk, applies colour substitutions from
+    /// <paramref name="colorMap"/> via plain-text replacement, then rasterises the
+    /// result into a reusable <see cref="SKPicture"/> via Svg.Skia.
+    ///
+    /// If the exact tile file does not exist (e.g. a rare diagonal-only water combination
+    /// that has no dedicated art) the method falls back to a simpler variant using
+    /// <see cref="GetFallbackTileName"/>.  A second miss throws
+    /// <see cref="FileNotFoundException"/> to surface missing asset configuration early.
+    /// </summary>
     private SKPicture LoadSvgPicture(string tileName, Dictionary<string, string> colorMap)
     {
         var path = Path.Combine(_svgResourcesPath, $"{tileName}.svg");
@@ -410,9 +535,31 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         return BuildWaterTileName(n, n && e, e, e && s, s, s && w, w, w && n);
     }
 
+    /// <summary>
+    /// Thin wrapper over <see cref="BuildWaterTileName"/> for call-site clarity.
+    /// Separates the neighbour-query logic (in <see cref="Compose"/>) from the
+    /// name-construction logic.
+    /// </summary>
     private static string GetWaterTileName(bool n, bool ne, bool e, bool se, bool s, bool sw, bool w, bool nw)
         => BuildWaterTileName(n, ne, e, se, s, sw, w, nw);
 
+    /// <summary>
+    /// Constructs the SVG asset filename for a water tile based on which of its
+    /// 8 neighbours are also water (or grid edges).
+    ///
+    /// Cardinal directions (N, E, S, W) are included whenever the corresponding
+    /// neighbour is water.  Diagonal directions (NE, SE, SW, NW) are only included
+    /// when <em>both</em> flanking cardinal neighbours are also water, matching the
+    /// blended-corner artwork convention where a diagonal fill only appears in a
+    /// fully water corner.
+    ///
+    /// Examples:
+    /// <list type="bullet">
+    ///   <item>All 8 neighbours water → <c>"water"</c> (fully surrounded centre tile).</item>
+    ///   <item>Only north is water → <c>"water-N"</c>.</item>
+    ///   <item>North, east, and NE corner all water → <c>"water-N-NE-E"</c>.</item>
+    /// </list>
+    /// </summary>
     private static string BuildWaterTileName(bool n, bool ne, bool e, bool se, bool s, bool sw, bool w, bool nw)
     {
         var parts = new List<string>(8);
@@ -429,6 +576,29 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Metro lines ──────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Draws all metro lines onto <paramref name="canvas"/> as coloured strokes.
+    ///
+    /// <para>
+    /// Each consecutive station pair in a line's route is decomposed into an ordered
+    /// list of waypoint tiles by <see cref="LinePathHelper.ComputeSegmentWaypoints"/>,
+    /// which handles the routing rule that each inter-station segment may contain at
+    /// most one diagonal portion (the rest must be horizontal or vertical).
+    /// </para>
+    ///
+    /// <para>
+    /// Each pair of adjacent waypoints is then drawn as a straight stroke between
+    /// the pixel centres of those tiles.  Because waypoints are tile-aligned, the
+    /// stroke naturally follows a Manhattan or 45° diagonal path between stations.
+    /// Coordinate conversion: tile (tx, ty) → pixel (tx·<see cref="TileSize"/> + <see cref="TileSize"/>/2,
+    ///  ty·<see cref="TileSize"/> + <see cref="TileSize"/>/2).
+    /// </para>
+    ///
+    /// <para>
+    /// Lines with no colour entry in <paramref name="lineColorMap"/> (e.g. a line whose
+    /// index exceeds the palette) are silently skipped.
+    /// </para>
+    /// </summary>
     private static void DrawLines(
         SKCanvas canvas,
         GameSnapshot snapshot,
@@ -467,6 +637,15 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Waiting passengers ───────────────────────────────────────────────────
 
+    /// <summary>
+    /// Renders small destination-type icons above each station tile to show how
+    /// many passengers are waiting and where they want to go.
+    ///
+    /// Up to 20 passengers per station are shown (two rows of 10 each), stacked
+    /// upward from just above the station tile.  In practice the game ends when
+    /// a station reaches 20 passengers, so the display never needs more than
+    /// two rows.  Each icon is centred horizontally on the station's tile midpoint.
+    /// </summary>
     private static void DrawWaitingPassengers(SKCanvas canvas, GameSnapshot snapshot)
     {
         const int maxPerRow = 10;
@@ -501,6 +680,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         }
     }
 
+    /// <summary>
+    /// Draws a single horizontal row of passenger destination icons.
+    /// Icons are laid out left-to-right, centred on <paramref name="centerX"/>,
+    /// starting at pixel Y = <paramref name="topY"/>.  Each icon is
+    /// <paramref name="size"/> pixels square with <see cref="PassengerGap"/> spacing.
+    /// Only the slice <c>passengers[start..end]</c> is rendered.
+    /// </summary>
     private static void DrawPassengerRow(
         SKCanvas canvas, SKPaint paint,
         IList<Passenger> passengers, int start, int end,
@@ -521,6 +707,23 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     // ─── Vehicles ─────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Renders all trains in the snapshot as directional rectangles.
+    ///
+    /// Each train is centred on the pixel midpoint of its current tile.  The facing
+    /// angle is derived by looking at the next tile in the train's travel direction
+    /// on the precomputed tile path:
+    /// <list type="bullet">
+    ///   <item>If the train is mid-path, the angle points toward <c>currentIndex + direction</c>.</item>
+    ///   <item>
+    ///     At a terminal (the next step would leave the path), the angle is computed
+    ///     <em>backwards</em> (<c>currentIndex − direction</c>) so the train faces the
+    ///     direction it was last moving rather than appearing to point off the edge.
+    ///   </item>
+    /// </list>
+    /// The angle is passed to <see cref="DrawVehicleRect"/> which rotates the canvas
+    /// before drawing so the pointy front always indicates the direction of travel.
+    /// </summary>
     private static void DrawVehicles(
         SKCanvas canvas,
         GameSnapshot snapshot,
@@ -774,6 +977,12 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         canvas.Restore();
     }
 
+    /// <summary>
+    /// Maps a <see cref="StationType"/> to the SVG tile filename (without the
+    /// <c>.svg</c> extension) used to draw that station on the grid.
+    /// Throws <see cref="ArgumentOutOfRangeException"/> for unrecognised types so that
+    /// missing art is caught at render time rather than silently skipped.
+    /// </summary>
     private static string GetStationTileName(StationType type) => type switch
     {
         StationType.Circle    => "station-circle",

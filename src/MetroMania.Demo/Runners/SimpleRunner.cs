@@ -69,4 +69,6 @@ internal class SimpleRunner : IMetroManiaRunner
     public void OnStationCrowded(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting) { }
 
     public void OnGameOver(GameSnapshot snapshot, Guid stationId) { }
+
+    public void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description) { Console.WriteLine(description); }
 }

@@ -6,8 +6,37 @@ using System.Diagnostics;
 
 namespace MetroMania.Engine;
 
+/// <summary>
+/// Deterministic, tick-based simulation engine for MetroMania.
+///
+/// Each call to <see cref="Run"/> or <see cref="RunSimulation"/> is completely
+/// self-contained: the same <paramref name="level"/> configuration and bot
+/// <see cref="IMetroManiaRunner"/> implementation will always produce an identical
+/// result for a given level seed, regardless of when or where the simulation runs.
+///
+/// The engine does not own any mutable state between invocations; all state is
+/// threaded through immutable <see cref="GameSnapshot"/> records.
+/// </summary>
 public class MetroManiaEngine
 {
+    /// <summary>
+    /// Executes the full simulation and returns a <see cref="GameResult"/> containing
+    /// the final score, wall-clock processing time, and the complete snapshot history
+    /// (one <see cref="GameSnapshot"/> per hour) suitable for replay and rendering.
+    /// </summary>
+    /// <param name="runner">
+    ///   The bot that responds to simulation events and supplies <see cref="PlayerAction"/>
+    ///   decisions at the end of every hour.
+    /// </param>
+    /// <param name="level">
+    ///   Level definition: grid dimensions, station spawn schedule, passenger phases,
+    ///   weekly gift overrides, vehicle capacity, and the RNG seed.
+    /// </param>
+    /// <param name="maxHours">
+    ///   Optional hard cap on simulated hours.  Useful for unit tests and preview
+    ///   renders that should not run to a natural game-over.
+    /// </param>
+    /// <param name="cancellationToken">Allows the caller to abort a long-running simulation.</param>
     public GameResult Run(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -25,12 +54,37 @@ public class MetroManiaEngine
         };
     }
 
+    /// <summary>
+    /// Core simulation loop. Advances the clock one hour at a time, driving station
+    /// spawns, passenger spawns, train movement, weekly gifts, and player actions.
+    ///
+    /// <para>
+    /// <strong>Event ordering within each hour tick:</strong>
+    /// <list type="number">
+    ///   <item><see cref="IMetroManiaRunner.OnDayStart"/> — called once at hour 0 of each day.</item>
+    ///   <item>Station crowding / game-over check — evaluated before new content appears so
+    ///         the runner sees the state that caused the crowd, not the subsequent state.</item>
+    ///   <item><see cref="SpawnStations"/> — new stations materialise per the level schedule.</item>
+    ///   <item><see cref="SpawnPassengers"/> — deterministic RNG spawns per station phase.</item>
+    ///   <item><see cref="ProcessTrains"/> — three-phase train movement pipeline and scoring.</item>
+    ///   <item>Weekly gift (Monday 00:00 only) — resource added; runner notified.</item>
+    ///   <item><see cref="IMetroManiaRunner.OnHourTicked"/> — player returns a <see cref="PlayerAction"/>.</item>
+    ///   <item><see cref="ApplyPlayerAction"/> — action is validated and applied to the snapshot.</item>
+    ///   <item>Snapshot is appended to the history list.</item>
+    /// </list>
+    /// </para>
+    /// </summary>
     public SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
     {
+        // absoluteHour is the monotonically increasing tick counter; it is the ground truth
+        // from which all calendar values (day, hour-of-day, day-of-week) are derived.
         var absoluteHour = 0;
         var snapshots = new List<GameSnapshot>();
         var totalPassengersSpawned = 0;
 
+        // Seed the very first snapshot. The initial Resources list is empty because
+        // the engine grants the starter resources (1 Line + 1 Train) via the level
+        // data rather than hard-coding them here, keeping the engine level-agnostic.
         var snapshot = new GameSnapshot
         {
             Time = new GameTime(1, 0, DayOfWeek.Sunday),
@@ -52,11 +106,19 @@ public class MetroManiaEngine
                 break;
             }
 
+            // ── Derive calendar values from the absolute tick counter ──────────
+            // Day 1 = hours 0–23, Day 2 = hours 24–47, etc.
+            // DayOfWeek wraps every 7 days starting on Sunday (the first day of Day 1).
             var day = absoluteHour / 24 + 1;
             var hourOfDay = absoluteHour % 24;
             var dayOfWeek = (DayOfWeek)(absoluteHour / 24 % 7);
             var gameTime = new GameTime(day, hourOfDay, dayOfWeek);
 
+            // ── Produce a shallow copy of the previous snapshot for this tick ──
+            // GameSnapshot is a record; `with` performs a non-destructive copy.
+            // We explicitly re-wrap every collection property so that mutations
+            // performed this tick (adding a passenger, moving a train, etc.) do not
+            // retroactively alter snapshots already stored in the history list.
             snapshot = snapshot with
             {
                 Time = gameTime,
@@ -111,7 +173,9 @@ public class MetroManiaEngine
 
             snapshot = ProcessTrains(level, snapshot);
 
-            // Give weekly gift
+            // ── Weekly gift — granted on the first tick of every Monday ──────────
+            // The gift is added before the player's OnHourTicked call so the runner
+            // can immediately use the new resource in the same turn it was received.
             if (dayOfWeek == DayOfWeek.Monday && hourOfDay == 0)
             {
                 var weeklyGift = GetWeeklyGift(level, snapshot);
@@ -122,10 +186,13 @@ public class MetroManiaEngine
                 runner.OnWeeklyGiftReceived(snapshot, weeklyGift);
             }
 
-            // Get player action for the hour
+            // ── Player action ─────────────────────────────────────────────────
+            // OnHourTicked is always the last callback of the tick so the runner
+            // sees the fully updated state (post-train-movement, post-gift) before
+            // deciding what to do.
             var playerAction = runner.OnHourTicked(snapshot);
 
-            snapshot = ApplyPlayerAction(snapshot with { LastAction = playerAction });
+            snapshot = ApplyPlayerAction(runner, snapshot with { LastAction = playerAction });
 
             snapshots.Add(snapshot);
             absoluteHour++;
@@ -141,6 +208,16 @@ public class MetroManiaEngine
         };
     }
 
+    /// <summary>
+    /// Determines which stations should appear during the current tick and registers
+    /// them in <paramref name="snapshot"/>.Stations (mutated in place for efficiency),
+    /// then returns the newly spawned station objects so the caller can fire
+    /// <see cref="IMetroManiaRunner.OnStationSpawned"/> callbacks.
+    ///
+    /// A station spawns exactly once: at hour 0 of day <c>SpawnDelayDays + 1</c>.
+    /// Each station receives a fresh <see cref="Guid"/> on spawn so identity is
+    /// stable for the rest of the simulation.
+    /// </summary>
     private static IEnumerable<Station> SpawnStations(Level level, GameSnapshot snapshot)
     {
         var newlySpawned = new List<Station>();
@@ -162,6 +239,26 @@ public class MetroManiaEngine
         return newlySpawned;
     }
 
+    /// <summary>
+    /// Yields zero or one passenger per station for the current tick, based on each
+    /// station's active spawn phase and how many hours that station has been alive.
+    ///
+    /// <para>
+    /// <strong>Spawn phase selection:</strong> each station can have multiple spawn
+    /// phases defined, each activated after a given number of days alive.  The most
+    /// recently unlocked phase (highest <c>AfterDays</c> ≤ days-alive) is used.
+    /// A phase with <c>FrequencyInHours ≤ 0</c> disables spawning entirely.
+    /// </para>
+    ///
+    /// <para>
+    /// <strong>Destination selection:</strong> the destination type is chosen uniformly
+    /// at random from all station types currently on the map <em>except</em> the
+    /// spawning station's own type, ensuring passengers always need to travel.
+    /// The RNG seed formula — <c>level.Seed + absoluteHour × 100 + gridX × 10 + gridY</c>
+    /// — guarantees that no two stations share an RNG stream within the same hour,
+    /// preserving full determinism.
+    /// </para>
+    /// </summary>
     private static IEnumerable<(Guid StationId, Passenger Passenger)> SpawnPassengers(Level level, GameSnapshot snapshot)
     {
         var spawnedTypes = snapshot.Stations.Values
@@ -197,6 +294,10 @@ public class MetroManiaEngine
             if (otherTypes.Length == 0)
                 continue;
 
+            // Seed each station's RNG independently so that adding or removing a station
+            // elsewhere on the grid never changes what destination type another station picks.
+            // Multiplying absoluteHour by 100 and gridX by 10 ensures the three components
+            // never accidentally collide into the same integer for distinct combinations.
             var rng = new Random(level.LevelData.Seed + snapshot.TotalHoursElapsed * 100 + location.X * 10 + location.Y);
             var destinationType = otherTypes[rng.Next(otherTypes.Length)];
 
@@ -500,6 +601,16 @@ public class MetroManiaEngine
         return types;
     }
 
+    /// <summary>
+    /// Returns the resource type that should be awarded as the weekly gift on the
+    /// given week number (1-based, where week 1 is days 1–7).
+    ///
+    /// If the level designer has placed a <see cref="WeeklyGiftOverride"/> for the
+    /// current week, that override takes effect unconditionally.  Otherwise a seeded
+    /// coin-flip (seed = <c>level.Seed + weekNumber</c>) chooses between
+    /// <see cref="ResourceType.Line"/> and <see cref="ResourceType.Train"/>,
+    /// making the gift sequence reproducible but varied across weeks.
+    /// </summary>
     private static ResourceType GetWeeklyGift(Level level, GameSnapshot snapshot)
     {
         var weekNumber = snapshot.TotalHoursElapsed / (24 * 7) + 1;
@@ -512,18 +623,43 @@ public class MetroManiaEngine
         return rng.Next(2) == 0 ? ResourceType.Line : ResourceType.Train;
     }
 
-    private static GameSnapshot ApplyPlayerAction(GameSnapshot snapshot) => snapshot.LastAction switch
+    /// <summary>
+    /// Dispatches the action chosen by the player this tick to the appropriate handler,
+    /// calling <see cref="IMetroManiaRunner.OnInvalidPlayerAction"/> if the action was
+    /// rejected.  <see cref="NoAction"/> is silently ignored.
+    /// </summary>
+    private static GameSnapshot ApplyPlayerAction(IMetroManiaRunner runner, GameSnapshot snapshot)
     {
-        CreateLine createLine => ApplyCreateLine(snapshot, createLine),
-        AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
-        _ => snapshot
-    };
+        if (snapshot.LastAction is NoAction)
+            return snapshot;
 
-    private static GameSnapshot ApplyCreateLine(GameSnapshot snapshot, CreateLine action)
+        var (newSnapshot, errorCode, errorDescription) = snapshot.LastAction switch
+        {
+            CreateLine createLine       => ApplyCreateLine(snapshot, createLine),
+            AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
+            _                           => (snapshot, -1, "Action type not recognised or not yet implemented.")
+        };
+
+        // Notify the player when their action had no effect.
+        if (errorCode != 0)
+            runner.OnInvalidPlayerAction(snapshot, errorCode, errorDescription!);
+
+        return newSnapshot;
+    }
+
+    /// <summary>
+    /// Handles both the <em>create</em> and <em>extend</em> variants of the
+    /// <see cref="CreateLine"/> player action.
+    ///
+    /// Returns a tuple of (newSnapshot, errorCode, errorDescription).
+    /// errorCode == 0 means success; any other value is a <see cref="PlayerActionError"/> constant.
+    /// </summary>
+    private static (GameSnapshot, int, string?) ApplyCreateLine(GameSnapshot snapshot, CreateLine action)
     {
         var resource = snapshot.Resources.FirstOrDefault(r => r.Id == action.LineId && r.Type == ResourceType.Line);
         if (resource is null)
-            return snapshot;
+            return (snapshot, PlayerActionError.LineResourceNotFound,
+                $"No line resource with id {action.LineId} found in available resources.");
 
         var existingLine = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
 
@@ -531,24 +667,26 @@ public class MetroManiaEngine
         {
             // Resource not yet in use — create a new line and mark the resource as used.
             if (resource.InUse)
-                return snapshot;
+                return (snapshot, PlayerActionError.LineResourceAlreadyInUse,
+                    $"Line resource {action.LineId} is already deployed on the map.");
 
             // Both station IDs must differ — a line cannot start and end at the same station.
             if (action.FromStationId == action.ToStationId)
-                return snapshot;
+                return (snapshot, PlayerActionError.LineStationsSameStation,
+                    "FromStationId and ToStationId must be different stations.");
 
             // Reject if these two stations are already directly connected (adjacent) on any line.
-            // "Directly connected" means they appear next to each other in some line's station list.
             if (AreDirectlyConnected(snapshot.Lines, action.FromStationId, action.ToStationId))
-                return snapshot;
+                return (snapshot, PlayerActionError.LineSegmentAlreadyExists,
+                    $"Stations {action.FromStationId} and {action.ToStationId} are already directly connected on an existing line.");
 
             var newLine = new Line { LineId = action.LineId, StationIds = [action.FromStationId, action.ToStationId] };
             var updatedResource = resource with { InUse = true };
-            return snapshot with
+            return (snapshot with
             {
                 Lines = [.. snapshot.Lines, newLine],
                 Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), updatedResource],
-            };
+            }, 0, null);
         }
 
         // Line already exists — try to extend it if one end matches FromStationId.
@@ -559,22 +697,24 @@ public class MetroManiaEngine
         else if (stationIds[0] == action.FromStationId)
             stationIds.Insert(0, action.ToStationId);
         else
-            return snapshot; // FromStationId is not at either end — ignore.
+            return (snapshot, PlayerActionError.LineExtendFromNotTerminal,
+                $"Station {action.FromStationId} is not at either terminal of line {action.LineId}. Only terminal stations can be used to extend a line.");
 
         // The new terminal station must not already appear anywhere in this line.
-        // This prevents duplicates and loops (e.g. extending back to a mid-line station).
         if (existingLine.StationIds.Contains(action.ToStationId))
-            return snapshot;
+            return (snapshot, PlayerActionError.LineExtendToAlreadyOnLine,
+                $"Station {action.ToStationId} is already on line {action.LineId}. Duplicate stops and loops are not allowed.");
 
         // The new segment must not duplicate a direct connection that already exists on any line.
         if (AreDirectlyConnected(snapshot.Lines, action.FromStationId, action.ToStationId))
-            return snapshot;
+            return (snapshot, PlayerActionError.LineSegmentAlreadyExists,
+                $"Stations {action.FromStationId} and {action.ToStationId} are already directly connected on an existing line.");
 
         var extendedLine = existingLine with { StationIds = stationIds };
-        return snapshot with
+        return (snapshot with
         {
             Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), extendedLine],
-        };
+        }, 0, null);
     }
 
     /// <summary>
@@ -597,38 +737,49 @@ public class MetroManiaEngine
         return false;
     }
 
-    private static GameSnapshot ApplyAddVehicleToLine(GameSnapshot snapshot, AddVehicleToLine action)
+    /// <summary>
+    /// Deploys an available (not in-use) <see cref="ResourceType.Train"/> resource onto
+    /// the specified line at the given spawn station tile.
+    ///
+    /// Returns a tuple of (newSnapshot, errorCode, errorDescription).
+    /// errorCode == 0 means success; any other value is a <see cref="PlayerActionError"/> constant.
+    /// </summary>
+    private static (GameSnapshot, int, string?) ApplyAddVehicleToLine(GameSnapshot snapshot, AddVehicleToLine action)
     {
         // Must be an available (not in-use) Train resource.
         var resource = snapshot.Resources.FirstOrDefault(
             r => r.Id == action.VehicleId && r.Type == ResourceType.Train && !r.InUse);
         if (resource is null)
-            return snapshot;
+            return (snapshot, PlayerActionError.TrainResourceNotFound,
+                $"No unused train resource with id {action.VehicleId} found.");
 
         // Line must exist and be in use.
         var line = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
         if (line is null)
-            return snapshot;
+            return (snapshot, PlayerActionError.TrainLineNotFound,
+                $"Line {action.LineId} does not exist on the map. Create the line before deploying a train.");
 
         // The spawn station must be on the line.
         if (!line.StationIds.Contains(action.StationId))
-            return snapshot;
+            return (snapshot, PlayerActionError.TrainStationNotOnLine,
+                $"Station {action.StationId} is not part of line {action.LineId}.");
 
         // Resolve the station to a tile location.
         var stationEntry = snapshot.Stations.FirstOrDefault(kvp => kvp.Value.Id == action.StationId);
         if (stationEntry.Value is null)
-            return snapshot;
+            return (snapshot, PlayerActionError.TrainStationNotSpawned,
+                $"Station {action.StationId} has not yet spawned on the map.");
 
-        // A line cannot have more trains than it has stations (e.g. 3 stations → max 3 trains).
-        // This keeps minimum spacing between trains and guarantees the shuttle pattern makes sense.
+        // A line cannot have more trains than it has stations.
         var trainsOnLine = snapshot.Trains.Count(t => t.LineId == action.LineId);
         if (trainsOnLine >= line.StationIds.Count)
-            return snapshot;
+            return (snapshot, PlayerActionError.TrainLineAtCapacity,
+                $"Line {action.LineId} already has {trainsOnLine} train(s), which is the maximum for a {line.StationIds.Count}-station line.");
 
         // Cannot deploy a train at a tile already occupied by another train.
-        // This enforces the single-occupancy invariant at the moment of deployment.
         if (snapshot.Trains.Any(t => t.TilePosition == stationEntry.Key))
-            return snapshot;
+            return (snapshot, PlayerActionError.TrainTileOccupied,
+                $"Station {action.StationId} is currently occupied by another train. Wait for it to move before deploying here.");
 
         var newTrain = new Train
         {
@@ -638,10 +789,10 @@ public class MetroManiaEngine
             Direction = 1,
         };
 
-        return snapshot with
+        return (snapshot with
         {
             Trains = [.. snapshot.Trains, newTrain],
             Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), resource with { InUse = true }],
-        };
+        }, 0, null);
     }
 }

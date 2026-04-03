@@ -40,4 +40,16 @@ public interface IMetroManiaRunner
     /// Called when the game is over because a station has too many passengers not picked up (20+).
     /// </summary>
     void OnGameOver(GameSnapshot snapshot, Guid stationId);
+
+    /// <summary>
+    /// Called when a player action returned from <see cref="OnHourTicked"/> was invalid
+    /// and had no effect on the game state.
+    /// <para>
+    /// Use <see cref="PlayerActionError"/> for the well-known <paramref name="code"/> values.
+    /// </para>
+    /// </summary>
+    /// <param name="snapshot">The snapshot at the time the action was attempted.</param>
+    /// <param name="code">A numeric code identifying the violation (see <see cref="PlayerActionError"/>).</param>
+    /// <param name="description">A human-readable explanation of why the action was rejected.</param>
+    void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description);
 }
