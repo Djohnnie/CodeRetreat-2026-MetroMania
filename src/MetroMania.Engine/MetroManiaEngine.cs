@@ -29,6 +29,7 @@ public class MetroManiaEngine
     {
         var absoluteHour = 0;
         var snapshots = new List<GameSnapshot>();
+        var totalPassengersSpawned = 0;
 
         var snapshot = new GameSnapshot
         {
@@ -73,6 +74,28 @@ public class MetroManiaEngine
                 runner.OnDayStart(snapshot);
             }
 
+            // ── Station crowding / game-over check ────────────────────────────
+            // Evaluated after day-start so the runner sees the state before new
+            // stations or passengers appear.  Thresholds: 10+ crowded, 20+ game over.
+            const int CrowdedThreshold  = 10;
+            const int GameOverThreshold = 20;
+
+            bool gameOver = false;
+            foreach (var (_, station) in snapshot.Stations)
+            {
+                var count = snapshot.Passengers.Count(p => p.StationId == station.Id);
+                if (count >= GameOverThreshold)
+                {
+                    runner.OnGameOver(snapshot, station.Id);
+                    snapshots.Add(snapshot);
+                    gameOver = true;
+                    break;
+                }
+                if (count >= CrowdedThreshold)
+                    runner.OnStationCrowded(snapshot, station.Id, count);
+            }
+            if (gameOver) break;
+
             // Spawn stations at the start of the hour before player action
             foreach (var station in SpawnStations(level, snapshot))
             {
@@ -82,6 +105,7 @@ public class MetroManiaEngine
             var spawnedPassengers = SpawnPassengers(level, snapshot).ToList();
             if (spawnedPassengers.Count > 0)
                 snapshot = snapshot with { Passengers = [.. snapshot.Passengers, .. spawnedPassengers.Select(p => p.Passenger)] };
+            totalPassengersSpawned += spawnedPassengers.Count;
             foreach (var (stationId, passenger) in spawnedPassengers)
                 runner.OnPassengerSpawned(snapshot, stationId, passenger.Id);
 
@@ -111,7 +135,7 @@ public class MetroManiaEngine
         {
             TotalScore = snapshots.Count > 0 ? snapshots[^1].Score : 0,
             DaysSurvived = absoluteHour / 24,
-            TotalPassengersSpawned = 0,
+            TotalPassengersSpawned = totalPassengersSpawned,
             NumberOfPlayerActions = snapshots.Count(x => x.LastAction is not NoAction),
             GameSnapshots = snapshots
         };

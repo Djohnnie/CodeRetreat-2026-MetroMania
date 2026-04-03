@@ -89,10 +89,10 @@ public class EngineTestContext
                 WeeklyGiftCalls.Add(new WeeklyGiftEvent(snapshot.Time, gift));
             });
 
-        Runner.Setup(r => r.OnStationOverrun(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), It.IsAny<int>()))
+        Runner.Setup(r => r.OnStationCrowded(It.IsAny<GameSnapshot>(), It.IsAny<Guid>(), It.IsAny<int>()))
             .Callback<GameSnapshot, Guid, int>((snapshot, stationId, count) =>
             {
-                EventLog.Add("OnStationOverrun");
+                EventLog.Add("OnStationCrowded");
                 OverrunCalls.Add(new OverrunEvent(snapshot.Time, stationId, count));
             });
 

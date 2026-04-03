@@ -66,7 +66,7 @@ internal class SimpleRunner : IMetroManiaRunner
 
     public void OnPassengerSpawned(GameSnapshot snapshot, Guid stationId, Guid passengerId) { }
 
-    public void OnStationOverrun(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting) { }
+    public void OnStationCrowded(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting) { }
 
     public void OnGameOver(GameSnapshot snapshot, Guid stationId) { }
 }

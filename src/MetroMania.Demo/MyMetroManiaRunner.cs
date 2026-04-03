@@ -11,6 +11,6 @@ public class MyMetroManiaRunner : IMetroManiaRunner
     public void OnWeeklyGiftReceived(GameSnapshot snapshot, ResourceType gift) { }
     public void OnStationSpawned(GameSnapshot snapshot, Guid stationId, Location location, StationType stationType) { }
     public void OnPassengerSpawned(GameSnapshot snapshot, Guid stationId, Guid passengerId) { }
-    public void OnStationOverrun(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting) { }
+    public void OnStationCrowded(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting) { }
     public void OnGameOver(GameSnapshot snapshot, Guid stationId) { }
 }

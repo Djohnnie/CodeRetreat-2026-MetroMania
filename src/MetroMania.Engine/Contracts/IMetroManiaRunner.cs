@@ -32,9 +32,9 @@ public interface IMetroManiaRunner
     void OnPassengerSpawned(GameSnapshot snapshot, Guid stationId, Guid passengerId);
 
     /// <summary>
-    /// Called when a station is getting overrun by passengers (10+).
+    /// Called when a station is getting crowded (10+ passengers waiting).
     /// </summary>
-    void OnStationOverrun(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting);
+    void OnStationCrowded(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting);
 
     /// <summary>
     /// Called when the game is over because a station has too many passengers not picked up (20+).
