@@ -28,7 +28,6 @@ public class MetroManiaEngine
     public SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
     {
         var absoluteHour = 0;
-        PlayerAction lastPlayerAction = new NoAction();
         var snapshots = new List<GameSnapshot>();
 
         var snapshot = new GameSnapshot
@@ -41,7 +40,7 @@ public class MetroManiaEngine
             Lines = new List<Line>(),
             Trains = new List<Train>(),
             Passengers = new List<Passenger>(),
-            LastAction = lastPlayerAction
+            LastAction = new NoAction()
         };
 
         // Run while not cancelled and within max hours if specified
@@ -66,8 +65,7 @@ public class MetroManiaEngine
                 Stations = new Dictionary<Location, Station>(snapshot.Stations),
                 Lines = [.. snapshot.Lines],
                 Trains = [.. snapshot.Trains],
-                Passengers = [.. snapshot.Passengers],
-                LastAction = lastPlayerAction
+                Passengers = [.. snapshot.Passengers]
             };
 
             if (hourOfDay == 0)
@@ -87,11 +85,11 @@ public class MetroManiaEngine
             foreach (var (stationId, passenger) in spawnedPassengers)
                 runner.OnPassengerSpawned(snapshot, stationId, passenger.Id);
 
-            MoveTrains(level, snapshot);
+            snapshot = MoveTrains(snapshot);
 
             TransportPassengers(level, snapshot);
 
-            // Give weekly gift at the start of Monday (before player action)
+            // Give weekly gift
             if (dayOfWeek == DayOfWeek.Monday && hourOfDay == 0)
             {
                 var weeklyGift = GetWeeklyGift(level, snapshot);
@@ -103,9 +101,9 @@ public class MetroManiaEngine
             }
 
             // Get player action for the hour
-            lastPlayerAction = runner.OnHourTicked(snapshot);
+            var playerAction = runner.OnHourTicked(snapshot);
 
-            snapshot = ApplyPlayerAction(snapshot, lastPlayerAction);
+            snapshot = ApplyPlayerAction(snapshot with { LastAction = playerAction });
 
             snapshots.Add(snapshot);
             absoluteHour++;
@@ -184,9 +182,59 @@ public class MetroManiaEngine
         }
     }
 
-    private static void MoveTrains(Level level, GameSnapshot snapshot)
+    private static GameSnapshot MoveTrains(GameSnapshot snapshot)
     {
-        // Not yet implemented
+        if (snapshot.Trains.Count == 0)
+            return snapshot;
+
+        var stationLocations = snapshot.Stations
+            .ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+
+        var updatedTrains = new List<Train>(snapshot.Trains.Count);
+        bool anyChanged = false;
+
+        foreach (var train in snapshot.Trains)
+        {
+            var line = snapshot.Lines.FirstOrDefault(l => l.LineId == train.LineId);
+            if (line is null)
+            {
+                updatedTrains.Add(train);
+                continue;
+            }
+
+            var path = LinePathHelper.ComputeTilePath(line, stationLocations);
+            if (path.Count < 2)
+            {
+                updatedTrains.Add(train);
+                continue;
+            }
+
+            var currentIndex = path.IndexOf(train.TilePosition);
+            if (currentIndex == -1)
+            {
+                // Position no longer on the path — snap to the start and face forward.
+                updatedTrains.Add(train with { TilePosition = path[0], Direction = 1 });
+                anyChanged = true;
+                continue;
+            }
+
+            int direction = train.Direction;
+            int nextIndex = currentIndex + direction;
+
+            // At a terminal: flip direction then step (train never pauses at ends)
+            if (nextIndex < 0 || nextIndex >= path.Count)
+            {
+                direction = -direction;
+                nextIndex = currentIndex + direction;
+            }
+
+            nextIndex = Math.Clamp(nextIndex, 0, path.Count - 1);
+
+            updatedTrains.Add(train with { TilePosition = path[nextIndex], Direction = direction });
+            anyChanged = true;
+        }
+
+        return anyChanged ? snapshot with { Trains = updatedTrains } : snapshot;
     }
 
     private static void TransportPassengers(Level level, GameSnapshot snapshot)
@@ -206,9 +254,10 @@ public class MetroManiaEngine
         return rng.Next(2) == 0 ? ResourceType.Line : ResourceType.Train;
     }
 
-    private static GameSnapshot ApplyPlayerAction(GameSnapshot snapshot, PlayerAction action) => action switch
+    private static GameSnapshot ApplyPlayerAction(GameSnapshot snapshot) => snapshot.LastAction switch
     {
         CreateLine createLine => ApplyCreateLine(snapshot, createLine),
+        AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
         _ => snapshot
     };
 
@@ -230,7 +279,7 @@ public class MetroManiaEngine
             var updatedResource = resource with { InUse = true };
             return snapshot with
             {
-                Lines     = [.. snapshot.Lines, newLine],
+                Lines = [.. snapshot.Lines, newLine],
                 Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), updatedResource],
             };
         }
@@ -249,6 +298,43 @@ public class MetroManiaEngine
         return snapshot with
         {
             Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), extendedLine],
+        };
+    }
+
+    private static GameSnapshot ApplyAddVehicleToLine(GameSnapshot snapshot, AddVehicleToLine action)
+    {
+        // Must be an available (not in-use) Train resource
+        var resource = snapshot.Resources.FirstOrDefault(
+            r => r.Id == action.VehicleId && r.Type == ResourceType.Train && !r.InUse);
+        if (resource is null)
+            return snapshot;
+
+        // Line must exist and be in use
+        var line = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
+        if (line is null)
+            return snapshot;
+
+        // The spawn station must be on the line
+        if (!line.StationIds.Contains(action.StationId))
+            return snapshot;
+
+        // Resolve the station to a tile location
+        var stationEntry = snapshot.Stations.FirstOrDefault(kvp => kvp.Value.Id == action.StationId);
+        if (stationEntry.Value is null)
+            return snapshot;
+
+        var newTrain = new Train
+        {
+            TrainId = action.VehicleId,
+            LineId = action.LineId,
+            TilePosition = stationEntry.Key,
+            Direction = 1,
+        };
+
+        return snapshot with
+        {
+            Trains = [.. snapshot.Trains, newTrain],
+            Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), resource with { InUse = true }],
         };
     }
 }

@@ -121,13 +121,16 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         // Pass 4: passengers waiting at stations, rendered above station icons
         DrawWaitingPassengers(canvas, snapshot);
 
-        // Pass 5: header overlay on top of the first tile row
+        // Pass 5: trains on top of lines and stations
+        DrawVehicles(canvas, snapshot, stationLocations, lineColorMap);
+
+        // Pass 6: header overlay on top of the first tile row
         DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.Score);
 
-        // Pass 6: resource availability counts in the bottom-left column
+        // Pass 7: resource availability counts in the bottom-left column
         DrawResourceCounts(canvas, level.GridHeight, snapshot);
 
-        // Pass 7: player action overlay in the bottom-right (only when an action was taken)
+        // Pass 8: player action overlay in the bottom-right (only when an action was taken)
         if (snapshot.LastAction is not null and not NoAction)
             DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction);
 
@@ -324,46 +327,6 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     private static (float px, float py) TileToPixel(float tx, float ty)
         => (tx * TileSize + TileSize / 2f, ty * TileSize + TileSize / 2f);
 
-    /// <summary>
-    /// Computes the tile-coordinate waypoints for a metro line segment between two stations.
-    /// Lines are drawn as straight horizontal or vertical segments; when a direct H/V connection
-    /// is not possible, a single 45-degree diagonal is inserted between the parts.
-    /// Total path length equals the Chebyshev distance: max(|dx|, |dy|) tiles.
-    /// </summary>
-    private static List<(float x, float y)> ComputeMetroPath(Location a, Location b)
-    {
-        int dx = b.X - a.X;
-        int dy = b.Y - a.Y;
-        int absDx = Math.Abs(dx);
-        int absDy = Math.Abs(dy);
-        int sdx = Math.Sign(dx);
-        int sdy = Math.Sign(dy);
-        int diagLen = Math.Min(absDx, absDy);
-        int startStraight = Math.Abs(absDx - absDy) / 2;
-
-        float x0 = a.X, y0 = a.Y;
-        float x3 = b.X, y3 = b.Y;
-        float x1, y1, x2, y2;
-
-        if (absDx >= absDy) // horizontal-dominant: straight portions are horizontal
-        {
-            x1 = x0 + sdx * startStraight; y1 = y0;
-            x2 = x1 + sdx * diagLen;       y2 = y1 + sdy * diagLen;
-        }
-        else // vertical-dominant: straight portions are vertical
-        {
-            x1 = x0;                 y1 = y0 + sdy * startStraight;
-            x2 = x1 + sdx * diagLen; y2 = y1 + sdy * diagLen;
-        }
-
-        var pts = new List<(float, float)> { (x0, y0) };
-        if (x1 != x0 || y1 != y0) pts.Add((x1, y1));
-        if (x2 != x1 || y2 != y1) pts.Add((x2, y2));
-        if (x3 != pts[^1].Item1 || y3 != pts[^1].Item2) pts.Add((x3, y3));
-
-        return pts;
-    }
-
     private static Dictionary<string, string> BuildColorMap(LevelData data)
     {
         var map = new Dictionary<string, string>();
@@ -491,11 +454,11 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                 if (!stationLocations.TryGetValue(line.StationIds[i],     out var locA)) continue;
                 if (!stationLocations.TryGetValue(line.StationIds[i + 1], out var locB)) continue;
 
-                var waypoints = ComputeMetroPath(locA, locB);
+                var waypoints = LinePathHelper.ComputeSegmentWaypoints(locA, locB);
                 for (int j = 0; j < waypoints.Count - 1; j++)
                 {
-                    var (ax, ay) = TileToPixel(waypoints[j].x,     waypoints[j].y);
-                    var (bx, by) = TileToPixel(waypoints[j + 1].x, waypoints[j + 1].y);
+                    var (ax, ay) = TileToPixel(waypoints[j].X,     waypoints[j].Y);
+                    var (bx, by) = TileToPixel(waypoints[j + 1].X, waypoints[j + 1].Y);
                     canvas.DrawLine(ax, ay, bx, by, paint);
                 }
             }
@@ -553,6 +516,123 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         {
             float px = startX + i * (size + PassengerGap);
             DrawPassengerIcon(canvas, paint, passengers[start + i].DestinationType, px, topY, size);
+        }
+    }
+
+    // ─── Vehicles ─────────────────────────────────────────────────────────────
+
+    private static void DrawVehicles(
+        SKCanvas canvas,
+        GameSnapshot snapshot,
+        Dictionary<Guid, Location> stationLocations,
+        Dictionary<Guid, SKColor> lineColorMap)
+    {
+        foreach (var train in snapshot.Trains)
+        {
+            if (!lineColorMap.TryGetValue(train.LineId, out var lineColor)) continue;
+
+            var line = snapshot.Lines.FirstOrDefault(l => l.LineId == train.LineId);
+            if (line is null) continue;
+
+            var tilePath = LinePathHelper.ComputeTilePath(line, stationLocations);
+            if (tilePath.Count == 0) continue;
+
+            var (vx, vy) = TileToPixel(train.TilePosition.X, train.TilePosition.Y);
+
+            // Facing angle: look at the next tile in the direction of travel.
+            float angle = 0f;
+            int currentIndex = tilePath.IndexOf(train.TilePosition);
+            if (currentIndex != -1 && tilePath.Count > 1)
+            {
+                int nextIndex = currentIndex + train.Direction;
+                // At a terminal the train will flip next tick; show it facing back the way it came.
+                if (nextIndex < 0 || nextIndex >= tilePath.Count)
+                    nextIndex = currentIndex - train.Direction;
+                nextIndex = Math.Clamp(nextIndex, 0, tilePath.Count - 1);
+
+                var nextTile = tilePath[nextIndex];
+                angle = MathF.Atan2(
+                    nextTile.Y - train.TilePosition.Y,
+                    nextTile.X - train.TilePosition.X);
+            }
+
+            DrawVehicleRect(canvas, vx, vy, angle, lineColor, []);
+        }
+    }
+
+    /// <summary>
+    /// Draws a single train rectangle, oriented along <paramref name="angle"/> and
+    /// centered at (<paramref name="cx"/>, <paramref name="cy"/>).
+    /// </summary>
+    private static void DrawVehicleRect(
+        SKCanvas canvas, float cx, float cy, float angle,
+        SKColor lineColor, IReadOnlyList<Passenger> passengers)
+    {
+        canvas.Save();
+        canvas.Translate(cx, cy);
+        canvas.RotateDegrees(angle * (180f / MathF.PI));
+
+        var rect = SKRect.Create(-TrainLength / 2f, -TrainHeight / 2f, TrainLength, TrainHeight);
+
+        using var bodyPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = lineColor,
+            IsAntialias = true,
+        };
+        canvas.DrawRoundRect(rect, TrainCornerRadius, TrainCornerRadius, bodyPaint);
+
+        using var borderPaint = new SKPaint
+        {
+            Style = SKPaintStyle.Stroke,
+            Color = SKColors.White,
+            StrokeWidth = TrainBorderWidth,
+            IsAntialias = true,
+        };
+        canvas.DrawRoundRect(rect, TrainCornerRadius, TrainCornerRadius, borderPaint);
+
+        if (passengers.Count > 0)
+            DrawPassengersInVehicle(canvas, passengers);
+
+        canvas.Restore();
+    }
+
+    /// <summary>
+    /// Draws passenger icons inside the vehicle, arranged in a grid centred on the vehicle origin.
+    /// </summary>
+    private static void DrawPassengersInVehicle(SKCanvas canvas, IReadOnlyList<Passenger> passengers)
+    {
+        const float padding = 2.0f;
+
+        float innerW = TrainLength - padding * 2;
+        float innerH = TrainHeight - padding * 2;
+
+        int cols = Math.Max(1, (int)((innerW + PassengerGap) / (TrainPassengerSize + PassengerGap)));
+        int rows = Math.Max(1, (int)((innerH + PassengerGap) / (TrainPassengerSize + PassengerGap)));
+        int maxVisible = Math.Min(passengers.Count, cols * rows);
+
+        int actualCols = Math.Min(maxVisible, cols);
+        int actualRows = (int)MathF.Ceiling((float)maxVisible / actualCols);
+
+        float gridW = actualCols * TrainPassengerSize + (actualCols - 1) * PassengerGap;
+        float gridH = actualRows * TrainPassengerSize + (actualRows - 1) * PassengerGap;
+        float startX = -gridW / 2f;
+        float startY = -gridH / 2f;
+
+        using var paint = new SKPaint
+        {
+            Style = SKPaintStyle.Fill,
+            Color = SKColors.White,
+            IsAntialias = true,
+        };
+
+        for (int i = 0; i < maxVisible; i++)
+        {
+            int row = i / actualCols;
+            int col = i % actualCols;
+            float px = startX + col * (TrainPassengerSize + PassengerGap);
+            float py = startY + row * (TrainPassengerSize + PassengerGap);
+            DrawPassengerIcon(canvas, paint, passengers[i].DestinationType, px, py, TrainPassengerSize);
         }
     }
 

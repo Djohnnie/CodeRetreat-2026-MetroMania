@@ -26,9 +26,13 @@ internal class SimpleRunner : IMetroManiaRunner
                 return new CreateLine(line.LineId, line.StationIds[^1], unconnected.Id);
         }
 
-        // Deploy a train once a line exists
-        // (AddVehicleToLine requires Line.LineId — revisit when the Line model is extended)
-        _ = availableTrains;
+        // Deploy a train onto the first line if one is available
+        if (snapshot.Lines.Count > 0 && availableTrains.Count > 0)
+        {
+            var line = snapshot.Lines[0];
+            if (line.StationIds.Count > 0)
+                return new AddVehicleToLine(availableTrains[0].Id, line.LineId, line.StationIds[0]);
+        }
 
         return new NoAction();
     }
