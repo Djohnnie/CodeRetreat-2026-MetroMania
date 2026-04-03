@@ -145,7 +145,7 @@ else
                                         </FooterContent>
                                     </MudTable>
                                 }
-                                <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 8px; overflow: hidden; height: @(CalculateEditorHeight(context.Code))px;">
+                                <div style="border: 1px solid var(--mud-palette-lines-default); border-radius: 8px; overflow: hidden; height: @(CalculateEditorHeight(context.Code))px; direction: ltr;">
                                     <StandaloneCodeEditor Id="@($"submission-{context.Id}")"
                                                           ConstructionOptions="@(e => ReadOnlyEditorOptions(context.Code))"
                                                           OnDidInit="() => SetEditorHeight(context.Id, context.Code)" />
