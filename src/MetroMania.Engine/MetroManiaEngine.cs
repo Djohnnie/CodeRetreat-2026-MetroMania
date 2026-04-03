@@ -95,6 +95,10 @@ public class MetroManiaEngine
             if (dayOfWeek == DayOfWeek.Monday && hourOfDay == 0)
             {
                 var weeklyGift = GetWeeklyGift(level, snapshot);
+                snapshot = snapshot with
+                {
+                    Resources = [.. snapshot.Resources, new Resource { Type = weeklyGift, InUse = false }]
+                };
                 runner.OnWeeklyGiftReceived(snapshot, weeklyGift);
             }
 
