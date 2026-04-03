@@ -1,82 +1,68 @@
+using MetroMania.Demo;
 using MetroMania.Demo.Levels;
-using MetroMania.Domain.Extensions;
-using MetroMania.Engine.Model;
-using MetroMania.Engine.Scripting;
+using MetroMania.Engine;
 
-var level = Level1.Level;
+// ── Resolve paths ────────────────────────────────────────────────────────────
 
-var simpleRunnerScript = """
-    internal class SimpleRunner : IMetroManiaRunner
+var resourcesPath = FindResourcesPath()
+    ?? throw new DirectoryNotFoundException("Could not find the 'resources' folder. Run from the repo root.");
+
+var outputPath = Path.Combine(AppContext.BaseDirectory, "output", Guid.NewGuid().ToString());
+Directory.CreateDirectory(outputPath);
+
+// ── Run simulation ────────────────────────────────────────────────────────────
+
+var level  = Level1.Level;
+var runner = new MyMetroManiaRunner();
+var engine = new MetroManiaEngine();
+
+Console.WriteLine($"Running simulation for level: {level.Title}");
+Console.WriteLine($"Max days: {level.LevelData.MaxDays}");
+
+var result = engine.Run(runner, level, maxHours: level.LevelData.MaxDays * 24);
+
+Console.WriteLine($"Simulation complete: {result.DaysSurvived} days survived, {result.GameSnapshots.Count} snapshots");
+
+// ── Render and save snapshots ─────────────────────────────────────────────────
+
+using var renderer = new MetroManiaRenderer(resourcesPath);
+
+Console.WriteLine($"Rendering {result.GameSnapshots.Count} snapshots to: {outputPath}");
+
+for (int i = 0; i < result.GameSnapshots.Count; i++)
+{
+    var snapshot = result.GameSnapshots[i];
+    var svg      = renderer.RenderSnapshot(level, snapshot);
+    var fileName = $"{i + 1:D5}.svg";
+    var filePath = Path.Combine(outputPath, fileName);
+
+    await File.WriteAllTextAsync(filePath, svg);
+
+    if (i % 100 == 0 || i == result.GameSnapshots.Count - 1)
+        Console.WriteLine($"  [{i + 1}/{result.GameSnapshots.Count}] Day {snapshot.Time.Day} Hour {snapshot.Time.Hour:D2} → {fileName}");
+}
+
+// ── Write viewer HTML ─────────────────────────────────────────────────────────
+
+var templatePath = Path.Combine(AppContext.BaseDirectory, "viewer.html");
+var viewerHtml = (await File.ReadAllTextAsync(templatePath))
+    .Replace("%%TOTAL%%", result.GameSnapshots.Count.ToString());
+await File.WriteAllTextAsync(Path.Combine(outputPath, "viewer.html"), viewerHtml);
+
+Console.WriteLine($"Viewer saved → {Path.Combine(outputPath, "viewer.html")}");
+Console.WriteLine("Done.");
+
+// ── Helper ────────────────────────────────────────────────────────────────────
+
+static string? FindResourcesPath()
+{
+    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+    while (dir is not null)
     {
-        public PlayerAction OnHourTick(GameSnapshot snapshot)
-        {
-            var lineWithoutVehicle = snapshot.Lines
-                .FirstOrDefault(l => l.Vehicles.Count == 0);
-
-            if (lineWithoutVehicle is not null && snapshot.AvailableVehicles.Count > 0)
-            {
-                var vehicleId = snapshot.AvailableVehicles[0].Id;
-                var stationId = lineWithoutVehicle.Stations
-                    .MaxBy(s => s.Passengers.Count)!
-                    .Id;
-                return new AddVehicleToLine(vehicleId, lineWithoutVehicle.LineId, stationId);
-            }
-
-            var unconnected = snapshot.UnconnectedStations;
-
-            if (unconnected.Count == 0)
-                return new NoAction();
-
-            if (snapshot.Lines.Count > 0)
-            {
-                var line = snapshot.Lines[0];
-                var fromStationId = line.StationIds[^1];
-                var toStationId = unconnected[0].Id;
-                return new ExtendLine(line.LineId, fromStationId, toStationId);
-            }
-
-            if (snapshot.AvailableLines.Count > 0 && unconnected.Count >= 2)
-            {
-                var lineId = snapshot.AvailableLines[0].Id;
-                var stationIds = unconnected.Select(s => s.Id).ToList();
-                return new CreateLine(lineId, stationIds);
-            }
-
-            return new NoAction();
-        }
-
-        public void OnDayStart(GameSnapshot snapshot) { }
-
-        public void OnWeeklyGift(GameSnapshot snapshot, ResourceType gift) { }
-
-        public void OnStationSpawned(GameSnapshot snapshot, Guid stationId, Location location, StationType stationType) { }
-
-        public void OnPassengerWaiting(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers) { }
-
-        public void OnStationOverrun(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers) { }
-
-        public void OnGameOver(GameSnapshot snapshot, Location location, IReadOnlyList<Passenger> passengers) { }
+        var candidate = Path.Combine(dir.FullName, "resources");
+        if (Directory.Exists(candidate) && File.Exists(Path.Combine(candidate, "background.svg")))
+            return candidate;
+        dir = dir.Parent;
     }
-    """;
-
-var outerScript = """
-        var engine = new MetroManiaEngine();
-        var runner = new SimpleRunner();
-        var result = engine.Run(runner, Level);
-        return result;
-
-        <<PLACEHOLDER>>
-    """;
-
-var scriptString = outerScript.Replace("<<PLACEHOLDER>>", simpleRunnerScript).Base64Encode();
-
-var globals = new ScriptGlobals(level);
-var scriptCompiler = new ScriptCompiler<GameResult>();
-var script = await scriptCompiler.CompileForExecution(scriptString);
-var result = await script.Invoke(globals);
-
-//Console.WriteLine($"Game Over!");
-//Console.WriteLine($"  Score:              {result.Score}");
-//Console.WriteLine($"  Days Survived:      {result.DaysSurvived}");
-//Console.WriteLine($"  Passengers Spawned: {result.TotalPassengersSpawned}");
-//Console.WriteLine($"  Time Taken:         {result.TimeTaken.TotalMilliseconds:F0}ms");
+    return null;
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 1 — MetroMania Viewer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #60a5fa;
+      letter-spacing: 0.05em;
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 900px;
+      background: #1e2433;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      background: #2563eb;
+      color: #fff;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 7ch;
+      text-align: center;
+    }
+
+    .label { color: #94a3b8; font-size: 0.85rem; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #334155;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #2563eb;
+      border: 2px solid #60a5fa;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #2563eb;
+      border: 2px solid #60a5fa;
+      cursor: pointer;
+    }
+
+    .step-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    button {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    button:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
+    button:active { transform: scale(0.96); }
+
+    .svg-frame {
+      width: 100%;
+      max-width: 900px;
+      background: #1e2433;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .svg-frame img {
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Level 1 — MetroMania Viewer</h1>
+
+  <div class="controls">
+    <div class="info-row">
+      <span class="label">Hour</span>
+      <span class="badge" id="hour-badge">1</span>
+      <span class="label">Day</span>
+      <span class="badge" id="day-badge">1 / 00:00</span>
+      <span class="label">Total</span>
+      <span class="badge">%%TOTAL%%</span>
+    </div>
+
+    <input type="range" id="slider" min="1" max="%%TOTAL%%" value="1" step="1" />
+
+    <div class="step-buttons">
+      <button id="btn-start" title="First hour">⏮ Start</button>
+      <button id="btn-prev-day" title="Previous day">◀◀ Day</button>
+      <button id="btn-prev" title="Previous hour">◀ Hour</button>
+      <button id="btn-next" title="Next hour">Hour ▶</button>
+      <button id="btn-next-day" title="Next day">Day ▶▶</button>
+      <button id="btn-end" title="Last hour">End ⏭</button>
+    </div>
+  </div>
+
+  <div class="svg-frame">
+    <img id="snapshot" src="00001.svg" alt="Snapshot 1" />
+  </div>
+
+  <script>
+    const TOTAL = %%TOTAL%%;
+    const HOURS_PER_DAY = 24;
+    const slider  = document.getElementById('slider');
+    const img     = document.getElementById('snapshot');
+    const hourBadge = document.getElementById('hour-badge');
+    const dayBadge  = document.getElementById('day-badge');
+
+    function pad(n, len) { return String(n).padStart(len, '0'); }
+
+    function update(hour) {
+      hour = Math.max(1, Math.min(TOTAL, hour));
+      slider.value = hour;
+      img.src = pad(hour, 5) + '.svg';
+      img.alt = 'Snapshot ' + hour;
+      hourBadge.textContent = hour;
+      const day  = Math.floor((hour - 1) / HOURS_PER_DAY) + 1;
+      const h    = (hour - 1) % HOURS_PER_DAY;
+      dayBadge.textContent = 'Day ' + day + '  ' + pad(h, 2) + ':00';
+    }
+
+    slider.addEventListener('input', () => update(+slider.value));
+
+    document.getElementById('btn-start').addEventListener('click', () => update(1));
+    document.getElementById('btn-end').addEventListener('click',   () => update(TOTAL));
+    document.getElementById('btn-prev').addEventListener('click',  () => update(+slider.value - 1));
+    document.getElementById('btn-next').addEventListener('click',  () => update(+slider.value + 1));
+    document.getElementById('btn-prev-day').addEventListener('click', () => update(+slider.value - HOURS_PER_DAY));
+    document.getElementById('btn-next-day').addEventListener('click', () => update(+slider.value + HOURS_PER_DAY));
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); update(+slider.value - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); update(+slider.value + 1); }
+      if (e.key === 'ArrowUp')    { e.preventDefault(); update(+slider.value - HOURS_PER_DAY); }
+      if (e.key === 'ArrowDown')  { e.preventDefault(); update(+slider.value + HOURS_PER_DAY); }
+      if (e.key === 'Home')       { e.preventDefault(); update(1); }
+      if (e.key === 'End')        { e.preventDefault(); update(TOTAL); }
+    });
+
+    update(1);
+  </script>
+</body>
+</html>

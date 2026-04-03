@@ -40,8 +40,7 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
             if (hourlySnapshots is null)
                 return new ScriptRenderResult { Success = false, Error = "Snapshot script returned null." };
 
-            var engine = new MetroManiaEngine();
-            using var renderer = new MetroManiaRenderer(engine, svgResourcesPath);
+            using var renderer = new MetroManiaRenderer(svgResourcesPath);
             var renders = new List<FrameRender>(hourlySnapshots.Count);
 
             // Render one frame per in-game hour (1-indexed)
@@ -87,8 +86,7 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         var outerScript = """
             var engine = new MetroManiaEngine();
             var runner = new MyMetroManiaRunner();
-            var snapshots = engine.RunWithHourlySnapshots(runner, Level);
-            return snapshots;
+            return engine.RunSimulation(runner, Level).GameSnapshots;
 
             <<PLACEHOLDER>>
             """;

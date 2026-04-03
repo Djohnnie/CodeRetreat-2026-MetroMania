@@ -11,7 +11,7 @@ public class MetroManiaEngine
     public GameResult Run(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
-        var simulationResult = RunSimulation(runner, level, cancellationToken: cancellationToken);
+        var simulationResult = RunSimulation(runner, level, maxHours, cancellationToken);
         stopwatch.Stop();
 
         return new GameResult
