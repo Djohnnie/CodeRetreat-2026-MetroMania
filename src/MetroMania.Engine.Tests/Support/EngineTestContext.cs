@@ -85,14 +85,14 @@ public class EngineTestContext
                 EventLog.Add("OnStationSpawned");
                 StationIdsByLocation[loc] = id;
             });
-        Runner.Setup(r => r.OnWeeklyGift(It.IsAny<GameSnapshot>(), It.IsAny<ResourceType>()))
+        Runner.Setup(r => r.OnWeeklyGiftReceived(It.IsAny<GameSnapshot>(), It.IsAny<ResourceType>()))
             .Callback<GameSnapshot, ResourceType>((snapshot, gift) =>
             {
                 EventLog.Add("OnWeeklyGift");
                 WeeklyGiftTypes.Add(gift);
                 WeeklyGiftEvents.Add(new WeeklyGiftEvent(snapshot, gift));
             });
-        Runner.Setup(r => r.OnPassengerWaiting(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
+        Runner.Setup(r => r.OnPassengerSpawned(It.IsAny<GameSnapshot>(), It.IsAny<Location>(), It.IsAny<IReadOnlyList<Passenger>>()))
             .Callback<GameSnapshot, Location, IReadOnlyList<Passenger>>((snapshot, loc, passengers) =>
             {
                 EventLog.Add("OnPassengerWaiting");
@@ -116,7 +116,7 @@ public class EngineTestContext
                 DayStartCalls.Add(snapshot.Time);
                 EventLog.Add("OnDayStart");
             });
-        Runner.Setup(r => r.OnHourTick(It.IsAny<GameSnapshot>()))
+        Runner.Setup(r => r.OnHourTicked(It.IsAny<GameSnapshot>()))
             .Returns<GameSnapshot>(snapshot =>
             {
                 HourTickCalls.Add(snapshot.Time);
@@ -124,7 +124,7 @@ public class EngineTestContext
 
                 // Track max passengers onboard any vehicle
                 // Track which stations each vehicle has visited
-                foreach (var v in snapshot.Vehicles)
+                foreach (var v in snapshot.Trains)
                 {
                     if (v.Passengers.Count > MaxPassengersOnboard)
                         MaxPassengersOnboard = v.Passengers.Count;

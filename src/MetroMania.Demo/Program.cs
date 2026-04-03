@@ -75,8 +75,8 @@ var scriptCompiler = new ScriptCompiler<GameResult>();
 var script = await scriptCompiler.CompileForExecution(scriptString);
 var result = await script.Invoke(globals);
 
-Console.WriteLine($"Game Over!");
-Console.WriteLine($"  Score:              {result.Score}");
-Console.WriteLine($"  Days Survived:      {result.DaysSurvived}");
-Console.WriteLine($"  Passengers Spawned: {result.TotalPassengersSpawned}");
-Console.WriteLine($"  Time Taken:         {result.TimeTaken.TotalMilliseconds:F0}ms");
+//Console.WriteLine($"Game Over!");
+//Console.WriteLine($"  Score:              {result.Score}");
+//Console.WriteLine($"  Days Survived:      {result.DaysSurvived}");
+//Console.WriteLine($"  Passengers Spawned: {result.TotalPassengersSpawned}");
+//Console.WriteLine($"  Time Taken:         {result.TimeTaken.TotalMilliseconds:F0}ms");

@@ -58,13 +58,11 @@ public class GameRunnerGrain : Grain, IGameRunnerGrain
             return new ScriptRunResult
             {
                 Success = true,
-                Score = result.Score,
-                TimeTakenMs = result.TimeTaken.TotalMilliseconds,
+                Score = result.TotalScore,
+                TimeTakenMs = result.ProcessingTime.TotalMilliseconds,
                 DaysSurvived = result.DaysSurvived,
                 TotalPassengersSpawned = result.TotalPassengersSpawned,
-                DebugJson = result.DebugInfo is not null
-                    ? JsonSerializer.Serialize(result.DebugInfo, DebugJsonOptions)
-                    : null
+                DebugJson = ""
             };
         }
         catch (Exception ex)
