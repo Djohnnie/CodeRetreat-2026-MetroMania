@@ -3,5 +3,6 @@
 public record Line
 {
     public Guid LineId { get; init; }
+    public int OrderId { get; init; }
     public IReadOnlyList<Guid> StationIds { get; init; } = [];
 }

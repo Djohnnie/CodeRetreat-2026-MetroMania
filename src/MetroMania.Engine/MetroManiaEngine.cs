@@ -82,15 +82,16 @@ public class MetroManiaEngine
         var snapshots = new List<GameSnapshot>();
         var totalPassengersSpawned = 0;
 
-        // Seed the very first snapshot. The initial Resources list is empty because
-        // the engine grants the starter resources (1 Line + 1 Train) via the level
-        // data rather than hard-coding them here, keeping the engine level-agnostic.
+        // Seed the very first snapshot. Resources are pre-populated from LevelData.InitialResources
+        // so tests and demo levels can grant starting resources without waiting for weekly gifts.
         var snapshot = new GameSnapshot
         {
             Time = new GameTime(1, 0, DayOfWeek.Sunday),
             TotalHoursElapsed = 0,
             Score = 0,
-            Resources = new List<Resource>(),
+            Resources = level.LevelData.InitialResources
+                .Select(type => new Resource { Id = Guid.NewGuid(), Type = type, InUse = false })
+                .ToList(),
             Stations = new Dictionary<Location, Station>(),
             Lines = new List<Line>(),
             Trains = new List<Train>(),
@@ -680,12 +681,13 @@ public class MetroManiaEngine
                 return (snapshot, PlayerActionError.LineSegmentAlreadyExists,
                     $"Stations {action.FromStationId} and {action.ToStationId} are already directly connected on an existing line.");
 
-            var newLine = new Line { LineId = action.LineId, StationIds = [action.FromStationId, action.ToStationId] };
+            var newLine = new Line { LineId = action.LineId, OrderId = snapshot.NextLineOrderId, StationIds = [action.FromStationId, action.ToStationId] };
             var updatedResource = resource with { InUse = true };
             return (snapshot with
             {
                 Lines = [.. snapshot.Lines, newLine],
                 Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), updatedResource],
+                NextLineOrderId = snapshot.NextLineOrderId + 1,
             }, 0, null);
         }
 

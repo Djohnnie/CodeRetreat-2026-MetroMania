@@ -26,7 +26,12 @@ public class EngineTestContext
     // Level configuration
     public List<MetroStation> Stations { get; } = [];
     public List<WeeklyGiftOverride> WeeklyGiftOverrides { get; } = [];
+    public List<ResourceType> InitialResources { get; } = [];
     public int Seed { get; set; } = 42;
+    public int VehicleCapacity { get; set; } = 6;
+
+    // Pending player actions dequeued one per tick from OnHourTicked
+    public Queue<Func<GameSnapshot, PlayerAction>> PendingActions { get; } = new();
 
     // Simulation results
     public SimulationResult? SimResult { get; set; }
@@ -117,6 +122,8 @@ public class EngineTestContext
             {
                 EventLog.Add("OnHourTicked");
                 HourTickCalls.Add(snapshot.Time);
+                if (PendingActions.Count > 0)
+                    return PendingActions.Dequeue()(snapshot);
                 return PlayerAction.None;
             });
     }
@@ -129,8 +136,10 @@ public class EngineTestContext
         LevelData = new LevelData
         {
             Seed = Seed,
+            VehicleCapacity = VehicleCapacity,
             Stations = [.. Stations],
-            WeeklyGiftOverrides = [.. WeeklyGiftOverrides]
+            WeeklyGiftOverrides = [.. WeeklyGiftOverrides],
+            InitialResources = [.. InitialResources]
         }
     };
 
@@ -141,6 +150,7 @@ public class EngineTestContext
     public void PrepareForRerun()
     {
         PreviousWeeklyGifts.AddRange(WeeklyGiftCalls.Select(e => e.Gift));
+        PendingActions.Clear();
         EventLog.Clear();
         DayStartCalls.Clear();
         HourTickCalls.Clear();

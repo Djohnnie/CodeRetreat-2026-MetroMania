@@ -105,6 +105,28 @@ public class EngineStepDefinitions(EngineTestContext ctx)
         });
     }
 
+    [Given(@"the level has (\d+) initial Lines? and (\d+) initial Trains?")]
+    public void GivenInitialLinesAndTrains(int lines, int trains)
+    {
+        for (int i = 0; i < lines; i++) ctx.InitialResources.Add(ResourceType.Line);
+        for (int i = 0; i < trains; i++) ctx.InitialResources.Add(ResourceType.Train);
+    }
+
+    [Given(@"the level has (\d+) initial Lines?$")]
+    public void GivenInitialLines(int lines)
+    {
+        for (int i = 0; i < lines; i++) ctx.InitialResources.Add(ResourceType.Line);
+    }
+
+    [Given(@"the level has (\d+) initial Trains?$")]
+    public void GivenInitialTrains(int trains)
+    {
+        for (int i = 0; i < trains; i++) ctx.InitialResources.Add(ResourceType.Train);
+    }
+
+    [Given(@"the vehicle capacity is (\d+)")]
+    public void GivenVehicleCapacity(int capacity) => ctx.VehicleCapacity = capacity;
+
     // =================================================================
     // When — run simulation
     // =================================================================
@@ -258,5 +280,52 @@ public class EngineStepDefinitions(EngineTestContext ctx)
             var expected = (DayOfWeek)((tick.Day - 1) % 7);
             Assert.Equal(expected, tick.DayOfWeek);
         }
+    }
+
+    // =================================================================
+    // Then — simulation state assertions
+    // =================================================================
+
+    [Then(@"the score should be (\d+)")]
+    public void ThenScoreShouldBe(int expected)
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.Equal(expected, ctx.LastSnapshot.Score);
+    }
+
+    [Then(@"there should be (\d+) trains? in the simulation")]
+    public void ThenTrainCount(int expected)
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.Equal(expected, ctx.LastSnapshot.Trains.Count);
+    }
+
+    [Then(@"there should be (\d+) lines? in the simulation")]
+    public void ThenLineCount(int expected)
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.Equal(expected, ctx.LastSnapshot.Lines.Count);
+    }
+
+    [Then(@"the simulation should have produced (\d+) snapshots?")]
+    public void ThenSimulationSnapshotCount(int expected)
+    {
+        Assert.NotNull(ctx.SimResult);
+        Assert.Equal(expected, ctx.SimResult.GameSnapshots.Count);
+    }
+
+    [Then(@"the simulation should have produced fewer than (\d+) snapshots?")]
+    public void ThenSimulationSnapshotCountLessThan(int max)
+    {
+        Assert.NotNull(ctx.SimResult);
+        Assert.True(ctx.SimResult.GameSnapshots.Count < max,
+            $"Expected fewer than {max} snapshots but got {ctx.SimResult.GameSnapshots.Count}");
+    }
+
+    [Then(@"the last snapshot should contain (\d+) resources?")]
+    public void ThenLastSnapshotResourceCount(int expected)
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.Equal(expected, ctx.LastSnapshot.Resources.Count);
     }
 }

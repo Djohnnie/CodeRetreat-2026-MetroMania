@@ -106,8 +106,9 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
         var colorMap = BuildColorMap(level.LevelData);
 
-        // Map each line's GUID to a display color, using index order for consistency.
+        // Map each line's GUID to a display color, ordered by creation (OrderId).
         var lineColorMap = snapshot.Lines
+            .OrderBy(line => line.OrderId)
             .Select((line, i) => (line.LineId, Color: LineColors[i % LineColors.Length]))
             .ToDictionary(x => x.LineId, x => x.Color);
 
@@ -614,7 +615,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             StrokeJoin = SKStrokeJoin.Round,
         };
 
-        foreach (var line in snapshot.Lines)
+        foreach (var line in snapshot.Lines.OrderBy(l => l.OrderId))
         {
             if (!lineColorMap.TryGetValue(line.LineId, out var color)) continue;
             paint.Color = color;

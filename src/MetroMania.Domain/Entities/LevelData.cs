@@ -45,6 +45,13 @@ public class LevelData
     /// instead of picking one randomly. Weeks without an entry still use the seeded RNG.
     /// </summary>
     public List<WeeklyGiftOverride> WeeklyGiftOverrides { get; set; } = [];
+
+    /// <summary>
+    /// Resources pre-seeded into the simulation at startup, before any weekly gifts are granted.
+    /// Primarily used by tests and the demo project to give the player lines and trains
+    /// from the very first tick without waiting for Monday's weekly gift.
+    /// </summary>
+    public List<ResourceType> InitialResources { get; set; } = [];
 }
 
 /// <summary>

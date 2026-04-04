@@ -12,5 +12,6 @@ public record GameSnapshot
     public required IReadOnlyList<Train> Trains { get; init; }
     public required IReadOnlyList<Passenger> Passengers { get; init; }
 
+    public int NextLineOrderId { get; init; }
     public PlayerAction? LastAction { get; init; }
 }

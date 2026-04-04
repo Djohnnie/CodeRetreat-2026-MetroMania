@@ -1,7 +1,10 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using MetroMania.Demo;
 using MetroMania.Demo.Levels;
 using MetroMania.Demo.Runners;
 using MetroMania.Engine;
+using MetroMania.Engine.Model;
 
 // ── Resolve paths ────────────────────────────────────────────────────────────
 
@@ -16,7 +19,13 @@ Directory.CreateDirectory(outputPath);
 using var renderer = new MetroManiaRenderer(resourcesPath);
 var templatePath = Path.Combine(AppContext.BaseDirectory, "viewer.html");
 
-foreach (var level in new[] { Level1.Level, Level2.Level })
+var jsonOptions = new JsonSerializerOptions
+{
+    WriteIndented = true,
+    Converters = { new JsonStringEnumConverter(), new LocationJsonConverter() }
+};
+
+foreach (var level in new[] { /*Level1.Level, Level2.Level, */Level3.Level })
 {
     var levelOutputPath = Path.Combine(outputPath, level.Title.Replace(" ", "-").ToLowerInvariant());
     Directory.CreateDirectory(levelOutputPath);
@@ -43,6 +52,9 @@ foreach (var level in new[] { Level1.Level, Level2.Level })
         var filePath = Path.Combine(levelOutputPath, fileName);
 
         await File.WriteAllTextAsync(filePath, svg);
+
+        var jsonPath = Path.ChangeExtension(filePath, ".json");
+        await File.WriteAllTextAsync(jsonPath, JsonSerializer.Serialize(snapshot, jsonOptions));
 
         if (i % 100 == 0 || i == result.GameSnapshots.Count - 1)
             Console.WriteLine($"  [{i + 1}/{result.GameSnapshots.Count}] Day {snapshot.Time.Day} Hour {snapshot.Time.Hour:D2} → {fileName}");
