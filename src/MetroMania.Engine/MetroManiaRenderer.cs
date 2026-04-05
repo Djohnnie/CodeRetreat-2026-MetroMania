@@ -744,8 +744,15 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             var (vx, vy) = TileToPixel(train.TilePosition.X, train.TilePosition.Y);
 
             // Facing angle: look at the next tile in the direction of travel.
+            // Use the engine-tracked PathIndex when available to avoid picking the wrong
+            // occurrence when a tile appears twice in the path (e.g. tiles shared by the
+            // inbound and outbound segments around a turning-point station).
             float angle = 0f;
-            int currentIndex = tilePath.IndexOf(train.TilePosition);
+            int currentIndex = (train.PathIndex >= 0
+                                && train.PathIndex < tilePath.Count
+                                && tilePath[train.PathIndex] == train.TilePosition)
+                               ? train.PathIndex
+                               : tilePath.IndexOf(train.TilePosition);
             if (currentIndex != -1 && tilePath.Count > 1)
             {
                 int nextIndex = currentIndex + train.Direction;
