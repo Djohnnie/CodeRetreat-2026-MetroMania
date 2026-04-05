@@ -86,7 +86,7 @@ public class MetroManiaEngine
         // so tests and demo levels can grant starting resources without waiting for weekly gifts.
         var snapshot = new GameSnapshot
         {
-            Time = new GameTime(1, 0, DayOfWeek.Sunday),
+            Time = new GameTime(1, 0, DayOfWeek.Monday),
             TotalHoursElapsed = 0,
             Score = 0,
             Resources = level.LevelData.InitialResources
@@ -109,10 +109,10 @@ public class MetroManiaEngine
 
             // ── Derive calendar values from the absolute tick counter ──────────
             // Day 1 = hours 0–23, Day 2 = hours 24–47, etc.
-            // DayOfWeek wraps every 7 days starting on Sunday (the first day of Day 1).
+            // DayOfWeek wraps every 7 days starting on Monday (the first day of Day 1).
             var day = absoluteHour / 24 + 1;
             var hourOfDay = absoluteHour % 24;
-            var dayOfWeek = (DayOfWeek)(absoluteHour / 24 % 7);
+            var dayOfWeek = (DayOfWeek)((absoluteHour / 24 + 1) % 7);
             var gameTime = new GameTime(day, hourOfDay, dayOfWeek);
 
             // ── Produce a shallow copy of the previous snapshot for this tick ──

@@ -2,7 +2,7 @@ Feature: Game Loop
     The engine's main tick loop drives simulation progress. Each iteration represents
     one game hour. "Running for N hours" processes ticks 0 through N-1 (inclusive);
     TotalHoursElapsed in each snapshot equals its zero-based tick index.
-    Day 1 starts on a Sunday (DayOfWeek 0) and advances one day per 24 ticks.
+    Day 1 starts on a Monday (DayOfWeek 1) and advances one day per 24 ticks.
 
     Scenario: Running for 0 hours produces no snapshots and fires no events
         Given an empty level
@@ -80,15 +80,15 @@ Feature: Game Loop
         When the simulation runs for 50 hours
         Then the last snapshot TotalHoursElapsed should be 49
 
-    Scenario: Day 1 is a Sunday
+    Scenario: Day 1 is a Monday
         Given an empty level
         When the simulation runs for 1 hour
-        Then the last tick DayOfWeek should be Sunday
+        Then the last tick DayOfWeek should be Monday
 
-    Scenario: Day 2 is a Monday
+    Scenario: Day 2 is a Tuesday
         Given an empty level
         When the simulation runs for 25 hours
-        Then the last tick DayOfWeek should be Monday
+        Then the last tick DayOfWeek should be Tuesday
 
     Scenario Outline: DayOfWeek advances one step each game day
         Given an empty level
@@ -97,19 +97,19 @@ Feature: Game Loop
 
         Examples:
             | hours | dayOfWeek |
-            | 1     | Sunday    |
-            | 25    | Monday    |
-            | 49    | Tuesday   |
-            | 73    | Wednesday |
-            | 97    | Thursday  |
-            | 121   | Friday    |
-            | 145   | Saturday  |
-            | 169   | Sunday    |
+            | 1     | Monday    |
+            | 25    | Tuesday   |
+            | 49    | Wednesday |
+            | 73    | Thursday  |
+            | 97    | Friday    |
+            | 121   | Saturday  |
+            | 145   | Sunday    |
+            | 169   | Monday    |
 
-    Scenario: DayOfWeek completes a full week and returns to Sunday on day 8
+    Scenario: DayOfWeek completes a full week and returns to Monday on day 8
         Given an empty level
         When the simulation runs for 169 hours
-        Then the last tick DayOfWeek should be Sunday
+        Then the last tick DayOfWeek should be Monday
         And "OnDayStart" should have fired exactly 8 times
 
     Scenario: OnDayStart is not fired on non-midnight hours
@@ -123,7 +123,7 @@ Feature: Game Loop
         When the simulation runs for 2 hours
         Then "OnHourTicked" should have fired exactly 2 times
 
-    Scenario: All tick DayOfWeek values follow the Sunday-starting cycle
+    Scenario: All tick DayOfWeek values follow the Monday-starting cycle
         Given an empty level
         When the simulation runs for 337 hours
-        Then all tick DayOfWeek values should follow the Sunday-starting cycle
+        Then all tick DayOfWeek values should follow the Monday-starting cycle

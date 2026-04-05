@@ -29,7 +29,7 @@ namespace MetroMania.Engine.Tests.Features
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Game Loop", @"    The engine's main tick loop drives simulation progress. Each iteration represents
     one game hour. ""Running for N hours"" processes ticks 0 through N-1 (inclusive);
     TotalHoursElapsed in each snapshot equals its zero-based tick index.
-    Day 1 starts on a Sunday (DayOfWeek 0) and advances one day per 24 ticks.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+    Day 1 starts on a Monday (DayOfWeek 1) and advances one day per 24 ticks.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "GameLoop.feature"
 #line hidden
@@ -567,15 +567,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Day 1 is a Sunday")]
+        [global::Xunit.FactAttribute(DisplayName="Day 1 is a Monday")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Loop")]
-        [global::Xunit.TraitAttribute("Description", "Day 1 is a Sunday")]
-        public async global::System.Threading.Tasks.Task Day1IsASunday()
+        [global::Xunit.TraitAttribute("Description", "Day 1 is a Monday")]
+        public async global::System.Threading.Tasks.Task Day1IsAMonday()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "20";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Day 1 is a Sunday", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Day 1 is a Monday", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 83
@@ -595,21 +595,21 @@ namespace MetroMania.Engine.Tests.Features
         await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 86
-        await testRunner.ThenAsync("the last tick DayOfWeek should be Sunday", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the last tick DayOfWeek should be Monday", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Day 2 is a Monday")]
+        [global::Xunit.FactAttribute(DisplayName="Day 2 is a Tuesday")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Loop")]
-        [global::Xunit.TraitAttribute("Description", "Day 2 is a Monday")]
-        public async global::System.Threading.Tasks.Task Day2IsAMonday()
+        [global::Xunit.TraitAttribute("Description", "Day 2 is a Tuesday")]
+        public async global::System.Threading.Tasks.Task Day2IsATuesday()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "21";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Day 2 is a Monday", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Day 2 is a Tuesday", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 88
@@ -629,7 +629,7 @@ namespace MetroMania.Engine.Tests.Features
         await testRunner.WhenAsync("the simulation runs for 25 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 91
-        await testRunner.ThenAsync("the last tick DayOfWeek should be Monday", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the last tick DayOfWeek should be Tuesday", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -638,14 +638,14 @@ namespace MetroMania.Engine.Tests.Features
         [global::Xunit.TheoryAttribute(DisplayName="DayOfWeek advances one step each game day")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Loop")]
         [global::Xunit.TraitAttribute("Description", "DayOfWeek advances one step each game day")]
-        [global::Xunit.InlineDataAttribute("1", "Sunday", "22", new string[0])]
-        [global::Xunit.InlineDataAttribute("25", "Monday", "23", new string[0])]
-        [global::Xunit.InlineDataAttribute("49", "Tuesday", "24", new string[0])]
-        [global::Xunit.InlineDataAttribute("73", "Wednesday", "25", new string[0])]
-        [global::Xunit.InlineDataAttribute("97", "Thursday", "26", new string[0])]
-        [global::Xunit.InlineDataAttribute("121", "Friday", "27", new string[0])]
-        [global::Xunit.InlineDataAttribute("145", "Saturday", "28", new string[0])]
-        [global::Xunit.InlineDataAttribute("169", "Sunday", "29", new string[0])]
+        [global::Xunit.InlineDataAttribute("1", "Monday", "22", new string[0])]
+        [global::Xunit.InlineDataAttribute("25", "Tuesday", "23", new string[0])]
+        [global::Xunit.InlineDataAttribute("49", "Wednesday", "24", new string[0])]
+        [global::Xunit.InlineDataAttribute("73", "Thursday", "25", new string[0])]
+        [global::Xunit.InlineDataAttribute("97", "Friday", "26", new string[0])]
+        [global::Xunit.InlineDataAttribute("121", "Saturday", "27", new string[0])]
+        [global::Xunit.InlineDataAttribute("145", "Sunday", "28", new string[0])]
+        [global::Xunit.InlineDataAttribute("169", "Monday", "29", new string[0])]
         public async global::System.Threading.Tasks.Task DayOfWeekAdvancesOneStepEachGameDay(string hours, string dayOfWeek, string @__pickleIndex, string[] exampleTags)
         {
             string[] tagsOfScenario = exampleTags;
@@ -679,15 +679,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="DayOfWeek completes a full week and returns to Sunday on day 8")]
+        [global::Xunit.FactAttribute(DisplayName="DayOfWeek completes a full week and returns to Monday on day 8")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Loop")]
-        [global::Xunit.TraitAttribute("Description", "DayOfWeek completes a full week and returns to Sunday on day 8")]
-        public async global::System.Threading.Tasks.Task DayOfWeekCompletesAFullWeekAndReturnsToSundayOnDay8()
+        [global::Xunit.TraitAttribute("Description", "DayOfWeek completes a full week and returns to Monday on day 8")]
+        public async global::System.Threading.Tasks.Task DayOfWeekCompletesAFullWeekAndReturnsToMondayOnDay8()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "30";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("DayOfWeek completes a full week and returns to Sunday on day 8", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("DayOfWeek completes a full week and returns to Monday on day 8", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 109
@@ -707,7 +707,7 @@ namespace MetroMania.Engine.Tests.Features
         await testRunner.WhenAsync("the simulation runs for 169 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 112
-        await testRunner.ThenAsync("the last tick DayOfWeek should be Sunday", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("the last tick DayOfWeek should be Monday", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 113
         await testRunner.AndAsync("\"OnDayStart\" should have fired exactly 8 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
@@ -787,15 +787,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="All tick DayOfWeek values follow the Sunday-starting cycle")]
+        [global::Xunit.FactAttribute(DisplayName="All tick DayOfWeek values follow the Monday-starting cycle")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Game Loop")]
-        [global::Xunit.TraitAttribute("Description", "All tick DayOfWeek values follow the Sunday-starting cycle")]
-        public async global::System.Threading.Tasks.Task AllTickDayOfWeekValuesFollowTheSunday_StartingCycle()
+        [global::Xunit.TraitAttribute("Description", "All tick DayOfWeek values follow the Monday-starting cycle")]
+        public async global::System.Threading.Tasks.Task AllTickDayOfWeekValuesFollowTheMonday_StartingCycle()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "33";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("All tick DayOfWeek values follow the Sunday-starting cycle", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("All tick DayOfWeek values follow the Monday-starting cycle", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 126
@@ -815,7 +815,7 @@ namespace MetroMania.Engine.Tests.Features
         await testRunner.WhenAsync("the simulation runs for 337 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 129
-        await testRunner.ThenAsync("all tick DayOfWeek values should follow the Sunday-starting cycle", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+        await testRunner.ThenAsync("all tick DayOfWeek values should follow the Monday-starting cycle", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

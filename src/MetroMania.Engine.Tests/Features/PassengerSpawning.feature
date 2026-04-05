@@ -137,7 +137,7 @@ Feature: Passenger Spawning
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days and passengers every 24 hours
         And a level with a Triangle station at (1,0) with a spawn delay of 1 day and passengers every 24 hours
         When the simulation runs for 49 hours
-        Then "OnPassengerSpawned" should have fired exactly 5 times
+        Then "OnPassengerSpawned" should have fired exactly 4 times
 
     Scenario: Station with delayed spawn and multiple phases counts hoursAlive from its spawn tick
         Given a level with a Circle station at (0,0) with a spawn delay of 1 day and the following spawn phases:

@@ -225,6 +225,7 @@
   <data name="Week" xml:space="preserve"><value>Week</value></data>
   <data name="ResourceType" xml:space="preserve"><value>Resourcetype</value></data>
   <data name="AddWeek" xml:space="preserve"><value>Week toevoegen</value></data>
+  <data name="StartingResourceTooltip" xml:space="preserve"><value>Startresource — altijd aanwezig aan het begin van het spel. Kan niet worden verwijderd.</value></data>
   <data name="ExportLevelData" xml:space="preserve"><value>JSON exporteren</value></data>
   <data name="ExportLevelDataTooltip" xml:space="preserve"><value>Leveldata downloaden als JSON-bestand</value></data>
   <data name="ImportLevelData" xml:space="preserve"><value>JSON importeren</value></data>

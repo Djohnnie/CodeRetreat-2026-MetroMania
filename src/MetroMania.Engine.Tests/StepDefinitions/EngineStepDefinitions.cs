@@ -270,14 +270,14 @@ public class EngineStepDefinitions(EngineTestContext ctx)
         Assert.Equal(expected, ctx.HourTickCalls[^1].DayOfWeek);
     }
 
-    [Then(@"all tick DayOfWeek values should follow the Sunday-starting cycle")]
+    [Then(@"all tick DayOfWeek values should follow the Monday-starting cycle")]
     public void ThenAllTickDayOfWeekValuesFollowCycle()
     {
         Assert.NotEmpty(ctx.HourTickCalls);
         foreach (var tick in ctx.HourTickCalls)
         {
-            // Day 1 = Sunday (DayOfWeek 0), day 2 = Monday (1), etc.
-            var expected = (DayOfWeek)((tick.Day - 1) % 7);
+            // Day 1 = Monday (DayOfWeek 1), day 2 = Tuesday (2), day 7 = Sunday (0), day 8 = Monday (1), etc.
+            var expected = (DayOfWeek)(tick.Day % 7);
             Assert.Equal(expected, tick.DayOfWeek);
         }
     }

@@ -203,7 +203,7 @@ else
     <!-- Weekly Gift Overrides -->
     <div class="d-flex flex-column align-center mt-6 mb-3">
         <MudText Typo="Typo.subtitle2" Class="mb-2">@Loc["WeeklyGiftOverrides"]</MudText>
-        <MudTable Items="_weeklyGiftOverrides" Dense="true" Elevation="0" Class="mb-3"
+        <MudTable T="WeeklyGiftOverride" Items="@AllGiftRows" Dense="true" Elevation="0" Class="mb-3"
                   Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 4px; max-width: 500px; width: 100%;">
             <HeaderContent>
                 <MudTh>@Loc["Week"]</MudTh>
@@ -211,25 +211,42 @@ else
                 <MudTh Style="width: 48px;"></MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd>
-                    <MudNumericField Value="context.Week" ValueChanged="(int v) => OnGiftWeekChanged(context, v)"
-                                     Min="1" Variant="Variant.Text" Margin="Margin.Dense"
-                                     Style="@(IsDuplicateWeek(context) ? "color: var(--mud-palette-error);" : "")"
-                                     Error="IsDuplicateWeek(context)" />
-                </MudTd>
-                <MudTd>
-                    <MudSelect Value="context.ResourceType" ValueChanged="(ResourceType v) => OnGiftResourceTypeChanged(context, v)"
-                               Variant="Variant.Text" Margin="Margin.Dense">
-                        @foreach (var rt in Enum.GetValues<ResourceType>())
-                        {
-                            <MudSelectItem Value="rt">@Loc[rt.ToString()]</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                                   OnClick="() => RemoveGiftOverride(context)" />
-                </MudTd>
+                @if (context.Week == 1 && _fixedGifts.Contains(context))
+                {
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Style="padding-left: 6px;">1</MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc[context.ResourceType.ToString()]</MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@Loc["StartingResourceTooltip"]">
+                            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Secondary" Style="margin: 8px;" />
+                        </MudTooltip>
+                    </MudTd>
+                }
+                else
+                {
+                    <MudTd>
+                        <MudNumericField Value="context.Week" ValueChanged="(int v) => OnGiftWeekChanged(context, v)"
+                                         Min="1" Variant="Variant.Text" Margin="Margin.Dense"
+                                         Style="@(IsDuplicateWeek(context) ? "color: var(--mud-palette-error);" : "")"
+                                         Error="IsDuplicateWeek(context)" />
+                    </MudTd>
+                    <MudTd>
+                        <MudSelect Value="context.ResourceType" ValueChanged="(ResourceType v) => OnGiftResourceTypeChanged(context, v)"
+                                   Variant="Variant.Text" Margin="Margin.Dense">
+                            @foreach (var rt in Enum.GetValues<ResourceType>())
+                            {
+                                <MudSelectItem Value="rt">@Loc[rt.ToString()]</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                       OnClick="() => RemoveGiftOverride(context)" />
+                    </MudTd>
+                }
             </RowTemplate>
         </MudTable>
         <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Variant="Variant.Text"
@@ -328,6 +345,16 @@ else
     private List<MetroStation> _stations = [];
     private List<Water> _waterTiles = [];
     private List<WeeklyGiftOverride> _weeklyGiftOverrides = [];
+
+    // Two fixed Week 1 rows always shown at the top of the gifts table (read-only).
+    // They represent InitialResources that every level provides at game start (Day 1 = Monday).
+    private static readonly WeeklyGiftOverride[] _fixedGifts =
+    [
+        new() { Week = 1, ResourceType = ResourceType.Line },
+        new() { Week = 1, ResourceType = ResourceType.Train },
+    ];
+
+    private IEnumerable<WeeklyGiftOverride> AllGiftRows => _fixedGifts.Concat(_weeklyGiftOverrides);
     private HashSet<(int X, int Y)> _waterSet = [];
     private StationType _selectedType = StationType.Circle;
     private ToolMode _toolMode = ToolMode.Station;
@@ -550,7 +577,8 @@ else
                 MaxDays = _maxDays,
                 Stations = _stations,
                 WaterTiles = _waterTiles,
-                WeeklyGiftOverrides = _weeklyGiftOverrides
+                WeeklyGiftOverrides = _weeklyGiftOverrides,
+                InitialResources = [ResourceType.Line, ResourceType.Train]
             };
             await ApiClient.UpdateGridDataAsync(LevelId, data);
         }
@@ -587,7 +615,8 @@ else
             LocalizedContent = _level!.LocalizedContent,
             Stations = _stations,
             WaterTiles = _waterTiles,
-            WeeklyGiftOverrides = _weeklyGiftOverrides
+            WeeklyGiftOverrides = _weeklyGiftOverrides,
+            InitialResources = [ResourceType.Line, ResourceType.Train]
         };
 
         var json = JsonSerializer.Serialize(data, ExportJsonOptions);

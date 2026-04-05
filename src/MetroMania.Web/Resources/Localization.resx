@@ -225,6 +225,7 @@
   <data name="Week" xml:space="preserve"><value>Week</value></data>
   <data name="ResourceType" xml:space="preserve"><value>Resource Type</value></data>
   <data name="AddWeek" xml:space="preserve"><value>Add Week</value></data>
+  <data name="StartingResourceTooltip" xml:space="preserve"><value>Starting resource — always provided at the beginning of the game. Cannot be removed.</value></data>
   <data name="ExportLevelData" xml:space="preserve"><value>Export JSON</value></data>
   <data name="ExportLevelDataTooltip" xml:space="preserve"><value>Download level data as JSON file</value></data>
   <data name="ImportLevelData" xml:space="preserve"><value>Import JSON</value></data>
