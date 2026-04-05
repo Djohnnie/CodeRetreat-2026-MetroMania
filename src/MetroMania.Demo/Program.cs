@@ -3,7 +3,9 @@ using System.Text.Json.Serialization;
 using MetroMania.Demo;
 using MetroMania.Demo.Levels;
 using MetroMania.Demo.Runners;
+using MetroMania.Domain.Entities;
 using MetroMania.Engine;
+using MetroMania.Engine.Contracts;
 using MetroMania.Engine.Model;
 
 // ── Resolve paths ────────────────────────────────────────────────────────────
@@ -25,12 +27,19 @@ var jsonOptions = new JsonSerializerOptions
     Converters = { new JsonStringEnumConverter(), new LocationJsonConverter() }
 };
 
-foreach (var level in new[] { /*Level1.Level, Level2.Level, */Level3.Level })
+var levelRunnerPairs = new (Level Level, IMetroManiaRunner Runner)[]
+{
+    (Level1.Level, new SimpleRunner()),
+    (Level2.Level, new SimpleRunner()),
+    (Level3.Level, new SimpleRunner()),
+    (Level4.Level, new TransferDemoRunner()),
+};
+
+foreach (var (level, runner) in levelRunnerPairs)
 {
     var levelOutputPath = Path.Combine(outputPath, level.Title.Replace(" ", "-").ToLowerInvariant());
     Directory.CreateDirectory(levelOutputPath);
 
-    var runner = new SimpleRunner();
     var engine = new MetroManiaEngine();
 
     Console.WriteLine($"Running simulation for level: {level.Title}");
@@ -47,7 +56,7 @@ foreach (var level in new[] { /*Level1.Level, Level2.Level, */Level3.Level })
     for (int i = 0; i < result.GameSnapshots.Count; i++)
     {
         var snapshot = result.GameSnapshots[i];
-        var svg      = renderer.RenderSnapshot(level, snapshot);
+        var svg = renderer.RenderSnapshot(level, snapshot);
         var fileName = $"{i + 1:D5}.svg";
         var filePath = Path.Combine(levelOutputPath, fileName);
 

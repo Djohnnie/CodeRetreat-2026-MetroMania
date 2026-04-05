@@ -370,6 +370,22 @@ public class MetroManiaEngine
             })
             .ToArray();
 
+        // ── Station graph for optimal-route decisions ─────────────────────────────
+        // Built once per tick; used by the boarding and transfer-drop checks below.
+        var stationById = snapshot.Stations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Value);
+        var stationAdj  = BuildStationAdjacency(stationById, stationLocations, snapshot.Lines);
+
+        // Cache Dijkstra results keyed by (fromStation, destType) to avoid recomputing
+        // the same shortest-path query for multiple passengers or trains in one tick.
+        var shortestCache = new Dictionary<(Guid, StationType), int>();
+        int CachedShortestSteps(Guid from, StationType dest)
+        {
+            var key = (from, dest);
+            if (!shortestCache.TryGetValue(key, out int d))
+                shortestCache[key] = d = ShortestStepsToType(stationById, stationAdj, from, dest);
+            return d;
+        }
+
         // ══════════════════════════════════════════════════════════════════════════
         // PHASE 1: Compute desired action for every train independently.
         // ══════════════════════════════════════════════════════════════════════════
@@ -408,7 +424,12 @@ public class MetroManiaEngine
             // ── Train is at a station: check for passenger work ────────────────
             if (snapshot.Stations.TryGetValue(train.TilePosition, out var currentStation))
             {
-                // 1. Drop off a passenger whose destination type matches this station.
+                // Direction after any terminal reversal — used for look-ahead checks.
+                bool wouldStepOffPath = idx + train.Direction < 0
+                                     || idx + train.Direction >= tilePath.Count;
+                int effectiveDir = wouldStepOffPath ? -train.Direction : train.Direction;
+
+                // 1. Deliver a carried passenger whose destination type matches this station.
                 var toDrop = train.Passengers.FirstOrDefault(p => p.DestinationType == currentStation.StationType);
                 if (toDrop is not null)
                 {
@@ -416,26 +437,70 @@ public class MetroManiaEngine
                     continue;
                 }
 
-                // 2. Pick up the oldest waiting passenger (FIFO) whose destination is
-                //    reachable in the outgoing travel direction.
-                //    At a terminal, the next move flips direction, so we look ahead
-                //    using the post-flip direction instead of the stored one.
-                bool wouldStepOffPath = idx + train.Direction < 0
-                                     || idx + train.Direction >= tilePath.Count;
-                int effectiveDir = wouldStepOffPath ? -train.Direction : train.Direction;
-                var futureTypes = GetFutureStationTypes(tilePath, idx, effectiveDir, snapshot.Stations);
-
-                var toPickUp = waitingPassengers
-                    .Where(p =>
-                        p.StationId == currentStation.Id &&
-                        train.Passengers.Count < level.LevelData.VehicleCapacity &&
-                        futureTypes.Contains(p.DestinationType))
-                    .MinBy(p => p.SpawnedAtHour);
-
-                if (toPickUp is not null)
+                // Pre-compute the next station the train will visit — shared by both
+                // the transfer-drop check and the boarding check below.
+                int effStep = effectiveDir > 0 ? 1 : -1;
+                Guid nextStationId = Guid.Empty;
+                int  nextPathIdx   = -1;
+                for (int i = idx + effStep; i >= 0 && i < tilePath.Count; i += effStep)
                 {
-                    ticks[t] = new TrainTick(true, null, toPickUp, train.TilePosition, train.Direction, idx);
+                    if (snapshot.Stations.TryGetValue(tilePath[i], out var ns))
+                    {
+                        nextStationId = ns.Id;
+                        nextPathIdx   = i;
+                        break;
+                    }
+                }
+                int stepsToNext = nextPathIdx >= 0 ? Math.Abs(nextPathIdx - idx) : int.MaxValue;
+
+                // 2. Intermediate transfer drop: a carried passenger can reach their
+                //    destination faster by transferring to another line from here.
+                //    Skip the drop if the NEXT station on this line is already on the
+                //    globally optimal path — in that case let the passenger ride forward
+                //    and the transfer will happen at the right interchange station.
+                var toTransfer = train.Passengers.FirstOrDefault(p =>
+                {
+                    int overall = CachedShortestSteps(currentStation.Id, p.DestinationType);
+                    if (overall == int.MaxValue) return false; // unreachable everywhere — keep on train
+                    int viaLine = MinStepsViaLine(tilePath, idx, effectiveDir, snapshot.Stations, p.DestinationType);
+                    if (overall >= viaLine) return false; // staying on this line is already optimal
+                    // If the next station is on the globally optimal path, the passenger
+                    // is making progress — carry them forward to the interchange.
+                    if (nextStationId != Guid.Empty && stepsToNext != int.MaxValue)
+                    {
+                        int fromNext = CachedShortestSteps(nextStationId, p.DestinationType);
+                        if (fromNext != int.MaxValue && stepsToNext + fromNext == overall) return false;
+                    }
+                    return true;
+                });
+                if (toTransfer is not null)
+                {
+                    ticks[t] = new TrainTick(true, toTransfer, null, train.TilePosition, train.Direction, idx);
                     continue;
+                }
+
+                // 3. Pick up a waiting passenger — but only if this train is on the
+                //    globally optimal route to that passenger's destination.
+                if (nextStationId != Guid.Empty)
+                {
+                    var toPickUp = waitingPassengers
+                        .Where(p =>
+                        {
+                            if (p.StationId != currentStation.Id) return false;
+                            if (train.Passengers.Count >= level.LevelData.VehicleCapacity) return false;
+                            int fromHere = CachedShortestSteps(currentStation.Id, p.DestinationType);
+                            if (fromHere == int.MaxValue) return false;
+                            int fromNext = CachedShortestSteps(nextStationId, p.DestinationType);
+                            // Board only if the next station is on a globally optimal path.
+                            return fromNext != int.MaxValue && stepsToNext + fromNext == fromHere;
+                        })
+                        .MinBy(p => p.SpawnedAtHour);
+
+                    if (toPickUp is not null)
+                    {
+                        ticks[t] = new TrainTick(true, null, toPickUp, train.TilePosition, train.Direction, idx);
+                        continue;
+                    }
                 }
             }
 
@@ -564,13 +629,25 @@ public class MetroManiaEngine
             {
                 if (tick.DropOff is not null)
                 {
-                    // Passenger delivered — remove from train and award a point.
+                    var dropped = tick.DropOff;
                     trains[t] = train with
                     {
-                        Passengers = train.Passengers.Where(p => p.Id != tick.DropOff.Id).ToList(),
+                        Passengers = train.Passengers.Where(p => p.Id != dropped.Id).ToList(),
                         PathIndex  = tick.FinalPathIndex,
                     };
-                    pointsScored++;
+
+                    // Award a point only for final delivery (destination type matches this station).
+                    // For intermediate transfer drops the passenger is re-queued at this station
+                    // so another train can collect them on the optimal route.
+                    snapshot.Stations.TryGetValue(train.TilePosition, out var dropStation);
+                    if (dropStation?.StationType == dropped.DestinationType)
+                    {
+                        pointsScored++;
+                    }
+                    else if (dropStation is not null)
+                    {
+                        waitingPassengers.Add(dropped with { StationId = dropStation.Id });
+                    }
                 }
                 else if (tick.PickUp is not null)
                 {
@@ -610,22 +687,130 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Returns the set of station types reachable from the current tile index moving in
-    /// <paramref name="direction"/> without reversing, i.e. stations the train will visit
-    /// before reaching its current terminal.
+    /// Builds an undirected adjacency list over the spawned station graph.
+    /// Each edge connects two stations that are adjacent (consecutive) on any line.
+    /// Edge weight = Chebyshev tile distance between the two station locations,
+    /// which equals the exact number of tile steps a train travels on that segment.
     /// </summary>
-    private static HashSet<StationType> GetFutureStationTypes(
-        List<Location> tilePath, int currentIndex, int direction,
-        Dictionary<Location, Station> stations)
+    private static Dictionary<Guid, List<(Guid Neighbor, int Cost)>> BuildStationAdjacency(
+        Dictionary<Guid, Station> stationById,
+        Dictionary<Guid, Location> stationLocations,
+        IReadOnlyList<Line> lines)
     {
-        var types = new HashSet<StationType>();
-        int step = direction >= 0 ? 1 : -1;
-        for (int i = currentIndex + step; i >= 0 && i < tilePath.Count; i += step)
+        var adj = stationById.Keys.ToDictionary(id => id, _ => new List<(Guid, int)>());
+
+        foreach (var line in lines)
         {
-            if (stations.TryGetValue(tilePath[i], out var station))
-                types.Add(station.StationType);
+            var ids = line.StationIds;
+            for (int i = 0; i < ids.Count - 1; i++)
+            {
+                if (!adj.ContainsKey(ids[i]) || !adj.ContainsKey(ids[i + 1])) continue;
+                if (!stationLocations.TryGetValue(ids[i],     out var locA)) continue;
+                if (!stationLocations.TryGetValue(ids[i + 1], out var locB)) continue;
+
+                int cost = Math.Max(Math.Abs(locA.X - locB.X), Math.Abs(locA.Y - locB.Y));
+                adj[ids[i]    ].Add((ids[i + 1], cost));
+                adj[ids[i + 1]].Add((ids[i],     cost));
+            }
         }
-        return types;
+        return adj;
+    }
+
+    /// <summary>
+    /// Dijkstra shortest tile-step distance from <paramref name="fromStationId"/> to
+    /// the nearest spawned station whose type equals <paramref name="destType"/>.
+    /// Transfers between lines are free (wait time is ignored).
+    /// Returns <see cref="int.MaxValue"/> when the destination type is unreachable.
+    /// </summary>
+    private static int ShortestStepsToType(
+        Dictionary<Guid, Station> stationById,
+        Dictionary<Guid, List<(Guid Neighbor, int Cost)>> adj,
+        Guid fromStationId,
+        StationType destType)
+    {
+        if (stationById.TryGetValue(fromStationId, out var fs) && fs.StationType == destType)
+            return 0;
+
+        var dist = new Dictionary<Guid, int> { [fromStationId] = 0 };
+        var pq   = new PriorityQueue<Guid, int>();
+        pq.Enqueue(fromStationId, 0);
+
+        while (pq.TryDequeue(out var cur, out int d))
+        {
+            if (d > dist.GetValueOrDefault(cur, int.MaxValue)) continue;
+            if (stationById.TryGetValue(cur, out var s) && s.StationType == destType) return d;
+            if (!adj.TryGetValue(cur, out var neighbors)) continue;
+
+            foreach (var (nb, cost) in neighbors)
+            {
+                int nd = d + cost;
+                if (nd < dist.GetValueOrDefault(nb, int.MaxValue))
+                {
+                    dist[nb] = nd;
+                    pq.Enqueue(nb, nd);
+                }
+            }
+        }
+        return int.MaxValue;
+    }
+
+    /// <summary>
+    /// Returns the minimum tile steps for a passenger riding on <paramref name="tilePath"/>
+    /// (currently at <paramref name="pathIndex"/>, heading in <paramref name="direction"/>)
+    /// to reach any station of <paramref name="destType"/> by staying on this train.
+    /// The train bounces at terminals; the first encounter in each direction is used.
+    /// Returns <see cref="int.MaxValue"/> when the destination type is not on this line.
+    /// </summary>
+    private static int MinStepsViaLine(
+        List<Location> tilePath,
+        int pathIndex,
+        int direction,
+        Dictionary<Location, Station> stations,
+        StationType destType)
+    {
+        // Collect all station tiles on the line in path order.
+        var lineStations = new List<(int PathIdx, StationType Type)>();
+        for (int i = 0; i < tilePath.Count; i++)
+            if (stations.TryGetValue(tilePath[i], out var s))
+                lineStations.Add((i, s.StationType));
+
+        if (lineStations.Count == 0) return int.MaxValue;
+
+        int curPos = lineStations.FindIndex(ls => ls.PathIdx == pathIndex);
+        if (curPos == -1) return int.MaxValue;
+
+        int best = int.MaxValue;
+        int step = direction > 0 ? 1 : -1;
+
+        // ── Forward: first T-type station in the current direction of travel ────
+        for (int k = curPos + step; k >= 0 && k < lineStations.Count; k += step)
+        {
+            if (lineStations[k].Type == destType)
+            {
+                best = Math.Abs(lineStations[k].PathIdx - lineStations[curPos].PathIdx);
+                break;
+            }
+        }
+
+        // ── Backward: reach the forward terminal first, then traverse back ──────
+        // This gives access to stations on the opposite side of the current position.
+        int terminalFwd   = direction > 0 ? lineStations.Count - 1 : 0;
+        int stepsToTerm   = Math.Abs(lineStations[terminalFwd].PathIdx - lineStations[curPos].PathIdx);
+
+        for (int k = terminalFwd - step; k >= 0 && k < lineStations.Count; k -= step)
+        {
+            // Stations in the forward half were already handled above with a lower cost.
+            if (step > 0 ? k >= curPos : k <= curPos) continue;
+
+            if (lineStations[k].Type == destType)
+            {
+                int cost = stepsToTerm + Math.Abs(lineStations[k].PathIdx - lineStations[terminalFwd].PathIdx);
+                if (cost < best) best = cost;
+                break; // First hit going back from terminal is the closest on this side.
+            }
+        }
+
+        return best;
     }
 
     /// <summary>
