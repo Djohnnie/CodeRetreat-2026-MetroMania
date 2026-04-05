@@ -5,7 +5,7 @@ public static class StarterCode
     public const string Template = """
         public class MyMetroManiaRunner : IMetroManiaRunner
         {
-            public PlayerAction OnHourTick(GameSnapshot snapshot) => PlayerAction.None;
+            public PlayerAction OnHourTicked(GameSnapshot snapshot) => PlayerAction.None;
 
             public void OnDayStart(GameSnapshot snapshot) { }
 
