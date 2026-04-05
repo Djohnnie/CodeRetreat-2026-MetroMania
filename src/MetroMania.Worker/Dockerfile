@@ -6,6 +6,7 @@ COPY src/MetroMania.Worker/MetroMania.Worker.csproj src/MetroMania.Worker/
 COPY src/MetroMania.Application/MetroMania.Application.csproj src/MetroMania.Application/
 COPY src/MetroMania.Domain/MetroMania.Domain.csproj src/MetroMania.Domain/
 COPY src/MetroMania.Engine/MetroMania.Engine.csproj src/MetroMania.Engine/
+COPY src/MetroMania.Scripting/MetroMania.Scripting.csproj src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj src/MetroMania.Infrastructure.Sql/
 COPY src/MetroMania.Infrastructure.Orleans/MetroMania.Infrastructure.Orleans.csproj src/MetroMania.Infrastructure.Orleans/
 COPY src/MetroMania.Infrastructure.ServiceBus/MetroMania.Infrastructure.ServiceBus.csproj src/MetroMania.Infrastructure.ServiceBus/
@@ -18,6 +19,7 @@ COPY src/MetroMania.Worker/ src/MetroMania.Worker/
 COPY src/MetroMania.Application/ src/MetroMania.Application/
 COPY src/MetroMania.Domain/ src/MetroMania.Domain/
 COPY src/MetroMania.Engine/ src/MetroMania.Engine/
+COPY src/MetroMania.Scripting/ src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/ src/MetroMania.Infrastructure.Sql/
 COPY src/MetroMania.Infrastructure.Orleans/ src/MetroMania.Infrastructure.Orleans/
 COPY src/MetroMania.Infrastructure.ServiceBus/ src/MetroMania.Infrastructure.ServiceBus/

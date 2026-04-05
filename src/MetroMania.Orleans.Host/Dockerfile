@@ -5,6 +5,7 @@ WORKDIR /src
 COPY src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj src/MetroMania.Orleans.Host/
 COPY src/MetroMania.Orleans.Contracts/MetroMania.Orleans.Contracts.csproj src/MetroMania.Orleans.Contracts/
 COPY src/MetroMania.Engine/MetroMania.Engine.csproj src/MetroMania.Engine/
+COPY src/MetroMania.Scripting/MetroMania.Scripting.csproj src/MetroMania.Scripting/
 COPY src/MetroMania.Domain/MetroMania.Domain.csproj src/MetroMania.Domain/
 RUN dotnet restore src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj
 
@@ -12,6 +13,7 @@ RUN dotnet restore src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj
 COPY src/MetroMania.Orleans.Host/ src/MetroMania.Orleans.Host/
 COPY src/MetroMania.Orleans.Contracts/ src/MetroMania.Orleans.Contracts/
 COPY src/MetroMania.Engine/ src/MetroMania.Engine/
+COPY src/MetroMania.Scripting/ src/MetroMania.Scripting/
 COPY src/MetroMania.Domain/ src/MetroMania.Domain/
 RUN dotnet publish src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj -c Release -o /app/publish --no-restore
 

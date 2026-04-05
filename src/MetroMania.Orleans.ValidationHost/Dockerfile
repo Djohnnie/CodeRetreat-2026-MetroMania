@@ -5,6 +5,7 @@ WORKDIR /src
 COPY src/MetroMania.Orleans.ValidationHost/MetroMania.Orleans.ValidationHost.csproj src/MetroMania.Orleans.ValidationHost/
 COPY src/MetroMania.Orleans.Contracts/MetroMania.Orleans.Contracts.csproj src/MetroMania.Orleans.Contracts/
 COPY src/MetroMania.Engine/MetroMania.Engine.csproj src/MetroMania.Engine/
+COPY src/MetroMania.Scripting/MetroMania.Scripting.csproj src/MetroMania.Scripting/
 COPY src/MetroMania.Domain/MetroMania.Domain.csproj src/MetroMania.Domain/
 RUN dotnet restore src/MetroMania.Orleans.ValidationHost/MetroMania.Orleans.ValidationHost.csproj
 
@@ -12,6 +13,7 @@ RUN dotnet restore src/MetroMania.Orleans.ValidationHost/MetroMania.Orleans.Vali
 COPY src/MetroMania.Orleans.ValidationHost/ src/MetroMania.Orleans.ValidationHost/
 COPY src/MetroMania.Orleans.Contracts/ src/MetroMania.Orleans.Contracts/
 COPY src/MetroMania.Engine/ src/MetroMania.Engine/
+COPY src/MetroMania.Scripting/ src/MetroMania.Scripting/
 COPY src/MetroMania.Domain/ src/MetroMania.Domain/
 RUN dotnet publish src/MetroMania.Orleans.ValidationHost/MetroMania.Orleans.ValidationHost.csproj -c Release -o /app/publish --no-restore
 
