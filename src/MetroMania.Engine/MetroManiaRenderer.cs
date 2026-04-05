@@ -226,8 +226,18 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         textPaint.GetFontMetrics(out SKFontMetrics metrics);
         float textY = headerHeight / 2f - (metrics.Ascent + metrics.Descent) / 2f;
 
-        string dayHour = $"{time.Day}/{time.Hour:D2}:00";
-        string leftText = $"{levelTitle}  {dayHour}";
+        string dowAbbrev = time.DayOfWeek switch
+        {
+            DayOfWeek.Monday    => "mo",
+            DayOfWeek.Tuesday   => "tu",
+            DayOfWeek.Wednesday => "we",
+            DayOfWeek.Thursday  => "th",
+            DayOfWeek.Friday    => "fr",
+            DayOfWeek.Saturday  => "sa",
+            _                   => "su",
+        };
+        string dayHour = $"{dowAbbrev} {time.Day} / {time.Hour:D2}:00";
+        string leftText = $"{levelTitle}: {dayHour}";
         using var leftPath = textPaint.GetTextPath(leftText, padding, textY);
         canvas.DrawPath(leftPath, textPaint);
 
