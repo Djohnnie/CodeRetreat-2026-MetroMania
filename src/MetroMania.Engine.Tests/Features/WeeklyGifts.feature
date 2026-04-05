@@ -3,7 +3,7 @@ Feature: Weekly Gifts
     The week number is 1-based: week 1 is the first Monday (abs tick 0 = day 1 hour 0),
     week 2 is abs tick 168 (day 8), week 3 is abs tick 336 (day 15), etc.
     The resource type is either taken from a deterministic override for that week number
-    or drawn from a seeded RNG that always produces Line or Train (never Wagon).
+    or drawn from a seeded RNG that always produces Line or Train.
 
     # Gift timing reference (number of ticks to process to receive N gifts):
     #   1 gift  → N=1   (includes abs tick 0, day 1 = first Monday)
@@ -69,29 +69,23 @@ Feature: Weekly Gifts
         When the simulation runs for 1 hour
         Then weekly gift 1 should be of type Line
 
-    Scenario: Week 1 override with Wagon is used on the first Monday
-        Given an empty level with seed 42
-        And a weekly gift override for week 1 with resource type Wagon
-        When the simulation runs for 1 hour
-        Then weekly gift 1 should be of type Wagon
-
     Scenario: Week 2 override overrides the second gift only
         Given an empty level with seed 42
-        And a weekly gift override for week 2 with resource type Wagon
+        And a weekly gift override for week 2 with resource type Train
         When the simulation runs for 169 hours
-        Then weekly gift 2 should be of type Wagon
+        Then weekly gift 2 should be of type Train
 
     Scenario: Multiple week overrides each fire with the correct resource type
         Given an empty level with seed 42
         And a weekly gift override for week 1 with resource type Train
-        And a weekly gift override for week 2 with resource type Wagon
+        And a weekly gift override for week 2 with resource type Line
         And a weekly gift override for week 3 with resource type Line
         When the simulation runs for 337 hours
         Then weekly gift 1 should be of type Train
-        And weekly gift 2 should be of type Wagon
+        And weekly gift 2 should be of type Line
         And weekly gift 3 should be of type Line
 
-    Scenario: Non-overridden weeks produce only Line or Train (never Wagon from RNG)
+    Scenario: Non-overridden weeks produce only Line or Train
         Given an empty level with seed 42
         When the simulation runs for 505 hours
         Then all weekly gifts should be of type Line or Train
@@ -136,9 +130,9 @@ Feature: Weekly Gifts
 
     Scenario: Overridden week 1 gift fires on the expected Monday
         Given an empty level with seed 42
-        And a weekly gift override for week 1 with resource type Wagon
+        And a weekly gift override for week 1 with resource type Train
         When the simulation runs for 1 hour
-        Then weekly gift 1 should be of type Wagon
+        Then weekly gift 1 should be of type Train
         And weekly gift 1 should have been received on day 1 at hour 0
 
     Scenario: Four consecutive gifts are all received at the start of their respective Mondays

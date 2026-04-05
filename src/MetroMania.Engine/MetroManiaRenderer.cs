@@ -88,11 +88,6 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         "c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14" +
         "s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5" +
         "s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z";
-    private const string WagonIconSvgPath =
-        "M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5.5c0 1.65 1.34 3 3 3s3-1.35 3-3H23" +
-        "v-5l-6-6zM3 11V7h4v4H3zm3 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
-        "m7-6.5H9V7h4v4zm4.5 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
-        "M15 11V7h1l4 4h-5z";
 
     // ── HUD constants ─────────────────────────────────────────────────────────
     private const string HudFont = "Liberation Sans,sans-serif";
@@ -752,27 +747,24 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     // ─── Resource counts HUD ──────────────────────────────────────────────────
 
     /// <summary>
-    /// Appends the available resource counts in the bottom three tiles of the first column.
+    /// Appends the available resource counts in the bottom two tiles of the first column.
     /// Each tile shows a Material Design resource icon scaled to 16×16 and the available count.
     /// </summary>
     private static void AppendResourceCounts(StringBuilder sb, int gridHeight, GameSnapshot snapshot)
     {
         int availableLines  = 0;
         int availableTrains = 0;
-        int availableWagons = 0;
         foreach (var r in snapshot.Resources)
         {
             if (r.InUse) continue;
             if      (r.Type == ResourceType.Line)  availableLines++;
             else if (r.Type == ResourceType.Train) availableTrains++;
-            else if (r.Type == ResourceType.Wagon) availableWagons++;
         }
 
-        (int RowOffset, ResourceType Type, int Count, string IconPath)[] items =
+        (int RowOffset, int Count, string IconPath)[] items =
         [
-            (-3, ResourceType.Line,  availableLines,  LineIconSvgPath),
-            (-2, ResourceType.Train, availableTrains, TrainIconSvgPath),
-            (-1, ResourceType.Wagon, availableWagons, WagonIconSvgPath),
+            (-2, availableLines,  LineIconSvgPath),
+            (-1, availableTrains, TrainIconSvgPath),
         ];
 
         const float iconSize = 16f;
@@ -780,7 +772,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         const float fontSize = 11f;
         const float iconCx   = 10f;
 
-        foreach (var (rowOffset, _, count, iconPath) in items)
+        foreach (var (rowOffset, count, iconPath) in items)
         {
             int   row        = gridHeight + rowOffset;
             if (row < 0) continue;
