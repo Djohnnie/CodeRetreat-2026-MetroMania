@@ -1,6 +1,6 @@
 using MediatR;
 using MetroMania.Domain.Extensions;
-using MetroMania.Engine.Scripting;
+using MetroMania.Scripting;
 
 namespace MetroMania.Application.Submissions.Queries;
 

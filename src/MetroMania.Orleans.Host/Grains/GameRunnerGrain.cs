@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine.Model;
-using MetroMania.Engine.Scripting;
+using MetroMania.Scripting;
 using MetroMania.Orleans.Contracts.Grains;
 using MetroMania.Orleans.Contracts.Models;
 

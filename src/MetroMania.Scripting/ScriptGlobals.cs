@@ -1,6 +1,6 @@
 using MetroMania.Domain.Entities;
 
-namespace MetroMania.Engine.Scripting;
+namespace MetroMania.Scripting;
 
 /// <summary>
 /// The global variables and methods available to player scripts.

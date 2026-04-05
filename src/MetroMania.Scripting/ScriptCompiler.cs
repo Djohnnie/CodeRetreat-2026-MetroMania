@@ -7,7 +7,7 @@ using MetroMania.Engine.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace MetroMania.Engine.Scripting;
+namespace MetroMania.Scripting;
 
 public interface IScriptCompiler<TResult>
 {

@@ -1,4 +1,4 @@
-namespace MetroMania.Engine.Scripting;
+namespace MetroMania.Scripting;
 
 public static class StarterCode
 {

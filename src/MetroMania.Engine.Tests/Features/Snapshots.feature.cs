@@ -213,15 +213,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Initial resources appear in the first snapshot alongside the week 1 gift")]
+        [global::Xunit.FactAttribute(DisplayName="Initial resources appear in the first snapshot as the week 1 gifts")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Snapshots")]
-        [global::Xunit.TraitAttribute("Description", "Initial resources appear in the first snapshot alongside the week 1 gift")]
-        public async global::System.Threading.Tasks.Task InitialResourcesAppearInTheFirstSnapshotAlongsideTheWeek1Gift()
+        [global::Xunit.TraitAttribute("Description", "Initial resources appear in the first snapshot as the week 1 gifts")]
+        public async global::System.Threading.Tasks.Task InitialResourcesAppearInTheFirstSnapshotAsTheWeek1Gifts()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Initial resources appear in the first snapshot alongside the week 1 gift", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Initial resources appear in the first snapshot as the week 1 gifts", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 18
@@ -249,7 +249,7 @@ namespace MetroMania.Engine.Tests.Features
     await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 23
-    await testRunner.ThenAsync("the last snapshot should contain 3 resources", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the last snapshot should contain 2 resources", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

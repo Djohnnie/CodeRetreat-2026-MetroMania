@@ -470,18 +470,18 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "AfterDays",
                             "FrequencyInHours"});
-                table1.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "0",
                             "24"});
-                table1.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "2",
                             "12"});
 #line 64
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and the follo" +
-                        "wing spawn phases:", ((string)(null)), table1, "Given ");
+                        "wing spawn phases:", ((string)(null)), table2, "Given ");
 #line hidden
 #line 68
         await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
@@ -518,21 +518,21 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
                             "AfterDays",
                             "FrequencyInHours"});
-                table2.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "0",
                             "24"});
-                table2.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "2",
                             "12"});
-                table2.AddRow(new string[] {
+                table3.AddRow(new string[] {
                             "4",
                             "6"});
 #line 73
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and the follo" +
-                        "wing spawn phases:", ((string)(null)), table2, "Given ");
+                        "wing spawn phases:", ((string)(null)), table3, "Given ");
 #line hidden
 #line 78
         await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
@@ -569,15 +569,15 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                             "AfterDays",
                             "FrequencyInHours"});
-                table3.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "0",
                             "0"});
 #line 83
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and the follo" +
-                        "wing spawn phases:", ((string)(null)), table3, "Given ");
+                        "wing spawn phases:", ((string)(null)), table4, "Given ");
 #line hidden
 #line 86
         await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
@@ -614,15 +614,15 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "AfterDays",
                             "FrequencyInHours"});
-                table4.AddRow(new string[] {
+                table5.AddRow(new string[] {
                             "3",
                             "24"});
 #line 91
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and the follo" +
-                        "wing spawn phases:", ((string)(null)), table4, "Given ");
+                        "wing spawn phases:", ((string)(null)), table5, "Given ");
 #line hidden
 #line 94
         await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
@@ -659,15 +659,15 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                             "AfterDays",
                             "FrequencyInHours"});
-                table5.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "3",
                             "24"});
 #line 99
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and the follo" +
-                        "wing spawn phases:", ((string)(null)), table5, "Given ");
+                        "wing spawn phases:", ((string)(null)), table6, "Given ");
 #line hidden
 #line 102
         await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +
@@ -941,18 +941,18 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "AfterDays",
                             "FrequencyInHours"});
-                table6.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "0",
                             "24"});
-                table6.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "2",
                             "12"});
 #line 143
         await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 1 day and the follow" +
-                        "ing spawn phases:", ((string)(null)), table6, "Given ");
+                        "ing spawn phases:", ((string)(null)), table7, "Given ");
 #line hidden
 #line 147
         await testRunner.AndAsync("a level with a Triangle station at (9,0) with a spawn delay of 0 days and no pass" +

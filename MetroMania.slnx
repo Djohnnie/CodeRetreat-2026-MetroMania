@@ -3,6 +3,7 @@
   <Folder Name="/src/1. Application/">
     <Project Path="src/MetroMania.Application/MetroMania.Application.csproj" />
     <Project Path="src/MetroMania.Engine/MetroMania.Engine.csproj" />
+    <Project Path="src/MetroMania.Scripting/MetroMania.Scripting.csproj" />
   </Folder>
   <Folder Name="/src/2. Domain/">
     <Project Path="src/MetroMania.Domain/MetroMania.Domain.csproj" />
