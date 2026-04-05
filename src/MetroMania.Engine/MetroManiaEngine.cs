@@ -669,7 +669,12 @@ public class MetroManiaEngine
 
         // Notify the player when their action had no effect.
         if (errorCode != 0)
+        {
             runner.OnInvalidPlayerAction(snapshot, errorCode, errorDescription!);
+            // The action didn't happen — don't record it in the snapshot so the
+            // renderer doesn't draw a label for something that had no effect.
+            return newSnapshot with { LastAction = new NoAction() };
+        }
 
         return newSnapshot;
     }
@@ -702,11 +707,6 @@ public class MetroManiaEngine
                 return (snapshot, PlayerActionError.LineStationsSameStation,
                     "FromStationId and ToStationId must be different stations.");
 
-            // Reject if these two stations are already directly connected (adjacent) on any line.
-            if (AreDirectlyConnected(snapshot.Lines, action.FromStationId, action.ToStationId))
-                return (snapshot, PlayerActionError.LineSegmentAlreadyExists,
-                    $"Stations {action.FromStationId} and {action.ToStationId} are already directly connected on an existing line.");
-
             var newLine = new Line { LineId = action.LineId, OrderId = snapshot.NextLineOrderId, StationIds = [action.FromStationId, action.ToStationId] };
             var updatedResource = resource with { InUse = true };
             return (snapshot with
@@ -733,36 +733,11 @@ public class MetroManiaEngine
             return (snapshot, PlayerActionError.LineExtendToAlreadyOnLine,
                 $"Station {action.ToStationId} is already on line {action.LineId}. Duplicate stops and loops are not allowed.");
 
-        // The new segment must not duplicate a direct connection that already exists on any line.
-        if (AreDirectlyConnected(snapshot.Lines, action.FromStationId, action.ToStationId))
-            return (snapshot, PlayerActionError.LineSegmentAlreadyExists,
-                $"Stations {action.FromStationId} and {action.ToStationId} are already directly connected on an existing line.");
-
         var extendedLine = existingLine with { StationIds = stationIds };
         return (snapshot with
         {
             Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), extendedLine],
         }, 0, null);
-    }
-
-    /// <summary>
-    /// Returns true when <paramref name="stationA"/> and <paramref name="stationB"/> are
-    /// already directly connected — i.e. they appear as adjacent entries in any existing line.
-    /// </summary>
-    private static bool AreDirectlyConnected(IReadOnlyList<Line> lines, Guid stationA, Guid stationB)
-    {
-        foreach (var line in lines)
-        {
-            var ids = line.StationIds;
-            for (int i = 0; i < ids.Count - 1; i++)
-            {
-                // Check both orderings because lines are traversed in both directions.
-                if ((ids[i] == stationA && ids[i + 1] == stationB) ||
-                    (ids[i] == stationB && ids[i + 1] == stationA))
-                    return true;
-            }
-        }
-        return false;
     }
 
     /// <summary>
