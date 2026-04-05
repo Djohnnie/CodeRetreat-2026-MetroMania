@@ -21,7 +21,8 @@ internal static class Level1
             [
                 new MetroStation { GridX = 3, GridY = 4, StationType = StationType.Circle,    SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 1 }] },
                 new MetroStation { GridX = 12, GridY = 4, StationType = StationType.Rectangle, SpawnDelayDays = 0, PassengerSpawnPhases = [new() { AfterDays = 0, FrequencyInHours = 1 }] },
-            ]
+            ],
+            InitialResources = [ResourceType.Line, ResourceType.Train]
         }
     };
 }

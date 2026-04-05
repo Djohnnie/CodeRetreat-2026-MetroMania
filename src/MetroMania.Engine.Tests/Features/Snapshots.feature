@@ -15,12 +15,12 @@ Feature: Snapshots
     When the simulation runs for 1 hour
     Then the first snapshot should have score 0
 
-  Scenario: Initial resources appear in the first snapshot alongside the week 1 gift
+  Scenario: Initial resources appear in the first snapshot as the week 1 gifts
     Given a level with a Circle station at (0,0) with a spawn delay of 0 days and no passenger spawn phases
     And a level with a Rectangle station at (5,0) with a spawn delay of 0 days and no passenger spawn phases
     And the level has 1 initial Lines and 1 initial Trains
     When the simulation runs for 1 hour
-    Then the last snapshot should contain 3 resources
+    Then the last snapshot should contain 2 resources
 
   Scenario: A created line appears in snapshots after the CreateLine action
     Given a level with a Circle station at (0,0) with a spawn delay of 0 days and no passenger spawn phases

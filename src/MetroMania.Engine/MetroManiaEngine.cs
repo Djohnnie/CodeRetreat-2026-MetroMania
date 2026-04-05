@@ -177,14 +177,27 @@ public class MetroManiaEngine
             // ── Weekly gift — granted on the first tick of every Monday ──────────
             // The gift is added before the player's OnHourTicked call so the runner
             // can immediately use the new resource in the same turn it was received.
+            // Week 1 (absoluteHour == 0) is special: if the level has InitialResources,
+            // those ARE the week-1 gifts (already in the snapshot); we notify the runner
+            // for each one without adding new resources. If InitialResources is empty,
+            // a regular RNG/override gift fires as normal.
             if (dayOfWeek == DayOfWeek.Monday && hourOfDay == 0)
             {
-                var weeklyGift = GetWeeklyGift(level, snapshot);
-                snapshot = snapshot with
+                var initialResources = level.LevelData.InitialResources;
+                if (absoluteHour == 0 && initialResources.Count > 0)
                 {
-                    Resources = [.. snapshot.Resources, new Resource { Type = weeklyGift, InUse = false }]
-                };
-                runner.OnWeeklyGiftReceived(snapshot, weeklyGift);
+                    foreach (var resourceType in initialResources)
+                        runner.OnWeeklyGiftReceived(snapshot, resourceType);
+                }
+                else
+                {
+                    var weeklyGift = GetWeeklyGift(level, snapshot);
+                    snapshot = snapshot with
+                    {
+                        Resources = [.. snapshot.Resources, new Resource { Type = weeklyGift, InUse = false }]
+                    };
+                    runner.OnWeeklyGiftReceived(snapshot, weeklyGift);
+                }
             }
 
             // ── Player action ─────────────────────────────────────────────────
