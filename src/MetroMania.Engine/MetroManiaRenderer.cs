@@ -567,10 +567,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
     /// <summary>
     /// Appends all metro lines as SVG <c>&lt;polyline&gt;</c> elements.
-    /// Lines sharing the same tile segment are drawn side-by-side with a 1 px gap.
+    /// Lines sharing the same tile segment — including the same line visiting a
+    /// segment twice via different station pairs — are drawn side-by-side with a
+    /// 1 px gap.
     /// <para>
-    /// Each line is emitted as a single polyline.  Per-run perpendicular offsets
-    /// keep shared segments visually separated, and a miter calculation at
+    /// Each station-to-station segment of a line is treated as a separate "lane"
+    /// identified by <c>(LineId, StationPairIndex)</c>.  Per-run perpendicular
+    /// offsets keep shared segments visually separated, and a miter calculation at
     /// direction-change junctions eliminates kinks between runs.
     /// </para>
     /// </summary>
@@ -579,97 +582,97 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         GameSnapshot snapshot,
         Dictionary<Guid, Location> stationLocations,
         Dictionary<Guid, string> lineColorMap,
-        Dictionary<(Location, Location), List<Guid>> segmentLines)
+        Dictionary<(Location, Location), List<(Guid LineId, int Pass)>> segmentLines)
     {
 
         foreach (var line in snapshot.Lines.OrderBy(l => l.OrderId))
         {
             if (!lineColorMap.TryGetValue(line.LineId, out var color)) continue;
 
-            // Collect all waypoint pairs across all station-to-station segments.
-            var wpPairs = new List<(Location A, Location B)>();
+            // Each station-to-station segment is a separate "pass" with its own lane.
+            int passCounter = 0;
             for (int i = 0; i < line.StationIds.Count - 1; i++)
             {
                 if (!stationLocations.TryGetValue(line.StationIds[i],     out var locA)) continue;
                 if (!stationLocations.TryGetValue(line.StationIds[i + 1], out var locB)) continue;
 
+                var laneId = (line.LineId, passCounter);
+                passCounter++;
+
                 var waypoints = LinePathHelper.ComputeSegmentWaypoints(locA, locB);
+                var wpPairs = new List<(Location A, Location B)>(waypoints.Count - 1);
                 for (int j = 0; j < waypoints.Count - 1; j++)
                     wpPairs.Add((waypoints[j], waypoints[j + 1]));
-            }
 
-            if (wpPairs.Count == 0) continue;
+                if (wpPairs.Count == 0) continue;
 
-            // Group consecutive same-direction pairs into runs.
-            var runs = GroupIntoDirectionRuns(wpPairs);
+                var runs = GroupIntoDirectionRuns(wpPairs);
 
-            // Compute per-run offset vectors.
-            var runOffsets = new (float px, float py)[runs.Count];
-            for (int r = 0; r < runs.Count; r++)
-            {
-                var run = runs[r];
-                var linesInRun = new List<Guid>();
-                foreach (var (wpA, wpB) in run)
-                    CollectTileLevelLineIds(wpA, wpB, segmentLines, linesInRun);
-
-                int idx    = linesInRun.IndexOf(line.LineId);
-                int n      = linesInRun.Count;
-                float step   = LineStrokeWidth + 1f;
-                float offset = (idx - (n - 1) / 2f) * step;
-
-                var (cdx, cdy) = CanonicalDirection(run[0].A, run[0].B);
-                float len = MathF.Sqrt(cdx * cdx + cdy * cdy);
-                runOffsets[r] = (-cdy / len * offset, cdx / len * offset);
-            }
-
-            // Build offset polyline vertices with miter-adjusted junctions.
-            var pts = new List<string>();
-            int globalSeg = 0;
-
-            for (int r = 0; r < runs.Count; r++)
-            {
-                var run = runs[r];
-                var (px, py) = runOffsets[r];
-
-                for (int s = 0; s < run.Count; s++)
+                // Compute per-run offset vectors for this lane.
+                var runOffsets = new (float px, float py)[runs.Count];
+                for (int r = 0; r < runs.Count; r++)
                 {
-                    var (wpA, wpB) = run[s];
+                    var run = runs[r];
+                    var lanesInRun = new List<(Guid, int)>();
+                    foreach (var (wpA, wpB) in run)
+                        CollectTileLevelLaneIds(wpA, wpB, segmentLines, lanesInRun);
 
-                    // Add start vertex only for the very first segment.
-                    if (globalSeg == 0)
-                    {
-                        var (ax, ay) = TileToPixel(wpA.X, wpA.Y);
-                        pts.Add(Invariant($"{ax + px:F1},{ay + py:F1}"));
-                    }
+                    int idx    = lanesInRun.IndexOf(laneId);
+                    int n      = lanesInRun.Count;
+                    float step   = LineStrokeWidth + 1f;
+                    float offset = (idx - (n - 1) / 2f) * step;
 
-                    bool isLastInRun = s == run.Count - 1;
-
-                    if (isLastInRun && r < runs.Count - 1)
-                    {
-                        // Junction between two direction runs — compute the miter
-                        // so the stroke transitions smoothly instead of kinking.
-                        var (npx, npy) = runOffsets[r + 1];
-                        var (jx, jy)   = TileToPixel(wpB.X, wpB.Y);
-                        var (mx, my)   = ComputeMiter(
-                            jx, jy,
-                            px,  py,  run[^1].A,       run[^1].B,
-                            npx, npy, runs[r + 1][0].A, runs[r + 1][0].B);
-                        pts.Add(Invariant($"{mx:F1},{my:F1}"));
-                    }
-                    else
-                    {
-                        var (bx, by) = TileToPixel(wpB.X, wpB.Y);
-                        pts.Add(Invariant($"{bx + px:F1},{by + py:F1}"));
-                    }
-
-                    globalSeg++;
+                    var (cdx, cdy) = CanonicalDirection(run[0].A, run[0].B);
+                    float len = MathF.Sqrt(cdx * cdx + cdy * cdy);
+                    runOffsets[r] = (-cdy / len * offset, cdx / len * offset);
                 }
-            }
 
-            if (pts.Count >= 2)
-            {
-                sb.Append($"<polyline points=\"{string.Join(" ", pts)}\" fill=\"none\" stroke=\"{color}\" " +
-                          $"stroke-width=\"{LineStrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                // Build offset polyline vertices with miter-adjusted junctions.
+                var pts = new List<string>();
+                int globalSeg = 0;
+
+                for (int r = 0; r < runs.Count; r++)
+                {
+                    var run = runs[r];
+                    var (px, py) = runOffsets[r];
+
+                    for (int s = 0; s < run.Count; s++)
+                    {
+                        var (wpA, wpB) = run[s];
+
+                        if (globalSeg == 0)
+                        {
+                            var (ax, ay) = TileToPixel(wpA.X, wpA.Y);
+                            pts.Add(Invariant($"{ax + px:F1},{ay + py:F1}"));
+                        }
+
+                        bool isLastInRun = s == run.Count - 1;
+
+                        if (isLastInRun && r < runs.Count - 1)
+                        {
+                            var (npx, npy) = runOffsets[r + 1];
+                            var (jx, jy)   = TileToPixel(wpB.X, wpB.Y);
+                            var (mx, my)   = ComputeMiter(
+                                jx, jy,
+                                px,  py,  run[^1].A,       run[^1].B,
+                                npx, npy, runs[r + 1][0].A, runs[r + 1][0].B);
+                            pts.Add(Invariant($"{mx:F1},{my:F1}"));
+                        }
+                        else
+                        {
+                            var (bx, by) = TileToPixel(wpB.X, wpB.Y);
+                            pts.Add(Invariant($"{bx + px:F1},{by + py:F1}"));
+                        }
+
+                        globalSeg++;
+                    }
+                }
+
+                if (pts.Count >= 2)
+                {
+                    sb.Append($"<polyline points=\"{string.Join(" ", pts)}\" fill=\"none\" stroke=\"{color}\" " +
+                              $"stroke-width=\"{LineStrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                }
             }
         }
     }
@@ -752,14 +755,14 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     }
 
     /// <summary>
-    /// Walks tile-by-tile between two waypoints and adds every line ID found
+    /// Walks tile-by-tile between two waypoints and adds every lane ID found
     /// in the segment map to <paramref name="dest"/> (preserving insertion order,
     /// no duplicates).
     /// </summary>
-    private static void CollectTileLevelLineIds(
+    private static void CollectTileLevelLaneIds(
         Location wpA, Location wpB,
-        Dictionary<(Location, Location), List<Guid>> segmentLines,
-        List<Guid> dest)
+        Dictionary<(Location, Location), List<(Guid LineId, int Pass)>> segmentLines,
+        List<(Guid, int)> dest)
     {
         int x = wpA.X, y = wpA.Y;
         while (x != wpB.X || y != wpB.Y)
@@ -777,21 +780,26 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     }
 
     /// <summary>
-    /// Builds a map from each canonical tile-level segment to the ordered list of line IDs
-    /// that pass through it (ordered by <see cref="LineSnapshot.OrderId"/>).
+    /// Builds a map from each canonical tile-level segment to the ordered list of lane IDs
+    /// <c>(LineId, StationPairIndex)</c> that pass through it.
+    /// The same line appearing on a segment via different station pairs gets separate entries.
     /// </summary>
-    private static Dictionary<(Location, Location), List<Guid>> BuildSegmentLineMap(
+    private static Dictionary<(Location, Location), List<(Guid LineId, int Pass)>> BuildSegmentLineMap(
         GameSnapshot snapshot,
         Dictionary<Guid, Location> stationLocations)
     {
-        var map = new Dictionary<(Location, Location), List<Guid>>();
+        var map = new Dictionary<(Location, Location), List<(Guid LineId, int Pass)>>();
 
         foreach (var line in snapshot.Lines.OrderBy(l => l.OrderId))
         {
+            int passCounter = 0;
             for (int i = 0; i < line.StationIds.Count - 1; i++)
             {
                 if (!stationLocations.TryGetValue(line.StationIds[i],     out var locA)) continue;
                 if (!stationLocations.TryGetValue(line.StationIds[i + 1], out var locB)) continue;
+
+                var laneId = (line.LineId, passCounter);
+                passCounter++;
 
                 var waypoints = LinePathHelper.ComputeSegmentWaypoints(locA, locB);
                 for (int j = 0; j < waypoints.Count - 1; j++)
@@ -806,8 +814,8 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                         var key   = CanonicalSegment(tileA, tileB);
                         if (!map.TryGetValue(key, out var list))
                             map[key] = list = [];
-                        if (!list.Contains(line.LineId))
-                            list.Add(line.LineId);
+                        if (!list.Contains(laneId))
+                            list.Add(laneId);
                     }
                 }
             }
@@ -886,8 +894,39 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         GameSnapshot snapshot,
         Dictionary<Guid, string> lineColorMap,
         Dictionary<Guid, List<Location>> tilePathByLine,
-        Dictionary<(Location, Location), List<Guid>> segmentLines)
+        Dictionary<(Location, Location), List<(Guid LineId, int Pass)>> segmentLines)
     {
+        // Pre-compute station-pair tile boundaries per line so we can map a
+        // train's PathIndex to its station-pair pass index.
+        var stationLocations = snapshot.Stations.ToDictionary(s => s.Value.Id, s => s.Key);
+        var passBoundaries = new Dictionary<Guid, List<int>>();
+        foreach (var line in snapshot.Lines)
+        {
+            var bounds = new List<int>();
+            int tileCount = 0;
+            int passCounter = 0;
+            for (int i = 0; i < line.StationIds.Count - 1; i++)
+            {
+                if (!stationLocations.TryGetValue(line.StationIds[i], out var locA)) continue;
+                if (!stationLocations.TryGetValue(line.StationIds[i + 1], out var locB)) continue;
+
+                bounds.Add(tileCount);  // start tile index for this pass
+                var waypoints = LinePathHelper.ComputeSegmentWaypoints(locA, locB);
+                for (int j = 0; j < waypoints.Count - 1; j++)
+                {
+                    int x = waypoints[j].X, y = waypoints[j].Y;
+                    while (x != waypoints[j + 1].X || y != waypoints[j + 1].Y)
+                    {
+                        x += Math.Sign(waypoints[j + 1].X - x);
+                        y += Math.Sign(waypoints[j + 1].Y - y);
+                        tileCount++;
+                    }
+                }
+                passCounter++;
+            }
+            passBoundaries[line.LineId] = bounds;
+        }
+
         foreach (var train in snapshot.Trains)
         {
             if (!lineColorMap.TryGetValue(train.LineId, out var lineColor)) continue;
@@ -913,12 +952,24 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                     nextTile.Y - train.TilePosition.Y,
                     nextTile.X - train.TilePosition.X);
 
+                // Determine which station-pair pass the train is in.
+                int passIdx = 0;
+                if (passBoundaries.TryGetValue(train.LineId, out var bounds))
+                {
+                    for (int b = bounds.Count - 1; b >= 0; b--)
+                    {
+                        if (currentIndex >= bounds[b]) { passIdx = b; break; }
+                    }
+                }
+
                 // Apply the same perpendicular offset used by AppendLines.
                 var segKey = CanonicalSegment(train.TilePosition, nextTile);
-                if (segmentLines.TryGetValue(segKey, out var linesOnSeg))
+                if (segmentLines.TryGetValue(segKey, out var lanesOnSeg))
                 {
-                    int idx  = linesOnSeg.IndexOf(train.LineId);
-                    int n    = linesOnSeg.Count;
+                    var laneId = (train.LineId, passIdx);
+                    int idx  = lanesOnSeg.IndexOf(laneId);
+                    if (idx < 0) idx = lanesOnSeg.FindIndex(l => l.LineId == train.LineId);
+                    int n    = lanesOnSeg.Count;
                     float step   = LineStrokeWidth + 1f;
                     float offset = (idx - (n - 1) / 2f) * step;
 
