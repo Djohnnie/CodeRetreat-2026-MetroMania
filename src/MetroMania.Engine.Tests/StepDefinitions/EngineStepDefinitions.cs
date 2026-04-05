@@ -134,14 +134,14 @@ public class EngineStepDefinitions(EngineTestContext ctx)
     [When(@"the simulation runs for (\d+) hours?")]
     public void WhenTheSimulationRunsForHours(int hours)
     {
-        ctx.SimResult = ctx.Engine.RunSimulation(ctx.Runner.Object, ctx.BuildLevel(), hours);
+        ctx.SimResult = ctx.Engine.Run(ctx.Runner.Object, ctx.BuildLevel(), hours);
     }
 
     [When(@"the simulation runs again for (\d+) hours with the same seed")]
     public void WhenTheSimulationRunsAgainForHoursWithTheSameSeed(int hours)
     {
         ctx.PrepareForRerun();
-        ctx.SimResult = ctx.Engine.RunSimulation(ctx.Runner.Object, ctx.BuildLevel(), hours);
+        ctx.SimResult = ctx.Engine.Run(ctx.Runner.Object, ctx.BuildLevel(), hours);
     }
 
     // =================================================================

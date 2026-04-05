@@ -86,8 +86,9 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         var outerScript = """
             var engine = new MetroManiaEngine();
             var runner = new MyMetroManiaRunner();
-            return engine.RunSimulation(runner, Level).GameSnapshots;
-
+            var result = engine.Run(runner, Level, maxHours: Level.LevelData.MaxDays * 24);
+            return result;
+            
             <<PLACEHOLDER>>
             """;
 

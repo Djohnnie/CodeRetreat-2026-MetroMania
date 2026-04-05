@@ -59,9 +59,9 @@ public class GameRunnerValidationGrain : Grain, IGameRunnerValidationGrain
         var outerScript = """
             var engine = new MetroManiaEngine();
             var runner = new MyMetroManiaRunner();
-            var result = engine.Run(runner, Level);
+            var result = engine.Run(runner, Level, maxHours: Level.LevelData.MaxDays * 24);
             return result;
-
+            
             <<PLACEHOLDER>>
             """;
 
