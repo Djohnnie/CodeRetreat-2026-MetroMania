@@ -1,0 +1,61 @@
+name: Build Player Package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/MetroMania.Engine/**'
+      - 'src/MetroMania.Domain/**'
+      - 'src/MetroMania.PlayerSdk/**'
+      - 'src/MetroMania.PlayerTemplate/**'
+      - 'MetroMania.PlayerTemplate.slnx'
+  workflow_dispatch:
+
+jobs:
+  build-player-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dotnet tools (Obfuscar)
+        run: dotnet tool restore
+
+      - name: Build obfuscated Player SDK
+        run: dotnet build src/MetroMania.PlayerSdk -c Release
+
+      - name: Stage player package
+        run: |
+          ROOT=stage/MetroMania.PlayerTemplate
+          mkdir -p "$ROOT/src/MetroMania.PlayerTemplate/binaries"
+
+          # Solution file at package root
+          cp MetroMania.PlayerTemplate.slnx "$ROOT/"
+
+          # Project source files — exclude build outputs and the stale pre-built binaries
+          rsync -a \
+            --exclude='bin/' \
+            --exclude='obj/' \
+            --exclude='binaries/' \
+            src/MetroMania.PlayerTemplate/ \
+            "$ROOT/src/MetroMania.PlayerTemplate/"
+
+          # Replace binaries with freshly obfuscated DLLs from the SDK build
+          cp output/PlayerSdk/*.dll "$ROOT/src/MetroMania.PlayerTemplate/binaries/"
+
+      - name: Create zip
+        run: cd stage && zip -r ../MetroMania.PlayerTemplate.zip MetroMania.PlayerTemplate/
+
+      - name: Upload player package
+        uses: actions/upload-artifact@v4
+        with:
+          name: MetroMania.PlayerTemplate
+          path: MetroMania.PlayerTemplate.zip
+          if-no-files-found: error
+          retention-days: 90
