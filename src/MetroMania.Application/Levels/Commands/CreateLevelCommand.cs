@@ -2,6 +2,7 @@ using MediatR;
 using MetroMania.Application.DTOs;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Interfaces;
+using MetroMania.Domain.Enums;
 
 namespace MetroMania.Application.Levels.Commands;
 
@@ -38,7 +39,8 @@ public class CreateLevelCommandHandler(ILevelRepository levelRepository)
             LevelData = new LevelData
             {
                 Seed = Random.Shared.Next(),
-                LocalizedContent = request.LocalizedContent
+                LocalizedContent = request.LocalizedContent,
+                InitialResources = [ResourceType.Line, ResourceType.Train]
             }
         };
 
