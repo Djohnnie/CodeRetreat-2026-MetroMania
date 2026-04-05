@@ -84,6 +84,9 @@
 			<_ObfuscarLine Include="l11">
 				<Value>  &lt;Var name="RegenerateDebugInfo" value="false" /&gt;</Value>
 			</_ObfuscarLine>
+			<_ObfuscarLine Include="l11b">
+				<Value>  &lt;Var name="HidePrivateApi"       value="true" /&gt;</Value>
+			</_ObfuscarLine>
 			<!-- Full absolute paths in Module file — avoids Obfuscar resolving against CWD -->
 			<_ObfuscarLine Include="l12">
 				<Value>  &lt;Module file="$(_InPath)MetroMania.Engine.dll" /&gt;</Value>
