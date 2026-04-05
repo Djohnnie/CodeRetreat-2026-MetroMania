@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.CodeAnalysis;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine;
@@ -21,24 +20,16 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
 
             var svgResourcesPath = ResolveSvgResourcesPath();
 
-            // Validate script by compiling for diagnostics
-            var snapshotWrapper = WrapInSnapshotScript(base64Code);
-            var snapshotCompiler = new ScriptCompiler<IReadOnlyList<GameSnapshot>>();
-
-            var diagnostics = await snapshotCompiler.CompileForDiagnostics(snapshotWrapper);
-            var errors = diagnostics
-                .Where(d => d.Severity == DiagnosticSeverity.Error)
-                .Select(d => d.GetMessage())
-                .ToList();
-
-            if (errors.Count > 0)
-                return new ScriptRenderResult { Success = false, Error = string.Join("; ", errors) };
-
             // Run the simulation once to get all hourly snapshots
-            var snapshotScript = await snapshotCompiler.CompileForExecution(snapshotWrapper);
-            var hourlySnapshots = await snapshotScript.Invoke(new ScriptGlobals(level));
-            if (hourlySnapshots is null)
-                return new ScriptRenderResult { Success = false, Error = "Snapshot script returned null." };
+            var wrappedScript = WrapInOuterScript(base64Code);
+            var scriptCompiler = new ScriptCompiler<GameResult>();
+
+            var script = await scriptCompiler.CompileForExecution(wrappedScript);
+            var gameResult = await script.Invoke(new ScriptGlobals(level));
+            if (gameResult is null)
+                return new ScriptRenderResult { Success = false, Error = "Script returned null." };
+
+            var hourlySnapshots = gameResult.GameSnapshots;
 
             using var renderer = new MetroManiaRenderer(svgResourcesPath);
             var renders = new List<FrameRender>(hourlySnapshots.Count);
@@ -79,7 +70,7 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "resources"));
     }
 
-    private static string WrapInSnapshotScript(string base64PlayerCode)
+    private static string WrapInOuterScript(string base64PlayerCode)
     {
         var playerCode = base64PlayerCode.Base64Decode();
 
@@ -88,7 +79,7 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
             var runner = new MyMetroManiaRunner();
             var result = engine.Run(runner, Level, maxHours: Level.LevelData.MaxDays * 24);
             return result;
-            
+
             <<PLACEHOLDER>>
             """;
 

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.CodeAnalysis;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine.Model;
@@ -30,20 +29,6 @@ public class GameRunnerGrain : Grain, IGameRunnerGrain
 
             var wrappedScript = WrapInOuterScript(base64Code);
             var scriptCompiler = new ScriptCompiler<GameResult>();
-
-            // Check for compilation errors
-            var diagnostics = await scriptCompiler.CompileForDiagnostics(wrappedScript);
-            var errors = diagnostics
-                .Where(d => d.Severity == DiagnosticSeverity.Error)
-                .Select(d => d.GetMessage())
-                .ToList();
-
-            if (errors.Count > 0)
-                return new ScriptRunResult
-                {
-                    Success = false,
-                    Error = string.Join("; ", errors)
-                };
 
             // Execute the script with the provided level
             var globals = new ScriptGlobals(level);
