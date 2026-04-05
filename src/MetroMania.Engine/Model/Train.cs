@@ -17,6 +17,15 @@ public record Train
     /// </summary>
     public int Direction { get; init; } = 1;
 
+    /// <summary>
+    /// Index of the train's current position within the computed tile path of its line.
+    /// Tracked explicitly to avoid ambiguity when duplicate tiles appear in the path
+    /// (which can occur when the inbound and outbound paths to a turning-point station share tiles).
+    /// -1 indicates the index has not been initialized; the engine will fall back to
+    /// <see cref="List{T}.IndexOf"/> on that tick and then set the correct index going forward.
+    /// </summary>
+    public int PathIndex { get; init; } = -1;
+
     /// <summary>Passengers currently riding this train.</summary>
     public IReadOnlyList<Passenger> Passengers { get; init; } = [];
 }

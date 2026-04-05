@@ -320,7 +320,13 @@ public class MetroManiaEngine
         /// <summary>Tile the train will occupy after this tick (its current tile when blocked or working).</summary>
         Location FinalTile,
         /// <summary>Travel direction the train carries into the next tick.</summary>
-        int FinalDirection
+        int FinalDirection,
+        /// <summary>
+        /// Index of <see cref="FinalTile"/> within the line's tile path.
+        /// Carried forward so the engine never has to call IndexOf (which would return the wrong
+        /// occurrence when tiles are duplicated around a turning-point station).
+        /// </summary>
+        int FinalPathIndex
     );
 
     /// <summary>
@@ -377,7 +383,25 @@ public class MetroManiaEngine
             if (tilePath.Count == 0)
             {
                 // Line has no computable path yet — train idles in place.
-                ticks[t] = new TrainTick(false, null, null, train.TilePosition, train.Direction);
+                ticks[t] = new TrainTick(false, null, null, train.TilePosition, train.Direction, train.PathIndex);
+                continue;
+            }
+
+            // ── Resolve the train's position to a tile-path index ─────────────
+            // Use the stored PathIndex when valid to avoid List.IndexOf, which would
+            // return the first occurrence of the tile and pick the wrong slot when
+            // tiles are duplicated (e.g. tiles shared by the inbound and outbound
+            // segments around a turning-point station).
+            int idx = (train.PathIndex >= 0
+                       && train.PathIndex < tilePath.Count
+                       && tilePath[train.PathIndex] == train.TilePosition)
+                      ? train.PathIndex
+                      : tilePath.IndexOf(train.TilePosition);
+
+            if (idx == -1)
+            {
+                // Position is not on the current path (e.g. path shrank) — snap to start.
+                ticks[t] = new TrainTick(false, null, null, tilePath[0], 1, 0);
                 continue;
             }
 
@@ -388,7 +412,7 @@ public class MetroManiaEngine
                 var toDrop = train.Passengers.FirstOrDefault(p => p.DestinationType == currentStation.StationType);
                 if (toDrop is not null)
                 {
-                    ticks[t] = new TrainTick(true, toDrop, null, train.TilePosition, train.Direction);
+                    ticks[t] = new TrainTick(true, toDrop, null, train.TilePosition, train.Direction, idx);
                     continue;
                 }
 
@@ -396,11 +420,10 @@ public class MetroManiaEngine
                 //    reachable in the outgoing travel direction.
                 //    At a terminal, the next move flips direction, so we look ahead
                 //    using the post-flip direction instead of the stored one.
-                int currentIndex = tilePath.IndexOf(train.TilePosition);
-                bool wouldStepOffPath = currentIndex + train.Direction < 0
-                                     || currentIndex + train.Direction >= tilePath.Count;
+                bool wouldStepOffPath = idx + train.Direction < 0
+                                     || idx + train.Direction >= tilePath.Count;
                 int effectiveDir = wouldStepOffPath ? -train.Direction : train.Direction;
-                var futureTypes = GetFutureStationTypes(tilePath, currentIndex, effectiveDir, snapshot.Stations);
+                var futureTypes = GetFutureStationTypes(tilePath, idx, effectiveDir, snapshot.Stations);
 
                 var toPickUp = waitingPassengers
                     .Where(p =>
@@ -411,7 +434,7 @@ public class MetroManiaEngine
 
                 if (toPickUp is not null)
                 {
-                    ticks[t] = new TrainTick(true, null, toPickUp, train.TilePosition, train.Direction);
+                    ticks[t] = new TrainTick(true, null, toPickUp, train.TilePosition, train.Direction, idx);
                     continue;
                 }
             }
@@ -420,15 +443,7 @@ public class MetroManiaEngine
             if (tilePath.Count < 2)
             {
                 // Single-tile path; train cannot move.
-                ticks[t] = new TrainTick(false, null, null, train.TilePosition, train.Direction);
-                continue;
-            }
-
-            int idx = tilePath.IndexOf(train.TilePosition);
-            if (idx == -1)
-            {
-                // Position is not on the current path (e.g. path shrank) — snap to start.
-                ticks[t] = new TrainTick(false, null, null, tilePath[0], 1);
+                ticks[t] = new TrainTick(false, null, null, train.TilePosition, train.Direction, idx);
                 continue;
             }
 
@@ -443,7 +458,7 @@ public class MetroManiaEngine
             }
             nextIdx = Math.Clamp(nextIdx, 0, tilePath.Count - 1);
 
-            ticks[t] = new TrainTick(false, null, null, tilePath[nextIdx], dir);
+            ticks[t] = new TrainTick(false, null, null, tilePath[nextIdx], dir, nextIdx);
         }
 
         // ══════════════════════════════════════════════════════════════════════════
@@ -494,7 +509,8 @@ public class MetroManiaEngine
                     ticks[t] = tick with
                     {
                         FinalTile      = trains[t].TilePosition,
-                        FinalDirection = trains[t].Direction
+                        FinalDirection = trains[t].Direction,
+                        FinalPathIndex = trains[t].PathIndex
                     };
                     anyChange = true;
                 }
@@ -513,7 +529,8 @@ public class MetroManiaEngine
                     ticks[t] = tick with
                     {
                         FinalTile      = trains[t].TilePosition,
-                        FinalDirection = trains[t].Direction
+                        FinalDirection = trains[t].Direction,
+                        FinalPathIndex = trains[t].PathIndex
                     };
                     anyChange = true;
                     continue;
@@ -525,7 +542,8 @@ public class MetroManiaEngine
                     ticks[t] = tick with
                     {
                         FinalTile      = trains[t].TilePosition,
-                        FinalDirection = trains[t].Direction
+                        FinalDirection = trains[t].Direction,
+                        FinalPathIndex = trains[t].PathIndex
                     };
                     anyChange = true;
                 }
@@ -549,7 +567,8 @@ public class MetroManiaEngine
                     // Passenger delivered — remove from train and award a point.
                     trains[t] = train with
                     {
-                        Passengers = train.Passengers.Where(p => p.Id != tick.DropOff.Id).ToList()
+                        Passengers = train.Passengers.Where(p => p.Id != tick.DropOff.Id).ToList(),
+                        PathIndex  = tick.FinalPathIndex,
                     };
                     pointsScored++;
                 }
@@ -559,8 +578,14 @@ public class MetroManiaEngine
                     waitingPassengers.Remove(tick.PickUp);
                     trains[t] = train with
                     {
-                        Passengers = [.. train.Passengers, tick.PickUp with { StationId = null }]
+                        Passengers = [.. train.Passengers, tick.PickUp with { StationId = null }],
+                        PathIndex  = tick.FinalPathIndex,
                     };
+                }
+                else
+                {
+                    // No passenger work this tick, but PathIndex is still updated.
+                    trains[t] = train with { PathIndex = tick.FinalPathIndex };
                 }
                 // TilePosition and Direction are unchanged — train stays at station.
             }
@@ -571,6 +596,7 @@ public class MetroManiaEngine
                 {
                     TilePosition = tick.FinalTile,
                     Direction    = tick.FinalDirection,
+                    PathIndex    = tick.FinalPathIndex,
                 };
             }
         }
@@ -783,12 +809,17 @@ public class MetroManiaEngine
             return (snapshot, PlayerActionError.TrainTileOccupied,
                 $"Station {action.StationId} is currently occupied by another train. Wait for it to move before deploying here.");
 
+        var stationLocations = snapshot.Stations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        var tilePath = LinePathHelper.ComputeTilePath(line, stationLocations);
+        int pathIndex = Math.Max(0, tilePath.IndexOf(stationEntry.Key));
+
         var newTrain = new Train
         {
-            TrainId = action.VehicleId,
-            LineId = action.LineId,
+            TrainId   = action.VehicleId,
+            LineId    = action.LineId,
             TilePosition = stationEntry.Key,
             Direction = 1,
+            PathIndex = pathIndex,
         };
 
         return (snapshot with
