@@ -72,6 +72,35 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     /// </summary>
     private readonly Dictionary<string, SKPicture> _tileCache = new();
 
+    /// <summary>Typeface resolved once per renderer instance to avoid repeated system font lookups per frame.</summary>
+    private readonly SKTypeface _typeface =
+        SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
+        ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
+        ?? SKTypeface.Default;
+
+    // Pre-parsed SVG paths for resource icons — shared across all DrawResourceIcon calls to
+    // avoid calling SKPath.ParseSvgPathData (which allocates and parses) on every frame.
+    private static readonly SKPath _lineIconPath = SKPath.ParseSvgPathData(
+        "M19.5,9.5c-1.03,0-1.9,0.62-2.29,1.5h-2.92" +
+        " C13.9,10.12,13.03,9.5,12,9.5s-1.9,0.62-2.29,1.5H6.79" +
+        " C6.4,10.12,5.53,9.5,4.5,9.5C3.12,9.5,2,10.62,2,12s1.12,2.5,2.5,2.5c1.03,0,1.9-0.62,2.29-1.5h2.92" +
+        "c0.39,0.88,1.26,1.5,2.29,1.5s1.9-0.62,2.29-1.5h2.92c0.39,0.88,1.26,1.5,2.29,1.5c1.38,0,2.5-1.12,2.5-2.5" +
+        "S20.88,9.5,19.5,9.5z");
+    private static readonly SKPath _trainIconPath = SKPath.ParseSvgPathData(
+        "M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 19" +
+        "c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14" +
+        "s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5" +
+        "s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z");
+    private static readonly SKPath _wagonIconPath = SKPath.ParseSvgPathData(
+        "M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5.5c0 1.65 1.34 3 3 3s3-1.35 3-3H23" +
+        "v-5l-6-6zM3 11V7h4v4H3zm3 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
+        "m7-6.5H9V7h4v4zm4.5 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
+        "M15 11V7h1l4 4h-5z");
+
+    // Pre-built train body path — all vertices are derived from compile-time constants so the
+    // geometry never changes; the canvas is rotated per-train rather than rebuilding the path.
+    private static readonly SKPath _trainBodyPath = CreateTrainBodyPath();
+
     /// <summary>
     /// Renders an existing game snapshot as an SVG string.
     /// Delegates to <see cref="Compose"/> which orchestrates all drawing passes.
@@ -116,6 +145,21 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         var stationLocations = snapshot.Stations
             .ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
 
+        // Pre-compute the colorMap cache-key suffix once so DrawTile doesn't rebuild it per tile.
+        var colorKeySuffix = colorMap.Count == 0 ? ""
+            : "|" + string.Join(",", colorMap.Select(kv => $"{kv.Key}={kv.Value}"));
+
+        // Pre-group passengers by station to avoid O(stations × passengers) filtering in DrawWaitingPassengers.
+        var passengersByStation = snapshot.Passengers
+            .Where(p => p.StationId.HasValue)
+            .GroupBy(p => p.StationId!.Value)
+            .ToDictionary(g => g.Key, g => (IList<Passenger>)g.ToList());
+
+        // Pre-compute tile paths per line once; reused for every train on that line.
+        var tilePathByLine = snapshot.Lines
+            .Where(l => lineColorMap.ContainsKey(l.LineId))
+            .ToDictionary(l => l.LineId, l => LinePathHelper.ComputeTilePath(l, stationLocations));
+
         using var stream = new MemoryStream();
         using var skStream = new SKManagedWStream(stream);
         using var canvas = SKSvgCanvas.Create(SKRect.Create(width, height), skStream);
@@ -131,7 +175,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                 float px = x * TileSize;
                 float py = y * TileSize;
 
-                DrawTile(canvas, "background", px, py, colorMap);
+                DrawTile(canvas, "background", px, py, colorKeySuffix, colorMap);
 
                 if (waterSet.Contains((x, y)))
                 {
@@ -149,7 +193,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                     bool nw = w && n && IsWaterOrEdge(x - 1, y - 1);
 
                     string tileName = GetWaterTileName(n, ne, e, se, s, sw, w, nw);
-                    DrawTile(canvas, tileName, px, py, colorMap);
+                    DrawTile(canvas, tileName, px, py, colorKeySuffix, colorMap);
                 }
             }
         }
@@ -163,24 +207,24 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         foreach (var (loc, station) in snapshot.Stations)
         {
             DrawTile(canvas, GetStationTileName(station.StationType),
-                loc.X * TileSize, loc.Y * TileSize, colorMap);
+                loc.X * TileSize, loc.Y * TileSize, colorKeySuffix, colorMap);
         }
 
         // ── Pass 4: waiting passengers above station icons ────────────────────
-        DrawWaitingPassengers(canvas, snapshot);
+        DrawWaitingPassengers(canvas, snapshot, passengersByStation);
 
         // ── Pass 5: trains on top of all terrain and station elements ─────────
-        DrawVehicles(canvas, snapshot, stationLocations, lineColorMap);
+        DrawVehicles(canvas, snapshot, lineColorMap, tilePathByLine);
 
         // ── Pass 6: header HUD — spans full width of first tile row ──────────
-        DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.Score);
+        DrawHeader(canvas, width, level.Title, snapshot.Time, snapshot.Score, _typeface);
 
         // ── Pass 7: resource counts HUD in the bottom-left column ─────────────
-        DrawResourceCounts(canvas, level.GridHeight, snapshot);
+        DrawResourceCounts(canvas, level.GridHeight, snapshot, _typeface);
 
         // ── Pass 8: player action overlay in the bottom-right (only when an action was taken) ──
         if (snapshot.LastAction is not null and not NoAction)
-            DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction);
+            DrawPlayerAction(canvas, width, level.GridHeight, snapshot.LastAction, _typeface);
 
         canvas.Dispose();
         skStream.Dispose();
@@ -199,7 +243,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     /// centred using the font's ascent/descent metrics so it renders consistently
     /// across different system typefaces.
     /// </summary>
-    private static void DrawHeader(SKCanvas canvas, int totalWidth, string levelTitle, GameTime time, int score)
+    private static void DrawHeader(SKCanvas canvas, int totalWidth, string levelTitle, GameTime time, int score, SKTypeface typeface)
     {
         const float headerHeight = TileSize;
         const float fontSize = 13f;
@@ -218,9 +262,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             Color = SKColors.White,
             IsAntialias = true,
             TextSize = fontSize,
-            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
-                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
-                    ?? SKTypeface.Default,
+            Typeface = typeface,
         };
 
         textPaint.GetFontMetrics(out SKFontMetrics metrics);
@@ -255,7 +297,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     /// <see cref="GameSnapshot.LastAction"/> is a non-idle, displayable action.
     /// The background width is sized to fit the text snugly with horizontal padding.
     /// </summary>
-    private static void DrawPlayerAction(SKCanvas canvas, int totalWidth, int gridHeight, PlayerAction action)
+    private static void DrawPlayerAction(SKCanvas canvas, int totalWidth, int gridHeight, PlayerAction action, SKTypeface typeface)
     {
         string? text = DescribeAction(action);
         if (text is null) return;
@@ -269,9 +311,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             Color = SKColors.White,
             IsAntialias = true,
             TextSize = fontSize,
-            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
-                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
-                    ?? SKTypeface.Default,
+            Typeface = typeface,
         };
 
         float textWidth = textPaint.MeasureText(text);
@@ -416,6 +456,39 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         return path;
     }
 
+    /// <summary>
+    /// Builds the static train body <see cref="SKPath"/> in local space (centred at origin).
+    /// All coordinates are derived from compile-time constants, so the path is created once
+    /// at class initialisation and reused for every train drawn on every frame.
+    /// </summary>
+    private static SKPath CreateTrainBodyPath()
+    {
+        float xl    = -TrainLength / 2f;
+        float xr    =  TrainLength / 2f;
+        float yt    = -TrainHeight / 2f;
+        float yb    =  TrainHeight / 2f;
+        float r     =  TrainCornerRadius;
+        float notch =  TrainHeight / 4f;
+
+        // Build the pointy-front path:
+        //   top-left arc → top line → front bevel → tip → front bevel → bottom line
+        //   → bottom-left arc → rear left edge → back to start
+        var path = new SKPath();
+        path.MoveTo(xl + r, yt);                        // start just right of top-left corner
+        path.LineTo(xr - notch, yt);                    // top edge
+        path.LineTo(xr, 0f);                            // top-front bevel to tip
+        path.LineTo(xr - notch, yb);                    // tip to bottom-front bevel
+        path.LineTo(xl + r, yb);                        // bottom edge
+        // Bottom-left rounded corner: arc from (xl+r, yb) → (xl, yb-r)
+        path.ArcTo(new SKRect(xl, yb - 2 * r, xl + 2 * r, yb), 90f, 90f, false);
+        // Rear left straight edge
+        path.LineTo(xl, yt + r);
+        // Top-left rounded corner: arc from (xl, yt+r) → (xl+r, yt)
+        path.ArcTo(new SKRect(xl, yt, xl + 2 * r, yt + 2 * r), 180f, 90f, false);
+        path.Close();
+        return path;
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -470,10 +543,10 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         SKCanvas canvas,
         string tileName,
         float x, float y,
+        string colorKeySuffix,
         Dictionary<string, string> colorMap)
     {
-        var cacheKey = colorMap.Count == 0 ? tileName
-            : tileName + "|" + string.Join(",", colorMap.Select(kv => $"{kv.Key}={kv.Value}"));
+        var cacheKey = tileName + colorKeySuffix;
 
         if (!_tileCache.TryGetValue(cacheKey, out var picture))
         {
@@ -492,6 +565,8 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         foreach (var pic in _tileCache.Values)
             pic.Dispose();
         _tileCache.Clear();
+        if (_typeface != SKTypeface.Default)
+            _typeface.Dispose();
     }
 
     /// <summary>
@@ -657,7 +732,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     /// a station reaches 20 passengers, so the display never needs more than
     /// two rows.  Each icon is centred horizontally on the station's tile midpoint.
     /// </summary>
-    private static void DrawWaitingPassengers(SKCanvas canvas, GameSnapshot snapshot)
+    private static void DrawWaitingPassengers(SKCanvas canvas, GameSnapshot snapshot, Dictionary<Guid, IList<Passenger>> passengersByStation)
     {
         const int maxPerRow = 10;
 
@@ -670,10 +745,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
         foreach (var (loc, station) in snapshot.Stations)
         {
-            var passengers = snapshot.Passengers
-                .Where(p => p.StationId == station.Id)
-                .ToList();
-            if (passengers.Count == 0) continue;
+            if (!passengersByStation.TryGetValue(station.Id, out var passengers) || passengers.Count == 0) continue;
 
             var (cx, _) = StationCenter(loc);
             float stationTopY = loc.Y * TileSize;
@@ -738,18 +810,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     private static void DrawVehicles(
         SKCanvas canvas,
         GameSnapshot snapshot,
-        Dictionary<Guid, Location> stationLocations,
-        Dictionary<Guid, SKColor> lineColorMap)
+        Dictionary<Guid, SKColor> lineColorMap,
+        Dictionary<Guid, List<Location>> tilePathByLine)
     {
         foreach (var train in snapshot.Trains)
         {
             if (!lineColorMap.TryGetValue(train.LineId, out var lineColor)) continue;
-
-            var line = snapshot.Lines.FirstOrDefault(l => l.LineId == train.LineId);
-            if (line is null) continue;
-
-            var tilePath = LinePathHelper.ComputeTilePath(line, stationLocations);
-            if (tilePath.Count == 0) continue;
+            if (!tilePathByLine.TryGetValue(train.LineId, out var tilePath) || tilePath.Count == 0) continue;
 
             var (vx, vy) = TileToPixel(train.TilePosition.X, train.TilePosition.Y);
 
@@ -804,42 +871,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         canvas.Translate(cx, cy);
         canvas.RotateDegrees(angle * (180f / MathF.PI));
 
-        float xl = -TrainLength / 2f;   // rear (left) edge
-        float xr =  TrainLength / 2f;   // frontmost X (tip)
-        float yt = -TrainHeight / 2f;   // top edge
-        float yb =  TrainHeight / 2f;   // bottom edge
-        float r  =  TrainCornerRadius;
-
-        // How far the angled front bevel extends horizontally back from the tip.
-        // A small notch gives a subtle directional bevel without eating into the
-        // passenger area. ~1/4 of the height keeps the angle gentle (≈ 17°).
-        float notch = TrainHeight / 4f;
-
-        // Build the pointy-front path:
-        //   top-left arc → top line → front bevel → tip → front bevel → bottom line
-        //   → bottom-left arc → rear left edge → back to start
-        var path = new SKPath();
-        path.MoveTo(xl + r, yt);                        // start just right of top-left corner
-        path.LineTo(xr - notch, yt);                    // top edge
-        path.LineTo(xr, 0f);                            // top-front bevel to tip
-        path.LineTo(xr - notch, yb);                    // tip to bottom-front bevel
-        path.LineTo(xl + r, yb);                        // bottom edge
-
-        // Bottom-left rounded corner: arc from (xl+r, yb) → (xl, yb-r)
-        path.ArcTo(new SKRect(xl, yb - 2 * r, xl + 2 * r, yb), 90f, 90f, false);
-        // Rear left straight edge
-        path.LineTo(xl, yt + r);
-        // Top-left rounded corner: arc from (xl, yt+r) → (xl+r, yt)
-        path.ArcTo(new SKRect(xl, yt, xl + 2 * r, yt + 2 * r), 180f, 90f, false);
-        path.Close();
-
         using var bodyPaint = new SKPaint
         {
             Style = SKPaintStyle.Fill,
             Color = lineColor,
             IsAntialias = true,
         };
-        canvas.DrawPath(path, bodyPaint);
+        canvas.DrawPath(_trainBodyPath, bodyPaint);
 
         using var borderPaint = new SKPaint
         {
@@ -848,7 +886,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             StrokeWidth = TrainBorderWidth,
             IsAntialias = true,
         };
-        canvas.DrawPath(path, borderPaint);
+        canvas.DrawPath(_trainBodyPath, borderPaint);
 
         if (passengers.Count > 0)
             DrawPassengersInVehicle(canvas, passengers);
@@ -901,11 +939,18 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     /// Draws the available resource counts in the bottom three tiles of the first column.
     /// Each tile shows a resource icon (line / train / wagon) and the available count.
     /// </summary>
-    private static void DrawResourceCounts(SKCanvas canvas, int gridHeight, GameSnapshot snapshot)
+    private static void DrawResourceCounts(SKCanvas canvas, int gridHeight, GameSnapshot snapshot, SKTypeface typeface)
     {
-        int availableLines  = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Line);
-        int availableTrains = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Train);
-        int availableWagons = snapshot.Resources.Count(r => !r.InUse && r.Type == ResourceType.Wagon);
+        int availableLines  = 0;
+        int availableTrains = 0;
+        int availableWagons = 0;
+        foreach (var r in snapshot.Resources)
+        {
+            if (r.InUse) continue;
+            if      (r.Type == ResourceType.Line)  availableLines++;
+            else if (r.Type == ResourceType.Train) availableTrains++;
+            else if (r.Type == ResourceType.Wagon) availableWagons++;
+        }
 
         // Bottom 3 tiles of column 0, from top to bottom: line, train, wagon
         (int RowOffset, ResourceType Type, int Count)[] items =
@@ -931,9 +976,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             Color = SKColors.White,
             IsAntialias = true,
             TextSize = 11f,
-            Typeface = SKTypeface.FromFamilyName("Liberation Sans", SKFontStyle.Normal)
-                    ?? SKTypeface.FromFamilyName("sans-serif", SKFontStyle.Normal)
-                    ?? SKTypeface.Default,
+            Typeface = typeface,
         };
 
         textPaint.GetFontMetrics(out var metrics);
@@ -965,29 +1008,19 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         SKCanvas canvas, ResourceType type, float cx, float cy,
         SKPaint fillPaint, SKPaint strokePaint)
     {
-        string? pathData = type switch
+        var iconPath = type switch
         {
-            ResourceType.Line  => "M19.5,9.5c-1.03,0-1.9,0.62-2.29,1.5h-2.92C13.9,10.12,13.03,9.5,12,9.5s-1.9,0.62-2.29,1.5H6.79" +
-                                  " C6.4,10.12,5.53,9.5,4.5,9.5C3.12,9.5,2,10.62,2,12s1.12,2.5,2.5,2.5c1.03,0,1.9-0.62,2.29-1.5h2.92" +
-                                  "c0.39,0.88,1.26,1.5,2.29,1.5s1.9-0.62,2.29-1.5h2.92c0.39,0.88,1.26,1.5,2.29,1.5c1.38,0,2.5-1.12,2.5-2.5" +
-                                  "S20.88,9.5,19.5,9.5z",
-            ResourceType.Train => "M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2.23l2-2H14l2 2h2v-.5L16.5 19" +
-                                  "c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-3.58-4-8-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14" +
-                                  "s1.5.67 1.5 1.5S8.33 17 7.5 17zm3.5-7H6V6h5v4zm2 0V6h5v4h-5zm3.5 7c-.83 0-1.5-.67-1.5-1.5" +
-                                  "s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z",
-            ResourceType.Wagon => "M17 5H3c-1.1 0-2 .89-2 2v9h2c0 1.65 1.34 3 3 3s3-1.35 3-3h5.5c0 1.65 1.34 3 3 3s3-1.35 3-3H23" +
-                                  "v-5l-6-6zM3 11V7h4v4H3zm3 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
-                                  "m7-6.5H9V7h4v4zm4.5 6.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" +
-                                  "M15 11V7h1l4 4h-5z",
-            _ => null
+            ResourceType.Line  => _lineIconPath,
+            ResourceType.Train => _trainIconPath,
+            ResourceType.Wagon => _wagonIconPath,
+            _                  => null,
         };
 
-        if (pathData is null) return;
+        if (iconPath is null) return;
 
         const float iconSize = 16f;
         const float scale = iconSize / 24f;
 
-        using var iconPath = SKPath.ParseSvgPathData(pathData);
         canvas.Save();
         canvas.Translate(cx - iconSize / 2f, cy - iconSize / 2f);
         canvas.Scale(scale);
