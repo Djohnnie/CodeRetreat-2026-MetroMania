@@ -74,7 +74,7 @@ public class MetroManiaEngine
     /// </list>
     /// </para>
     /// </summary>
-    public SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
+    private static SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
     {
         // absoluteHour is the monotonically increasing tick counter; it is the ground truth
         // from which all calendar values (day, hour-of-day, day-of-week) are derived.

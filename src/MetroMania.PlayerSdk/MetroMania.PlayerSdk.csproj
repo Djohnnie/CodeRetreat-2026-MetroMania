@@ -51,21 +51,49 @@
 			UseUnicodeNames=true → renamed private symbols use lookalike Unicode characters
 		-->
 		<ItemGroup>
-			<_ObfuscarLine Include="l01"><Value>&lt;?xml version='1.0'?&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l02"><Value>&lt;Obfuscator&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l03"><Value>  &lt;Var name="InPath"              value="$(_InPath)" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l04"><Value>  &lt;Var name="OutPath"             value="$(_StagingPath)" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l05"><Value>  &lt;Var name="KeepPublicApi"       value="true" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l06"><Value>  &lt;Var name="RenameFields"        value="true" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l07"><Value>  &lt;Var name="RenameProperties"    value="true" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l08"><Value>  &lt;Var name="RenameEvents"        value="true" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l09"><Value>  &lt;Var name="HideStrings"         value="true" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l10"><Value>  &lt;Var name="UseUnicodeNames"     value="true" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l11"><Value>  &lt;Var name="RegenerateDebugInfo" value="false" /&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l01">
+				<Value>&lt;?xml version='1.0'?&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l02">
+				<Value>&lt;Obfuscator&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l03">
+				<Value>  &lt;Var name="InPath"              value="$(_InPath)" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l04">
+				<Value>  &lt;Var name="OutPath"             value="$(_StagingPath)" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l05">
+				<Value>  &lt;Var name="KeepPublicApi"       value="true" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l06">
+				<Value>  &lt;Var name="RenameFields"        value="true" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l07">
+				<Value>  &lt;Var name="RenameProperties"    value="true" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l08">
+				<Value>  &lt;Var name="RenameEvents"        value="true" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l09">
+				<Value>  &lt;Var name="HideStrings"         value="true" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l10">
+				<Value>  &lt;Var name="UseUnicodeNames"     value="true" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l11">
+				<Value>  &lt;Var name="RegenerateDebugInfo" value="false" /&gt;</Value>
+			</_ObfuscarLine>
 			<!-- Full absolute paths in Module file — avoids Obfuscar resolving against CWD -->
-			<_ObfuscarLine Include="l12"><Value>  &lt;Module file="$(_InPath)MetroMania.Engine.dll" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l13"><Value>  &lt;Module file="$(_InPath)MetroMania.Domain.dll" /&gt;</Value></_ObfuscarLine>
-			<_ObfuscarLine Include="l14"><Value>&lt;/Obfuscator&gt;</Value></_ObfuscarLine>
+			<_ObfuscarLine Include="l12">
+				<Value>  &lt;Module file="$(_InPath)MetroMania.Engine.dll" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l13">
+				<Value>  &lt;Module file="$(_InPath)MetroMania.Domain.dll" /&gt;</Value>
+			</_ObfuscarLine>
+			<_ObfuscarLine Include="l14">
+				<Value>&lt;/Obfuscator&gt;</Value>
+			</_ObfuscarLine>
 		</ItemGroup>
 
 		<WriteLinesToFile
