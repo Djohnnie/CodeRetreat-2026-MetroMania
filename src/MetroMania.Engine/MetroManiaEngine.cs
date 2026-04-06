@@ -174,6 +174,12 @@ public class MetroManiaEngine
 
             snapshot = ProcessTrains(level, snapshot);
 
+            // ── Finalize pending vehicle removals ────────────────────────────
+            // After train movement and passenger ops, check for trains flagged
+            // PendingRemoval that have dropped off all their passengers.
+            // Remove them, release the resource, and notify the runner.
+            snapshot = FinalizePendingRemovals(runner, snapshot);
+
             // ── Weekly gift — granted on the first tick of every Monday ──────────
             // The gift is added before the player's OnHourTicked call so the runner
             // can immediately use the new resource in the same turn it was received.
@@ -207,6 +213,12 @@ public class MetroManiaEngine
             var playerAction = runner.OnHourTicked(snapshot);
 
             snapshot = ApplyPlayerAction(runner, snapshot with { LastAction = playerAction });
+
+            // ── Post-action pending-removal finalization ──────────────────────
+            // A RemoveVehicle action sets PendingRemoval on the train.  When the
+            // train has zero passengers the removal can complete immediately in
+            // the same tick rather than waiting for the next ProcessTrains cycle.
+            snapshot = FinalizePendingRemovals(runner, snapshot);
 
             snapshots.Add(snapshot);
             absoluteHour++;
@@ -450,6 +462,17 @@ public class MetroManiaEngine
                     continue;
                 }
 
+                // 1b. Pending-removal forced drop: when the train is scheduled for removal,
+                //     force-drop the first remaining passenger at this station even if the
+                //     station type doesn't match. The passenger is re-queued (no score) and
+                //     can be collected by another train later.
+                if (train.PendingRemoval && train.Passengers.Count > 0)
+                {
+                    var forceDrop = train.Passengers[0];
+                    ticks[t] = new TrainTick(true, forceDrop, null, train.TilePosition, train.Direction, idx);
+                    continue;
+                }
+
                 // Pre-compute the next station the train will visit — shared by both
                 // the transfer-drop check and the boarding check below.
                 int effStep = effectiveDir > 0 ? 1 : -1;
@@ -494,7 +517,8 @@ public class MetroManiaEngine
 
                 // 3. Pick up a waiting passenger — but only if this train is on the
                 //    globally optimal route to that passenger's destination.
-                if (nextStationId != Guid.Empty)
+                //    Trains with PendingRemoval do NOT pick up new passengers.
+                if (nextStationId != Guid.Empty && !train.PendingRemoval)
                 {
                     var toPickUp = waitingPassengers
                         .Where(p =>
@@ -849,6 +873,38 @@ public class MetroManiaEngine
     }
 
     /// <summary>
+    /// Checks for trains with <see cref="Train.PendingRemoval"/> that have dropped off
+    /// all their passengers. Those trains are removed from the map, their resource is
+    /// released (marked as not in use), and <see cref="IMetroManiaRunner.OnVehicleRemoved"/>
+    /// is called for each one.
+    /// </summary>
+    private static GameSnapshot FinalizePendingRemovals(IMetroManiaRunner runner, GameSnapshot snapshot)
+    {
+        var completedRemovals = snapshot.Trains
+            .Where(t => t.PendingRemoval && t.Passengers.Count == 0)
+            .ToList();
+
+        if (completedRemovals.Count == 0)
+            return snapshot;
+
+        var removedIds = completedRemovals.Select(t => t.TrainId).ToHashSet();
+
+        snapshot = snapshot with
+        {
+            Trains = snapshot.Trains.Where(t => !removedIds.Contains(t.TrainId)).ToList(),
+            Resources = snapshot.Resources.Select(r =>
+                removedIds.Contains(r.Id) && r.Type == ResourceType.Train
+                    ? r with { InUse = false }
+                    : r).ToList(),
+        };
+
+        foreach (var train in completedRemovals)
+            runner.OnVehicleRemoved(snapshot, train.TrainId);
+
+        return snapshot;
+    }
+
+    /// <summary>
     /// Dispatches the action chosen by the player this tick to the appropriate handler,
     /// calling <see cref="IMetroManiaRunner.OnInvalidPlayerAction"/> if the action was
     /// rejected.  <see cref="NoAction"/> is silently ignored.
@@ -862,6 +918,7 @@ public class MetroManiaEngine
         {
             CreateLine createLine       => ApplyCreateLine(snapshot, createLine),
             AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
+            RemoveVehicle removeVehicle => ApplyRemoveVehicle(snapshot, removeVehicle),
             _                           => (snapshot, -1, "Action type not recognised or not yet implemented.")
         };
 
@@ -999,6 +1056,39 @@ public class MetroManiaEngine
         {
             Trains = [.. snapshot.Trains, newTrain],
             Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), resource with { InUse = true }],
+        }, 0, null);
+    }
+
+    /// <summary>
+    /// Handles the <see cref="RemoveVehicle"/> player action.
+    ///
+    /// The train is flagged with <see cref="Train.PendingRemoval"/>. A pending-removal
+    /// train continues moving and dropping off passengers but will NOT pick up new ones.
+    /// When the train has no passengers left, <see cref="FinalizePendingRemovals"/> removes
+    /// it and fires <see cref="IMetroManiaRunner.OnVehicleRemoved"/>. For trains that are
+    /// already empty this happens immediately within the same tick.
+    ///
+    /// Returns a tuple of (newSnapshot, errorCode, errorDescription).
+    /// errorCode == 0 means success; any other value is a <see cref="PlayerActionError"/> constant.
+    /// </summary>
+    private static (GameSnapshot, int, string?) ApplyRemoveVehicle(GameSnapshot snapshot, RemoveVehicle action)
+    {
+        var train = snapshot.Trains.FirstOrDefault(t => t.TrainId == action.VehicleId);
+        if (train is null)
+            return (snapshot, PlayerActionError.RemoveVehicleNotFound,
+                $"No active train with id {action.VehicleId} found on the map.");
+
+        if (train.PendingRemoval)
+            return (snapshot, PlayerActionError.RemoveVehicleAlreadyPending,
+                $"Train {action.VehicleId} is already scheduled for removal.");
+
+        // Always flag for pending removal. FinalizePendingRemovals (called after
+        // ApplyPlayerAction) will handle the actual removal once the train has
+        // zero passengers — which may be immediately if the train is already empty.
+        return (snapshot with
+        {
+            Trains = snapshot.Trains.Select(t =>
+                t.TrainId == action.VehicleId ? t with { PendingRemoval = true } : t).ToList(),
         }, 0, null);
     }
 }

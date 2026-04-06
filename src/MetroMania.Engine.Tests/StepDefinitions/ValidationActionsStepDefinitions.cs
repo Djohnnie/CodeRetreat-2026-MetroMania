@@ -125,4 +125,10 @@ public class ValidationActionsStepDefinitions(EngineTestContext ctx)
             return train is not null ? new RemoveVehicle(train.TrainId) : new RemoveVehicle(Guid.NewGuid());
         });
     }
+
+    [Given(@"the runner will attempt to remove a non-existent train")]
+    public void GivenAttemptRemoveNonExistentVehicle()
+    {
+        ctx.PendingActions.Enqueue(_ => new RemoveVehicle(Guid.NewGuid()));
+    }
 }

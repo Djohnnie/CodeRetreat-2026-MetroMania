@@ -14,4 +14,5 @@ public class MyMetroManiaRunner : IMetroManiaRunner
     public void OnStationCrowded(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting) { }
     public void OnGameOver(GameSnapshot snapshot, Guid stationId) { }
     public void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description) { }
+    public void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId) { }
 }

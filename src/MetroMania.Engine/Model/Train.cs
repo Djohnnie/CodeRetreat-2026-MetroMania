@@ -28,4 +28,11 @@ public record Train
 
     /// <summary>Passengers currently riding this train.</summary>
     public IReadOnlyList<Passenger> Passengers { get; init; } = [];
+
+    /// <summary>
+    /// When <c>true</c> the train is scheduled for removal. It will continue moving
+    /// and dropping off passengers but will NOT pick up new ones. Once all passengers
+    /// have been dropped off the train is removed and its resource is released.
+    /// </summary>
+    public bool PendingRemoval { get; init; }
 }

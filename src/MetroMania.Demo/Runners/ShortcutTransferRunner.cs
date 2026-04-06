@@ -152,4 +152,6 @@ internal class ShortcutTransferRunner : IMetroManiaRunner
 
     public void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description) =>
         Console.WriteLine($"[Level5] Invalid action (code {code}): {description}");
+
+    public void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId) { }
 }

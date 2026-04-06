@@ -53,4 +53,12 @@ public static class PlayerActionError
 
     /// <summary>Another train is currently occupying the requested spawn tile.</summary>
     public const int TrainTileOccupied = 205;
+
+    // ── RemoveVehicle ─────────────────────────────────────────────────────────
+
+    /// <summary>No active train with the given VehicleId exists on the map.</summary>
+    public const int RemoveVehicleNotFound = 300;
+
+    /// <summary>The train already has a pending removal — it cannot be removed again.</summary>
+    public const int RemoveVehicleAlreadyPending = 301;
 }

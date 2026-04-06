@@ -26,9 +26,9 @@ namespace MetroMania.Engine.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Player Action Validation", "  Verifies that RemoveLine and RemoveVehicle actions are correctly rejected as\r\n " +
-                " not yet implemented (error code -1), and that rejected actions preserve the\r\n  " +
-                "existing game state.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Player Action Validation", "  Verifies that RemoveLine actions are correctly rejected as not yet implemented\r" +
+                "\n  (error code -1), and that rejected actions preserve the existing game state.\r" +
+                "\n  Also verifies that RemoveVehicle correctly removes an empty train.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "PlayerActionValidation.feature"
 #line hidden
@@ -186,15 +186,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="RemoveVehicle triggers error code -1")]
+        [global::Xunit.FactAttribute(DisplayName="RemoveVehicle immediately removes an empty train")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Validation")]
-        [global::Xunit.TraitAttribute("Description", "RemoveVehicle triggers error code -1")]
-        public async global::System.Threading.Tasks.Task RemoveVehicleTriggersErrorCode_1()
+        [global::Xunit.TraitAttribute("Description", "RemoveVehicle immediately removes an empty train")]
+        public async global::System.Threading.Tasks.Task RemoveVehicleImmediatelyRemovesAnEmptyTrain()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveVehicle triggers error code -1", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveVehicle immediately removes an empty train", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 16
@@ -231,7 +231,10 @@ namespace MetroMania.Engine.Tests.Features
     await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 24
-    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code -1", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("there should be 0 trains in the simulation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 25
+    await testRunner.AndAsync("there should be 0 in-use Train resources", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -248,7 +251,7 @@ namespace MetroMania.Engine.Tests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveLine does not remove the line", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 26
+#line 27
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -258,45 +261,45 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 27
+#line 28
     await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and no passen" +
                         "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 28
+#line 29
     await testRunner.AndAsync("a level with a Rectangle station at (3,0) with a spawn delay of 0 days and no pas" +
                         "senger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 29
+#line 30
     await testRunner.AndAsync("the level has 1 initial Line and 1 initial Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 30
+#line 31
     await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 31
+#line 32
     await testRunner.AndAsync("the runner will attempt to remove the first line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 32
+#line 33
     await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 33
+#line 34
     await testRunner.ThenAsync("there should be 1 line in the simulation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="RemoveVehicle does not remove the train")]
+        [global::Xunit.FactAttribute(DisplayName="RemoveVehicle on non-existent train triggers error")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Validation")]
-        [global::Xunit.TraitAttribute("Description", "RemoveVehicle does not remove the train")]
-        public async global::System.Threading.Tasks.Task RemoveVehicleDoesNotRemoveTheTrain()
+        [global::Xunit.TraitAttribute("Description", "RemoveVehicle on non-existent train triggers error")]
+        public async global::System.Threading.Tasks.Task RemoveVehicleOnNon_ExistentTrainTriggersError()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveVehicle does not remove the train", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveVehicle on non-existent train triggers error", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 35
+#line 36
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -306,31 +309,28 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 36
+#line 37
     await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and no passen" +
                         "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 37
+#line 38
     await testRunner.AndAsync("a level with a Rectangle station at (3,0) with a spawn delay of 0 days and no pas" +
                         "senger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 38
+#line 39
     await testRunner.AndAsync("the level has 1 initial Line and 1 initial Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 39
+#line 40
     await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 40
-    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 41
-    await testRunner.AndAsync("the runner will attempt to remove the first train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will attempt to remove a non-existent train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 42
-    await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 43
-    await testRunner.ThenAsync("there should be 1 train in the simulation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 300", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

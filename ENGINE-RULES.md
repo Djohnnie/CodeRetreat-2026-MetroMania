@@ -68,10 +68,14 @@ Every hour, the engine fires events in this exact order:
 │  3. Station spawning   → OnStationSpawned           │
 │  4. Passenger spawning → OnPassengerSpawned          │
 │  5. Train movement     (3-phase pipeline)           │
+│  5b. Finalize pending removals                      │
+│      → OnVehicleRemoved                             │
 │  6. Weekly gift        → OnWeeklyGiftReceived        │
 │     (only Monday 00:00)                             │
 │  7. OnHourTicked       → Player returns action      │
 │  8. Apply player action                             │
+│  8b. Finalize pending removals (post-action)        │
+│      → OnVehicleRemoved                             │
 │  9. Snapshot recorded                               │
 └─────────────────────────────────────────────────────┘
 ```
@@ -236,6 +240,22 @@ Each tick, the player's `OnHourTicked` callback must return a `PlayerAction`. On
 | `RemoveLine(LineId)` | Remove an entire line and release its resource + all trains on it. |
 | `RemoveVehicle(VehicleId)` | Remove a single train and release its resource. |
 
+### RemoveVehicle Behavior
+
+When a player returns `RemoveVehicle(VehicleId)`:
+
+1. **No passengers on board** — the train is flagged `PendingRemoval` and removed in the same tick by the post-action finalization step (step 8b). The Train resource is released and `OnVehicleRemoved` fires.
+2. **Passengers on board** — the train is flagged `PendingRemoval`. It continues moving and dropping off passengers but **will NOT pick up new passengers**. At each station it visits, any remaining passenger is force-dropped even if the station type doesn't match the passenger's destination (no points for a wrong-station drop). Once all passengers have been dropped, the finalization step (step 5b) removes the train, releases the resource, and fires `OnVehicleRemoved`.
+
+> **Key detail:** A pending-removal train that reaches a station matching a passenger's destination type still delivers normally and scores a point. Force-drop only applies when no normal delivery is possible.
+
+### RemoveVehicle Error Codes
+
+| Code | Name | Cause |
+|:-:|------|-------|
+| 300 | `RemoveVehicleNotFound` | No active train with the given `VehicleId`. |
+| 301 | `RemoveVehicleAlreadyPending` | The train is already flagged for removal. |
+
 ### Invalid Action Handling
 
 If an action is invalid, the engine:
@@ -304,6 +324,7 @@ Trains are vehicles that travel along lines, picking up and delivering passenger
 | Trains have a vehicle capacity | Default: 6 passengers. Configurable per level via `VehicleCapacity`. |
 | Max trains per line = number of stations | A 3-station line can have at most 3 trains. |
 | Spawn tile must be unoccupied | Cannot deploy a train on a tile already occupied by another train. |
+| Pending removal | When `PendingRemoval` is `true`, the train continues moving and dropping off passengers but will NOT board new ones. Once empty, the train is removed and the Train resource is released for redeployment. |
 
 ### AddVehicleToLine Error Codes
 
@@ -369,11 +390,17 @@ At a station, the train checks in this **priority order**:
 │  1. Deliver: Drop a passenger whose destination     │
 │     type matches this station's type.               │
 │                                                     │
+│  1b.Force-drop (pending removal only): If the train │
+│     is flagged PendingRemoval, drop the first        │
+│     remaining passenger here even if the station     │
+│     type doesn't match (no points — re-queued).     │
+│                                                     │
 │  2. Transfer: Drop a passenger who can reach their  │
 │     destination faster via another line from here.   │
 │                                                     │
 │  3. Pickup: Board a waiting passenger if this train │
 │     is on the optimal route to their destination.   │
+│     (Skipped when PendingRemoval is true.)          │
 │                                                     │
 │  4. Move: If no work to do, advance to next tile.   │
 └─────────────────────────────────────────────────────┘
@@ -396,6 +423,7 @@ At a station, the train checks in this **priority order**:
 |------|--------|
 | Final delivery | If the station's type matches the passenger's `DestinationType`, the passenger is removed and a point is scored. |
 | Intermediate transfer | If the station type does NOT match, the passenger is **re-queued** at this station (no point). Another train can pick them up later. |
+| Force-drop (pending removal) | A `PendingRemoval` train force-drops its first remaining passenger at any station, even if the type doesn't match. The passenger is re-queued (no point). Normal delivery (step 1) still takes precedence — if the station type matches, the passenger is delivered normally with a point. |
 | One drop per tick | A train drops **at most one** passenger per tick (prioritizing delivery over transfer). |
 
 ---
@@ -522,6 +550,7 @@ The `IMetroManiaRunner` interface defines all callbacks that the player bot impl
 | `OnGameOver(snapshot, stationId)` | When a station reaches ≥ 20 passengers | `void` |
 | `OnHourTicked(snapshot)` | Every tick (always last event) | `PlayerAction` |
 | `OnInvalidPlayerAction(snapshot, code, description)` | When the returned action was rejected | `void` |
+| `OnVehicleRemoved(snapshot, vehicleId)` | When a pending-removal train has been fully removed | `void` |
 
 ### Callback Ordering Within a Tick
 
@@ -544,6 +573,10 @@ The `IMetroManiaRunner` interface defines all callbacks that the player bot impl
   Process trains (3-phase pipeline)
          │
          ▼
+  Pending removals with 0 passengers?
+         │──yes──►  Remove train, release resource
+         │          OnVehicleRemoved (for each)
+         ▼
   Monday at 00:00?  ──yes──►  OnWeeklyGiftReceived
          │
          ▼
@@ -554,6 +587,10 @@ The `IMetroManiaRunner` interface defines all callbacks that the player bot impl
          │
   Invalid? ──yes──►  OnInvalidPlayerAction
          │
+         ▼
+  Pending removals with 0 passengers?
+         │──yes──►  Remove train, release resource
+         │          OnVehicleRemoved (for each)
          ▼
   Record snapshot
 ```

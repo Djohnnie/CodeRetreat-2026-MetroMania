@@ -20,6 +20,8 @@ public static class StarterCode
             public void OnGameOver(GameSnapshot snapshot, Guid stationId) { }
 
             public void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description) { }
+
+            public void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId) { }
         }
         """;
 }

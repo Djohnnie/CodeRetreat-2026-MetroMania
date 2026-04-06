@@ -52,4 +52,13 @@ public interface IMetroManiaRunner
     /// <param name="code">A numeric code identifying the violation (see <see cref="PlayerActionError"/>).</param>
     /// <param name="description">A human-readable explanation of why the action was rejected.</param>
     void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description);
+
+    /// <summary>
+    /// Called after a train with a pending removal has dropped off all its passengers
+    /// and has been physically removed from the map. The train resource is now available
+    /// for redeployment.
+    /// </summary>
+    /// <param name="snapshot">The snapshot after the train was removed.</param>
+    /// <param name="vehicleId">The Id of the removed train (matches the resource Id).</param>
+    void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId);
 }
