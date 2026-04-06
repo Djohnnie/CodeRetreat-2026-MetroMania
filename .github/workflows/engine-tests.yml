@@ -1,0 +1,76 @@
+name: Engine Tests & Coverage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/MetroMania.Engine/**'
+      - 'src/MetroMania.Engine.Tests/**'
+      - 'src/MetroMania.Domain/**'
+  pull_request:
+    paths:
+      - 'src/MetroMania.Engine/**'
+      - 'src/MetroMania.Engine.Tests/**'
+      - 'src/MetroMania.Domain/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test:
+    name: Run Tests & Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/MetroMania.Engine.Tests
+
+      - name: Build
+        run: dotnet build src/MetroMania.Engine.Tests --no-restore -c Release
+
+      - name: Run tests with coverage
+        run: |
+          dotnet test src/MetroMania.Engine.Tests \
+            --no-build \
+            -c Release \
+            --logger "trx;LogFileName=test-results.trx" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: |
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:CoverageReport \
+            -reporttypes:"HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub"
+
+      - name: Publish coverage summary to job summary
+        run: cat CoverageReport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: CoverageReport/
+          retention-days: 30
+
+      - name: Add coverage PR comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: CoverageReport/SummaryGithub.md
