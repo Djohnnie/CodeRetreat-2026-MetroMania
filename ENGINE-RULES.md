@@ -235,7 +235,9 @@ Each tick, the player's `OnHourTicked` callback must return a `PlayerAction`. On
 | Action | Purpose |
 |--------|---------|
 | `NoAction` | Do nothing this tick. |
-| `CreateLine(LineId, FromStationId, ToStationId)` | Create a new line or extend an existing one. |
+| `CreateLine(LineId, FromStationId, ToStationId)` | Create a new line consuming an unused Line resource. |
+| `ExtendLineFromTerminal(LineId, TerminalStationId, ToStationId)` | Extend an existing line from a terminal station to a new station. |
+| `ExtendLineInBetween(LineId, FromStationId, NewStationId, ToStationId)` | Insert a new station between two consecutive stations on an existing line. |
 | `AddVehicleToLine(VehicleId, LineId, StationId)` | Deploy a train on a line at a station. |
 | `RemoveLine(LineId)` | Remove an entire line and release its resource + all trains on it. |
 | `RemoveVehicle(VehicleId)` | Remove a single train and release its resource. |
@@ -292,11 +294,12 @@ Lines are the routes that trains follow. They connect a sequence of stations.
 
 | Rule | Detail |
 |------|--------|
-| A line connects 2+ stations | Created with exactly 2 stations, extended one station at a time. |
+| A line connects 2+ stations | Created with exactly 2 stations via `CreateLine`, extended one station at a time via `ExtendLineFromTerminal`. |
 | Creating a line consumes a Line resource | The resource must exist, be unused, and of type `Line`. |
-| Lines can be extended | Use `CreateLine` with an already-in-use `LineId` to add a station to either end. |
-| Extension must be from a terminal | `FromStationId` must be the first or last station on the line. |
-| No duplicate stations on a line | `ToStationId` cannot already appear on the line (no loops). |
+| Lines can be extended | Use `ExtendLineFromTerminal` with the `LineId` of an existing line to add a station to either end. |
+| Stations can be inserted mid-line | Use `ExtendLineInBetween` to insert a new station between two consecutive stops. `FromStationId` and `ToStationId` must be adjacent on the line (in either order). Trains on the line have their path indices recalculated after insertion. |
+| Extension must be from a terminal | `TerminalStationId` must be the first or last station on the line. |
+| No duplicate stations on a line | `ToStationId` / `NewStationId` cannot already appear on the line (no loops). |
 | Lines have a color | Assigned sequentially by creation order from a palette of 8 colors (see [Visual Reference](#18-visual-reference)). |
 | Line path follows the grid | The tile path between stations uses straight + 45° diagonal segments. |
 | Pending removal | When `RemoveLine` is applied, the line is flagged `PendingRemoval`. It cannot receive new trains or be extended. The line is physically removed once all its trains have been removed. See [RemoveLine Behavior](#removeline-behavior). |
@@ -306,11 +309,26 @@ Lines are the routes that trains follow. They connect a sequence of stations.
 | Code | Name | Cause |
 |:-:|------|-------|
 | 100 | `LineResourceNotFound` | No Line resource with the given `LineId`. |
-| 101 | `LineResourceAlreadyInUse` | The Line resource is already deployed (use extend instead). |
+| 101 | `LineResourceAlreadyInUse` | The Line resource is already deployed (use `ExtendLineFromTerminal` instead). |
 | 102 | `LineStationsSameStation` | `FromStationId == ToStationId`. |
 | 103 | `LineSegmentAlreadyExists` | The two stations are already directly connected. |
-| 104 | `LineExtendFromNotTerminal` | `FromStationId` is not at either end of the line. |
-| 105 | `LineExtendToAlreadyOnLine` | `ToStationId` is already on this line. |
+
+### ExtendLineFromTerminal Error Codes
+
+| Code | Name | Cause |
+|:-:|------|-------|
+| 104 | `LineExtendLineNotFound` | No active line with the given `LineId`. |
+| 105 | `LineExtendFromNotTerminal` | `TerminalStationId` is not at either end of the line. |
+| 106 | `LineExtendToAlreadyOnLine` | `ToStationId` is already on this line. |
+
+### ExtendLineInBetween Error Codes
+
+| Code | Name | Cause |
+|:-:|------|-------|
+| 107 | `LineInsertLineNotFound` | No active line with the given `LineId`. |
+| 108 | `LineInsertStationsNotConsecutive` | `FromStationId` and `ToStationId` are not adjacent stops on the line. |
+| 109 | `LineInsertStationAlreadyOnLine` | `NewStationId` is already on this line. |
+| 110 | `LineInsertStationNotSpawned` | `NewStationId` does not match any spawned station. |
 
 ### Line Path Computation
 

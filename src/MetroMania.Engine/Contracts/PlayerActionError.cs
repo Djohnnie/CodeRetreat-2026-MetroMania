@@ -37,6 +37,20 @@ public static class PlayerActionError
     /// </summary>
     public const int LineExtendToAlreadyOnLine = 106;
 
+    // ── ExtendLineInBetween ───────────────────────────────────────────────────
+
+    /// <summary>No active line with the given LineId exists on the map.</summary>
+    public const int LineInsertLineNotFound = 107;
+
+    /// <summary>FromStationId and ToStationId are not consecutive stations on the line.</summary>
+    public const int LineInsertStationsNotConsecutive = 108;
+
+    /// <summary>NewStationId already appears on the line — duplicate stops are not allowed.</summary>
+    public const int LineInsertStationAlreadyOnLine = 109;
+
+    /// <summary>NewStationId has not yet spawned on the map.</summary>
+    public const int LineInsertStationNotSpawned = 110;
+
     // ── AddVehicleToLine ──────────────────────────────────────────────────────
 
     /// <summary>No unused Train resource with the given VehicleId exists.</summary>

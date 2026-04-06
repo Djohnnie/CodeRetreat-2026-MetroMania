@@ -72,6 +72,46 @@ public class ValidationActionsStepDefinitions(EngineTestContext ctx)
         });
     }
 
+    [Given(@"the runner will attempt to insert station \((\d+),(\d+)\) on a non-existent line between \((\d+),(\d+)\) and \((\d+),(\d+)\)")]
+    public void GivenAttemptInsertOnNonExistentLine(int nx, int ny, int x1, int y1, int x2, int y2)
+    {
+        ctx.PendingActions.Enqueue(snapshot =>
+        {
+            var newStation = snapshot.Stations[new Location(nx, ny)];
+            var from = snapshot.Stations[new Location(x1, y1)];
+            var to = snapshot.Stations[new Location(x2, y2)];
+            return new ExtendLineInBetween(Guid.NewGuid(), from.Id, newStation.Id, to.Id);
+        });
+    }
+
+    [Given(@"the runner will attempt to insert station \((\d+),(\d+)\) between non-consecutive stations \((\d+),(\d+)\) and \((\d+),(\d+)\) on the first line")]
+    public void GivenAttemptInsertBetweenNonConsecutive(int nx, int ny, int x1, int y1, int x2, int y2)
+    {
+        ctx.PendingActions.Enqueue(snapshot =>
+        {
+            var line = snapshot.Lines.FirstOrDefault();
+            if (line is null) return PlayerAction.None;
+            var newStation = snapshot.Stations[new Location(nx, ny)];
+            var from = snapshot.Stations[new Location(x1, y1)];
+            var to = snapshot.Stations[new Location(x2, y2)];
+            return new ExtendLineInBetween(line.LineId, from.Id, newStation.Id, to.Id);
+        });
+    }
+
+    [Given(@"the runner will attempt to insert existing station \((\d+),(\d+)\) between \((\d+),(\d+)\) and \((\d+),(\d+)\) on the first line")]
+    public void GivenAttemptInsertExistingStation(int nx, int ny, int x1, int y1, int x2, int y2)
+    {
+        ctx.PendingActions.Enqueue(snapshot =>
+        {
+            var line = snapshot.Lines.FirstOrDefault();
+            if (line is null) return PlayerAction.None;
+            var newStation = snapshot.Stations[new Location(nx, ny)];
+            var from = snapshot.Stations[new Location(x1, y1)];
+            var to = snapshot.Stations[new Location(x2, y2)];
+            return new ExtendLineInBetween(line.LineId, from.Id, newStation.Id, to.Id);
+        });
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // AddVehicleToLine error-triggering steps
     // ═══════════════════════════════════════════════════════════════════

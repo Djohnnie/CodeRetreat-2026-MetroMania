@@ -30,6 +30,14 @@ public sealed record CreateLine(Guid LineId, Guid FromStationId, Guid ToStationI
 public sealed record ExtendLineFromTerminal(Guid LineId, Guid TerminalStationId, Guid ToStationId) : PlayerAction;
 
 /// <summary>
+/// Inserts a station between two consecutive stations on an existing line.
+/// <paramref name="LineId"/> must be the Id of an existing line.
+/// <paramref name="FromStationId"/> and <paramref name="ToStationId"/> must be consecutive stations on the line (in either order).
+/// <paramref name="NewStationId"/> must be a spawned station that is not already on the line.
+/// </summary>
+public sealed record ExtendLineInBetween(Guid LineId, Guid FromStationId, Guid NewStationId, Guid ToStationId) : PlayerAction;
+
+/// <summary>
 /// Removes an entire metro line and releases the line resource and all vehicles on it.
 /// <paramref name="LineId"/> must be the Id of a used Line resource.
 /// </summary>

@@ -956,6 +956,7 @@ public class MetroManiaEngine
         {
             CreateLine createLine                     => ApplyCreateLine(snapshot, createLine),
             ExtendLineFromTerminal extendLine        => ApplyExtendLineFromTerminal(snapshot, extendLine),
+            ExtendLineInBetween insertStation        => ApplyExtendLineInBetween(snapshot, insertStation),
             AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
             RemoveVehicle removeVehicle => ApplyRemoveVehicle(snapshot, removeVehicle),
             RemoveLine removeLine       => ApplyRemoveLine(snapshot, removeLine),
@@ -1038,6 +1039,78 @@ public class MetroManiaEngine
         return (snapshot with
         {
             Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), extendedLine],
+        }, 0, null);
+    }
+
+    /// <summary>
+    /// Inserts a station between two consecutive stations on an existing line.
+    /// Trains on the affected line have their <see cref="Train.PathIndex"/> recalculated
+    /// to match the new tile path.
+    ///
+    /// Returns a tuple of (newSnapshot, errorCode, errorDescription).
+    /// errorCode == 0 means success; any other value is a <see cref="PlayerActionError"/> constant.
+    /// </summary>
+    private static (GameSnapshot, int, string?) ApplyExtendLineInBetween(GameSnapshot snapshot, ExtendLineInBetween action)
+    {
+        var existingLine = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
+        if (existingLine is null)
+            return (snapshot, PlayerActionError.LineInsertLineNotFound,
+                $"No line with id {action.LineId} exists on the map.");
+
+        var stationIds = existingLine.StationIds.ToList();
+        int fromIdx = stationIds.IndexOf(action.FromStationId);
+        int toIdx = stationIds.IndexOf(action.ToStationId);
+
+        // From and To must both be on the line and consecutive (in either order).
+        bool consecutive = fromIdx >= 0 && toIdx >= 0
+                        && Math.Abs(fromIdx - toIdx) == 1;
+        if (!consecutive)
+            return (snapshot, PlayerActionError.LineInsertStationsNotConsecutive,
+                $"Stations {action.FromStationId} and {action.ToStationId} are not consecutive on line {action.LineId}.");
+
+        if (stationIds.Contains(action.NewStationId))
+            return (snapshot, PlayerActionError.LineInsertStationAlreadyOnLine,
+                $"Station {action.NewStationId} is already on line {action.LineId}. Duplicate stops are not allowed.");
+
+        var newStationEntry = snapshot.Stations.FirstOrDefault(kvp => kvp.Value.Id == action.NewStationId);
+        if (newStationEntry.Value is null)
+            return (snapshot, PlayerActionError.LineInsertStationNotSpawned,
+                $"Station {action.NewStationId} has not yet spawned on the map.");
+
+        // Insert the new station between the two consecutive stations.
+        int insertAt = Math.Min(fromIdx, toIdx) + 1;
+        stationIds.Insert(insertAt, action.NewStationId);
+
+        var updatedLine = existingLine with { StationIds = stationIds };
+
+        // Recompute the tile path and fix up PathIndex for every train on this line.
+        var stationLocations = snapshot.Stations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Key);
+        var newTilePath = LinePathHelper.ComputeTilePath(updatedLine, stationLocations);
+
+        var updatedTrains = snapshot.Trains.Select(train =>
+        {
+            if (train.LineId != action.LineId) return train;
+
+            int newIdx = newTilePath.IndexOf(train.TilePosition);
+            if (newIdx >= 0)
+                return train with { PathIndex = newIdx };
+
+            // Tile no longer on path — snap to the closest tile.
+            int bestIdx = 0;
+            int bestDist = int.MaxValue;
+            for (int i = 0; i < newTilePath.Count; i++)
+            {
+                int dist = Math.Abs(newTilePath[i].X - train.TilePosition.X)
+                         + Math.Abs(newTilePath[i].Y - train.TilePosition.Y);
+                if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+            }
+            return train with { PathIndex = bestIdx, TilePosition = newTilePath[bestIdx] };
+        }).ToList();
+
+        return (snapshot with
+        {
+            Lines = [.. snapshot.Lines.Where(l => l.LineId != action.LineId), updatedLine],
+            Trains = updatedTrains,
         }, 0, null);
     }
 

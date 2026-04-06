@@ -80,4 +80,21 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
             return new AddVehicleToLine(trainResource.Id, line.LineId, station.Id);
         });
     }
+
+    [Given(@"the runner will insert station \((\d+),(\d+)\) between stations \((\d+),(\d+)\) and \((\d+),(\d+)\) on the first line")]
+    public void GivenRunnerInsertStationBetween(int nx, int ny, int x1, int y1, int x2, int y2)
+    {
+        ctx.PendingActions.Enqueue(snapshot =>
+        {
+            var line = snapshot.Lines.FirstOrDefault();
+            if (line is null) return PlayerAction.None;
+
+            if (!snapshot.Stations.TryGetValue(new Location(nx, ny), out var newStation) ||
+                !snapshot.Stations.TryGetValue(new Location(x1, y1), out var from) ||
+                !snapshot.Stations.TryGetValue(new Location(x2, y2), out var to))
+                return PlayerAction.None;
+
+            return new ExtendLineInBetween(line.LineId, from.Id, newStation.Id, to.Id);
+        });
+    }
 }

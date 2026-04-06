@@ -325,8 +325,9 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     private static string? DescribeAction(PlayerAction action) => action switch
     {
         NoAction          => null,
-        CreateLine        => "Line created",
+        CreateLine             => "Line created",
         ExtendLineFromTerminal => "Line extended",
+        ExtendLineInBetween    => "Station inserted",
         RemoveLine        => "Line removed",
         AddVehicleToLine  => "Train deployed",
         RemoveVehicle     => "Train removed",

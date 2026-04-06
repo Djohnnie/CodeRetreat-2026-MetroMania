@@ -32,6 +32,22 @@ public class GameSnapshotPropertyStepDefinitions(EngineTestContext ctx)
         Assert.IsType<ExtendLineFromTerminal>(ctx.LastSnapshot.LastAction);
     }
 
+    [Then(@"the last snapshot LastAction should be ExtendLineInBetween")]
+    public void ThenLastActionIsExtendLineInBetween()
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.IsType<ExtendLineInBetween>(ctx.LastSnapshot.LastAction);
+    }
+
+    [Then(@"the first line should have (\d+) stations")]
+    public void ThenFirstLineHasNStations(int expected)
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        var line = ctx.LastSnapshot.Lines.FirstOrDefault();
+        Assert.NotNull(line);
+        Assert.Equal(expected, line.StationIds.Count);
+    }
+
     [Then(@"the last snapshot should have day (\d+) and hour (\d+)")]
     public void ThenLastSnapshotTime(int day, int hour)
     {
