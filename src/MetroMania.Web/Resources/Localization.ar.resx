@@ -279,6 +279,7 @@
   <data name="ThirdPlace" xml:space="preserve"><value>المركز الثالث</value></data>
   <data name="NoScoresAvailable" xml:space="preserve"><value>لا تتوفر نتائج لهذا التقديم.</value></data>
   <data name="DownloadZip" xml:space="preserve"><value>تحميل ZIP</value></data>
+  <data name="DownloadPlayerProject" xml:space="preserve"><value>تحميل المشروع</value></data>
 
   <!-- Orleans Dashboard -->
   <data name="OrleansDashboard" xml:space="preserve"><value>لوحة تحكم Orleans</value></data>

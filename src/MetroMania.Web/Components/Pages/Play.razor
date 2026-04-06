@@ -58,6 +58,15 @@
                    OnClick="ClearCode" Disabled="_submitting">
             @Loc["Clear"]
         </MudButton>
+        <MudSpacer />
+        @if (!string.IsNullOrEmpty(_playerTemplateUrl))
+        {
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Download"
+                       Href="@_playerTemplateUrl" Target="_blank">
+                @Loc["DownloadPlayerProject"]
+            </MudButton>
+        }
     </div>
 
     @if (_submitting)
@@ -221,12 +230,15 @@ else
     private List<SubmissionDto> _submissions = [];
     private IReadOnlyList<string>? _validationErrors;
     private HubConnection? _hubConnection;
+    private string? _playerTemplateUrl;
 
     [CascadingParameter(Name = "IsDarkMode")]
     private bool IsDarkMode { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        _playerTemplateUrl = Configuration.GetValue<string>("PLAYER_TEMPLATE_URL");
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (Guid.TryParse(userIdClaim, out var uid))

@@ -274,6 +274,7 @@
   <data name="ThirdPlace" xml:space="preserve"><value>3e Plaats</value></data>
   <data name="NoScoresAvailable" xml:space="preserve"><value>Geen scores beschikbaar voor deze inzending.</value></data>
   <data name="DownloadZip" xml:space="preserve"><value>ZIP downloaden</value></data>
+  <data name="DownloadPlayerProject" xml:space="preserve"><value>Project downloaden</value></data>
 
   <!-- Orleans Dashboard -->
   <data name="OrleansDashboard" xml:space="preserve"><value>Orleans Dashboard</value></data>
