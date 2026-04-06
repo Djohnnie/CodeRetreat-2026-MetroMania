@@ -7,5 +7,5 @@ public record SimulationResult
     public int TotalPassengersSpawned { get; init; }
     public int NumberOfPlayerActions { get; init; }
 
-    public IReadOnlyList<GameSnapshot> GameSnapshots { get; init; }
+    public IReadOnlyList<GameSnapshot> GameSnapshots { get; init; } = [];
 }
