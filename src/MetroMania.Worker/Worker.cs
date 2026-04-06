@@ -22,6 +22,8 @@ public class ServiceBusWorker(
     IHttpClientFactory httpClientFactory,
     ILogger<ServiceBusWorker> logger) : BackgroundService
 {
+    private const int RenderBatchSize = 100;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var connectionString = configuration.GetValue<string>("SERVICE_BUS_CONNECTION_STRING")
@@ -95,7 +97,7 @@ public class ServiceBusWorker(
         {
             var base64Code = submission.Code.Base64Encode();
 
-            // Phase 1: Run scripts
+            // Phase 1: Run scripts (parallel across all levels)
             var runTasks = levels.Select(level =>
             {
                 logger.LogInformation("Running script for level {LevelId} ({LevelTitle})", level.Id, level.Title);
@@ -108,25 +110,66 @@ public class ServiceBusWorker(
             runSw.Stop();
             logger.LogInformation("Ran scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, runSw.ElapsedMilliseconds);
 
-            // Phase 2: Render scripts
+            // Phase 2: Render scripts in batches (one level at a time to limit memory)
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Rendering), ct);
             await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Rendering);
 
-            var renderTasks = levels.Select(level =>
-            {
-                logger.LogInformation("Rendering script for level {LevelId} ({LevelTitle})", level.Id, level.Title);
-                var levelDataJson = JsonSerializer.Serialize(ToLevelEntity(level));
-                return gameRendererService.RenderScriptAsync(level.Id, base64Code, levelDataJson);
-            }).ToList();
-
             var renderSw = Stopwatch.StartNew();
-            var renderResults = await Task.WhenAll(renderTasks);
-            renderSw.Stop();
-            logger.LogInformation("Rendered scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, renderSw.ElapsedMilliseconds);
+            var renderFailures = new List<(LevelDto level, string error)>();
+            var renderedLevelInfos = new List<CreateSubmissionRenderZipsCommand.LevelInfo>();
 
-            // Phase 3: Save scores and renders
-            await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Saving), ct);
-            await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Saving);
+            for (int levelIndex = 0; levelIndex < levels.Count; levelIndex++)
+            {
+                var level = levels[levelIndex];
+                logger.LogInformation("Rendering level {LevelIndex}/{LevelCount}: {LevelTitle}", levelIndex + 1, levels.Count, level.Title);
+
+                var levelDataJson = JsonSerializer.Serialize(ToLevelEntity(level));
+
+                // Step 1: Prepare — run simulation and store snapshots in grain state
+                var prepareResult = await gameRendererService.PrepareRenderAsync(level.Id, base64Code, levelDataJson);
+                if (!prepareResult.Success)
+                {
+                    renderFailures.Add((level, prepareResult.Error ?? "Prepare failed."));
+                    continue;
+                }
+
+                var totalFrames = prepareResult.TotalFrames;
+                logger.LogInformation("Prepared {TotalFrames} frames for level {LevelTitle}", totalFrames, level.Title);
+
+                // Step 2: Render and save in batches
+                var levelFailed = false;
+                for (int start = 0; start < totalFrames; start += RenderBatchSize)
+                {
+                    var count = Math.Min(RenderBatchSize, totalFrames - start);
+                    var batchResult = await gameRendererService.RenderBatchAsync(level.Id, start, count);
+                    if (!batchResult.Success)
+                    {
+                        renderFailures.Add((level, batchResult.Error ?? "Render batch failed."));
+                        levelFailed = true;
+                        break;
+                    }
+
+                    // Save this batch (upload blobs + DB metadata)
+                    var batchRenders = batchResult.Renders
+                        .Select(r => new SaveSubmissionRenderBatchCommand.LevelRender(level.Id, r.Hour, r.SvgContent, r.JsonContent))
+                        .ToList();
+
+                    await sender.Send(new SaveSubmissionRenderBatchCommand(submissionId, batchRenders), ct);
+
+                    logger.LogInformation("Saved render batch {Start}-{End} of {Total} for level {LevelTitle}",
+                        start + 1, start + batchResult.Renders.Count, totalFrames, level.Title);
+                }
+
+                if (!levelFailed)
+                    renderedLevelInfos.Add(new CreateSubmissionRenderZipsCommand.LevelInfo(level.Id, level.Title, totalFrames));
+            }
+
+            renderSw.Stop();
+            logger.LogInformation("Rendered {LevelCount} levels in {ElapsedMs}ms", levels.Count, renderSw.ElapsedMilliseconds);
+
+            // Phase 3: Save scores and create ZIPs
+            await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Finalizing), ct);
+            await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Finalizing);
 
             // Build scores from results (score = 0 for failed levels)
             var scores = levels.Zip(results, (level, result) =>
@@ -138,30 +181,18 @@ public class ServiceBusWorker(
             saveScoresSw.Stop();
             logger.LogInformation("Saved scores for {LevelCount} levels in {ElapsedMs}ms", levels.Count, saveScoresSw.ElapsedMilliseconds);
 
-            // Save all renders from successful levels
-            var allRenders = levels.Zip(renderResults, (level, renderResult) =>
-                renderResult.Success
-                    ? renderResult.Renders.Select(r => new SaveSubmissionRendersCommand.LevelRender(level.Id, level.Title, r.Hour, r.SvgContent, r.JsonContent))
-                    : Enumerable.Empty<SaveSubmissionRendersCommand.LevelRender>())
-                .SelectMany(r => r)
-                .ToList();
-
-            if (allRenders.Count > 0)
+            // Create ZIP archives per level (downloads individual blobs, creates ZIP, uploads)
+            if (renderedLevelInfos.Count > 0)
             {
-                var saveRendersSw = Stopwatch.StartNew();
-                await sender.Send(new SaveSubmissionRendersCommand(submissionId, allRenders), ct);
-                saveRendersSw.Stop();
-                logger.LogInformation("Saved {RenderCount} renders for {LevelCount} levels in {ElapsedMs}ms", allRenders.Count, levels.Count, saveRendersSw.ElapsedMilliseconds);
+                var zipSw = Stopwatch.StartNew();
+                await sender.Send(new CreateSubmissionRenderZipsCommand(submissionId, renderedLevelInfos), ct);
+                zipSw.Stop();
+                logger.LogInformation("Created ZIP archives for {LevelCount} levels in {ElapsedMs}ms", renderedLevelInfos.Count, zipSw.ElapsedMilliseconds);
             }
 
-            // Check if any level run failed
+            // Check if any level run or render failed
             var runnerFailures = levels
                 .Zip(results, (level, result) => (level, result))
-                .Where(x => !x.result.Success)
-                .ToList();
-
-            var renderFailures = levels
-                .Zip(renderResults, (level, result) => (level, result))
                 .Where(x => !x.result.Success)
                 .ToList();
 
@@ -175,10 +206,10 @@ public class ServiceBusWorker(
                     messageLines.Add($"[{level.Title}] Run: {result.Error}");
                 }
 
-                foreach (var (level, result) in renderFailures)
+                foreach (var (level, error) in renderFailures)
                 {
-                    logger.LogError("Level render failed [{Level}]: {Error}", level.Title, result.Error);
-                    messageLines.Add($"[{level.Title}] Render: {result.Error}");
+                    logger.LogError("Level render failed [{Level}]: {Error}", level.Title, error);
+                    messageLines.Add($"[{level.Title}] Render: {error}");
                 }
 
                 var message = string.Join("\n", messageLines);
@@ -189,9 +220,8 @@ public class ServiceBusWorker(
             }
 
             for (var i = 0; i < levels.Count; i++)
-                logger.LogInformation("Level {LevelTitle}: Score={Score}, Days={Days}, Time={Time}ms, Renders={Renders}",
-                    levels[i].Title, results[i].Score, results[i].DaysSurvived, results[i].TimeTakenMs,
-                    renderResults[i].Renders.Count);
+                logger.LogInformation("Level {LevelTitle}: Score={Score}, Days={Days}, Time={Time}ms",
+                    levels[i].Title, results[i].Score, results[i].DaysSurvived, results[i].TimeTakenMs);
 
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Succeeded), ct);
             await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Succeeded);

@@ -4,5 +4,6 @@ namespace MetroMania.Infrastructure.Orleans.Services;
 
 public interface IGameRendererService
 {
-    Task<ScriptRenderResult> RenderScriptAsync(Guid grainId, string base64Code, string levelDataJson);
+    Task<ScriptPrepareResult> PrepareRenderAsync(Guid grainId, string base64Code, string levelDataJson);
+    Task<ScriptRenderResult> RenderBatchAsync(Guid grainId, int startHour, int count);
 }

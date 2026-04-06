@@ -5,7 +5,7 @@ public enum SubmissionStatus
     Waiting,
     Running,
     Rendering,
-    Saving,
+    Finalizing,
     Succeeded,
     Failed
 }

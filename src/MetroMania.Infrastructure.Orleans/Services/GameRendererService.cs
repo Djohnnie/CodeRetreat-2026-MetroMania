@@ -5,9 +5,15 @@ namespace MetroMania.Infrastructure.Orleans.Services;
 
 public class GameRendererService(IGrainFactory grainFactory) : IGameRendererService
 {
-    public Task<ScriptRenderResult> RenderScriptAsync(Guid grainId, string base64Code, string levelDataJson)
+    public Task<ScriptPrepareResult> PrepareRenderAsync(Guid grainId, string base64Code, string levelDataJson)
     {
         var grain = grainFactory.GetGrain<IGameRendererGrain>(grainId);
-        return grain.RenderScriptAsync(base64Code, levelDataJson);
+        return grain.PrepareAsync(base64Code, levelDataJson);
+    }
+
+    public Task<ScriptRenderResult> RenderBatchAsync(Guid grainId, int startHour, int count)
+    {
+        var grain = grainFactory.GetGrain<IGameRendererGrain>(grainId);
+        return grain.RenderBatchAsync(startHour, count);
     }
 }

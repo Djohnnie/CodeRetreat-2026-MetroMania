@@ -18,49 +18,88 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         Converters = { new JsonStringEnumConverter(), new LocationJsonConverter() }
     };
 
-    public async Task<ScriptRenderResult> RenderScriptAsync(string base64Code, string levelDataJson)
+    private Level? _level;
+    private IReadOnlyList<GameSnapshot>? _snapshots;
+    private MetroManiaRenderer? _renderer;
+
+    public async Task<ScriptPrepareResult> PrepareAsync(string base64Code, string levelDataJson)
     {
         try
         {
-            var level = JsonSerializer.Deserialize<Level>(levelDataJson)
+            _level = JsonSerializer.Deserialize<Level>(levelDataJson)
                 ?? throw new InvalidOperationException("Failed to deserialize level data.");
 
-            var svgResourcesPath = ResolveSvgResourcesPath();
-
-            // Run the simulation once to get all hourly snapshots
             var wrappedScript = WrapInOuterScript(base64Code);
             var scriptCompiler = new ScriptCompiler<GameResult>();
 
             var script = await scriptCompiler.CompileForExecution(wrappedScript);
-            var gameResult = await script.Invoke(new ScriptGlobals(level));
+            var gameResult = await script.Invoke(new ScriptGlobals(_level));
             if (gameResult is null)
-                return new ScriptRenderResult { Success = false, Error = "Script returned null." };
-
-            var hourlySnapshots = gameResult.GameSnapshots;
-
-            using var renderer = new MetroManiaRenderer(svgResourcesPath);
-            var renders = new List<FrameRender>(hourlySnapshots.Count);
-
-            // Render one frame per in-game hour (1-indexed)
-            for (int i = 0; i < hourlySnapshots.Count; i++)
             {
-                var svg = renderer.RenderSnapshot(level, hourlySnapshots[i]);
-                var json = JsonSerializer.Serialize(hourlySnapshots[i], SnapshotJsonOptions);
-                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg, JsonContent = json });
+                Cleanup();
+                return new ScriptPrepareResult { Success = false, Error = "Script returned null." };
             }
 
-            DeactivateOnIdle();
+            _snapshots = gameResult.GameSnapshots;
+            _renderer = new MetroManiaRenderer(ResolveSvgResourcesPath());
 
-            return new ScriptRenderResult { Success = true, Renders = renders };
+            return new ScriptPrepareResult { Success = true, TotalFrames = _snapshots.Count };
         }
         catch (Exception ex)
         {
-            return new ScriptRenderResult
+            Cleanup();
+            return new ScriptPrepareResult
             {
                 Success = false,
                 Error = ex.InnerException?.Message ?? ex.Message
             };
         }
+    }
+
+    public Task<ScriptRenderResult> RenderBatchAsync(int startHour, int count)
+    {
+        if (_level is null || _snapshots is null || _renderer is null)
+            return Task.FromResult(new ScriptRenderResult { Success = false, Error = "PrepareAsync must be called first." });
+
+        try
+        {
+            var end = Math.Min(startHour + count, _snapshots.Count);
+            var renders = new List<FrameRender>(end - startHour);
+
+            for (int i = startHour; i < end; i++)
+            {
+                var svg = _renderer.RenderSnapshot(_level, _snapshots[i]);
+                var json = JsonSerializer.Serialize(_snapshots[i], SnapshotJsonOptions);
+                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg, JsonContent = json });
+            }
+
+            // If this is the last batch, clean up and deactivate
+            if (end >= _snapshots.Count)
+            {
+                Cleanup();
+                DeactivateOnIdle();
+            }
+
+            return Task.FromResult(new ScriptRenderResult { Success = true, Renders = renders });
+        }
+        catch (Exception ex)
+        {
+            Cleanup();
+            DeactivateOnIdle();
+            return Task.FromResult(new ScriptRenderResult
+            {
+                Success = false,
+                Error = ex.InnerException?.Message ?? ex.Message
+            });
+        }
+    }
+
+    private void Cleanup()
+    {
+        _renderer?.Dispose();
+        _renderer = null;
+        _snapshots = null;
+        _level = null;
     }
 
     private string ResolveSvgResourcesPath()

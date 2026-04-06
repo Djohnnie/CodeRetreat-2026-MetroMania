@@ -30,8 +30,6 @@ public class GameRunnerGrain : Grain, IGameRunnerGrain
             if (result is null)
                 return new ScriptRunResult { Success = false, Error = "Script returned null." };
 
-            DeactivateOnIdle(); // Deactivate grain after processing
-
             return new ScriptRunResult
             {
                 Success = true,
@@ -48,6 +46,10 @@ public class GameRunnerGrain : Grain, IGameRunnerGrain
                 Success = false,
                 Error = ex.InnerException?.Message ?? ex.Message
             };
+        }
+        finally
+        {
+            DeactivateOnIdle(); // Deactivate grain after processing
         }
     }
 
