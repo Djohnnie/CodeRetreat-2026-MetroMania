@@ -47,6 +47,7 @@ jobs:
             -c Release \
             --logger "trx;LogFileName=test-results.trx" \
             --collect:"XPlat Code Coverage" \
+            --settings src/MetroMania.Engine.Tests/coverage.runsettings \
             --results-directory ./TestResults
 
       - name: Install ReportGenerator
