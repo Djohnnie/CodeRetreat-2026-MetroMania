@@ -3,7 +3,6 @@ using System.Text;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
 using MetroMania.Engine.Model;
-using static System.FormattableString;
 
 namespace MetroMania.Engine;
 
@@ -282,12 +281,12 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         string leftText = XmlEscape($"{levelTitle}: {dayHour}");
         float  cy       = headerHeight / 2f;
 
-        sb.Append(Invariant($"<text x=\"{padding:F1}\" y=\"{cy:F1}\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{leftText}</text>"));
+        sb.Append(CultureInfo.InvariantCulture, $"<text x=\"{padding:F1}\" y=\"{cy:F1}\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{leftText}</text>");
 
         // text-anchor="end" handles right-alignment without requiring font metrics.
         string rightText = $"score: {score}";
         float  rightX    = totalWidth - padding;
-        sb.Append(Invariant($"<text x=\"{rightX:F1}\" y=\"{cy:F1}\" text-anchor=\"end\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{rightText}</text>"));
+        sb.Append(CultureInfo.InvariantCulture, $"<text x=\"{rightX:F1}\" y=\"{cy:F1}\" text-anchor=\"end\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{rightText}</text>");
     }
 
     // ─── Player action overlay ────────────────────────────────────────────────
@@ -313,8 +312,8 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         float bgX     = totalWidth - bgWidth;
         float rightX  = totalWidth - padding;
 
-        sb.Append(Invariant($"<rect x=\"{bgX:F1}\" y=\"{tileY}\" width=\"{bgWidth:F1}\" height=\"{TileSize}\" style=\"fill:{HudBgFill}\"/>"));
-        sb.Append(Invariant($"<text x=\"{rightX:F1}\" y=\"{cy:F1}\" text-anchor=\"end\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{XmlEscape(text)}</text>"));
+        sb.Append(CultureInfo.InvariantCulture, $"<rect x=\"{bgX:F1}\" y=\"{tileY}\" width=\"{bgWidth:F1}\" height=\"{TileSize}\" style=\"fill:{HudBgFill}\"/>");
+        sb.Append(CultureInfo.InvariantCulture, $"<text x=\"{rightX:F1}\" y=\"{cy:F1}\" text-anchor=\"end\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{XmlEscape(text)}</text>");
     }
 
     /// <summary>
@@ -352,65 +351,65 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         switch (type)
         {
             case StationType.Circle:
-                sb.Append(Invariant($"<circle cx=\"{cx:F1}\" cy=\"{cy:F1}\" r=\"{r:F1}\" fill=\"{fill}\"/>"));
+                sb.Append(CultureInfo.InvariantCulture, $"<circle cx=\"{cx:F1}\" cy=\"{cy:F1}\" r=\"{r:F1}\" fill=\"{fill}\"/>");
                 break;
 
             case StationType.Rectangle:
-                sb.Append(Invariant($"<rect x=\"{x:F1}\" y=\"{y:F1}\" width=\"{size:F1}\" height=\"{size:F1}\" fill=\"{fill}\"/>"));
+                sb.Append(CultureInfo.InvariantCulture, $"<rect x=\"{x:F1}\" y=\"{y:F1}\" width=\"{size:F1}\" height=\"{size:F1}\" fill=\"{fill}\"/>");
                 break;
 
             case StationType.Triangle:
-                sb.Append(Invariant($"<polygon points=\"{cx:F1},{y:F1} {(x + size):F1},{(y + size):F1} {x:F1},{(y + size):F1}\" fill=\"{fill}\"/>"));
+                sb.Append(CultureInfo.InvariantCulture, $"<polygon points=\"{cx:F1},{y:F1} {(x + size):F1},{(y + size):F1} {x:F1},{(y + size):F1}\" fill=\"{fill}\"/>");
                 break;
 
             case StationType.Diamond:
-                sb.Append(Invariant($"<polygon points=\"{cx:F1},{y:F1} {(x + size):F1},{cy:F1} {cx:F1},{(y + size):F1} {x:F1},{cy:F1}\" fill=\"{fill}\"/>"));
+                sb.Append(CultureInfo.InvariantCulture, $"<polygon points=\"{cx:F1},{y:F1} {(x + size):F1},{cy:F1} {cx:F1},{(y + size):F1} {x:F1},{cy:F1}\" fill=\"{fill}\"/>");
                 break;
 
             case StationType.Pentagon:
-                sb.Append($"<polygon points=\"{MakeRegularPolygonPoints(cx, cy, r, 5, -MathF.PI / 2f)}\" fill=\"{fill}\"/>");
+                sb.Append("<polygon points=\"");
+                AppendRegularPolygonPoints(sb, cx, cy, r, 5, -MathF.PI / 2f);
+                sb.Append($"\" fill=\"{fill}\"/>");
                 break;
 
             case StationType.Star:
-                sb.Append($"<polygon points=\"{MakeStarPoints(cx, cy, r, r * 0.45f, 5)}\" fill=\"{fill}\"/>");
+                sb.Append("<polygon points=\"");
+                AppendStarPoints(sb, cx, cy, r, r * 0.45f, 5);
+                sb.Append($"\" fill=\"{fill}\"/>");
                 break;
         }
     }
 
     /// <summary>
-    /// Returns the SVG <c>points</c> attribute string for a regular <paramref name="sides"/>-sided
+    /// Appends SVG <c>points</c> attribute values for a regular <paramref name="sides"/>-sided
     /// polygon centred at (<paramref name="cx"/>, <paramref name="cy"/>) with circumscribed radius
-    /// <paramref name="r"/>.
+    /// <paramref name="r"/> directly into <paramref name="sb"/>.
     /// </summary>
-    private static string MakeRegularPolygonPoints(float cx, float cy, float r, int sides, float startAngle)
+    private static void AppendRegularPolygonPoints(StringBuilder sb, float cx, float cy, float r, int sides, float startAngle)
     {
-        var pts = new StringBuilder();
         for (int i = 0; i < sides; i++)
         {
             float angle = startAngle + i * (2f * MathF.PI / sides);
-            if (i > 0) pts.Append(' ');
-            pts.Append(Invariant($"{cx + r * MathF.Cos(angle):F1},{cy + r * MathF.Sin(angle):F1}"));
+            if (i > 0) sb.Append(' ');
+            sb.Append(CultureInfo.InvariantCulture, $"{cx + r * MathF.Cos(angle):F1},{cy + r * MathF.Sin(angle):F1}");
         }
-        return pts.ToString();
     }
 
     /// <summary>
-    /// Returns the SVG <c>points</c> attribute string for a <paramref name="points"/>-pointed star
-    /// centred at (<paramref name="cx"/>, <paramref name="cy"/>).  Outer vertices are at radius
-    /// <paramref name="outerR"/> and inner vertices are at radius <paramref name="innerR"/>.
+    /// Appends SVG <c>points</c> attribute values for a <paramref name="points"/>-pointed star
+    /// centred at (<paramref name="cx"/>, <paramref name="cy"/>) directly into <paramref name="sb"/>.
+    /// Outer vertices are at radius <paramref name="outerR"/> and inner vertices at <paramref name="innerR"/>.
     /// </summary>
-    private static string MakeStarPoints(float cx, float cy, float outerR, float innerR, int points)
+    private static void AppendStarPoints(StringBuilder sb, float cx, float cy, float outerR, float innerR, int points)
     {
-        var pts = new StringBuilder();
         float startAngle = -MathF.PI / 2f;
         for (int i = 0; i < points * 2; i++)
         {
             float angle = startAngle + i * (MathF.PI / points);
             float r = i % 2 == 0 ? outerR : innerR;
-            if (i > 0) pts.Append(' ');
-            pts.Append(Invariant($"{cx + r * MathF.Cos(angle):F1},{cy + r * MathF.Sin(angle):F1}"));
+            if (i > 0) sb.Append(' ');
+            sb.Append(CultureInfo.InvariantCulture, $"{cx + r * MathF.Cos(angle):F1},{cy + r * MathF.Sin(angle):F1}");
         }
-        return pts.ToString();
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -722,37 +721,40 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                         while (segEnd < segIsSplit.Count && segIsSplit[segEnd] == isSplit)
                             segEnd++;
 
-                        if (isSplit)
+                        int pointCount = segEnd - segStart + 1;
+
+                        if (isSplit && pointCount >= 2)
                         {
-                            var pts1 = new List<string>(segEnd - segStart + 1);
-                            var pts2 = new List<string>(segEnd - segStart + 1);
+                            // Rail 1
+                            sb.Append("<polyline points=\"");
                             for (int v = segStart; v <= segEnd; v++)
                             {
+                                if (v > segStart) sb.Append(' ');
                                 var (vx, vy, vpx, vpy) = vertices[v];
-                                pts1.Add(Invariant($"{vx + vpx:F1},{vy + vpy:F1}"));
-                                pts2.Add(Invariant($"{vx - vpx:F1},{vy - vpy:F1}"));
+                                sb.Append(CultureInfo.InvariantCulture, $"{vx + vpx:F1},{vy + vpy:F1}");
                             }
-                            if (pts1.Count >= 2)
-                            {
-                                sb.Append($"<polyline points=\"{string.Join(" ", pts1)}\" fill=\"none\" stroke=\"{color}\" " +
-                                          $"stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
-                                sb.Append($"<polyline points=\"{string.Join(" ", pts2)}\" fill=\"none\" stroke=\"{color}\" " +
-                                          $"stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
-                            }
-                        }
-                        else
-                        {
-                            var pts = new List<string>(segEnd - segStart + 1);
+                            sb.Append($"\" fill=\"none\" stroke=\"{color}\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+
+                            // Rail 2
+                            sb.Append("<polyline points=\"");
                             for (int v = segStart; v <= segEnd; v++)
                             {
-                                var (vx, vy, _, _) = vertices[v];
-                                pts.Add(Invariant($"{vx:F1},{vy:F1}"));
+                                if (v > segStart) sb.Append(' ');
+                                var (vx, vy, vpx, vpy) = vertices[v];
+                                sb.Append(CultureInfo.InvariantCulture, $"{vx - vpx:F1},{vy - vpy:F1}");
                             }
-                            if (pts.Count >= 2)
+                            sb.Append($"\" fill=\"none\" stroke=\"{color}\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                        }
+                        else if (!isSplit && pointCount >= 2)
+                        {
+                            sb.Append("<polyline points=\"");
+                            for (int v = segStart; v <= segEnd; v++)
                             {
-                                sb.Append($"<polyline points=\"{string.Join(" ", pts)}\" fill=\"none\" stroke=\"{color}\" " +
-                                          $"stroke-width=\"{LineStrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                                if (v > segStart) sb.Append(' ');
+                                var (vx, vy, _, _) = vertices[v];
+                                sb.Append(CultureInfo.InvariantCulture, $"{vx:F1},{vy:F1}");
                             }
+                            sb.Append(CultureInfo.InvariantCulture, $"\" fill=\"none\" stroke=\"{color}\" stroke-width=\"{LineStrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
                         }
 
                         segStart = segEnd;
@@ -1080,7 +1082,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         string lineColor, IReadOnlyList<Passenger> passengers)
     {
         float angleDeg = angle * (180f / MathF.PI);
-        sb.Append(Invariant($"<g transform=\"translate({cx:F1},{cy:F1}) rotate({angleDeg:F1})\">"));
+        sb.Append(CultureInfo.InvariantCulture, $"<g transform=\"translate({cx:F1},{cy:F1}) rotate({angleDeg:F1})\">");
         sb.Append($"<path d=\"{TrainBodySvgPath}\" fill=\"{lineColor}\" stroke=\"white\" stroke-width=\"{TrainBorderWidth}\"/>");
         if (passengers.Count > 0)
             AppendPassengersInVehicle(sb, passengers);
@@ -1154,13 +1156,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
             float tileY      = row * TileSize;
             float tileCenterY = tileY + TileSize / 2f;
 
-            sb.Append(Invariant($"<rect x=\"0\" y=\"{tileY:F1}\" width=\"{TileSize}\" height=\"{TileSize}\" style=\"fill:{HudBgFill}\"/>"));
+            sb.Append(CultureInfo.InvariantCulture, $"<rect x=\"0\" y=\"{tileY:F1}\" width=\"{TileSize}\" height=\"{TileSize}\" style=\"fill:{HudBgFill}\"/>");
 
             float tx = iconCx - iconSize / 2f;
             float ty = tileCenterY - iconSize / 2f;
-            sb.Append(Invariant($"<g transform=\"translate({tx:F1},{ty:F1}) scale({scale:F4})\"><path d=\"{iconPath}\" fill=\"white\"/></g>"));
+            sb.Append(CultureInfo.InvariantCulture, $"<g transform=\"translate({tx:F1},{ty:F1}) scale({scale:F4})\"><path d=\"{iconPath}\" fill=\"white\"/></g>");
 
-            sb.Append(Invariant($"<text x=\"20\" y=\"{tileCenterY:F1}\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{count}</text>"));
+            sb.Append(CultureInfo.InvariantCulture, $"<text x=\"20\" y=\"{tileCenterY:F1}\" dominant-baseline=\"central\" font-size=\"{(int)fontSize}\" fill=\"white\" font-family=\"{HudFont}\">{count}</text>");
         }
     }
 
