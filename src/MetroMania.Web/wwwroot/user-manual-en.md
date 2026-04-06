@@ -38,15 +38,14 @@ You start each run with a limited pool of resources:
 - **1 Line** — defines a metro route between stations
 - **1 Train** — a vehicle to place on a line
 
-Every **Monday at midnight** (the start of each in-game week), your bot receives a **weekly gift**: one additional resource chosen at random — either a **Line**, a **Train**, or a **Wagon**.
+Every **Monday at midnight** (the start of each in-game week), your bot receives a **weekly gift**: one additional resource chosen at random — either a **Line** or a **Train**.
 
 | Resource | Purpose |
 |----------|---------|
 | Line | Define a route connecting two or more stations |
 | Train | A vehicle that shuttles back and forth along a line |
-| Wagon | Attaches to a train, adding +1 passenger capacity |
 
-Each train holds **6 passengers** by default. Attaching wagons increases this capacity by 1 per wagon.
+Each train holds **6 passengers** by default (configurable per level).
 
 ## Time
 
@@ -79,7 +78,6 @@ Every callback receives a `GameSnapshot` containing the complete current state:
 - `snapshot.Vehicles` — all vehicles (id, line, passengers aboard, current position)
 - `snapshot.Resources.AvailableLines` — line resources not yet placed
 - `snapshot.Resources.AvailableVehicles` — trains not yet placed
-- `snapshot.Resources.AvailableWagons` — wagons not yet attached
 - `snapshot.GameTime` — current `Day` and `Hour`
 
 ---
@@ -148,28 +146,7 @@ return new RemoveVehicle(VehicleId: vehicleId);
 
 Removes a vehicle from its line and returns it to your available pool.
 
-### `AddWagonToTrain` — Boost Capacity
-
-```csharp
-return new AddWagonToTrain(
-    WagonId: availableWagonId,
-    TrainId: targetTrainId);
-```
-
-Attaches a wagon to a train already placed on a line. Each wagon adds **+1 passenger capacity**.
-
-### `MoveWagonBetweenTrains` — Reallocate Capacity
-
-```csharp
-return new MoveWagonBetweenTrains(
-    WagonId: wagonId,
-    SourceTrainId: fromTrain,
-    DestinationTrainId: toTrain);
-```
-
-Moves an attached wagon from one active train to another. Both trains must be deployed on lines.
-
-### `NoAction` — Skip This Tick
+### `NoAction`— Skip This Tick
 
 ```csharp
 return PlayerAction.None;  // or: return new NoAction();
@@ -218,7 +195,6 @@ Your score increases each time a passenger is successfully delivered to a statio
 - **React immediately to `OnStationOverrun`** — at 10 passengers you have roughly 10 more hours before game over.
 - **Connect every station** — an unlinked station accumulates passengers with no escape route. Always prioritize new stations.
 - **Think about line topology** — hub-and-spoke or loop networks typically outperform a single long chain.
-- **Add wagons to busy lines** — if a line is carrying many passengers, wagons increase throughput significantly.
 - **Use weekly gifts immediately** — try to deploy new resources the same tick you receive them.
 - **Passenger routing is intelligent** — passengers only board when the line leads toward their destination type. Randomly connecting stations does not help.
 - **Remove and rebuild** — dismantling a poorly planned line and rebuilding it with a better route is often worth the temporary disruption.

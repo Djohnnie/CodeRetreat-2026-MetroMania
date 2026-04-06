@@ -245,7 +245,6 @@
   <!-- Resources -->
   <data name="Line" xml:space="preserve"><value>خط</value></data>
   <data name="Train" xml:space="preserve"><value>قطار</value></data>
-  <data name="Wagon" xml:space="preserve"><value>عربة</value></data>
 
   <!-- Scores -->
   <data name="Score" xml:space="preserve"><value>النتيجة</value></data>

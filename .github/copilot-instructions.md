@@ -59,7 +59,7 @@ The solution follows **Clean Architecture** with 14 projects organized into solu
   - `UserRole` — User, Admin
   - `SubmissionStatus` — Waiting, Running, Succeeded, Failed
   - `StationType` — Circle, Rectangle, Triangle, Diamond, Pentagon, Star
-  - `ResourceType` — Line, Train, Wagon
+  - `ResourceType` — Line, Train
 - **Repository interfaces:** `IUserRepository`, `ILevelRepository`, `ISubmissionRepository`, `ISubmissionScoreRepository` — each exposes async methods (`GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`, etc.).
 - **Extensions:** `StringExtensions` with `Base64Encode()` and `Base64Decode()` helpers.
 - This layer has zero external NuGet dependencies.
@@ -89,16 +89,16 @@ The core game simulation engine, decoupled from web/API/database concerns:
 
 - **`MetroManiaEngine`** — main simulation class with `Run()` (until game over) and `RunForHours()` (partial simulation) methods.
 - **`IMetroManiaRunner`** — callback interface that player bots implement. Receives events: `OnHourTick`, `OnDayStart`, `OnWeeklyGift`, `OnStationSpawned`, `OnPassengerWaiting`, `OnStationOverrun`, `OnGameOver`.
-- **Player actions:** `PlayerAction` sealed record hierarchy — `NoAction`, `CreateLine`, `RemoveLine`, `ExtendLine`, `InsertStationInLine`, `AddVehicleToLine`, `RemoveVehicle`, `AddWagonToTrain`, `MoveWagonBetweenTrains`.
+- **Player actions:** `PlayerAction` sealed record hierarchy — `NoAction`, `CreateLine`, `RemoveLine`, `ExtendLineFromTerminal`, `ExtendLineInBetween`, `AddVehicleToLine`, `RemoveVehicle`.
 - **Game model:** `GameSnapshot`, `GameResult`, `GameTime`, `StationSnapshot`, `LineSnapshot`, `VehicleSnapshot`, `ResourceSnapshot`, `Passenger`, `Location`.
 - **Routing:** Dijkstra-based shortest-path for intelligent passenger pickup — passengers only board if the vehicle's line offers a competitive route.
 - **Rendering:** `MetroManiaRenderer` uses SkiaSharp + Svg.Skia to render game state as SVG with 32×32 tile grids, water tile blending (8-way directional), and station icon overlays.
 - **Scripting:** `ScriptCompiler<TResult>` compiles user C# scripts via Roslyn. `StarterCode` provides the template `IMetroManiaRunner` implementation. `ScriptGlobals` exposes the `Level` property to scripts.
 - **Game rules:**
   - Initial resources: 1 Line + 1 Train
-  - Weekly gifts: random (or overridden) resource every Monday (Line/Train/Wagon)
+  - Weekly gifts: random (or overridden) resource every Monday (Line/Train)
   - Station overrun alert at 10+ passengers; game over at 20+ passengers
-  - Vehicle capacity: configurable per level (default 6), +1 per attached wagon
+  - Vehicle capacity: configurable per level (default 6)
   - Deterministic gameplay via seed-based RNG
 - Depends only on `MetroMania.Domain`.
 
@@ -279,8 +279,8 @@ Localization uses **ASP.NET Core `IStringLocalizer<T>`** with `.resx` resource f
 - **Framework:** [Reqnroll](https://reqnroll.net/) v3.3.4 (BDD/Gherkin) with **xUnit v3** (3.2.2) as the test runner and **Moq** v4.20.72 for mocking.
 - **Test project:** `MetroMania.Engine.Tests` — covers the game engine simulation logic.
 - **Structure:**
-  - `Features/*.feature` — 12 Gherkin feature files: EventOrdering, GameOverThresholds, GameSimulation, PassengerDelivery, PassengerSpawning, PlayerActionEdgeCases, PlayerActions, StationSpawning, VehicleMovement, WagonManagement, WeeklyGiftDeterminism, WeeklyGiftResources.
-  - `StepDefinitions/*.cs` — 9 step definition classes: EngineStepDefinitions (core Given/When/Then), GameOverStepDefinitions, PassengerDeliveryStepDefinitions, PassengerSpawningStepDefinitions, PlayerActionsStepDefinitions, VehicleMovementStepDefinitions, WagonManagementStepDefinitions, WeeklyGiftDeterminismStepDefinitions, WeeklyGiftResourcesStepDefinitions.
+  - `Features/*.feature` — 24 Gherkin feature files covering game loop, events, stations, passengers, lines, trains, collisions, removal, resources, determinism, snapshots, and more.
+  - `StepDefinitions/*.cs` — 18 step definition classes organized by feature area (e.g., EngineStepDefinitions, PlayerActionsStepDefinitions, TrainCollisionStepDefinitions, RemoveVehicleStepDefinitions, etc.).
   - `Support/EngineTestContext.cs` — Shared per-scenario context holding the engine, `Mock<IMetroManiaRunner>`, level configuration (stations, weekly gift overrides, seed, vehicle capacity), simulation results (`GameSnapshot`, `GameResult`), and comprehensive event tracking (`EventLog`, `DayStartCalls`, `HourTickCalls`, `PassengerWaitingCalls`, `OverrunCalls`, `GameOverCalls`, `WeeklyGiftTypes`, `WeeklyGiftEvents`, `PendingActions`, `StationIdsByLocation`).
 - **Conventions:**
   - All new engine tests must be written as Reqnroll feature files — do not use plain `[Fact]`/`[Theory]` xUnit tests.

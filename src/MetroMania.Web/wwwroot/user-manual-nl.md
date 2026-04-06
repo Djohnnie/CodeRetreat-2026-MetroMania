@@ -38,15 +38,14 @@ Je begint elke run met een beperkte voorraad middelen:
 - **1 Lijn** — definieert een metroroute tussen stations
 - **1 Trein** — een voertuig om op een lijn te plaatsen
 
-Elke **maandag om middernacht** (begin van elke spelweek) ontvangt je bot een **wekelijks cadeau**: één extra middel willekeurig gekozen — ofwel een **Lijn**, een **Trein**, of een **Wagon**.
+Elke **maandag om middernacht** (begin van elke spelweek) ontvangt je bot een **wekelijks cadeau**: één extra middel willekeurig gekozen — ofwel een **Lijn** of een **Trein**.
 
 | Middel | Doel |
 |--------|------|
 | Lijn | Definieer een route die twee of meer stations verbindt |
 | Trein | Een voertuig dat heen en weer rijdt over een lijn |
-| Wagon | Wordt aan een trein gekoppeld en voegt +1 capaciteit toe |
 
-Elke trein vervoert standaard **6 reizigers**. Wagons verhogen deze capaciteit met 1 per wagon.
+Elke trein vervoert standaard **6 reizigers** (instelbaar per level).
 
 ## Tijd
 
@@ -79,7 +78,6 @@ Elke callback ontvangt een `GameSnapshot` met de volledige huidige toestand:
 - `snapshot.Vehicles` — alle voertuigen (id, lijn, reizigers aan boord, positie)
 - `snapshot.Resources.AvailableLines` — lijnmiddelen die nog niet zijn geplaatst
 - `snapshot.Resources.AvailableVehicles` — treinen die nog niet zijn geplaatst
-- `snapshot.Resources.AvailableWagons` — wagons die nog niet zijn gekoppeld
 - `snapshot.GameTime` — huidige `Dag` en `Uur`
 
 ---
@@ -148,28 +146,7 @@ return new RemoveVehicle(VehicleId: voertuigId);
 
 Verwijdert een voertuig van zijn lijn en geeft het terug aan je beschikbare pool.
 
-### `AddWagonToTrain` — Vergroot de Capaciteit
-
-```csharp
-return new AddWagonToTrain(
-    WagonId: beschikbareWagonId,
-    TrainId: doeltreinId);
-```
-
-Koppelt een wagon aan een trein die al op een lijn staat. Elke wagon voegt **+1 reizigercapaciteit** toe.
-
-### `MoveWagonBetweenTrains` — Herbestem Capaciteit
-
-```csharp
-return new MoveWagonBetweenTrains(
-    WagonId: wagonId,
-    SourceTrainId: vanTrein,
-    DestinationTrainId: naarTrein);
-```
-
-Verplaatst een wagon van de ene actieve trein naar een andere. Beide treinen moeten op lijnen staan.
-
-### `NoAction` — Sla Deze Tick Over
+### `NoAction`— Sla Deze Tick Over
 
 ```csharp
 return PlayerAction.None;  // of: return new NoAction();
@@ -218,7 +195,6 @@ Je score stijgt elke keer dat een reiziger succesvol wordt afgeleverd bij een st
 - **Reageer meteen op `OnStationOverrun`** — bij 10 reizigers heb je nog ongeveer 10 uur voor game over.
 - **Verbind elk station** — een niet-verbonden station stapelt reizigers op zonder ontsnappingsroute. Prioriteer altijd nieuwe stations.
 - **Denk na over lijntopologie** — hub-and-spoke- of lus-netwerken presteren meestal beter dan één lange keten.
-- **Voeg wagons toe aan drukke lijnen** — als een lijn veel reizigers vervoert, verhogen wagons de doorvoer aanzienlijk.
 - **Gebruik wekelijkse cadeaus meteen** — zet nieuwe middelen zo snel mogelijk in.
 - **Reizigersroutering is slim** — reizigers stappen alleen in als de lijn naar hun bestemmingstype leidt. Willekeurig stations verbinden helpt niet.
 - **Verwijder en herbouw** — een slecht geplande lijn slopen en opnieuw bouwen is soms de beste zet, ondanks de tijdelijke verstoring.

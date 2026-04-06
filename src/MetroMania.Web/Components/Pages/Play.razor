@@ -13,6 +13,7 @@
 @inject MetroManiaApiClient ApiClient
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IConfiguration Configuration
+@inject CodeEditorBridge EditorBridge
 
 <PageTitle>MetroMania - @Loc["Play"]</PageTitle>
 
@@ -321,6 +322,15 @@ else
         if (!string.IsNullOrEmpty(_initialCode))
             await EditorInteropWithRetryAsync(() => _editor.SetValue(_initialCode));
         await UpdateEditorHeight();
+
+        EditorBridge.GetCode = async () => _editorReady ? await _editor.GetValue() : null;
+        EditorBridge.SetCode = async (code) =>
+        {
+            if (!_editorReady) return;
+            await _editor.SetValue(code);
+            await UpdateEditorHeight();
+            StateHasChanged();
+        };
     }
 
     private async Task UpdateEditorHeight()
@@ -422,6 +432,9 @@ else
 
     public async ValueTask DisposeAsync()
     {
+        EditorBridge.GetCode = null;
+        EditorBridge.SetCode = null;
+
         if (_hubConnection is not null)
         {
             await _hubConnection.DisposeAsync();

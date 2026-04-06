@@ -67,6 +67,7 @@ public static class ConductorEndpoints
             var levelTitles = allLevels.Select(l => l.Title).ToList();
             var result = await conductor.ChatAsync(
                 history, userName, language, request.Message, levelTitles,
+                request.EditorCode,
                 onClearHistory: async (token) =>
                     await mediator.Send(new ArchiveChatHistoryCommand(request.UserId), token),
                 onGetLatestCode: async (version, token) =>
@@ -104,15 +105,15 @@ public static class ConductorEndpoints
             await mediator.Send(new SaveChatMessageCommand(request.UserId, request.Message, ChatMessageAuthor.User), ct);
             await mediator.Send(new SaveChatMessageCommand(request.UserId, result.Reply, ChatMessageAuthor.Bot), ct);
 
-            return Results.Ok(new ConductorChatResponse(result.Reply, result.HistoryCleared, result.NavigateTo, result.ConductorClosed));
+            return Results.Ok(new ConductorChatResponse(result.Reply, result.HistoryCleared, result.NavigateTo, result.ConductorClosed, result.EditorCode));
         });
 
         return app;
     }
 }
 
-record ConductorChatRequest(Guid UserId, string Message);
-record ConductorChatResponse(string Reply, bool HistoryCleared, string? NavigateTo, bool ConductorClosed);
+record ConductorChatRequest(Guid UserId, string Message, string? EditorCode = null);
+record ConductorChatResponse(string Reply, bool HistoryCleared, string? NavigateTo, bool ConductorClosed, string? EditorCode);
 
 file static class ConductorSerializerOptions
 {

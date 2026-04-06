@@ -50,6 +50,7 @@ builder.Services.AddLocalization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<LoginTicketService>();
 builder.Services.AddScoped<JwtTokenProvider>();
+builder.Services.AddScoped<CodeEditorBridge>();
 builder.Services.AddAuthentication("BlazorServer")
     .AddCookie("BlazorServer", options =>
     {

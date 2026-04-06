@@ -8,6 +8,7 @@
 @inject IJSRuntime JSRuntime
 @inject IStringLocalizer<Localization> Loc
 @inject IConfiguration Configuration
+@inject CodeEditorBridge EditorBridge
 
 <MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -348,7 +349,11 @@
 
         try
         {
-            var result = await ApiClient.ChatWithConductorAsync(_userId, text);
+            string? editorCode = null;
+            if (EditorBridge.IsAvailable && EditorBridge.GetCode is not null)
+                editorCode = await EditorBridge.GetCode();
+
+            var result = await ApiClient.ChatWithConductorAsync(_userId, text, editorCode);
             _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(result.Reply)));
             if (result.HistoryCleared)
                 await LoadChatHistoryAsync();
@@ -356,6 +361,8 @@
                 _conductorOpen = false;
             if (result.NavigateTo is not null)
                 Navigation.NavigateTo(result.NavigateTo);
+            if (result.EditorCode is not null && EditorBridge.IsAvailable && EditorBridge.SetCode is not null)
+                await EditorBridge.SetCode(result.EditorCode);
         }
         catch
         {

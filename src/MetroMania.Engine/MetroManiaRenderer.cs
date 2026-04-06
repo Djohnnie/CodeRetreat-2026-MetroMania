@@ -122,7 +122,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     ///   <item>Waiting passengers — crowd indicators above station icons.</item>
     ///   <item>Trains — always the topmost game element so trains are never occluded.</item>
     ///   <item>Header overlay — level title, day/hour, and score across the first tile row.</item>
-    ///   <item>Resource counts HUD — available line/train/wagon counts in the bottom-left column.</item>
+    ///   <item>Resource counts HUD — available line/train counts in the bottom-left column.</item>
     ///   <item>Player action overlay — short label in the bottom-right, only when a non-idle action occurred.</item>
     /// </list>
     /// </summary>

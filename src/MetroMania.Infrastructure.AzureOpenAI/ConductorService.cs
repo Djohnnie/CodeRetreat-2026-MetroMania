@@ -13,6 +13,7 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         string language,
         string userMessage,
         IReadOnlyList<string> levelTitles,
+        string? editorCode,
         Func<CancellationToken, Task> onClearHistory,
         Func<int?, CancellationToken, Task<string?>> onGetLatestCode,
         Func<string, CancellationToken, Task<string?>> onGetLevelData,
@@ -35,6 +36,7 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         var historyCleared = false;
         string? navigateTo = null;
         var conductorClosed = false;
+        string? updatedEditorCode = null;
 
         // Local function used as the AI tool — captures closure vars so no parameters needed.
         async Task<string> DoClearHistory()
@@ -130,6 +132,36 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
             return result;
         }
 
+        string DoReadEditorCode()
+        {
+            if (editorCode is null)
+                return language switch
+                {
+                    "nl" => "De speler heeft de Play-pagina niet geopend. De code-editor is niet beschikbaar.",
+                    "ar" => "اللاعب ليس على صفحة اللعب. محرر الكود غير متاح.",
+                    _ => "The player is not on the Play page. The code editor is not available."
+                };
+            return editorCode;
+        }
+
+        string DoUpdateEditorCode(string code)
+        {
+            if (editorCode is null)
+                return language switch
+                {
+                    "nl" => "De speler heeft de Play-pagina niet geopend. De code-editor is niet beschikbaar.",
+                    "ar" => "اللاعب ليس على صفحة اللعب. محرر الكود غير متاح.",
+                    _ => "The player is not on the Play page. The code editor is not available."
+                };
+            updatedEditorCode = code;
+            return language switch
+            {
+                "nl" => "De code in de editor is bijgewerkt.",
+                "ar" => "تم تحديث الكود في المحرر.",
+                _ => "The code in the editor has been updated."
+            };
+        }
+
         var clearHistoryTool = AIFunctionFactory.Create(
             DoClearHistory,
             "clear_chat_history",
@@ -189,11 +221,33 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
             "or anything related to their performance on the leaderboard. " +
             "If the player just wants to see the leaderboard page, use navigate_to_page instead.");
 
+        var readEditorCodeTool = AIFunctionFactory.Create(
+            DoReadEditorCode,
+            "read_editor_code",
+            "Reads the current C# code from the Monaco code editor on the Play page. " +
+            "This returns the live editor content, which may differ from the last submitted version. " +
+            "Use this when the player asks you to review, check, or comment on 'the code in my editor', " +
+            "'what I have so far', or 'my current code' — especially when they haven't submitted yet. " +
+            "If the player asks about their submitted code, use get_latest_submission_code instead.");
+
+        var updateEditorCodeTool = AIFunctionFactory.Create(
+            DoUpdateEditorCode,
+            "update_editor_code",
+            "Replaces the content of the Monaco code editor on the Play page with the provided code. " +
+            "Use this when the player asks you to add a comment, insert a small snippet, fix a typo, " +
+            "or make a minor modification to their editor code. Always read the editor code first with " +
+            "read_editor_code, make your changes to that code, then call this tool with the full updated source. " +
+            "Never provide a full solution — only small additions, comments, or hints.");
+
         // UseFunctionInvocation() middleware (registered in DI) handles the tool-call loop automatically.
-        var options = new ChatOptions { Tools = [clearHistoryTool, getLatestCodeTool, getLevelDataTool, navigateToPageTool, closeConductorTool, getLeaderboardPositionTool] };
+        var options = new ChatOptions
+        {
+            Tools = [clearHistoryTool, getLatestCodeTool, getLevelDataTool, navigateToPageTool,
+                     closeConductorTool, getLeaderboardPositionTool, readEditorCodeTool, updateEditorCodeTool]
+        };
         var response = await chatClient.GetResponseAsync(messages, options, cancellationToken);
 
-        return new ConductorChatResult(response.Text ?? string.Empty, historyCleared, navigateTo, conductorClosed);
+        return new ConductorChatResult(response.Text ?? string.Empty, historyCleared, navigateTo, conductorClosed, updatedEditorCode);
     }
 }
 

@@ -240,7 +240,6 @@
   <data name="ImportSuccess" xml:space="preserve"><value>Leveldata succesvol geïmporteerd.</value></data>
   <data name="Line" xml:space="preserve"><value>Lijn</value></data>
   <data name="Train" xml:space="preserve"><value>Trein</value></data>
-  <data name="Wagon" xml:space="preserve"><value>Wagon</value></data>
 
   <!-- Scores -->
   <data name="Score" xml:space="preserve"><value>Score</value></data>
