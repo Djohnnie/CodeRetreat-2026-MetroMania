@@ -1,0 +1,69 @@
+{
+  "backgroundColor": "#e8f5e9",
+  "waterColor": "#64b5f6",
+  "seed": 303,
+  "vehicleCapacity": 6,
+  "maxDays": 50,
+  "localizedContent": {},
+  "stations": [
+    {
+      "gridX": 2,
+      "gridY": 2,
+      "stationType": "Circle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 35, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 2,
+      "gridY": 6,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 35, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 11,
+      "gridY": 2,
+      "stationType": "Triangle",
+      "spawnDelayDays": 3,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 12, "frequencyInHours": 4 },
+        { "afterDays": 30, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 11,
+      "gridY": 6,
+      "stationType": "Diamond",
+      "spawnDelayDays": 7,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 10 },
+        { "afterDays": 10, "frequencyInHours": 5 },
+        { "afterDays": 25, "frequencyInHours": 2 }
+      ]
+    }
+  ],
+  "waterTiles": [
+    { "gridX": 6, "gridY": 0 }, { "gridX": 7, "gridY": 0 },
+    { "gridX": 6, "gridY": 1 }, { "gridX": 7, "gridY": 1 },
+    { "gridX": 7, "gridY": 2 }, { "gridX": 8, "gridY": 2 },
+    { "gridX": 7, "gridY": 3 }, { "gridX": 8, "gridY": 3 },
+    { "gridX": 6, "gridY": 4 }, { "gridX": 7, "gridY": 4 },
+    { "gridX": 6, "gridY": 5 }, { "gridX": 7, "gridY": 5 },
+    { "gridX": 5, "gridY": 6 }, { "gridX": 6, "gridY": 6 },
+    { "gridX": 5, "gridY": 7 }, { "gridX": 6, "gridY": 7 }
+  ],
+  "weeklyGiftOverrides": [
+    { "week": 2, "resourceType": "Train" },
+    { "week": 4, "resourceType": "Line" }
+  ],
+  "initialResources": ["Line", "Train"]
+}

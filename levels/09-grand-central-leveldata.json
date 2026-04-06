@@ -1,0 +1,118 @@
+{
+  "backgroundColor": "#eceff1",
+  "waterColor": "#42a5f5",
+  "seed": 909,
+  "vehicleCapacity": 8,
+  "maxDays": 80,
+  "localizedContent": {},
+  "stations": [
+    {
+      "gridX": 2,
+      "gridY": 2,
+      "stationType": "Circle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 40, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 15,
+      "gridY": 2,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 40, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 2,
+      "gridY": 9,
+      "stationType": "Triangle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 40, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 15,
+      "gridY": 9,
+      "stationType": "Diamond",
+      "spawnDelayDays": 3,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 6 },
+        { "afterDays": 12, "frequencyInHours": 3 },
+        { "afterDays": 35, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 9,
+      "gridY": 1,
+      "stationType": "Pentagon",
+      "spawnDelayDays": 6,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 6 },
+        { "afterDays": 10, "frequencyInHours": 3 },
+        { "afterDays": 30, "frequencyInHours": 1 }
+      ]
+    },
+    {
+      "gridX": 9,
+      "gridY": 10,
+      "stationType": "Star",
+      "spawnDelayDays": 9,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 6 },
+        { "afterDays": 10, "frequencyInHours": 3 },
+        { "afterDays": 25, "frequencyInHours": 1 }
+      ]
+    },
+    {
+      "gridX": 5,
+      "gridY": 6,
+      "stationType": "Circle",
+      "spawnDelayDays": 12,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 4 },
+        { "afterDays": 8, "frequencyInHours": 2 },
+        { "afterDays": 20, "frequencyInHours": 1 }
+      ]
+    },
+    {
+      "gridX": 13,
+      "gridY": 6,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 15,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 4 },
+        { "afterDays": 8, "frequencyInHours": 2 },
+        { "afterDays": 18, "frequencyInHours": 1 }
+      ]
+    }
+  ],
+  "waterTiles": [
+    { "gridX": 0, "gridY": 5 }, { "gridX": 1, "gridY": 5 }, { "gridX": 2, "gridY": 5 },
+    { "gridX": 3, "gridY": 5 }, { "gridX": 4, "gridY": 5 },
+    { "gridX": 4, "gridY": 4 }, { "gridX": 5, "gridY": 4 },
+    { "gridX": 5, "gridY": 3 }, { "gridX": 6, "gridY": 3 },
+    { "gridX": 6, "gridY": 4 }, { "gridX": 7, "gridY": 4 }, { "gridX": 7, "gridY": 5 },
+    { "gridX": 8, "gridY": 5 }, { "gridX": 9, "gridY": 5 }, { "gridX": 10, "gridY": 5 },
+    { "gridX": 10, "gridY": 6 }, { "gridX": 11, "gridY": 6 }, { "gridX": 11, "gridY": 7 },
+    { "gridX": 12, "gridY": 7 }, { "gridX": 13, "gridY": 7 },
+    { "gridX": 14, "gridY": 7 }, { "gridX": 14, "gridY": 6 },
+    { "gridX": 15, "gridY": 6 }, { "gridX": 16, "gridY": 6 }, { "gridX": 17, "gridY": 6 }
+  ],
+  "weeklyGiftOverrides": [
+    { "week": 2, "resourceType": "Line" },
+    { "week": 3, "resourceType": "Train" },
+    { "week": 4, "resourceType": "Train" },
+    { "week": 5, "resourceType": "Line" },
+    { "week": 7, "resourceType": "Train" }
+  ],
+  "initialResources": ["Line", "Train"]
+}

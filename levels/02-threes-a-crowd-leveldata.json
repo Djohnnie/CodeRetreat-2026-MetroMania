@@ -1,0 +1,54 @@
+{
+  "backgroundColor": "#e8f5e9",
+  "waterColor": "#90caf9",
+  "seed": 202,
+  "vehicleCapacity": 6,
+  "maxDays": 40,
+  "localizedContent": {},
+  "stations": [
+    {
+      "gridX": 2,
+      "gridY": 4,
+      "stationType": "Circle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 10 },
+        { "afterDays": 12, "frequencyInHours": 6 },
+        { "afterDays": 25, "frequencyInHours": 3 }
+      ]
+    },
+    {
+      "gridX": 9,
+      "gridY": 1,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 10 },
+        { "afterDays": 12, "frequencyInHours": 6 },
+        { "afterDays": 25, "frequencyInHours": 3 }
+      ]
+    },
+    {
+      "gridX": 9,
+      "gridY": 6,
+      "stationType": "Triangle",
+      "spawnDelayDays": 3,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 10 },
+        { "afterDays": 8, "frequencyInHours": 5 },
+        { "afterDays": 20, "frequencyInHours": 3 }
+      ]
+    }
+  ],
+  "waterTiles": [
+    { "gridX": 5, "gridY": 6 },
+    { "gridX": 5, "gridY": 7 },
+    { "gridX": 6, "gridY": 6 },
+    { "gridX": 6, "gridY": 7 }
+  ],
+  "weeklyGiftOverrides": [
+    { "week": 2, "resourceType": "Line" },
+    { "week": 3, "resourceType": "Train" }
+  ],
+  "initialResources": ["Line", "Train"]
+}

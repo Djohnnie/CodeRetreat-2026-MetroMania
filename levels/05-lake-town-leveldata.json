@@ -1,0 +1,77 @@
+{
+  "backgroundColor": "#e0f2f1",
+  "waterColor": "#4fc3f7",
+  "seed": 505,
+  "vehicleCapacity": 6,
+  "maxDays": 60,
+  "localizedContent": {},
+  "stations": [
+    {
+      "gridX": 1,
+      "gridY": 1,
+      "stationType": "Circle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 35, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 12,
+      "gridY": 1,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 15, "frequencyInHours": 4 },
+        { "afterDays": 35, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 7,
+      "gridY": 8,
+      "stationType": "Triangle",
+      "spawnDelayDays": 4,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 8 },
+        { "afterDays": 10, "frequencyInHours": 4 },
+        { "afterDays": 30, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 1,
+      "gridY": 8,
+      "stationType": "Diamond",
+      "spawnDelayDays": 7,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 10 },
+        { "afterDays": 10, "frequencyInHours": 5 },
+        { "afterDays": 25, "frequencyInHours": 2 }
+      ]
+    },
+    {
+      "gridX": 12,
+      "gridY": 8,
+      "stationType": "Pentagon",
+      "spawnDelayDays": 10,
+      "passengerSpawnPhases": [
+        { "afterDays": 0, "frequencyInHours": 10 },
+        { "afterDays": 8, "frequencyInHours": 4 },
+        { "afterDays": 20, "frequencyInHours": 2 }
+      ]
+    }
+  ],
+  "waterTiles": [
+    { "gridX": 5, "gridY": 3 }, { "gridX": 6, "gridY": 3 }, { "gridX": 7, "gridY": 3 }, { "gridX": 8, "gridY": 3 },
+    { "gridX": 5, "gridY": 4 }, { "gridX": 6, "gridY": 4 }, { "gridX": 7, "gridY": 4 }, { "gridX": 8, "gridY": 4 }, { "gridX": 9, "gridY": 4 },
+    { "gridX": 5, "gridY": 5 }, { "gridX": 6, "gridY": 5 }, { "gridX": 7, "gridY": 5 }, { "gridX": 8, "gridY": 5 }, { "gridX": 9, "gridY": 5 },
+    { "gridX": 6, "gridY": 6 }, { "gridX": 7, "gridY": 6 }, { "gridX": 8, "gridY": 6 }
+  ],
+  "weeklyGiftOverrides": [
+    { "week": 2, "resourceType": "Line" },
+    { "week": 3, "resourceType": "Train" },
+    { "week": 5, "resourceType": "Line" }
+  ],
+  "initialResources": ["Line", "Train"]
+}
