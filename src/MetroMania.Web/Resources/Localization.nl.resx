@@ -261,4 +261,5 @@
   <data name="SecondPlace" xml:space="preserve"><value>2e Plaats</value></data>
   <data name="ThirdPlace" xml:space="preserve"><value>3e Plaats</value></data>
   <data name="NoScoresAvailable" xml:space="preserve"><value>Geen scores beschikbaar voor deze inzending.</value></data>
+  <data name="DownloadZip" xml:space="preserve"><value>ZIP downloaden</value></data>
 </root>

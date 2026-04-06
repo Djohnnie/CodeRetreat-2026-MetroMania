@@ -156,7 +156,7 @@ public class ServiceBusWorker(
             // Save all renders from successful levels
             var allRenders = levels.Zip(renderResults, (level, renderResult) =>
                 renderResult.Success
-                    ? renderResult.Renders.Select(r => new SaveSubmissionRendersCommand.LevelRender(level.Id, r.Hour, r.SvgContent))
+                    ? renderResult.Renders.Select(r => new SaveSubmissionRendersCommand.LevelRender(level.Id, r.Hour, r.SvgContent, r.JsonContent))
                     : Enumerable.Empty<SaveSubmissionRendersCommand.LevelRender>())
                 .SelectMany(r => r)
                 .ToList();

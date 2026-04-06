@@ -145,6 +145,7 @@ else
                                 @if (submission.Status == SubmissionStatus.Succeeded)
                                 {
                                     <MudTh Style="width: 0;" />
+                                    <MudTh Style="width: 0;" />
                                 }
                             </HeaderContent>
                             <RowTemplate>
@@ -170,6 +171,15 @@ else
                                                            Href="@($"/play/renders?submissionId={submission.Id}&levelId={context.LevelId}")" />
                                         </MudTooltip>
                                     </MudTd>
+                                    <MudTd>
+                                        <MudTooltip Text="@Loc["DownloadZip"]">
+                                            <MudIconButton Icon="@Icons.Material.Filled.FolderZip"
+                                                           Size="Size.Small"
+                                                           Color="Color.Secondary"
+                                                           Href="@($"/api/downloads/submissions/{submission.Id}/levels/{context.LevelId}/zip")"
+                                                           Target="_blank" />
+                                        </MudTooltip>
+                                    </MudTd>
                                 }
                             </RowTemplate>
                             <FooterContent>
@@ -182,6 +192,7 @@ else
                                     </MudTd>
                                     @if (submission.Status == SubmissionStatus.Succeeded)
                                     {
+                                        <MudTd />
                                         <MudTd />
                                     }
                                 </MudTFootRow>

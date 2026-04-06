@@ -180,6 +180,17 @@ app.MapGet("/api/auth/update-language", async (HttpContext context, string langu
     return Results.Redirect(redirect);
 });
 
+// Submission render ZIP download proxy — forwards the JWT-authenticated API call through the cookie-protected Web host.
+app.MapGet("/api/downloads/submissions/{submissionId:guid}/levels/{levelId:guid}/zip",
+    async (Guid submissionId, Guid levelId, MetroManiaApiClient apiClient) =>
+{
+    var zipBytes = await apiClient.DownloadSubmissionLevelZipAsync(submissionId, levelId);
+    if (zipBytes is null)
+        return Results.NotFound();
+
+    return Results.File(zipBytes, "application/zip", $"{submissionId}_{levelId}.zip");
+}).RequireAuthorization();
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

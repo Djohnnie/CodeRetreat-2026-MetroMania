@@ -110,6 +110,7 @@ else
                                             <MudTh>@Loc["LevelName"]</MudTh>
                                             <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
                                             <MudTh Style="width: 0;" />
+                                            <MudTh Style="width: 0;" />
                                         </HeaderContent>
                                         <RowTemplate Context="scoreCtx">
                                             <MudTd DataLabel="@Loc["LevelName"]">
@@ -130,6 +131,15 @@ else
                                                                    Icon="@Icons.Material.Filled.Slideshow"
                                                                    Color="Color.Primary"
                                                                    Href="@($"/play/renders?submissionId={context.Id}&levelId={scoreCtx.LevelId}")" />
+                                                </MudTooltip>
+                                            </MudTd>
+                                            <MudTd>
+                                                <MudTooltip Text="@Loc["DownloadZip"]">
+                                                    <MudIconButton Size="Size.Small"
+                                                                   Icon="@Icons.Material.Filled.FolderZip"
+                                                                   Color="Color.Secondary"
+                                                                   Href="@($"/api/downloads/submissions/{context.Id}/levels/{scoreCtx.LevelId}/zip")"
+                                                                   Target="_blank" />
                                                 </MudTooltip>
                                             </MudTd>
                                         </RowTemplate>

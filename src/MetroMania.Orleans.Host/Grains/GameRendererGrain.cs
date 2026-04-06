@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine;
@@ -11,6 +12,12 @@ namespace MetroMania.Orleans.Host.Grains;
 
 public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRendererGrain
 {
+    private static readonly JsonSerializerOptions SnapshotJsonOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter(), new LocationJsonConverter() }
+    };
+
     public async Task<ScriptRenderResult> RenderScriptAsync(string base64Code, string levelDataJson)
     {
         try
@@ -38,7 +45,8 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
             for (int i = 0; i < hourlySnapshots.Count; i++)
             {
                 var svg = renderer.RenderSnapshot(level, hourlySnapshots[i]);
-                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg });
+                var json = JsonSerializer.Serialize(hourlySnapshots[i], SnapshotJsonOptions);
+                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg, JsonContent = json });
             }
 
             DeactivateOnIdle();

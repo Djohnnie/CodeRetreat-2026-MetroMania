@@ -266,4 +266,5 @@
   <data name="SecondPlace" xml:space="preserve"><value>المركز الثاني</value></data>
   <data name="ThirdPlace" xml:space="preserve"><value>المركز الثالث</value></data>
   <data name="NoScoresAvailable" xml:space="preserve"><value>لا تتوفر نتائج لهذا التقديم.</value></data>
+  <data name="DownloadZip" xml:space="preserve"><value>تحميل ZIP</value></data>
 </root>

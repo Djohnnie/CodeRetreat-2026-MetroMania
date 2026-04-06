@@ -82,6 +82,13 @@ else
 
             @* Right: editable hour counter + progress *@
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; justify-content: flex-end;">
+                <MudTooltip Text="@Loc["DownloadZip"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.FolderZip"
+                                   Color="Color.Secondary"
+                                   Href="@($"/api/downloads/submissions/{SubmissionId}/levels/{LevelId}/zip")"
+                                   Target="_blank" />
+                </MudTooltip>
+
                 <span style="font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
                     @Loc["Hour"]
                     <input type="text"

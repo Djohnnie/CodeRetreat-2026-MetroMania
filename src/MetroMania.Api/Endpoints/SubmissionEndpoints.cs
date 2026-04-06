@@ -37,6 +37,15 @@ public static class SubmissionEndpoints
             return Results.Ok(renders);
         });
 
+        group.MapGet("/{submissionId:guid}/levels/{levelId:guid}/zip", async (Guid submissionId, Guid levelId, IMediator mediator) =>
+        {
+            var zipBytes = await mediator.Send(new GetSubmissionLevelZipQuery(submissionId, levelId));
+            if (zipBytes is null)
+                return Results.NotFound();
+
+            return Results.File(zipBytes, "application/zip", $"{submissionId}_{levelId}.zip");
+        });
+
         group.MapPost("/", async (SubmitCodeRequest request, IMediator mediator) =>
         {
             var result = await mediator.Send(new SubmitCodeCommand(request.UserId, request.Code));

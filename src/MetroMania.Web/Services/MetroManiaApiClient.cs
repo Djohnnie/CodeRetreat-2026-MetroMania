@@ -200,6 +200,18 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
             $"/api/submissions/{submissionId}/levels/{levelId}/renders", JsonOptions))!;
     }
 
+    public string GetSubmissionLevelZipUrl(Guid submissionId, Guid levelId)
+        => $"/api/submissions/{submissionId}/levels/{levelId}/zip";
+
+    public async Task<byte[]?> DownloadSubmissionLevelZipAsync(Guid submissionId, Guid levelId)
+    {
+        SetAuthHeader();
+        var response = await httpClient.GetAsync($"/api/submissions/{submissionId}/levels/{levelId}/zip");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsByteArrayAsync();
+    }
+
     public async Task<bool> DeleteSubmissionAsync(Guid submissionId)
     {
         SetAuthHeader();
