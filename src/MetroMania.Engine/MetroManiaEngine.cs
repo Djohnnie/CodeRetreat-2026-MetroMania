@@ -37,10 +37,10 @@ public class MetroManiaEngine
     ///   renders that should not run to a natural game-over.
     /// </param>
     /// <param name="cancellationToken">Allows the caller to abort a long-running simulation.</param>
-    public GameResult Run(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
+    public GameResult Run(IMetroManiaRunner runner, Level level, int? maxHours = null, bool collectSnapshots = true, CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
-        var simulationResult = RunSimulation(runner, level, maxHours, cancellationToken);
+        var simulationResult = RunSimulation(runner, level, maxHours, collectSnapshots, cancellationToken);
         stopwatch.Stop();
 
         return new GameResult
@@ -74,13 +74,14 @@ public class MetroManiaEngine
     /// </list>
     /// </para>
     /// </summary>
-    private static SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? maxHours = null, CancellationToken cancellationToken = default)
+    private static SimulationResult RunSimulation(IMetroManiaRunner runner, Level level, int? maxHours = null, bool collectSnapshots = true, CancellationToken cancellationToken = default)
     {
         // absoluteHour is the monotonically increasing tick counter; it is the ground truth
         // from which all calendar values (day, hour-of-day, day-of-week) are derived.
         var absoluteHour = 0;
-        var snapshots = new List<GameSnapshot>();
+        var snapshots = collectSnapshots ? new List<GameSnapshot>() : null;
         var totalPassengersSpawned = 0;
+        var numberOfPlayerActions = 0;
 
         // Seed the very first snapshot. Resources are pre-populated from LevelData.InitialResources
         // so tests and demo levels can grant starting resources without waiting for weekly gifts.
@@ -150,7 +151,7 @@ public class MetroManiaEngine
                 if (count >= GameOverThreshold)
                 {
                     runner.OnGameOver(snapshot, station.Id);
-                    snapshots.Add(snapshot);
+                    snapshots?.Add(snapshot);
                     gameOver = true;
                     break;
                 }
@@ -220,17 +221,18 @@ public class MetroManiaEngine
             // the same tick rather than waiting for the next ProcessTrains cycle.
             snapshot = FinalizePendingRemovals(runner, snapshot);
 
-            snapshots.Add(snapshot);
+            snapshots?.Add(snapshot);
+            if (snapshot.LastAction is not NoAction) numberOfPlayerActions++;
             absoluteHour++;
         }
 
         return new SimulationResult
         {
-            TotalScore = snapshots.Count > 0 ? snapshots[^1].Score : 0,
+            TotalScore = snapshot.Score,
             DaysSurvived = absoluteHour / 24,
             TotalPassengersSpawned = totalPassengersSpawned,
-            NumberOfPlayerActions = snapshots.Count(x => x.LastAction is not NoAction),
-            GameSnapshots = snapshots
+            NumberOfPlayerActions = numberOfPlayerActions,
+            GameSnapshots = snapshots ?? []
         };
     }
 
