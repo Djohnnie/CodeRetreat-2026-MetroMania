@@ -79,13 +79,26 @@ public static class ConductorEndpoints
                     if (level is null) return null;
                     return JsonSerializer.Serialize(level, ConductorSerializerOptions.LevelData);
                 },
+                onGetLeaderboardPosition: async (token) =>
+                {
+                    var leaderboard = await mediator.Send(new GetLeaderboardQuery(), token);
+                    var entry = leaderboard.FirstOrDefault(e => e.UserId == request.UserId);
+                    if (entry is null) return null;
+                    var position = leaderboard.IndexOf(entry) + 1;
+                    var totalPlayers = leaderboard.Count;
+                    var levelBreakdown = string.Join(", ", entry.LevelScores
+                        .OrderBy(s => s.SortOrder)
+                        .Select(s => $"{s.LevelTitle}: {s.Score}"));
+                    return $"Position: {position} of {totalPlayers} | Total score: {entry.TotalScore} | " +
+                           $"Submissions: {entry.SubmissionCount} | Per-level scores: {levelBreakdown}";
+                },
                 ct);
 
             // Persist both turns (after any archiving has already happened)
             await mediator.Send(new SaveChatMessageCommand(request.UserId, request.Message, ChatMessageAuthor.User), ct);
             await mediator.Send(new SaveChatMessageCommand(request.UserId, result.Reply, ChatMessageAuthor.Bot), ct);
 
-            return Results.Ok(new ConductorChatResponse(result.Reply, result.HistoryCleared));
+            return Results.Ok(new ConductorChatResponse(result.Reply, result.HistoryCleared, result.NavigateTo, result.ConductorClosed));
         });
 
         return app;
@@ -93,7 +106,7 @@ public static class ConductorEndpoints
 }
 
 record ConductorChatRequest(Guid UserId, string Message);
-record ConductorChatResponse(string Reply, bool HistoryCleared);
+record ConductorChatResponse(string Reply, bool HistoryCleared, string? NavigateTo, bool ConductorClosed);
 
 file static class ConductorSerializerOptions
 {

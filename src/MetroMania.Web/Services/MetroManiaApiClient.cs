@@ -244,13 +244,13 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return (await httpClient.GetFromJsonAsync<List<ChatMessageDto>>($"/api/conductor/history/{userId}", JsonOptions, ct))!;
     }
 
-    public async Task<(string Reply, bool HistoryCleared)> ChatWithConductorAsync(Guid userId, string message, CancellationToken ct = default)
+    public async Task<(string Reply, bool HistoryCleared, string? NavigateTo, bool ConductorClosed)> ChatWithConductorAsync(Guid userId, string message, CancellationToken ct = default)
     {
         SetAuthHeader();
         var response = await httpClient.PostAsJsonAsync("/api/conductor/chat", new { userId, message }, ct);
         response.EnsureSuccessStatusCode();
         var result = (await response.Content.ReadFromJsonAsync<ConductorChatApiResponse>(JsonOptions, ct))!;
-        return (result.Reply, result.HistoryCleared);
+        return (result.Reply, result.HistoryCleared, result.NavigateTo, result.ConductorClosed);
     }
 }
 
@@ -258,6 +258,6 @@ public record SubmitCodeResponse(bool Success, IReadOnlyList<string>? Validation
 
 record ValidationErrorResponse(IReadOnlyList<string>? Errors);
 
-record ConductorChatApiResponse(string Reply, bool HistoryCleared);
+record ConductorChatApiResponse(string Reply, bool HistoryCleared, string? NavigateTo, bool ConductorClosed);
 
 public record LevelTranslationApiResponse(string TitleNl, string DescriptionNl, string TitleAr, string DescriptionAr);

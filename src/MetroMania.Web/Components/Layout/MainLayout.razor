@@ -129,10 +129,11 @@
 
         <MudDrawer @bind-Open="_conductorOpen"
                    Anchor="@(_currentLanguage == "ar" ? Anchor.Left : Anchor.Right)"
-                   Elevation="2"
-                   Variant="DrawerVariant.Temporary"
+                   Elevation="0"
+                   Variant="DrawerVariant.Responsive"
                    Width="380px"
-                   Class="conductor-drawer">
+                   Class="conductor-drawer"
+                   ClipMode="DrawerClipMode.Always">
             <div class="conductor-drawer-inner">
                 <div class="conductor-drawer-header">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3">
@@ -343,6 +344,10 @@
             _conductorMessages.Add(new(false, System.Web.HttpUtility.HtmlEncode(result.Reply)));
             if (result.HistoryCleared)
                 await LoadChatHistoryAsync();
+            if (result.ConductorClosed)
+                _conductorOpen = false;
+            if (result.NavigateTo is not null)
+                Navigation.NavigateTo(result.NavigateTo);
         }
         catch
         {
@@ -364,6 +369,7 @@
 
     private async Task ScrollConductorToBottomAsync()
     {
+        await Task.Yield(); // let Blazor flush the render before scrolling
         try
         {
             await JSRuntime.InvokeVoidAsync("eval",
