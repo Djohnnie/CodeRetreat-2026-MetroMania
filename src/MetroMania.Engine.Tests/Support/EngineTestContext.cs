@@ -13,6 +13,7 @@ public record OverrunEvent(GameTime Time, Guid StationId, int PassengerCount);
 public record GameOverEvent(GameTime Time, Guid StationId);
 public record InvalidActionEvent(GameTime Time, int Code, string Description);
 public record VehicleRemovedEvent(GameTime Time, Guid VehicleId);
+public record LineRemovedEvent(GameTime Time, Guid LineId);
 
 /// <summary>
 /// Shared scenario context holding the engine, mock runner, level configuration,
@@ -51,6 +52,7 @@ public class EngineTestContext
     public List<GameOverEvent> GameOverCalls { get; } = [];
     public List<InvalidActionEvent> InvalidActionCalls { get; } = [];
     public List<VehicleRemovedEvent> VehicleRemovedCalls { get; } = [];
+    public List<LineRemovedEvent> LineRemovedCalls { get; } = [];
 
     // Station ID lookup: Location → Guid (populated by OnStationSpawned callback)
     public Dictionary<Location, Guid> StationIdsByLocation { get; } = [];
@@ -127,6 +129,13 @@ public class EngineTestContext
                 VehicleRemovedCalls.Add(new VehicleRemovedEvent(snapshot.Time, vehicleId));
             });
 
+        Runner.Setup(r => r.OnLineRemoved(It.IsAny<GameSnapshot>(), It.IsAny<Guid>()))
+            .Callback<GameSnapshot, Guid>((snapshot, lineId) =>
+            {
+                EventLog.Add("OnLineRemoved");
+                LineRemovedCalls.Add(new LineRemovedEvent(snapshot.Time, lineId));
+            });
+
         Runner.Setup(r => r.OnHourTicked(It.IsAny<GameSnapshot>()))
             .Returns<GameSnapshot>(snapshot =>
             {
@@ -172,6 +181,7 @@ public class EngineTestContext
         GameOverCalls.Clear();
         InvalidActionCalls.Clear();
         VehicleRemovedCalls.Clear();
+        LineRemovedCalls.Clear();
         StationIdsByLocation.Clear();
         SimResult = null;
     }

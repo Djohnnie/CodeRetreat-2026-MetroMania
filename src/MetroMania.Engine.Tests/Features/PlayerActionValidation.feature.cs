@@ -26,9 +26,8 @@ namespace MetroMania.Engine.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Player Action Validation", "  Verifies that RemoveLine actions are correctly rejected as not yet implemented\r" +
-                "\n  (error code -1), and that rejected actions preserve the existing game state.\r" +
-                "\n  Also verifies that RemoveVehicle correctly removes an empty train.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Player Action Validation", "  Verifies that RemoveLine and RemoveVehicle player actions are correctly\r\n  vali" +
+                "dated and applied.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "PlayerActionValidation.feature"
 #line hidden
@@ -135,18 +134,18 @@ namespace MetroMania.Engine.Tests.Features
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="RemoveLine triggers error code -1")]
+        [global::Xunit.FactAttribute(DisplayName="RemoveLine removes an empty line with no trains")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Validation")]
-        [global::Xunit.TraitAttribute("Description", "RemoveLine triggers error code -1")]
-        public async global::System.Threading.Tasks.Task RemoveLineTriggersErrorCode_1()
+        [global::Xunit.TraitAttribute("Description", "RemoveLine removes an empty line with no trains")]
+        public async global::System.Threading.Tasks.Task RemoveLineRemovesAnEmptyLineWithNoTrains()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveLine triggers error code -1", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveLine removes an empty line with no trains", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 6
+#line 5
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -156,31 +155,34 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 7
+#line 6
     await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and no passen" +
                         "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 8
+#line 7
     await testRunner.AndAsync("a level with a Rectangle station at (3,0) with a spawn delay of 0 days and no pas" +
                         "senger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 9
+#line 8
     await testRunner.AndAsync("the level has 1 initial Line and 1 initial Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 10
+#line 9
     await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 11
-    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 12
+#line 10
     await testRunner.AndAsync("the runner will attempt to remove the first line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
+#line 11
+    await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 12
+    await testRunner.ThenAsync("there should be 0 lines in the simulation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
 #line 13
-    await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("\"OnLineRemoved\" should have fired exactly 1 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 14
-    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code -1", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("there should be 0 in-use Line resources", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -240,15 +242,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="RemoveLine does not remove the line")]
+        [global::Xunit.FactAttribute(DisplayName="RemoveVehicle on non-existent train triggers error")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Validation")]
-        [global::Xunit.TraitAttribute("Description", "RemoveLine does not remove the line")]
-        public async global::System.Threading.Tasks.Task RemoveLineDoesNotRemoveTheLine()
+        [global::Xunit.TraitAttribute("Description", "RemoveVehicle on non-existent train triggers error")]
+        public async global::System.Threading.Tasks.Task RemoveVehicleOnNon_ExistentTrainTriggersError()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveLine does not remove the line", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveVehicle on non-existent train triggers error", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 27
@@ -276,27 +278,27 @@ namespace MetroMania.Engine.Tests.Features
     await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 32
-    await testRunner.AndAsync("the runner will attempt to remove the first line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will attempt to remove a non-existent train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 33
     await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 34
-    await testRunner.ThenAsync("there should be 1 line in the simulation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 300", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="RemoveVehicle on non-existent train triggers error")]
+        [global::Xunit.FactAttribute(DisplayName="RemoveLine on non-existent line triggers error")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Player Action Validation")]
-        [global::Xunit.TraitAttribute("Description", "RemoveVehicle on non-existent train triggers error")]
-        public async global::System.Threading.Tasks.Task RemoveVehicleOnNon_ExistentTrainTriggersError()
+        [global::Xunit.TraitAttribute("Description", "RemoveLine on non-existent line triggers error")]
+        public async global::System.Threading.Tasks.Task RemoveLineOnNon_ExistentLineTriggersError()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveVehicle on non-existent train triggers error", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("RemoveLine on non-existent line triggers error", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 36
@@ -324,13 +326,13 @@ namespace MetroMania.Engine.Tests.Features
     await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 41
-    await testRunner.AndAsync("the runner will attempt to remove a non-existent train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will attempt to remove a non-existent line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 42
     await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 43
-    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 300", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -73,4 +73,5 @@ internal class SimpleRunner : IMetroManiaRunner
     public void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description) { Console.WriteLine(description); }
 
     public void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId) { }
+    public void OnLineRemoved(GameSnapshot snapshot, Guid lineId) { }
 }

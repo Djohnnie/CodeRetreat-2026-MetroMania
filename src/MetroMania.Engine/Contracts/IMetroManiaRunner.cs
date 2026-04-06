@@ -61,4 +61,13 @@ public interface IMetroManiaRunner
     /// <param name="snapshot">The snapshot after the train was removed.</param>
     /// <param name="vehicleId">The Id of the removed train (matches the resource Id).</param>
     void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId);
+
+    /// <summary>
+    /// Called after a line with a pending removal has had all its trains removed
+    /// and has been physically removed from the map. The line resource is now available
+    /// for redeployment.
+    /// </summary>
+    /// <param name="snapshot">The snapshot after the line was removed.</param>
+    /// <param name="lineId">The Id of the removed line (matches the resource Id).</param>
+    void OnLineRemoved(GameSnapshot snapshot, Guid lineId);
 }

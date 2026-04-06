@@ -131,4 +131,10 @@ public class ValidationActionsStepDefinitions(EngineTestContext ctx)
     {
         ctx.PendingActions.Enqueue(_ => new RemoveVehicle(Guid.NewGuid()));
     }
+
+    [Given(@"the runner will attempt to remove a non-existent line")]
+    public void GivenAttemptRemoveNonExistentLine()
+    {
+        ctx.PendingActions.Enqueue(_ => new RemoveLine(Guid.NewGuid()));
+    }
 }

@@ -22,6 +22,8 @@ public static class StarterCode
             public void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description) { }
 
             public void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId) { }
+
+            public void OnLineRemoved(GameSnapshot snapshot, Guid lineId) { }
         }
         """;
 }

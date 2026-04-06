@@ -877,29 +877,56 @@ public class MetroManiaEngine
     /// all their passengers. Those trains are removed from the map, their resource is
     /// released (marked as not in use), and <see cref="IMetroManiaRunner.OnVehicleRemoved"/>
     /// is called for each one.
+    ///
+    /// After train finalization, checks for lines with <see cref="Line.PendingRemoval"/>
+    /// that no longer have any trains assigned. Those lines are removed from the map,
+    /// their resource is released, and <see cref="IMetroManiaRunner.OnLineRemoved"/> fires.
     /// </summary>
     private static GameSnapshot FinalizePendingRemovals(IMetroManiaRunner runner, GameSnapshot snapshot)
     {
-        var completedRemovals = snapshot.Trains
+        // ── Train removals ────────────────────────────────────────────────────
+        var completedTrainRemovals = snapshot.Trains
             .Where(t => t.PendingRemoval && t.Passengers.Count == 0)
             .ToList();
 
-        if (completedRemovals.Count == 0)
-            return snapshot;
-
-        var removedIds = completedRemovals.Select(t => t.TrainId).ToHashSet();
-
-        snapshot = snapshot with
+        if (completedTrainRemovals.Count > 0)
         {
-            Trains = snapshot.Trains.Where(t => !removedIds.Contains(t.TrainId)).ToList(),
-            Resources = snapshot.Resources.Select(r =>
-                removedIds.Contains(r.Id) && r.Type == ResourceType.Train
-                    ? r with { InUse = false }
-                    : r).ToList(),
-        };
+            var removedTrainIds = completedTrainRemovals.Select(t => t.TrainId).ToHashSet();
 
-        foreach (var train in completedRemovals)
-            runner.OnVehicleRemoved(snapshot, train.TrainId);
+            snapshot = snapshot with
+            {
+                Trains = snapshot.Trains.Where(t => !removedTrainIds.Contains(t.TrainId)).ToList(),
+                Resources = snapshot.Resources.Select(r =>
+                    removedTrainIds.Contains(r.Id) && r.Type == ResourceType.Train
+                        ? r with { InUse = false }
+                        : r).ToList(),
+            };
+
+            foreach (var train in completedTrainRemovals)
+                runner.OnVehicleRemoved(snapshot, train.TrainId);
+        }
+
+        // ── Line removals ─────────────────────────────────────────────────────
+        var completedLineRemovals = snapshot.Lines
+            .Where(l => l.PendingRemoval && !snapshot.Trains.Any(t => t.LineId == l.LineId))
+            .ToList();
+
+        if (completedLineRemovals.Count > 0)
+        {
+            var removedLineIds = completedLineRemovals.Select(l => l.LineId).ToHashSet();
+
+            snapshot = snapshot with
+            {
+                Lines = snapshot.Lines.Where(l => !removedLineIds.Contains(l.LineId)).ToList(),
+                Resources = snapshot.Resources.Select(r =>
+                    removedLineIds.Contains(r.Id) && r.Type == ResourceType.Line
+                        ? r with { InUse = false }
+                        : r).ToList(),
+            };
+
+            foreach (var line in completedLineRemovals)
+                runner.OnLineRemoved(snapshot, line.LineId);
+        }
 
         return snapshot;
     }
@@ -919,6 +946,7 @@ public class MetroManiaEngine
             CreateLine createLine       => ApplyCreateLine(snapshot, createLine),
             AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
             RemoveVehicle removeVehicle => ApplyRemoveVehicle(snapshot, removeVehicle),
+            RemoveLine removeLine       => ApplyRemoveLine(snapshot, removeLine),
             _                           => (snapshot, -1, "Action type not recognised or not yet implemented.")
         };
 
@@ -1089,6 +1117,42 @@ public class MetroManiaEngine
         {
             Trains = snapshot.Trains.Select(t =>
                 t.TrainId == action.VehicleId ? t with { PendingRemoval = true } : t).ToList(),
+        }, 0, null);
+    }
+
+    /// <summary>
+    /// Handles the <see cref="RemoveLine"/> player action.
+    ///
+    /// The line is flagged with <see cref="Line.PendingRemoval"/> and all trains
+    /// currently on the line are also flagged with <see cref="Train.PendingRemoval"/>
+    /// (unless they already are). Those trains will drop off their remaining
+    /// passengers and be removed by <see cref="FinalizePendingRemovals"/>.
+    /// Once the last train has been removed the line itself is removed and
+    /// <see cref="IMetroManiaRunner.OnLineRemoved"/> fires.
+    ///
+    /// If the line has no trains, it is flagged and removed in the same tick
+    /// by the post-action <see cref="FinalizePendingRemovals"/> call.
+    /// </summary>
+    private static (GameSnapshot, int, string?) ApplyRemoveLine(GameSnapshot snapshot, RemoveLine action)
+    {
+        var line = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
+        if (line is null)
+            return (snapshot, PlayerActionError.RemoveLineNotFound,
+                $"No active line with id {action.LineId} found on the map.");
+
+        if (line.PendingRemoval)
+            return (snapshot, PlayerActionError.RemoveLineAlreadyPending,
+                $"Line {action.LineId} is already scheduled for removal.");
+
+        // Flag the line and all its trains for pending removal.
+        return (snapshot with
+        {
+            Lines = snapshot.Lines.Select(l =>
+                l.LineId == action.LineId ? l with { PendingRemoval = true } : l).ToList(),
+            Trains = snapshot.Trains.Select(t =>
+                t.LineId == action.LineId && !t.PendingRemoval
+                    ? t with { PendingRemoval = true }
+                    : t).ToList(),
         }, 0, null);
     }
 }

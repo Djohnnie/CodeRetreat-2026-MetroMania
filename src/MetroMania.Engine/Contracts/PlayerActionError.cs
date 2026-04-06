@@ -61,4 +61,12 @@ public static class PlayerActionError
 
     /// <summary>The train already has a pending removal — it cannot be removed again.</summary>
     public const int RemoveVehicleAlreadyPending = 301;
+
+    // ── RemoveLine ────────────────────────────────────────────────────────────
+
+    /// <summary>No active line with the given LineId exists on the map.</summary>
+    public const int RemoveLineNotFound = 400;
+
+    /// <summary>The line already has a pending removal — it cannot be removed again.</summary>
+    public const int RemoveLineAlreadyPending = 401;
 }

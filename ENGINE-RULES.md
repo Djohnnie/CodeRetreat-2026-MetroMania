@@ -69,13 +69,13 @@ Every hour, the engine fires events in this exact order:
 │  4. Passenger spawning → OnPassengerSpawned          │
 │  5. Train movement     (3-phase pipeline)           │
 │  5b. Finalize pending removals                      │
-│      → OnVehicleRemoved                             │
+│      → OnVehicleRemoved → OnLineRemoved             │
 │  6. Weekly gift        → OnWeeklyGiftReceived        │
 │     (only Monday 00:00)                             │
 │  7. OnHourTicked       → Player returns action      │
 │  8. Apply player action                             │
 │  8b. Finalize pending removals (post-action)        │
-│      → OnVehicleRemoved                             │
+│      → OnVehicleRemoved → OnLineRemoved             │
 │  9. Snapshot recorded                               │
 └─────────────────────────────────────────────────────┘
 ```
@@ -256,6 +256,25 @@ When a player returns `RemoveVehicle(VehicleId)`:
 | 300 | `RemoveVehicleNotFound` | No active train with the given `VehicleId`. |
 | 301 | `RemoveVehicleAlreadyPending` | The train is already flagged for removal. |
 
+### RemoveLine Behavior
+
+When a player returns `RemoveLine(LineId)`:
+
+1. **The line is flagged `PendingRemoval`.**
+2. **All trains currently assigned to the line are also flagged `PendingRemoval`** (unless they are already flagged — e.g. from a prior `RemoveVehicle` action).
+3. Each pending-removal train follows the same drop-off-then-remove logic described under [RemoveVehicle Behavior](#removevehicle-behavior): it stops picking up new passengers, drops remaining passengers at the next station(s), and is removed once empty.
+4. **After the last train on the line has been removed**, the finalization step (5b or 8b) removes the line itself, releases the Line resource (marks `InUse = false`), and fires `OnLineRemoved`.
+5. **If the line has no trains at all**, it is flagged and removed in the same tick by the post-action finalization step (step 8b).
+
+> **Event order:** When a line with trains is removed in the same finalization pass, `OnVehicleRemoved` fires **before** `OnLineRemoved` for each train.
+
+### RemoveLine Error Codes
+
+| Code | Name | Cause |
+|:-:|------|-------|
+| 400 | `RemoveLineNotFound` | No active line with the given `LineId`. |
+| 401 | `RemoveLineAlreadyPending` | The line is already flagged for removal. |
+
 ### Invalid Action Handling
 
 If an action is invalid, the engine:
@@ -280,6 +299,7 @@ Lines are the routes that trains follow. They connect a sequence of stations.
 | No duplicate stations on a line | `ToStationId` cannot already appear on the line (no loops). |
 | Lines have a color | Assigned sequentially by creation order from a palette of 8 colors (see [Visual Reference](#18-visual-reference)). |
 | Line path follows the grid | The tile path between stations uses straight + 45° diagonal segments. |
+| Pending removal | When `RemoveLine` is applied, the line is flagged `PendingRemoval`. It cannot receive new trains or be extended. The line is physically removed once all its trains have been removed. See [RemoveLine Behavior](#removeline-behavior). |
 
 ### CreateLine Error Codes
 
@@ -551,6 +571,7 @@ The `IMetroManiaRunner` interface defines all callbacks that the player bot impl
 | `OnHourTicked(snapshot)` | Every tick (always last event) | `PlayerAction` |
 | `OnInvalidPlayerAction(snapshot, code, description)` | When the returned action was rejected | `void` |
 | `OnVehicleRemoved(snapshot, vehicleId)` | When a pending-removal train has been fully removed | `void` |
+| `OnLineRemoved(snapshot, lineId)` | When a pending-removal line has had all trains removed and is itself removed | `void` |
 
 ### Callback Ordering Within a Tick
 
@@ -576,6 +597,9 @@ The `IMetroManiaRunner` interface defines all callbacks that the player bot impl
   Pending removals with 0 passengers?
          │──yes──►  Remove train, release resource
          │          OnVehicleRemoved (for each)
+         │          Lines with PendingRemoval + no trains left?
+         │          ──yes──►  Remove line, release resource
+         │                    OnLineRemoved (for each)
          ▼
   Monday at 00:00?  ──yes──►  OnWeeklyGiftReceived
          │
@@ -591,6 +615,9 @@ The `IMetroManiaRunner` interface defines all callbacks that the player bot impl
   Pending removals with 0 passengers?
          │──yes──►  Remove train, release resource
          │          OnVehicleRemoved (for each)
+         │          Lines with PendingRemoval + no trains left?
+         │          ──yes──►  Remove line, release resource
+         │                    OnLineRemoved (for each)
          ▼
   Record snapshot
 ```

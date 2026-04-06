@@ -154,4 +154,5 @@ internal class ShortcutTransferRunner : IMetroManiaRunner
         Console.WriteLine($"[Level5] Invalid action (code {code}): {description}");
 
     public void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId) { }
+    public void OnLineRemoved(GameSnapshot snapshot, Guid lineId) { }
 }
