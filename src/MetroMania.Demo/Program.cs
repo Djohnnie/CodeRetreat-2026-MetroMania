@@ -33,6 +33,8 @@ var levelRunnerPairs = new (Level Level, IMetroManiaRunner Runner)[]
     (Level3.Level, new SimpleRunner()),
     (Level4.Level, new TransferDemoRunner()),
     (Level5.Level, new ShortcutTransferRunner()),
+    (Level6.Level, new RemoveVehicleDemoRunner()),
+    (Level7.Level, new RemoveLineDemoRunner()),
 };
 
 foreach (var (level, runner) in levelRunnerPairs)
