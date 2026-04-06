@@ -64,4 +64,20 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
 
     [Given(@"the runner will do nothing on the next tick")]
     public void GivenRunnerDoNothing() => ctx.PendingActions.Enqueue(_ => PlayerAction.None);
+
+    [Given(@"the runner will deploy a train on the last line at station \((\d+),(\d+)\)")]
+    public void GivenRunnerDeployTrainOnLastLine(int x, int y)
+    {
+        ctx.PendingActions.Enqueue(snapshot =>
+        {
+            var trainResource = snapshot.Resources.FirstOrDefault(r => r.Type == ResourceType.Train && !r.InUse);
+            var line = snapshot.Lines.LastOrDefault();
+            if (trainResource is null || line is null) return PlayerAction.None;
+
+            if (!snapshot.Stations.TryGetValue(new Location(x, y), out var station))
+                return PlayerAction.None;
+
+            return new AddVehicleToLine(trainResource.Id, line.LineId, station.Id);
+        });
+    }
 }

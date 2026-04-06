@@ -53,8 +53,9 @@ public class EngineTestContext
     // Station ID lookup: Location → Guid (populated by OnStationSpawned callback)
     public Dictionary<Location, Guid> StationIdsByLocation { get; } = [];
 
-    // Determinism support: gift sequence saved from a prior run for comparison
+    // Determinism support: sequences saved from a prior run for comparison
     public List<ResourceType> PreviousWeeklyGifts { get; } = [];
+    public int PreviousPassengerSpawnCount { get; set; }
 
     public EngineTestContext()
     {
@@ -150,6 +151,7 @@ public class EngineTestContext
     public void PrepareForRerun()
     {
         PreviousWeeklyGifts.AddRange(WeeklyGiftCalls.Select(e => e.Gift));
+        PreviousPassengerSpawnCount = PassengerSpawnedCalls.Count;
         PendingActions.Clear();
         EventLog.Clear();
         DayStartCalls.Clear();
