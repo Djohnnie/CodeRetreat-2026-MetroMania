@@ -395,6 +395,15 @@ public class MetroManiaEngine
             })
             .ToArray();
 
+        // Station IDs belonging to each train's line — used to skip pass-through stations.
+        var lineStationSets = trains
+            .Select(t =>
+            {
+                var line = snapshot.Lines.FirstOrDefault(l => l.LineId == t.LineId);
+                return line is null ? new HashSet<Guid>() : new HashSet<Guid>(line.StationIds);
+            })
+            .ToArray();
+
         // ── Station graph for optimal-route decisions ─────────────────────────────
         // Built once per tick; used by the boarding and transfer-drop checks below.
         var stationById = snapshot.Stations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Value);
@@ -446,8 +455,9 @@ public class MetroManiaEngine
                 continue;
             }
 
-            // ── Train is at a station: check for passenger work ────────────────
-            if (snapshot.Stations.TryGetValue(train.TilePosition, out var currentStation))
+            // ── Train is at a station on its line: check for passenger work ──
+            if (snapshot.Stations.TryGetValue(train.TilePosition, out var currentStation)
+                && lineStationSets[t].Contains(currentStation.Id))
             {
                 // Direction after any terminal reversal — used for look-ahead checks.
                 bool wouldStepOffPath = idx + train.Direction < 0
@@ -480,7 +490,8 @@ public class MetroManiaEngine
                 int  nextPathIdx   = -1;
                 for (int i = idx + effStep; i >= 0 && i < tilePath.Count; i += effStep)
                 {
-                    if (snapshot.Stations.TryGetValue(tilePath[i], out var ns))
+                    if (snapshot.Stations.TryGetValue(tilePath[i], out var ns)
+                        && lineStationSets[t].Contains(ns.Id))
                     {
                         nextStationId = ns.Id;
                         nextPathIdx   = i;
