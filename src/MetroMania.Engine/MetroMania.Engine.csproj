@@ -14,4 +14,8 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="MetroMania.Engine.Tests" />
+	</ItemGroup>
+
 </Project>

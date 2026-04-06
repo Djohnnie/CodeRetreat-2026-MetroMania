@@ -293,6 +293,14 @@ public class EngineStepDefinitions(EngineTestContext ctx)
         Assert.Equal(expected, ctx.LastSnapshot.Score);
     }
 
+    [Then(@"the score should be at least (\d+)")]
+    public void ThenScoreShouldBeAtLeast(int minimum)
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.True(ctx.LastSnapshot.Score >= minimum,
+            $"Expected score >= {minimum} but was {ctx.LastSnapshot.Score}");
+    }
+
     [Then(@"there should be (\d+) trains? in the simulation")]
     public void ThenTrainCount(int expected)
     {
