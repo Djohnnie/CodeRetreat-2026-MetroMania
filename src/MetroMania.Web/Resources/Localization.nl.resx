@@ -248,6 +248,13 @@
   <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigeer door de dagelijkse weergaven van deze inzending.</value></data>
   <data name="NoRendersAvailable" xml:space="preserve"><value>Er zijn nog geen weergaven beschikbaar voor deze inzending en dit level. Weergaven worden gegenereerd tijdens de verwerking.</value></data>
   <data name="Day" xml:space="preserve"><value>Dag</value></data>
+  <data name="DayMo" xml:space="preserve"><value>ma</value></data>
+  <data name="DayTu" xml:space="preserve"><value>di</value></data>
+  <data name="DayWe" xml:space="preserve"><value>wo</value></data>
+  <data name="DayTh" xml:space="preserve"><value>do</value></data>
+  <data name="DayFr" xml:space="preserve"><value>vr</value></data>
+  <data name="DaySa" xml:space="preserve"><value>za</value></data>
+  <data name="DaySu" xml:space="preserve"><value>zo</value></data>
   <data name="Hour" xml:space="preserve"><value>Uur</value></data>
   <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
   <data name="PreviousDay" xml:space="preserve"><value>Vorig uur</value></data>

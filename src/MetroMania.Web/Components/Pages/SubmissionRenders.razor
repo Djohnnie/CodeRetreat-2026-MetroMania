@@ -35,8 +35,8 @@ else
          style="outline: none; display: flex; flex-direction: column; align-items: center; gap: 16px;">
 
         @* Hour counter and controls *@
-        <MudPaper Elevation="0" Class="pa-3 d-flex align-center"
-                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%;">
+        <MudPaper Elevation="0" Class="pa-3"
+                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; width: 100%; display: flex; flex-wrap: wrap; align-items: center;">
 
             @* Left: navigation controls *@
             <div style="display: flex; align-items: center; gap: 4px; flex: 1;">
@@ -107,6 +107,13 @@ else
                 <MudProgressLinear Value="@((_currentIndex + 1.0) / _renders.Count * 100)"
                                    Color="Color.Primary" Rounded="true"
                                    Style="width: 100px;" />
+            </div>
+
+            @* Slider *@
+            <div style="width: 100%; margin-top: 4px;">
+                <MudSlider T="int" Value="_currentIndex" ValueChanged="OnSliderChanged"
+                           Min="0" Max="_renders.Count - 1" Step="1"
+                           Color="Color.Primary" />
             </div>
         </MudPaper>
 
@@ -182,10 +189,21 @@ else
         get
         {
             if (_renders.Count == 0) return string.Empty;
-            int totalHour = Math.Max(0, _renders[_currentIndex].Hour - 1);
-            int day = totalHour / 24;
-            int hourOfDay = totalHour % 24;
-            return $"{day}/{hourOfDay:D2}:00";
+            int absoluteHour = Math.Max(0, _renders[_currentIndex].Hour - 1);
+            int day = absoluteHour / 24 + 1;
+            int hourOfDay = absoluteHour % 24;
+            string dowKey = ((DayOfWeek)((absoluteHour / 24 + 1) % 7)) switch
+            {
+                DayOfWeek.Monday    => "DayMo",
+                DayOfWeek.Tuesday   => "DayTu",
+                DayOfWeek.Wednesday => "DayWe",
+                DayOfWeek.Thursday  => "DayTh",
+                DayOfWeek.Friday    => "DayFr",
+                DayOfWeek.Saturday  => "DaySa",
+                DayOfWeek.Sunday    => "DaySu",
+                _                   => "DayMo"
+            };
+            return $"{Loc[dowKey]} {day} / {hourOfDay:D2}:00";
         }
     }
 
@@ -211,6 +229,8 @@ else
         }
         SetCurrentIndex(bestIndex);
     }
+
+    private void OnSliderChanged(int value) => SetCurrentIndex(value);
 
     private void Previous()
     {

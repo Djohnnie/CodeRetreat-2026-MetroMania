@@ -248,6 +248,13 @@
   <data name="ReplaysSubtitle" xml:space="preserve"><value>Navigate through the per-day renders for this submission.</value></data>
   <data name="NoRendersAvailable" xml:space="preserve"><value>No renders are available for this submission and level yet. Renders are generated when the submission is processed.</value></data>
   <data name="Day" xml:space="preserve"><value>Day</value></data>
+  <data name="DayMo" xml:space="preserve"><value>mo</value></data>
+  <data name="DayTu" xml:space="preserve"><value>tu</value></data>
+  <data name="DayWe" xml:space="preserve"><value>we</value></data>
+  <data name="DayTh" xml:space="preserve"><value>th</value></data>
+  <data name="DayFr" xml:space="preserve"><value>fr</value></data>
+  <data name="DaySa" xml:space="preserve"><value>sa</value></data>
+  <data name="DaySu" xml:space="preserve"><value>su</value></data>
   <data name="Hour" xml:space="preserve"><value>Hour</value></data>
   <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
   <data name="PreviousDay" xml:space="preserve"><value>Previous hour</value></data>

@@ -253,6 +253,13 @@
   <data name="ReplaysSubtitle" xml:space="preserve"><value>التنقل خلال مقاطع اليوم لهذا التقديم.</value></data>
   <data name="NoRendersAvailable" xml:space="preserve"><value>لا تتوفر مقاطع لهذا التقديم والمستوى بعد. يتم إنشاء المقاطع عند معالجة التقديم.</value></data>
   <data name="Day" xml:space="preserve"><value>اليوم</value></data>
+  <data name="DayMo" xml:space="preserve"><value>اث</value></data>
+  <data name="DayTu" xml:space="preserve"><value>ثل</value></data>
+  <data name="DayWe" xml:space="preserve"><value>أر</value></data>
+  <data name="DayTh" xml:space="preserve"><value>خم</value></data>
+  <data name="DayFr" xml:space="preserve"><value>جم</value></data>
+  <data name="DaySa" xml:space="preserve"><value>سب</value></data>
+  <data name="DaySu" xml:space="preserve"><value>أح</value></data>
   <data name="Hour" xml:space="preserve"><value>الساعة</value></data>
   <data name="StopPlayback" xml:space="preserve"><value>إيقاف</value></data>
   <data name="PreviousDay" xml:space="preserve"><value>الساعة السابقة</value></data>
