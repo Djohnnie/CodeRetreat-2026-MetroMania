@@ -140,6 +140,12 @@
   <data name="ConductorOnline" xml:space="preserve"><value>● متصل</value></data>
   <data name="AskConductor" xml:space="preserve"><value>اسأل القائد...</value></data>
   <data name="ConductorError" xml:space="preserve"><value>⚠️ عذراً، أواجه صعوبة في الاتصال الآن. يرجى المحاولة مرة أخرى.</value></data>
+  <data name="ConductorPrivacyNotice" xml:space="preserve"><value>يتم تخزين سجل المحادثة وقد يراجعه المسؤولون.</value></data>
+  <data name="ChatHistory" xml:space="preserve"><value>سجل المحادثات</value></data>
+  <data name="ChatHistorySubtitle" xml:space="preserve"><value>عرض سجل محادثات القائد لجميع المستخدمين.</value></data>
+  <data name="SelectUserToViewChat" xml:space="preserve"><value>حدد مستخدمًا لعرض سجل المحادثة الخاص به.</value></data>
+  <data name="NoChatMessages" xml:space="preserve"><value>لم يتم العثور على رسائل محادثة لهذا المستخدم.</value></data>
+  <data name="Archived" xml:space="preserve"><value>مؤرشف</value></data>
 
   <!-- Levels -->
   <data name="Levels" xml:space="preserve"><value>المستويات</value></data>

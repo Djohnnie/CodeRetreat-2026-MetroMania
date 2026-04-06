@@ -142,6 +142,12 @@
   <data name="ConductorOnline" xml:space="preserve"><value>● Online</value></data>
   <data name="AskConductor" xml:space="preserve"><value>Stel een vraag aan Conducteur...</value></data>
   <data name="ConductorError" xml:space="preserve"><value>⚠️ Sorry, ik heb momenteel verbindingsproblemen. Probeer het opnieuw.</value></data>
+  <data name="ConductorPrivacyNotice" xml:space="preserve"><value>Chatgeschiedenis wordt opgeslagen en kan door beheerders worden bekeken.</value></data>
+  <data name="ChatHistory" xml:space="preserve"><value>Chatgeschiedenis</value></data>
+  <data name="ChatHistorySubtitle" xml:space="preserve"><value>Bekijk de Conducteur chatgeschiedenis van alle gebruikers.</value></data>
+  <data name="SelectUserToViewChat" xml:space="preserve"><value>Selecteer een gebruiker om de chatgeschiedenis te bekijken.</value></data>
+  <data name="NoChatMessages" xml:space="preserve"><value>Geen chatberichten gevonden voor deze gebruiker.</value></data>
+  <data name="Archived" xml:space="preserve"><value>Gearchiveerd</value></data>
 
   <!-- Level Editor -->
   <data name="Levels" xml:space="preserve"><value>Levels</value></data>

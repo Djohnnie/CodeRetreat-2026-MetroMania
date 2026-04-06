@@ -114,6 +114,9 @@
                         <MudNavLink Href="/admin/users" Icon="@Icons.Material.Filled.People">
                             @Loc["UserManagement"]
                         </MudNavLink>
+                        <MudNavLink Href="/admin/chats" Icon="@Icons.Material.Filled.Forum">
+                            @Loc["ChatHistory"]
+                        </MudNavLink>
                         @if (!string.IsNullOrEmpty(Configuration["ORLEANS_DASHBOARD_URL"]))
                         {
                             <MudNavLink Href="@Configuration["ORLEANS_DASHBOARD_URL"]"
@@ -149,6 +152,11 @@
                                        OnClick="ToggleConductor" />
                     </MudStack>
                     <MudDivider />
+                    <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true" NoIcon="true"
+                              Class="py-1 px-3" Style="font-size: 0.7rem; min-height: auto;">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" Style="font-size: 0.8rem; vertical-align: text-bottom;" />
+                        @Loc["ConductorPrivacyNotice"]
+                    </MudAlert>
                 </div>
 
                 <div class="conductor-messages">

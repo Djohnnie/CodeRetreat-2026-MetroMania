@@ -45,6 +45,12 @@ public static class ConductorEndpoints
             return Results.Ok(history);
         });
 
+        group.MapGet("/history/{userId:guid}/full", async (Guid userId, IMediator mediator) =>
+        {
+            var history = await mediator.Send(new GetFullChatHistoryQuery(userId));
+            return Results.Ok(history);
+        }).RequireAuthorization("Admin");
+
         group.MapPost("/chat", async (ConductorChatRequest request, ClaimsPrincipal user, IConductorService conductor, IMediator mediator, CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(request.Message))

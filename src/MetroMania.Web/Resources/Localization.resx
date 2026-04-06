@@ -142,6 +142,12 @@
   <data name="ConductorOnline" xml:space="preserve"><value>● Online</value></data>
   <data name="AskConductor" xml:space="preserve"><value>Ask Conductor...</value></data>
   <data name="ConductorError" xml:space="preserve"><value>⚠️ Sorry, I'm having trouble connecting right now. Please try again.</value></data>
+  <data name="ConductorPrivacyNotice" xml:space="preserve"><value>Chat history is stored and may be reviewed by administrators.</value></data>
+  <data name="ChatHistory" xml:space="preserve"><value>Chat History</value></data>
+  <data name="ChatHistorySubtitle" xml:space="preserve"><value>View Conductor chat history for all users.</value></data>
+  <data name="SelectUserToViewChat" xml:space="preserve"><value>Select a user to view their chat history.</value></data>
+  <data name="NoChatMessages" xml:space="preserve"><value>No chat messages found for this user.</value></data>
+  <data name="Archived" xml:space="preserve"><value>Archived</value></data>
 
   <!-- Level Editor -->
   <data name="Levels" xml:space="preserve"><value>Levels</value></data>

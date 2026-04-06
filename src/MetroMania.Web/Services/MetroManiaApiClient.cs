@@ -244,6 +244,12 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return (await httpClient.GetFromJsonAsync<List<ChatMessageDto>>($"/api/conductor/history/{userId}", JsonOptions, ct))!;
     }
 
+    public async Task<List<ChatMessageDto>> GetFullChatHistoryAsync(Guid userId, CancellationToken ct = default)
+    {
+        SetAuthHeader();
+        return (await httpClient.GetFromJsonAsync<List<ChatMessageDto>>($"/api/conductor/history/{userId}/full", JsonOptions, ct))!;
+    }
+
     public async Task<(string Reply, bool HistoryCleared, string? NavigateTo, bool ConductorClosed)> ChatWithConductorAsync(Guid userId, string message, CancellationToken ct = default)
     {
         SetAuthHeader();

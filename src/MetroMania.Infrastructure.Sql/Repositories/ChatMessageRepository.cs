@@ -13,6 +13,12 @@ public class ChatMessageRepository(AppDbContext db) : IChatMessageRepository
             .OrderBy(m => m.Timestamp)
             .ToListAsync();
 
+    public async Task<List<ChatMessage>> GetAllByUserIdAsync(Guid userId) =>
+        await db.ChatMessages
+            .Where(m => m.UserId == userId)
+            .OrderBy(m => m.Timestamp)
+            .ToListAsync();
+
     public async Task AddAsync(ChatMessage message)
     {
         db.ChatMessages.Add(message);
