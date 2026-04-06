@@ -7,6 +7,7 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @inject IStringLocalizer<Localization> Loc
+@inject IConfiguration Configuration
 
 <MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -113,6 +114,14 @@
                         <MudNavLink Href="/admin/users" Icon="@Icons.Material.Filled.People">
                             @Loc["UserManagement"]
                         </MudNavLink>
+                        @if (!string.IsNullOrEmpty(Configuration["ORLEANS_DASHBOARD_URL"]))
+                        {
+                            <MudNavLink Href="@Configuration["ORLEANS_DASHBOARD_URL"]"
+                                        Target="_blank"
+                                        Icon="@Icons.Material.Filled.Monitor">
+                                @Loc["OrleansDashboard"]
+                            </MudNavLink>
+                        }
                     </Authorized>
                 </AuthorizeView>
             </MudNavMenu>
