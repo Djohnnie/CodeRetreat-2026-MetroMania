@@ -20,17 +20,22 @@ public static class PlayerActionError
     /// <summary>The two stations are already directly connected on an existing line.</summary>
     public const int LineSegmentAlreadyExists = 103;
 
+    // ── ExtendLineFromTerminal ────────────────────────────────────────────────
+
+    /// <summary>No active line with the given LineId exists on the map.</summary>
+    public const int LineExtendLineNotFound = 104;
+
     /// <summary>
-    /// FromStationId is not at either terminal of the existing line and therefore
+    /// TerminalStationId is not at either terminal of the existing line and therefore
     /// cannot be used as the extension anchor.
     /// </summary>
-    public const int LineExtendFromNotTerminal = 104;
+    public const int LineExtendFromNotTerminal = 105;
 
     /// <summary>
     /// ToStationId already appears somewhere in the existing line — adding it again
     /// would create a duplicate stop or a loop.
     /// </summary>
-    public const int LineExtendToAlreadyOnLine = 105;
+    public const int LineExtendToAlreadyOnLine = 106;
 
     // ── AddVehicleToLine ──────────────────────────────────────────────────────
 

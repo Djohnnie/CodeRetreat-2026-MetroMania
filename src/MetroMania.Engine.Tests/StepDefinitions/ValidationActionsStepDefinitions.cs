@@ -44,7 +44,7 @@ public class ValidationActionsStepDefinitions(EngineTestContext ctx)
             if (line is null) return PlayerAction.None;
             var from = snapshot.Stations[new Location(x1, y1)];
             var to = snapshot.Stations[new Location(x2, y2)];
-            return new CreateLine(line.LineId, from.Id, to.Id);
+            return new ExtendLineFromTerminal(line.LineId, from.Id, to.Id);
         });
     }
 
@@ -57,7 +57,18 @@ public class ValidationActionsStepDefinitions(EngineTestContext ctx)
             if (line is null) return PlayerAction.None;
             var from = snapshot.Stations[new Location(x1, y1)];
             var to = snapshot.Stations[new Location(x2, y2)];
-            return new CreateLine(line.LineId, from.Id, to.Id);
+            return new ExtendLineFromTerminal(line.LineId, from.Id, to.Id);
+        });
+    }
+
+    [Given(@"the runner will attempt to extend a non-existent line from \((\d+),(\d+)\) to \((\d+),(\d+)\)")]
+    public void GivenAttemptExtendNonExistentLine(int x1, int y1, int x2, int y2)
+    {
+        ctx.PendingActions.Enqueue(snapshot =>
+        {
+            var from = snapshot.Stations[new Location(x1, y1)];
+            var to = snapshot.Stations[new Location(x2, y2)];
+            return new ExtendLineFromTerminal(Guid.NewGuid(), from.Id, to.Id);
         });
     }
 

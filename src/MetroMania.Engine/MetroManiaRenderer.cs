@@ -326,6 +326,7 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     {
         NoAction          => null,
         CreateLine        => "Line created",
+        ExtendLineFromTerminal => "Line extended",
         RemoveLine        => "Line removed",
         AddVehicleToLine  => "Train deployed",
         RemoveVehicle     => "Train removed",

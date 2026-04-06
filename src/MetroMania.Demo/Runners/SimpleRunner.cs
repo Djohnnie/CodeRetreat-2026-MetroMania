@@ -40,7 +40,7 @@ internal class SimpleRunner : IMetroManiaRunner
                     return new CreateLine(availableLines[0].Id, line.StationIds[0], unconnected.Id);
                 else
                     // No spare line — extend line0 from its tail.
-                    return new CreateLine(line.LineId, line.StationIds[^1], unconnected.Id);
+                    return new ExtendLineFromTerminal(line.LineId, line.StationIds[^1], unconnected.Id);
             }
         }
 

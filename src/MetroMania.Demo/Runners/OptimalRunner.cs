@@ -95,7 +95,7 @@ internal class OptimalRunner : IMetroManiaRunner
             return new CreateLine(idleLine.Id, backbone.StationIds[0], target);
 
         // No spare resource — extend the backbone from its TAIL → target.
-        return new CreateLine(backbone.LineId, backbone.StationIds[^1], target);
+        return new ExtendLineFromTerminal(backbone.LineId, backbone.StationIds[^1], target);
     }
 
     private PlayerAction? CreateBackbone(GameSnapshot snapshot)

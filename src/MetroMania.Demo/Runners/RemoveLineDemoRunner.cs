@@ -67,7 +67,7 @@ internal class RemoveLineDemoRunner : IMetroManiaRunner
                     var tri = stations.First(s => s.StationType == StationType.Triangle);
                     _setupPhase++;
                     Console.WriteLine($"  [Tick {_tick}] Extending line: Rectangle → Triangle");
-                    return new CreateLine(line.LineId, rect.Id, tri.Id);
+                    return new ExtendLineFromTerminal(line.LineId, rect.Id, tri.Id);
                 }
                 case 2:
                 {
@@ -76,7 +76,7 @@ internal class RemoveLineDemoRunner : IMetroManiaRunner
                     var diamond = stations.First(s => s.StationType == StationType.Diamond);
                     _setupPhase++;
                     Console.WriteLine($"  [Tick {_tick}] Extending line: Triangle → Diamond");
-                    return new CreateLine(line.LineId, tri.Id, diamond.Id);
+                    return new ExtendLineFromTerminal(line.LineId, tri.Id, diamond.Id);
                 }
                 case 3:
                 {

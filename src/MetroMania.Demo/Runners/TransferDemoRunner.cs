@@ -14,9 +14,9 @@ namespace MetroMania.Demo.Runners;
 ///                                   Triangle
 ///
 /// Setup sequence (one action per tick):
-///   1. CreateLine (resource)  Circle → Rectangle          (Line 1 starts)
-///   2. CreateLine (extend)    Rectangle → Star            (Line 1 completes)
-///   3. CreateLine (resource)  Rectangle → Triangle        (Line 2)
+///   1. CreateLine (resource)           Circle → Rectangle          (Line 1 starts)
+///   2. ExtendLineFromTerminal          Rectangle → Star            (Line 1 completes)
+///   3. CreateLine (resource)           Rectangle → Triangle        (Line 2)
 ///   4. AddVehicleToLine       Train 1 → Line 1 at Circle
 ///   5. AddVehicleToLine       Train 2 → Line 2 at Triangle
 ///
@@ -72,7 +72,7 @@ internal class TransferDemoRunner : IMetroManiaRunner
                     l.StationIds.Contains(_circleId.Value) && l.StationIds.Contains(_rectangleId.Value));
                 if (line1 is null) return new NoAction();
                 _setupPhase++;
-                return new CreateLine(line1.LineId, _rectangleId.Value, _starId.Value);
+                return new ExtendLineFromTerminal(line1.LineId, _rectangleId.Value, _starId.Value);
             }
 
             case 2:

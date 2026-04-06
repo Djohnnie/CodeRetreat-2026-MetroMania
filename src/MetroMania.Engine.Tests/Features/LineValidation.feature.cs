@@ -26,9 +26,9 @@ namespace MetroMania.Engine.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Line Validation", "  Verifies that the engine correctly rejects invalid CreateLine player actions\r\n " +
-                " with the appropriate error codes, and that rejected actions leave the game\r\n  s" +
-                "tate unchanged.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Line Validation", "  Verifies that the engine correctly rejects invalid CreateLine and ExtendLineFro" +
+                "mTerminal\r\n  player actions with the appropriate error codes, and that rejected " +
+                "actions leave the\r\n  game state unchanged.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "LineValidation.feature"
 #line hidden
@@ -129,7 +129,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/LineValidation.feature.ndjson", 8);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/LineValidation.feature.ndjson", 10);
         }
         
         async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
@@ -234,15 +234,15 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Extending a line from a non-terminal station triggers error 104")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a line from a non-terminal station triggers error 105")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Line Validation")]
-        [global::Xunit.TraitAttribute("Description", "Extending a line from a non-terminal station triggers error 104")]
-        public async global::System.Threading.Tasks.Task ExtendingALineFromANon_TerminalStationTriggersError104()
+        [global::Xunit.TraitAttribute("Description", "Extending a line from a non-terminal station triggers error 105")]
+        public async global::System.Threading.Tasks.Task ExtendingALineFromANon_TerminalStationTriggersError105()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Extending a line from a non-terminal station triggers error 104", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Extending a line from a non-terminal station triggers error 105", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 23
@@ -275,21 +275,21 @@ namespace MetroMania.Engine.Tests.Features
     await testRunner.WhenAsync("the simulation runs for 3 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 29
-    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 104", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 105", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Extending a line to a station already on it triggers error 105")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a line to a station already on it triggers error 106")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Line Validation")]
-        [global::Xunit.TraitAttribute("Description", "Extending a line to a station already on it triggers error 105")]
-        public async global::System.Threading.Tasks.Task ExtendingALineToAStationAlreadyOnItTriggersError105()
+        [global::Xunit.TraitAttribute("Description", "Extending a line to a station already on it triggers error 106")]
+        public async global::System.Threading.Tasks.Task ExtendingALineToAStationAlreadyOnItTriggersError106()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Extending a line to a station already on it triggers error 105", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Extending a line to a station already on it triggers error 106", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 31
@@ -318,21 +318,21 @@ namespace MetroMania.Engine.Tests.Features
     await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 36
-    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 105", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 106", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="An invalid CreateLine action does not create a line")]
+        [global::Xunit.FactAttribute(DisplayName="Extending a non-existent line triggers error 104")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Line Validation")]
-        [global::Xunit.TraitAttribute("Description", "An invalid CreateLine action does not create a line")]
-        public async global::System.Threading.Tasks.Task AnInvalidCreateLineActionDoesNotCreateALine()
+        [global::Xunit.TraitAttribute("Description", "Extending a non-existent line triggers error 104")]
+        public async global::System.Threading.Tasks.Task ExtendingANon_ExistentLineTriggersError104()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("An invalid CreateLine action does not create a line", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Extending a non-existent line triggers error 104", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 38
@@ -349,12 +349,52 @@ namespace MetroMania.Engine.Tests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 39
-    await testRunner.GivenAsync("the runner will attempt to create a line with a non-existent resource", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("the level has 1 initial Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 40
-    await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("the runner will attempt to extend a non-existent line from (0,0) to (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 41
+    await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 42
+    await testRunner.ThenAsync("OnInvalidPlayerAction should have fired with code 104", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="An invalid CreateLine action does not create a line")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Line Validation")]
+        [global::Xunit.TraitAttribute("Description", "An invalid CreateLine action does not create a line")]
+        public async global::System.Threading.Tasks.Task AnInvalidCreateLineActionDoesNotCreateALine()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "5";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("An invalid CreateLine action does not create a line", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 44
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 45
+    await testRunner.GivenAsync("the runner will attempt to create a line with a non-existent resource", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 46
+    await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 47
     await testRunner.ThenAsync("there should be 0 lines in the simulation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -368,11 +408,11 @@ namespace MetroMania.Engine.Tests.Features
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "5";
+            string pickleIndex = "6";
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("An invalid CreateLine action records NoAction in the snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 43
+#line 49
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -385,14 +425,57 @@ namespace MetroMania.Engine.Tests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 44
+#line 50
     await testRunner.GivenAsync("the runner will attempt to create a line with a non-existent resource", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 45
+#line 51
     await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 46
+#line 52
     await testRunner.ThenAsync("the last snapshot LastAction should be NoAction", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="LastAction reflects ExtendLineFromTerminal when valid")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Line Validation")]
+        [global::Xunit.TraitAttribute("Description", "LastAction reflects ExtendLineFromTerminal when valid")]
+        public async global::System.Threading.Tasks.Task LastActionReflectsExtendLineFromTerminalWhenValid()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("LastAction reflects ExtendLineFromTerminal when valid", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 54
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 55
+    await testRunner.GivenAsync("the level has 1 initial Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 56
+    await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 57
+    await testRunner.AndAsync("the runner will extend the first line from station (3,0) to station (6,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 58
+    await testRunner.WhenAsync("the simulation runs for 2 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 59
+    await testRunner.ThenAsync("the last snapshot LastAction should be ExtendLineFromTerminal", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

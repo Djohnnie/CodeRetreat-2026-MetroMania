@@ -25,6 +25,13 @@ public class GameSnapshotPropertyStepDefinitions(EngineTestContext ctx)
         Assert.IsType<CreateLine>(ctx.LastSnapshot.LastAction);
     }
 
+    [Then(@"the last snapshot LastAction should be ExtendLineFromTerminal")]
+    public void ThenLastActionIsExtendLineFromTerminal()
+    {
+        Assert.NotNull(ctx.LastSnapshot);
+        Assert.IsType<ExtendLineFromTerminal>(ctx.LastSnapshot.LastAction);
+    }
+
     [Then(@"the last snapshot should have day (\d+) and hour (\d+)")]
     public void ThenLastSnapshotTime(int day, int hour)
     {

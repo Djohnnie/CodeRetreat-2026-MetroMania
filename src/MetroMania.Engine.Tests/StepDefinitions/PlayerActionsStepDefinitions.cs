@@ -42,7 +42,7 @@ public class PlayerActionsStepDefinitions(EngineTestContext ctx)
                 !snapshot.Stations.TryGetValue(new Location(x2, y2), out var toStation))
                 return PlayerAction.None;
 
-            return new CreateLine(line.LineId, fromStation.Id, toStation.Id);
+            return new ExtendLineFromTerminal(line.LineId, fromStation.Id, toStation.Id);
         });
     }
 

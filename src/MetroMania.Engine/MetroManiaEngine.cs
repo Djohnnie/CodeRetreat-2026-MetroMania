@@ -954,7 +954,8 @@ public class MetroManiaEngine
 
         var (newSnapshot, errorCode, errorDescription) = snapshot.LastAction switch
         {
-            CreateLine createLine       => ApplyCreateLine(snapshot, createLine),
+            CreateLine createLine                     => ApplyCreateLine(snapshot, createLine),
+            ExtendLineFromTerminal extendLine        => ApplyExtendLineFromTerminal(snapshot, extendLine),
             AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
             RemoveVehicle removeVehicle => ApplyRemoveVehicle(snapshot, removeVehicle),
             RemoveLine removeLine       => ApplyRemoveLine(snapshot, removeLine),
@@ -974,8 +975,7 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Handles both the <em>create</em> and <em>extend</em> variants of the
-    /// <see cref="CreateLine"/> player action.
+    /// Creates a brand-new line from two stations, consuming an unused Line resource.
     ///
     /// Returns a tuple of (newSnapshot, errorCode, errorDescription).
     /// errorCode == 0 means success; any other value is a <see cref="PlayerActionError"/> constant.
@@ -987,40 +987,47 @@ public class MetroManiaEngine
             return (snapshot, PlayerActionError.LineResourceNotFound,
                 $"No line resource with id {action.LineId} found in available resources.");
 
-        var existingLine = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
+        if (resource.InUse)
+            return (snapshot, PlayerActionError.LineResourceAlreadyInUse,
+                $"Line resource {action.LineId} is already deployed on the map.");
 
-        if (existingLine is null)
+        // Both station IDs must differ — a line cannot start and end at the same station.
+        if (action.FromStationId == action.ToStationId)
+            return (snapshot, PlayerActionError.LineStationsSameStation,
+                "FromStationId and ToStationId must be different stations.");
+
+        var newLine = new Line { LineId = action.LineId, OrderId = snapshot.NextLineOrderId, StationIds = [action.FromStationId, action.ToStationId] };
+        var updatedResource = resource with { InUse = true };
+        return (snapshot with
         {
-            // Resource not yet in use — create a new line and mark the resource as used.
-            if (resource.InUse)
-                return (snapshot, PlayerActionError.LineResourceAlreadyInUse,
-                    $"Line resource {action.LineId} is already deployed on the map.");
+            Lines = [.. snapshot.Lines, newLine],
+            Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), updatedResource],
+            NextLineOrderId = snapshot.NextLineOrderId + 1,
+        }, 0, null);
+    }
 
-            // Both station IDs must differ — a line cannot start and end at the same station.
-            if (action.FromStationId == action.ToStationId)
-                return (snapshot, PlayerActionError.LineStationsSameStation,
-                    "FromStationId and ToStationId must be different stations.");
+    /// <summary>
+    /// Extends an existing line from one of its terminal stations to a new station.
+    ///
+    /// Returns a tuple of (newSnapshot, errorCode, errorDescription).
+    /// errorCode == 0 means success; any other value is a <see cref="PlayerActionError"/> constant.
+    /// </summary>
+    private static (GameSnapshot, int, string?) ApplyExtendLineFromTerminal(GameSnapshot snapshot, ExtendLineFromTerminal action)
+    {
+        var existingLine = snapshot.Lines.FirstOrDefault(l => l.LineId == action.LineId);
+        if (existingLine is null)
+            return (snapshot, PlayerActionError.LineExtendLineNotFound,
+                $"No line with id {action.LineId} exists on the map.");
 
-            var newLine = new Line { LineId = action.LineId, OrderId = snapshot.NextLineOrderId, StationIds = [action.FromStationId, action.ToStationId] };
-            var updatedResource = resource with { InUse = true };
-            return (snapshot with
-            {
-                Lines = [.. snapshot.Lines, newLine],
-                Resources = [.. snapshot.Resources.Where(r => r.Id != resource.Id), updatedResource],
-                NextLineOrderId = snapshot.NextLineOrderId + 1,
-            }, 0, null);
-        }
-
-        // Line already exists — try to extend it if one end matches FromStationId.
         var stationIds = existingLine.StationIds.ToList();
 
-        if (stationIds[^1] == action.FromStationId)
+        if (stationIds[^1] == action.TerminalStationId)
             stationIds.Add(action.ToStationId);
-        else if (stationIds[0] == action.FromStationId)
+        else if (stationIds[0] == action.TerminalStationId)
             stationIds.Insert(0, action.ToStationId);
         else
             return (snapshot, PlayerActionError.LineExtendFromNotTerminal,
-                $"Station {action.FromStationId} is not at either terminal of line {action.LineId}. Only terminal stations can be used to extend a line.");
+                $"Station {action.TerminalStationId} is not at either terminal of line {action.LineId}. Only terminal stations can be used to extend a line.");
 
         // The new terminal station must not already appear anywhere in this line.
         if (existingLine.StationIds.Contains(action.ToStationId))

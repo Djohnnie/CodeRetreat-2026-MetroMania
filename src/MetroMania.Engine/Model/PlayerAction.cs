@@ -16,10 +16,18 @@ public sealed record NoAction : PlayerAction;
 
 /// <summary>
 /// Creates a new metro line by consuming an available line resource and connecting two stations.
-/// <paramref name="LineId"/> must be the Id of an available Line resource.
-/// <paramref name="FromStationId"/> and <paramref name="ToStationId"/> must be the Ids of two distinct stations that are not already connected by a line.
+/// <paramref name="LineId"/> must be the Id of an available (not in-use) Line resource.
+/// <paramref name="FromStationId"/> and <paramref name="ToStationId"/> must be the Ids of two distinct stations.
 /// </summary>
 public sealed record CreateLine(Guid LineId, Guid FromStationId, Guid ToStationId) : PlayerAction;
+
+/// <summary>
+/// Extends an existing line from one of its terminal stations to a new station.
+/// <paramref name="LineId"/> must be the Id of an in-use Line resource (an existing line).
+/// <paramref name="TerminalStationId"/> must be the first or last station on the line.
+/// <paramref name="ToStationId"/> must not already appear on the line.
+/// </summary>
+public sealed record ExtendLineFromTerminal(Guid LineId, Guid TerminalStationId, Guid ToStationId) : PlayerAction;
 
 /// <summary>
 /// Removes an entire metro line and releases the line resource and all vehicles on it.

@@ -24,11 +24,11 @@ namespace MetroMania.Demo.Runners;
 ///   Total: 15 steps via transfer  vs  20 steps via full arc.
 ///
 /// Setup (one action per tick after all stations have spawned):
-///   Phase 0  CreateLine (resource)  A → B          (Line 1, first segment)
-///   Phase 1  Extend Line 1          B → C
-///   Phase 2  Extend Line 1          C → D
-///   Phase 3  Extend Line 1          D → E
-///   Phase 4  CreateLine (resource)  B → E          (Line 2, the shortcut)
+///   Phase 0  CreateLine (resource)         A → B          (Line 1, first segment)
+///   Phase 1  ExtendLineFromTerminal       B → C
+///   Phase 2  ExtendLineFromTerminal       C → D
+///   Phase 3  ExtendLineFromTerminal       D → E
+///   Phase 4  CreateLine (resource)         B → E          (Line 2, the shortcut)
 ///   Phase 5  AddVehicleToLine       Train 1 → Line 1 at A
 ///   Phase 6  AddVehicleToLine       Train 2 → Line 2 at B
 /// </summary>
@@ -71,7 +71,7 @@ internal class ShortcutTransferRunner : IMetroManiaRunner
                 _line1Id ??= snapshot.Lines.FirstOrDefault(l => l.StationIds.Contains(_circleId!.Value))?.LineId;
                 if (_line1Id is null) return new NoAction();
                 _setupPhase++;
-                return new CreateLine(_line1Id.Value, _rectangleId.Value, _triangleId.Value);
+                return new ExtendLineFromTerminal(_line1Id.Value, _rectangleId.Value, _triangleId.Value);
             }
 
             case 2:
@@ -79,7 +79,7 @@ internal class ShortcutTransferRunner : IMetroManiaRunner
                 // Extend Line 1: C(Triangle) → D(Diamond)
                 if (_line1Id is null) return new NoAction();
                 _setupPhase++;
-                return new CreateLine(_line1Id.Value, _triangleId.Value, _diamondId.Value);
+                return new ExtendLineFromTerminal(_line1Id.Value, _triangleId.Value, _diamondId.Value);
             }
 
             case 3:
@@ -87,7 +87,7 @@ internal class ShortcutTransferRunner : IMetroManiaRunner
                 // Extend Line 1: D(Diamond) → E(Star)
                 if (_line1Id is null) return new NoAction();
                 _setupPhase++;
-                return new CreateLine(_line1Id.Value, _diamondId.Value, _starId.Value);
+                return new ExtendLineFromTerminal(_line1Id.Value, _diamondId.Value, _starId.Value);
             }
 
             case 4:
