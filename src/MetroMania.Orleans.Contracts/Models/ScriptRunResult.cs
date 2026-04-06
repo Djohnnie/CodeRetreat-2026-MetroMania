@@ -9,10 +9,4 @@ public record ScriptRunResult
     [Id(3)] public double TimeTakenMs { get; init; }
     [Id(4)] public int DaysSurvived { get; init; }
     [Id(5)] public int TotalPassengersSpawned { get; init; }
-
-    /// <summary>
-    /// JSON-serialized <see cref="MetroMania.Engine.Model.GameDebugInfo"/> containing
-    /// the original level data and a snapshot for every simulated hour.
-    /// </summary>
-    [Id(6)] public string? DebugJson { get; init; }
 }

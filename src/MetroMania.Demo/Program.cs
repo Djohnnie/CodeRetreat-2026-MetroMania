@@ -19,7 +19,6 @@ Directory.CreateDirectory(outputPath);
 // ── Run simulation ────────────────────────────────────────────────────────────
 
 using var renderer = new MetroManiaRenderer(resourcesPath);
-var templatePath = Path.Combine(AppContext.BaseDirectory, "viewer.html");
 
 var jsonOptions = new JsonSerializerOptions
 {
@@ -72,9 +71,7 @@ foreach (var (level, runner) in levelRunnerPairs)
 
     // ── Write viewer HTML ─────────────────────────────────────────────────────
 
-    var viewerHtml = (await File.ReadAllTextAsync(templatePath))
-        .Replace("%%TOTAL%%", result.GameSnapshots.Count.ToString())
-        .Replace("%%LEVEL_TITLE%%", level.Title);
+    var viewerHtml = ViewerTemplate.Generate(level.Title, result.GameSnapshots.Count, padWidth: 5);
     await File.WriteAllTextAsync(Path.Combine(levelOutputPath, "viewer.html"), viewerHtml);
 
     Console.WriteLine($"Viewer saved → {Path.Combine(levelOutputPath, "viewer.html")}");

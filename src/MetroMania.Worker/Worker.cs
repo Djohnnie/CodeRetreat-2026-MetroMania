@@ -138,25 +138,10 @@ public class ServiceBusWorker(
             saveScoresSw.Stop();
             logger.LogInformation("Saved scores for {LevelCount} levels in {ElapsedMs}ms", levels.Count, saveScoresSw.ElapsedMilliseconds);
 
-            // Save debug JSON for each level that ran successfully
-            var debugSw = Stopwatch.StartNew();
-            var debugSaveTasks = levels
-                .Zip(results, (level, result) => (level, result))
-                .Where(x => x.result.Success && x.result.DebugJson is not null)
-                .Select(x =>
-                {
-                    var blobName = $"{submissionId}-{x.level.Id}-debug.json";
-                    return debugBlobStorage.UploadAsync(blobName, x.result.DebugJson!, ct);
-                })
-                .ToList();
-            await Task.WhenAll(debugSaveTasks);
-            debugSw.Stop();
-            logger.LogInformation("Saved {Count} debug blobs in {ElapsedMs}ms", debugSaveTasks.Count, debugSw.ElapsedMilliseconds);
-
             // Save all renders from successful levels
             var allRenders = levels.Zip(renderResults, (level, renderResult) =>
                 renderResult.Success
-                    ? renderResult.Renders.Select(r => new SaveSubmissionRendersCommand.LevelRender(level.Id, r.Hour, r.SvgContent, r.JsonContent))
+                    ? renderResult.Renders.Select(r => new SaveSubmissionRendersCommand.LevelRender(level.Id, level.Title, r.Hour, r.SvgContent, r.JsonContent))
                     : Enumerable.Empty<SaveSubmissionRendersCommand.LevelRender>())
                 .SelectMany(r => r)
                 .ToList();

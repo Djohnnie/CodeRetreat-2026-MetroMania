@@ -152,11 +152,12 @@
   </div>
 
   <div class="svg-frame">
-    <img id="snapshot" src="00001.svg" alt="Snapshot 1" />
+    <img id="snapshot" src="" alt="Snapshot 1" />
   </div>
 
   <script>
     const TOTAL = %%TOTAL%%;
+    const PAD   = %%PAD_WIDTH%%;
     const HOURS_PER_DAY = 24;
     const slider  = document.getElementById('slider');
     const img     = document.getElementById('snapshot');
@@ -168,7 +169,7 @@
     function update(hour) {
       hour = Math.max(1, Math.min(TOTAL, hour));
       slider.value = hour;
-      img.src = pad(hour, 5) + '.svg';
+      img.src = pad(hour, PAD) + '.svg';
       img.alt = 'Snapshot ' + hour;
       hourBadge.textContent = hour;
       const day  = Math.floor((hour - 1) / HOURS_PER_DAY) + 1;

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine.Model;
@@ -11,13 +10,6 @@ namespace MetroMania.Orleans.Host.Grains;
 
 public class GameRunnerGrain : Grain, IGameRunnerGrain
 {
-    private static readonly JsonSerializerOptions DebugJsonOptions = new()
-    {
-        ReferenceHandler = ReferenceHandler.IgnoreCycles,
-        WriteIndented = false,
-        Converters = { new LocationJsonConverter() }
-    };
-
     public Task<string> PingAsync() => Task.FromResult("pong");
 
     public async Task<ScriptRunResult> RunScriptAsync(string base64Code, string levelDataJson)
@@ -46,8 +38,7 @@ public class GameRunnerGrain : Grain, IGameRunnerGrain
                 Score = result.TotalScore,
                 TimeTakenMs = result.ProcessingTime.TotalMilliseconds,
                 DaysSurvived = result.DaysSurvived,
-                TotalPassengersSpawned = result.TotalPassengersSpawned,
-                DebugJson = ""
+                TotalPassengersSpawned = result.TotalPassengersSpawned
             };
         }
         catch (Exception ex)
