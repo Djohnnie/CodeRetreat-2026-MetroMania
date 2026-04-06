@@ -26,30 +26,44 @@ var jsonOptions = new JsonSerializerOptions
     Converters = { new JsonStringEnumConverter(), new LocationJsonConverter() }
 };
 
-var levelRunnerPairs = new (Level Level, IMetroManiaRunner Runner)[]
+var levelRunnerPairs = new (Level Level, IMetroManiaRunner Runner, string? Tag)[]
 {
-    (Level1.Level, new SimpleRunner()),
-    (Level2.Level, new SimpleRunner()),
-    (Level3.Level, new SimpleRunner()),
-    (Level4.Level, new TransferDemoRunner()),
-    (Level5.Level, new ShortcutTransferRunner()),
-    (Level6.Level, new RemoveVehicleDemoRunner()),
-    (Level7.Level, new RemoveLineDemoRunner()),
+    (Level1.Level, new SimpleRunner(), null),
+    (Level2.Level, new SimpleRunner(), null),
+    (Level3.Level, new SimpleRunner(), null),
+    (Level4.Level, new TransferDemoRunner(), null),
+    (Level5.Level, new ShortcutTransferRunner(), null),
+    (Level6.Level, new RemoveVehicleDemoRunner(), null),
+    (Level7.Level, new RemoveLineDemoRunner(), null),
+    (Level8.Level, new PassThroughDemoRunner(), null),
+
+    // Optimal runner — same levels, best general-purpose strategy
+    (Level1.Level, new OptimalRunner(), "optimal"),
+    (Level2.Level, new OptimalRunner(), "optimal"),
+    (Level3.Level, new OptimalRunner(), "optimal"),
+    (Level4.Level, new OptimalRunner(), "optimal"),
+    (Level5.Level, new OptimalRunner(), "optimal"),
+    (Level6.Level, new OptimalRunner(), "optimal"),
+    (Level7.Level, new OptimalRunner(), "optimal"),
 };
 
-foreach (var (level, runner) in levelRunnerPairs)
+foreach (var (level, runner, tag) in levelRunnerPairs)
 {
-    var levelOutputPath = Path.Combine(outputPath, level.Title.Replace(" ", "-").ToLowerInvariant());
+    var folderName = level.Title.Replace(" ", "-").ToLowerInvariant();
+    if (tag is not null) folderName += $"-{tag}";
+    var levelOutputPath = Path.Combine(outputPath, folderName);
     Directory.CreateDirectory(levelOutputPath);
 
     var engine = new MetroManiaEngine();
 
-    Console.WriteLine($"Running simulation for level: {level.Title}");
+    var displayTitle = tag is not null ? $"{level.Title} ({tag})" : level.Title;
+
+    Console.WriteLine($"Running simulation for level: {displayTitle}");
     Console.WriteLine($"Max days: {level.LevelData.MaxDays}");
 
     var result = engine.Run(runner, level, maxHours: level.LevelData.MaxDays * 24);
 
-    Console.WriteLine($"Simulation complete: {result.DaysSurvived} days survived, {result.GameSnapshots.Count} snapshots");
+    Console.WriteLine($"Simulation complete: {result.DaysSurvived} days survived, score: {result.TotalScore}, {result.GameSnapshots.Count} snapshots");
 
     // ── Render and save snapshots ─────────────────────────────────────────────
 
@@ -73,7 +87,7 @@ foreach (var (level, runner) in levelRunnerPairs)
 
     // ── Write viewer HTML ─────────────────────────────────────────────────────
 
-    var viewerHtml = ViewerTemplate.Generate(level.Title, result.GameSnapshots.Count, padWidth: 5);
+    var viewerHtml = ViewerTemplate.Generate(displayTitle, result.GameSnapshots.Count, padWidth: 5);
     await File.WriteAllTextAsync(Path.Combine(levelOutputPath, "viewer.html"), viewerHtml);
 
     Console.WriteLine($"Viewer saved → {Path.Combine(levelOutputPath, "viewer.html")}");

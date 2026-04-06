@@ -576,6 +576,12 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
     /// offsets keep shared segments visually separated, and a miter calculation at
     /// direction-change junctions eliminates kinks between runs.
     /// </para>
+    /// <para>
+    /// When a line passes through a tile that contains a station <em>not</em>
+    /// connected to that line, the stroke is split into two parallel 1 px rails
+    /// separated by a 1 px gap (total 3 px), running from the centre of the
+    /// preceding tile to the centre of the following tile.
+    /// </para>
     /// </summary>
     private static void AppendLines(
         StringBuilder sb,
@@ -589,6 +595,13 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
         {
             if (!lineColorMap.TryGetValue(line.LineId, out var color)) continue;
 
+            // Stations connected to this line — used to detect pass-through overlaps.
+            var connectedStationIds = new HashSet<Guid>(line.StationIds);
+            var unconnectedStationTiles = new HashSet<Location>();
+            foreach (var (loc, station) in snapshot.Stations)
+                if (!connectedStationIds.Contains(station.Id))
+                    unconnectedStationTiles.Add(loc);
+
             // Each station-to-station segment is a separate "pass" with its own lane.
             int passCounter = 0;
             for (int i = 0; i < line.StationIds.Count - 1; i++)
@@ -600,16 +613,40 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
                 passCounter++;
 
                 var waypoints = LinePathHelper.ComputeSegmentWaypoints(locA, locB);
-                var wpPairs = new List<(Location A, Location B)>(waypoints.Count - 1);
+
+                // Expand waypoint pairs to tile-level steps for split-zone detection.
+                var tilePairs = new List<(Location A, Location B)>();
                 for (int j = 0; j < waypoints.Count - 1; j++)
-                    wpPairs.Add((waypoints[j], waypoints[j + 1]));
+                {
+                    int tx = waypoints[j].X, ty = waypoints[j].Y;
+                    var target = waypoints[j + 1];
+                    while (tx != target.X || ty != target.Y)
+                    {
+                        var from = new Location(tx, ty);
+                        tx += Math.Sign(target.X - tx);
+                        ty += Math.Sign(target.Y - ty);
+                        tilePairs.Add((from, new Location(tx, ty)));
+                    }
+                }
 
-                if (wpPairs.Count == 0) continue;
+                if (tilePairs.Count == 0) continue;
 
-                var runs = GroupIntoDirectionRuns(wpPairs);
+                // Identify tiles where the line passes through an unconnected station.
+                // Mark the station tile and its immediate path neighbours as split tiles.
+                var pathTiles = new List<Location>(tilePairs.Count + 1) { tilePairs[0].A };
+                foreach (var (_, b) in tilePairs) pathTiles.Add(b);
 
-                // Compute per-run offset vectors for this lane.
-                var runOffsets = new (float px, float py)[runs.Count];
+                var splitTileSet = new HashSet<Location>();
+                for (int t = 0; t < pathTiles.Count; t++)
+                {
+                    if (unconnectedStationTiles.Contains(pathTiles[t]))
+                        splitTileSet.Add(pathTiles[t]);
+                }
+
+                var runs = GroupIntoDirectionRuns(tilePairs);
+
+                // Compute per-run lane offsets and perpendicular unit vectors.
+                var runInfo = new (float px, float py, float perpUX, float perpUY)[runs.Count];
                 for (int r = 0; r < runs.Count; r++)
                 {
                     var run = runs[r];
@@ -624,54 +661,100 @@ public class MetroManiaRenderer(string svgResourcesPath) : IDisposable
 
                     var (cdx, cdy) = CanonicalDirection(run[0].A, run[0].B);
                     float len = MathF.Sqrt(cdx * cdx + cdy * cdy);
-                    runOffsets[r] = (-cdy / len * offset, cdx / len * offset);
+                    float perpUX = -cdy / len;
+                    float perpUY = cdx / len;
+                    runInfo[r] = (perpUX * offset, perpUY * offset, perpUX, perpUY);
                 }
 
-                // Build offset polyline vertices with miter-adjusted junctions.
-                var pts = new List<string>();
+                // Build enriched vertex list with per-vertex perpendicular info.
+                var vertices = new List<(float x, float y, float perpUX, float perpUY)>();
+                var segIsSplit = new List<bool>();
                 int globalSeg = 0;
 
                 for (int r = 0; r < runs.Count; r++)
                 {
                     var run = runs[r];
-                    var (px, py) = runOffsets[r];
+                    var (px, py, perpUX, perpUY) = runInfo[r];
 
                     for (int s = 0; s < run.Count; s++)
                     {
-                        var (wpA, wpB) = run[s];
+                        var (tileA, tileB) = run[s];
 
                         if (globalSeg == 0)
                         {
-                            var (ax, ay) = TileToPixel(wpA.X, wpA.Y);
-                            pts.Add(Invariant($"{ax + px:F1},{ay + py:F1}"));
+                            var (ax, ay) = TileToPixel(tileA.X, tileA.Y);
+                            vertices.Add((ax + px, ay + py, perpUX, perpUY));
                         }
 
                         bool isLastInRun = s == run.Count - 1;
 
                         if (isLastInRun && r < runs.Count - 1)
                         {
-                            var (npx, npy) = runOffsets[r + 1];
-                            var (jx, jy)   = TileToPixel(wpB.X, wpB.Y);
+                            var (npx, npy, _, _) = runInfo[r + 1];
+                            var (jx, jy)   = TileToPixel(tileB.X, tileB.Y);
                             var (mx, my)   = ComputeMiter(
                                 jx, jy,
                                 px,  py,  run[^1].A,       run[^1].B,
                                 npx, npy, runs[r + 1][0].A, runs[r + 1][0].B);
-                            pts.Add(Invariant($"{mx:F1},{my:F1}"));
+                            vertices.Add((mx, my, perpUX, perpUY));
                         }
                         else
                         {
-                            var (bx, by) = TileToPixel(wpB.X, wpB.Y);
-                            pts.Add(Invariant($"{bx + px:F1},{by + py:F1}"));
+                            var (bx, by) = TileToPixel(tileB.X, tileB.Y);
+                            vertices.Add((bx + px, by + py, perpUX, perpUY));
                         }
 
+                        segIsSplit.Add(splitTileSet.Contains(tileA) || splitTileSet.Contains(tileB));
                         globalSeg++;
                     }
                 }
 
-                if (pts.Count >= 2)
+                // Emit sub-polylines: solid segments as 3 px, split segments as two 1 px rails.
+                if (vertices.Count >= 2)
                 {
-                    sb.Append($"<polyline points=\"{string.Join(" ", pts)}\" fill=\"none\" stroke=\"{color}\" " +
-                              $"stroke-width=\"{LineStrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                    int segStart = 0;
+                    while (segStart < segIsSplit.Count)
+                    {
+                        bool isSplit = segIsSplit[segStart];
+                        int segEnd = segStart + 1;
+                        while (segEnd < segIsSplit.Count && segIsSplit[segEnd] == isSplit)
+                            segEnd++;
+
+                        if (isSplit)
+                        {
+                            var pts1 = new List<string>(segEnd - segStart + 1);
+                            var pts2 = new List<string>(segEnd - segStart + 1);
+                            for (int v = segStart; v <= segEnd; v++)
+                            {
+                                var (vx, vy, vpx, vpy) = vertices[v];
+                                pts1.Add(Invariant($"{vx + vpx:F1},{vy + vpy:F1}"));
+                                pts2.Add(Invariant($"{vx - vpx:F1},{vy - vpy:F1}"));
+                            }
+                            if (pts1.Count >= 2)
+                            {
+                                sb.Append($"<polyline points=\"{string.Join(" ", pts1)}\" fill=\"none\" stroke=\"{color}\" " +
+                                          $"stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                                sb.Append($"<polyline points=\"{string.Join(" ", pts2)}\" fill=\"none\" stroke=\"{color}\" " +
+                                          $"stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                            }
+                        }
+                        else
+                        {
+                            var pts = new List<string>(segEnd - segStart + 1);
+                            for (int v = segStart; v <= segEnd; v++)
+                            {
+                                var (vx, vy, _, _) = vertices[v];
+                                pts.Add(Invariant($"{vx:F1},{vy:F1}"));
+                            }
+                            if (pts.Count >= 2)
+                            {
+                                sb.Append($"<polyline points=\"{string.Join(" ", pts)}\" fill=\"none\" stroke=\"{color}\" " +
+                                          $"stroke-width=\"{LineStrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>");
+                            }
+                        }
+
+                        segStart = segEnd;
+                    }
                 }
             }
         }
