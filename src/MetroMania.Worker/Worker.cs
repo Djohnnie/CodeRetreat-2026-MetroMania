@@ -220,9 +220,12 @@ public class ServiceBusWorker(
             WaterColor = dto.WaterColor,
             Seed = dto.Seed,
             VehicleCapacity = dto.VehicleCapacity,
+            MaxDays = dto.MaxDays,
+            LocalizedContent = dto.LocalizedContent,
             Stations = dto.Stations,
             WaterTiles = dto.WaterTiles,
-            WeeklyGiftOverrides = dto.WeeklyGiftOverrides
+            WeeklyGiftOverrides = dto.WeeklyGiftOverrides,
+            InitialResources = dto.InitialResources
         }
     };
 

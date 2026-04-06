@@ -1,5 +1,6 @@
 using System.Globalization;
 using MetroMania.Domain.Entities;
+using MetroMania.Domain.Enums;
 
 namespace MetroMania.Application.DTOs;
 
@@ -19,7 +20,8 @@ public record LevelDto(
     Dictionary<string, LocalizedLevelText> LocalizedContent,
     List<MetroStation> Stations,
     List<Water> WaterTiles,
-    List<WeeklyGiftOverride> WeeklyGiftOverrides)
+    List<WeeklyGiftOverride> WeeklyGiftOverrides,
+    List<ResourceType> InitialResources)
 {
     public static LevelDto FromEntity(Level level) =>
         new(level.Id, level.Title, level.Description, level.GridWidth, level.GridHeight,
@@ -28,7 +30,8 @@ public record LevelDto(
             level.LevelData.Seed, level.LevelData.VehicleCapacity, level.LevelData.MaxDays,
             level.LevelData.LocalizedContent,
             level.LevelData.Stations, level.LevelData.WaterTiles,
-            level.LevelData.WeeklyGiftOverrides);
+            level.LevelData.WeeklyGiftOverrides,
+            level.LevelData.InitialResources);
 
     /// <summary>Returns the title for the current UI culture, falling back to the English Title.</summary>
     public string GetLocalizedTitle()
