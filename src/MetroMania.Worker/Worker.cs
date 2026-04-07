@@ -35,7 +35,7 @@ public class ServiceBusWorker(
         await using var processor = client.CreateProcessor(queueName, new ServiceBusProcessorOptions
         {
             AutoCompleteMessages = false,
-            MaxConcurrentCalls = 1
+            MaxConcurrentCalls = 6
         });
 
         processor.ProcessMessageAsync += async args =>
