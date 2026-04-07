@@ -7,9 +7,11 @@ using MetroMania.Engine.Model;
 using MetroMania.Scripting;
 using MetroMania.Orleans.Contracts.Grains;
 using MetroMania.Orleans.Contracts.Models;
+using Orleans.Concurrency;
 
-namespace MetroMania.Orleans.Host.Grains;
+namespace MetroMania.Orleans.RendererHost.Grains;
 
+[StatelessWorker]
 public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRendererGrain
 {
     private static readonly JsonSerializerOptions SnapshotJsonOptions = new()
@@ -18,88 +20,44 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         Converters = { new JsonStringEnumConverter(), new LocationJsonConverter() }
     };
 
-    private Level? _level;
-    private IReadOnlyList<GameSnapshot>? _snapshots;
-    private MetroManiaRenderer? _renderer;
-
-    public async Task<ScriptPrepareResult> PrepareAsync(string base64Code, string levelDataJson)
+    public async Task<ScriptRenderResult> RenderBatchAsync(string base64Code, string levelDataJson, int startHour, int count)
     {
         try
         {
-            _level = JsonSerializer.Deserialize<Level>(levelDataJson)
+            var level = JsonSerializer.Deserialize<Level>(levelDataJson)
                 ?? throw new InvalidOperationException("Failed to deserialize level data.");
 
             var wrappedScript = WrapInOuterScript(base64Code);
             var scriptCompiler = new ScriptCompiler<GameResult>();
 
             var script = await scriptCompiler.CompileForExecution(wrappedScript);
-            var gameResult = await script.Invoke(new ScriptGlobals(_level));
+            var gameResult = await script.Invoke(new ScriptGlobals(level));
             if (gameResult is null)
+                return new ScriptRenderResult { Success = false, Error = "Script returned null." };
+
+            var snapshots = gameResult.GameSnapshots;
+            using var renderer = new MetroManiaRenderer(ResolveSvgResourcesPath());
+
+            var end = Math.Min(startHour + count, snapshots.Count);
+            var renders = new List<FrameRender>(end - startHour);
+
+            for (int i = startHour; i < end; i++)
             {
-                Cleanup();
-                return new ScriptPrepareResult { Success = false, Error = "Script returned null." };
+                var svg = renderer.RenderSnapshot(level, snapshots[i]);
+                var json = JsonSerializer.Serialize(snapshots[i], SnapshotJsonOptions);
+                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg, JsonContent = json });
             }
 
-            _snapshots = gameResult.GameSnapshots;
-            _renderer = new MetroManiaRenderer(ResolveSvgResourcesPath());
-
-            return new ScriptPrepareResult { Success = true, TotalFrames = _snapshots.Count };
+            return new ScriptRenderResult { Success = true, Renders = renders, TotalFrames = snapshots.Count };
         }
         catch (Exception ex)
         {
-            Cleanup();
-            return new ScriptPrepareResult
+            return new ScriptRenderResult
             {
                 Success = false,
                 Error = ex.InnerException?.Message ?? ex.Message
             };
         }
-    }
-
-    public Task<ScriptRenderResult> RenderBatchAsync(int startHour, int count)
-    {
-        if (_level is null || _snapshots is null || _renderer is null)
-            return Task.FromResult(new ScriptRenderResult { Success = false, Error = "PrepareAsync must be called first." });
-
-        try
-        {
-            var end = Math.Min(startHour + count, _snapshots.Count);
-            var renders = new List<FrameRender>(end - startHour);
-
-            for (int i = startHour; i < end; i++)
-            {
-                var svg = _renderer.RenderSnapshot(_level, _snapshots[i]);
-                var json = JsonSerializer.Serialize(_snapshots[i], SnapshotJsonOptions);
-                renders.Add(new FrameRender { Hour = i + 1, SvgContent = svg, JsonContent = json });
-            }
-
-            // If this is the last batch, clean up and deactivate
-            if (end >= _snapshots.Count)
-            {
-                Cleanup();
-                DeactivateOnIdle();
-            }
-
-            return Task.FromResult(new ScriptRenderResult { Success = true, Renders = renders });
-        }
-        catch (Exception ex)
-        {
-            Cleanup();
-            DeactivateOnIdle();
-            return Task.FromResult(new ScriptRenderResult
-            {
-                Success = false,
-                Error = ex.InnerException?.Message ?? ex.Message
-            });
-        }
-    }
-
-    private void Cleanup()
-    {
-        _renderer?.Dispose();
-        _renderer = null;
-        _snapshots = null;
-        _level = null;
     }
 
     private string ResolveSvgResourcesPath()
@@ -108,12 +66,10 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
         if (!string.IsNullOrWhiteSpace(configured))
             return configured;
 
-        // In Docker the resources are copied alongside the app binary at /app/resources
         var dockerPath = Path.Combine(AppContext.BaseDirectory, "resources");
         if (Directory.Exists(dockerPath))
             return dockerPath;
 
-        // Local development fallback: resources/ at repo root, 5 levels above the binary output directory
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "resources"));
     }
 

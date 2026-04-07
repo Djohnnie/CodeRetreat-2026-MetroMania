@@ -5,15 +5,8 @@ namespace MetroMania.Orleans.Contracts.Grains;
 public interface IGameRendererGrain : IGrainWithGuidKey
 {
     /// <summary>
-    /// Runs the simulation and stores snapshots in grain state.
-    /// Returns the total number of frames available for rendering.
+    /// Runs the full simulation and renders a batch of frames.
+    /// The grain is stateless — each call re-runs the simulation and renders only the requested range.
     /// </summary>
-    Task<ScriptPrepareResult> PrepareAsync(string base64Code, string levelDataJson);
-
-    /// <summary>
-    /// Renders a batch of frames from the stored snapshots.
-    /// Must call <see cref="PrepareAsync"/> first.
-    /// The grain deactivates automatically after the last batch is rendered.
-    /// </summary>
-    Task<ScriptRenderResult> RenderBatchAsync(int startHour, int count);
+    Task<ScriptRenderResult> RenderBatchAsync(string base64Code, string levelDataJson, int startHour, int count);
 }

@@ -25,6 +25,8 @@ jobs:
             dockerfile: src/MetroMania.Orleans.Host/Dockerfile
           - image: metromania-orleans-validationhost
             dockerfile: src/MetroMania.Orleans.ValidationHost/Dockerfile
+          - image: metromania-orleans-renderhost
+            dockerfile: src/MetroMania.Orleans.RendererHost/Dockerfile
 
     steps:
       - name: Checkout
@@ -111,3 +113,13 @@ jobs:
               --name metromania-orleans-vhost \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --image ${{ env.REGISTRY }}/metromania-orleans-validationhost:${{ github.sha }}
+
+      - name: Restart metromania-orleans-rhost
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp update \
+              --name metromania-orleans-rhost \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --image ${{ env.REGISTRY }}/metromania-orleans-renderhost:${{ github.sha }}

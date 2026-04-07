@@ -22,7 +22,7 @@ public class ServiceBusWorker(
     IHttpClientFactory httpClientFactory,
     ILogger<ServiceBusWorker> logger) : BackgroundService
 {
-    private const int RenderBatchSize = 100;
+    private const int RenderBatchSize = 50;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -135,23 +135,11 @@ public class ServiceBusWorker(
 
                 var levelDataJson = JsonSerializer.Serialize(ToLevelEntity(level));
 
-                // Step 1: Prepare — run simulation and store snapshots in grain state
-                var prepareResult = await gameRendererService.PrepareRenderAsync(level.Id, base64Code, levelDataJson);
-                if (!prepareResult.Success)
-                {
-                    renderFailures.Add((level, prepareResult.Error ?? "Prepare failed."));
-                    continue;
-                }
-
-                var totalFrames = prepareResult.TotalFrames;
-                logger.LogInformation("Prepared {TotalFrames} frames for level {LevelTitle}", totalFrames, level.Title);
-
-                // Step 2: Render and save in batches
+                var totalFrames = 0;
                 var levelFailed = false;
-                for (int start = 0; start < totalFrames; start += RenderBatchSize)
+                for (int start = 0; ; start += RenderBatchSize)
                 {
-                    var count = Math.Min(RenderBatchSize, totalFrames - start);
-                    var batchResult = await gameRendererService.RenderBatchAsync(level.Id, start, count);
+                    var batchResult = await gameRendererService.RenderBatchAsync(level.Id, base64Code, levelDataJson, start, RenderBatchSize);
                     if (!batchResult.Success)
                     {
                         renderFailures.Add((level, batchResult.Error ?? "Render batch failed."));
@@ -159,7 +147,8 @@ public class ServiceBusWorker(
                         break;
                     }
 
-                    // Save this batch (upload blobs + DB metadata)
+                    totalFrames = batchResult.TotalFrames;
+
                     var batchRenders = batchResult.Renders
                         .Select(r => new SaveSubmissionRenderBatchCommand.LevelRender(level.Id, r.Hour, r.SvgContent, r.JsonContent))
                         .ToList();
@@ -168,6 +157,9 @@ public class ServiceBusWorker(
 
                     logger.LogInformation("Saved render batch {Start}-{End} of {Total} for level {LevelTitle}",
                         start + 1, start + batchResult.Renders.Count, totalFrames, level.Title);
+
+                    if (start + RenderBatchSize >= totalFrames)
+                        break;
                 }
 
                 if (!levelFailed)

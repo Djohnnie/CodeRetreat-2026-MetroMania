@@ -17,6 +17,7 @@
     <Project Path="src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj" />
     <Project Path="src/MetroMania.Orleans.Contracts/MetroMania.Orleans.Contracts.csproj" />
     <Project Path="src/MetroMania.Orleans.Host/MetroMania.Orleans.Host.csproj" />
+    <Project Path="src/MetroMania.Orleans.RendererHost/MetroMania.Orleans.RendererHost.csproj" />
     <Project Path="src/MetroMania.Orleans.ValidationHost/MetroMania.Orleans.ValidationHost.csproj" />
     <Project Path="src/MetroMania.Web/MetroMania.Web.csproj" />
     <Project Path="src/MetroMania.Worker/MetroMania.Worker.csproj" />
