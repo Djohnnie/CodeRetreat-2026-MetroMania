@@ -17,6 +17,7 @@
 		<ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
 		<ProjectReference Include="..\MetroMania.Infrastructure.BlobStorage\MetroMania.Infrastructure.BlobStorage.csproj" />
 		<ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
+		<ProjectReference Include="..\MetroMania.ServiceDefaults\MetroMania.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 </Project>

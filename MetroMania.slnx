@@ -1,5 +1,9 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/0. Aspire/">
+    <Project Path="src/MetroMania.AppHost/MetroMania.AppHost.csproj" />
+    <Project Path="src/MetroMania.ServiceDefaults/MetroMania.ServiceDefaults.csproj" />
+  </Folder>
   <Folder Name="/src/1. Application/">
     <Project Path="src/MetroMania.Application/MetroMania.Application.csproj" />
     <Project Path="src/MetroMania.Engine/MetroMania.Engine.csproj" />

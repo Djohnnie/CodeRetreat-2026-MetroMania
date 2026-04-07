@@ -12,6 +12,8 @@ using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // API HttpClient
 var apiBaseUrl = builder.Configuration.GetValue<string>("API_BASE_URL")
     ?? throw new InvalidOperationException("Configure ApiBaseUrl in appsettings.");
@@ -203,6 +205,7 @@ app.MapGet("/api/renders/{submissionId:guid}/{levelId:guid}/{hour:int}.svg",
     return Results.Content(svg, "image/svg+xml");
 }).RequireAuthorization();
 
+app.MapDefaultEndpoints();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

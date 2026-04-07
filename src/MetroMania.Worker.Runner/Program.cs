@@ -4,6 +4,8 @@ using MetroMania.Worker.Runner;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Infrastructure (EF Core, repositories)
 var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("Default")

@@ -6,6 +6,7 @@
 		<ProjectReference Include="..\MetroMania.Infrastructure.BlobStorage\MetroMania.Infrastructure.BlobStorage.csproj" />
 		<ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
 		<ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
+		<ProjectReference Include="..\MetroMania.ServiceDefaults\MetroMania.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -15,6 +15,8 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Infrastructure (EF Core, repositories, password hasher)
 var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("Default")
@@ -93,6 +95,8 @@ using (var scope = app.Services.CreateScope())
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapDefaultEndpoints();
 
 // SignalR hub for real-time submission notifications
 app.MapHub<SubmissionHub>("/hubs/submissions");
