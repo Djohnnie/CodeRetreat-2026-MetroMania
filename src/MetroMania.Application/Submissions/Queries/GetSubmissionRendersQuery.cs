@@ -14,17 +14,19 @@ public class GetSubmissionRendersQueryHandler(
 {
     public async Task<List<SubmissionRenderDto>> Handle(GetSubmissionRendersQuery request, CancellationToken cancellationToken)
     {
-        var renders = await renderRepository.GetBySubmissionAndLevelAsync(request.SubmissionId, request.LevelId);
+        var render = await renderRepository.GetBySubmissionAndLevelAsync(request.SubmissionId, request.LevelId);
+        if (render is null || render.TotalFrames == 0)
+            return [];
 
-        var downloads = renders
-            .Where(r => !string.IsNullOrEmpty(r.SvgLocation))
-            .Select(r => (r, task: blobStorage.DownloadAsync(r.SvgLocation, cancellationToken)))
+        var downloads = Enumerable.Range(0, render.TotalFrames)
+            .Select(hour => (hour, task: blobStorage.DownloadAsync(
+                $"{request.SubmissionId}_{request.LevelId}_{hour:D4}.svg", cancellationToken)))
             .ToList();
 
         await Task.WhenAll(downloads.Select(x => x.task));
 
         return downloads
-            .Select(x => new SubmissionRenderDto(x.r.Id, x.r.SubmissionId, x.r.LevelId, x.r.Hour, x.task.Result))
+            .Select(x => new SubmissionRenderDto(render.Id, request.SubmissionId, request.LevelId, x.hour, x.task.Result))
             .ToList();
     }
 }

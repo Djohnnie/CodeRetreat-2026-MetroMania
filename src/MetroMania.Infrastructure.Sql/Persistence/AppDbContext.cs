@@ -86,8 +86,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasKey(e => e.Id).IsClustered(false);
             entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
-            entity.HasIndex(e => new { e.SubmissionId, e.LevelId, e.Hour }).IsUnique();
-            entity.Property(e => e.SvgLocation).HasColumnType("nvarchar(500)").IsRequired();
+            entity.HasIndex(e => new { e.SubmissionId, e.LevelId }).IsUnique();
             entity.HasOne(e => e.Submission).WithMany()
                 .HasForeignKey(e => e.SubmissionId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.Level).WithMany()

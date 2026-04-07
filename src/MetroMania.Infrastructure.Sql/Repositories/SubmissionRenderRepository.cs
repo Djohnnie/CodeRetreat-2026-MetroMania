@@ -7,21 +7,21 @@ namespace MetroMania.Infrastructure.Sql.Repositories;
 
 public class SubmissionRenderRepository(AppDbContext db) : ISubmissionRenderRepository
 {
-    public async Task<List<SubmissionRender>> GetBySubmissionAndLevelAsync(Guid submissionId, Guid levelId) =>
+    public async Task<SubmissionRender?> GetBySubmissionAndLevelAsync(Guid submissionId, Guid levelId) =>
         await db.SubmissionRenders
-            .Where(r => r.SubmissionId == submissionId && r.LevelId == levelId)
-            .OrderBy(r => r.Hour)
-            .ToListAsync();
+            .FirstOrDefaultAsync(r => r.SubmissionId == submissionId && r.LevelId == levelId);
 
-    public async Task<List<string>> GetLocationsBySubmissionIdAsync(Guid submissionId) =>
+    public async Task<List<SubmissionRender>> GetBySubmissionIdAsync(Guid submissionId) =>
         await db.SubmissionRenders
             .Where(r => r.SubmissionId == submissionId)
-            .Select(r => r.SvgLocation)
             .ToListAsync();
 
-    public async Task AddManyAsync(IEnumerable<SubmissionRender> renders)
+    public async Task AddAsync(SubmissionRender render)
     {
-        db.SubmissionRenders.AddRange(renders);
+        db.SubmissionRenders.Add(render);
         await db.SaveChangesAsync();
     }
+
+    public async Task UpdateAsync(SubmissionRender render) =>
+        await db.SaveChangesAsync();
 }

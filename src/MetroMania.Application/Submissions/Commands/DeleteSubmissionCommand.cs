@@ -14,28 +14,19 @@ public class DeleteSubmissionCommandHandler(
 {
     public async Task Handle(DeleteSubmissionCommand request, CancellationToken cancellationToken)
     {
-        // Fetch blob locations before deleting from SQL so we can clean them up afterwards
-        var blobLocations = await renderRepository.GetLocationsBySubmissionIdAsync(request.SubmissionId);
+        // Fetch render info before deleting from SQL so we can derive blob names for cleanup
+        var renders = await renderRepository.GetBySubmissionIdAsync(request.SubmissionId);
 
-        // Derive JSON, ZIP blob names from SVG locations
         var allBlobNames = new List<string>();
-        var zipBlobNames = new HashSet<string>();
-
-        foreach (var loc in blobLocations.Where(l => !string.IsNullOrEmpty(l)))
+        foreach (var render in renders)
         {
-            allBlobNames.Add(loc); // SVG
-            allBlobNames.Add(Path.ChangeExtension(loc, ".json")); // JSON
-
-            // Derive ZIP name: {submissionId}_{levelId}.zip from {submissionId}_{levelId}_{hour}.svg
-            var lastUnderscore = loc.LastIndexOf('_');
-            if (lastUnderscore > 0)
+            for (var hour = 0; hour < render.TotalFrames; hour++)
             {
-                var zipName = loc[..lastUnderscore] + ".zip";
-                zipBlobNames.Add(zipName);
+                allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.svg");
+                allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.json");
             }
+            allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}.zip");
         }
-
-        allBlobNames.AddRange(zipBlobNames);
 
         // Delete the submission — SQL cascade removes SubmissionScores and SubmissionRenders
         await submissionRepository.DeleteAsync(request.SubmissionId);

@@ -4,7 +4,8 @@ namespace MetroMania.Domain.Interfaces;
 
 public interface ISubmissionRenderRepository
 {
-    Task<List<SubmissionRender>> GetBySubmissionAndLevelAsync(Guid submissionId, Guid levelId);
-    Task<List<string>> GetLocationsBySubmissionIdAsync(Guid submissionId);
-    Task AddManyAsync(IEnumerable<SubmissionRender> renders);
+    Task<SubmissionRender?> GetBySubmissionAndLevelAsync(Guid submissionId, Guid levelId);
+    Task<List<SubmissionRender>> GetBySubmissionIdAsync(Guid submissionId);
+    Task AddAsync(SubmissionRender render);
+    Task UpdateAsync(SubmissionRender render);
 }

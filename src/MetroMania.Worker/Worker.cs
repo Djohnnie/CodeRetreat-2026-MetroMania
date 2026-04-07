@@ -163,7 +163,10 @@ public class ServiceBusWorker(
                 }
 
                 if (!levelFailed)
+                {
+                    await sender.Send(new SaveSubmissionRenderInfoCommand(submissionId, level.Id, totalFrames), ct);
                     renderedLevelInfos.Add(new CreateSubmissionRenderZipsCommand.LevelInfo(level.Id, level.Title, totalFrames));
+                }
             }
 
             renderSw.Stop();
