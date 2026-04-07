@@ -7,11 +7,9 @@ using MetroMania.Engine.Model;
 using MetroMania.Scripting;
 using MetroMania.Orleans.Contracts.Grains;
 using MetroMania.Orleans.Contracts.Models;
-using Orleans.Concurrency;
 
 namespace MetroMania.Orleans.RendererHost.Grains;
 
-[StatelessWorker]
 public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRendererGrain
 {
     private static readonly JsonSerializerOptions SnapshotJsonOptions = new()
@@ -57,6 +55,10 @@ public class GameRendererGrain(IConfiguration configuration) : Grain, IGameRende
                 Success = false,
                 Error = ex.InnerException?.Message ?? ex.Message
             };
+        }
+        finally
+        {
+            DeactivateOnIdle(); // Deactivate grain after processing
         }
     }
 

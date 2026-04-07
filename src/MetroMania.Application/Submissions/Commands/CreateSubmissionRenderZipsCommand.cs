@@ -27,7 +27,7 @@ public class CreateSubmissionRenderZipsCommandHandler(IRenderBlobStorage blobSto
             using var memoryStream = new MemoryStream();
             using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, leaveOpen: true))
             {
-                for (var hour = 0; hour < level.TotalFrames; hour++)
+                for (var hour = 1; hour <= level.TotalFrames; hour++)
                 {
                     var svgBlobName = $"{request.SubmissionId}_{level.LevelId}_{hour:D4}.svg";
                     var svgContent = await blobStorage.DownloadAsync(svgBlobName, cancellationToken);

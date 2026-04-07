@@ -18,7 +18,7 @@ public class GetSubmissionRendersQueryHandler(
         if (render is null || render.TotalFrames == 0)
             return [];
 
-        var downloads = Enumerable.Range(0, render.TotalFrames)
+        var downloads = Enumerable.Range(1, render.TotalFrames)
             .Select(hour => (hour, task: blobStorage.DownloadAsync(
                 $"{request.SubmissionId}_{request.LevelId}_{hour:D4}.svg", cancellationToken)))
             .ToList();

@@ -20,7 +20,7 @@ public class DeleteSubmissionCommandHandler(
         var allBlobNames = new List<string>();
         foreach (var render in renders)
         {
-            for (var hour = 0; hour < render.TotalFrames; hour++)
+            for (var hour = 1; hour <= render.TotalFrames; hour++)
             {
                 allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.svg");
                 allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.json");
