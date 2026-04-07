@@ -15,8 +15,6 @@ public interface IConductorService
     /// <summary>
     /// Sends a user message to Conductor and returns the assistant reply.
     /// The <paramref name="onClearHistory"/> callback is invoked if the model calls the clear_chat_history tool.
-    /// The <paramref name="onGetLatestCode"/> callback is invoked if the model calls the get_latest_submission_code tool;
-    /// it should return the decoded C# source of the player's most recent submission, or <c>null</c> if none exists.
     /// The <paramref name="onGetLevelData"/> callback is invoked if the model calls the get_level_data tool;
     /// it receives the level title and should return a JSON string describing the level, or <c>null</c> if not found.
     /// The <paramref name="onGetLeaderboardPosition"/> callback is invoked if the model calls the get_leaderboard_position tool;
@@ -31,7 +29,6 @@ public interface IConductorService
         IReadOnlyList<string> levelTitles,
         string? editorCode,
         Func<CancellationToken, Task> onClearHistory,
-        Func<int?, CancellationToken, Task<string?>> onGetLatestCode,
         Func<string, CancellationToken, Task<string?>> onGetLevelData,
         Func<CancellationToken, Task<string?>> onGetLeaderboardPosition,
         CancellationToken cancellationToken = default);

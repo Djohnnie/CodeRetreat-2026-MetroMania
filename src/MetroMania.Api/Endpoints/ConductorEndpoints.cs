@@ -70,16 +70,7 @@ public static class ConductorEndpoints
                 request.EditorCode,
                 onClearHistory: async (token) =>
                     await mediator.Send(new ArchiveChatHistoryCommand(request.UserId), token),
-                onGetLatestCode: async (version, token) =>
-                {
-                    var submissions = await mediator.Send(new GetUserSubmissionsQuery(request.UserId), token);
-                    if (submissions.Count == 0) return null;
-                    var match = version.HasValue
-                        ? submissions.FirstOrDefault(s => s.Version == version.Value)
-                        : submissions.MaxBy(s => s.Version);
-                    return match?.Code;
-                },
-                onGetLevelData: async (title, token) =>
+                onGetLevelData:async (title, token) =>
                 {
                     var level = allLevels.FirstOrDefault(l =>
                         string.Equals(l.Title, title, StringComparison.OrdinalIgnoreCase));

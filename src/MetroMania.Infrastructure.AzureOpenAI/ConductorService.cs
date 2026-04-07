@@ -15,7 +15,6 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         IReadOnlyList<string> levelTitles,
         string? editorCode,
         Func<CancellationToken, Task> onClearHistory,
-        Func<int?, CancellationToken, Task<string?>> onGetLatestCode,
         Func<string, CancellationToken, Task<string?>> onGetLevelData,
         Func<CancellationToken, Task<string?>> onGetLeaderboardPosition,
         CancellationToken cancellationToken = default)
@@ -49,19 +48,6 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
                 "ar" => "تم أرشفة سجل المحادثة بنجاح.",
                 _ => "Chat history successfully archived."
             };
-        }
-
-        async Task<string> DoGetLatestCode(int? version = null)
-        {
-            var code = await onGetLatestCode(version, cancellationToken);
-            if (code is null)
-                return language switch
-                {
-                    "nl" => "De speler heeft nog geen code ingediend.",
-                    "ar" => "لم يقدم اللاعب أي كود بعد.",
-                    _ => "The player has not submitted any code yet."
-                };
-            return code;
         }
 
         async Task<string> DoGetLevelData(string title)
@@ -168,16 +154,7 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
             "Archives all previous chat messages for the current user, giving them a fresh start. " +
             "Invoke this when the user explicitly asks to clear, wipe, reset, or start over their chat history.");
 
-        var getLatestCodeTool = AIFunctionFactory.Create(
-            DoGetLatestCode,
-            "get_latest_submission_code",
-            "Retrieves the player's submitted C# bot code. " +
-            "Optionally pass a version number to fetch a specific submission; omit it (or pass null) to get the latest version. " +
-            "Use this whenever the player refers to 'my code', asks for a review, " +
-            "needs help debugging or improving it, or asks any question that requires seeing their actual code. " +
-            "Never make assumptions about the code without fetching it first.");
-
-        var messages = new List<ChatMessage>
+        var messages= new List<ChatMessage>
         {
             new(ChatRole.System, systemPrompt)
         };
@@ -226,9 +203,9 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
             "read_editor_code",
             "Reads the current C# code from the Monaco code editor on the Play page. " +
             "This returns the live editor content, which may differ from the last submitted version. " +
-            "Use this when the player asks you to review, check, or comment on 'the code in my editor', " +
-            "'what I have so far', or 'my current code' — especially when they haven't submitted yet. " +
-            "If the player asks about their submitted code, use get_latest_submission_code instead.");
+            "This is the only way to access the player's code. Use this whenever the player refers to " +
+            "'my code', asks for a review, wants help debugging or improving, or asks any question that " +
+            "requires seeing their actual code. Never make assumptions about the code without reading it first.");
 
         var updateEditorCodeTool = AIFunctionFactory.Create(
             DoUpdateEditorCode,
@@ -242,7 +219,7 @@ public sealed class ConductorService(IChatClient chatClient, ConductorInstructio
         // UseFunctionInvocation() middleware (registered in DI) handles the tool-call loop automatically.
         var options = new ChatOptions
         {
-            Tools = [clearHistoryTool, getLatestCodeTool, getLevelDataTool, navigateToPageTool,
+            Tools = [clearHistoryTool, getLevelDataTool, navigateToPageTool,
                      closeConductorTool, getLeaderboardPositionTool, readEditorCodeTool, updateEditorCodeTool]
         };
         var response = await chatClient.GetResponseAsync(messages, options, cancellationToken);
