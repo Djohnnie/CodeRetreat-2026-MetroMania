@@ -117,7 +117,7 @@ else
                             <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="GetStatusColor(submission.Status)">
                                 @Loc[submission.Status.ToString()]
                             </MudChip>
-                            @if (submission.Status == SubmissionStatus.Succeeded)
+                            @if (submission.Scores.Count > 0)
                             {
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
                                     @Loc["TotalScore"]: @submission.TotalScore.ToString("N0")
