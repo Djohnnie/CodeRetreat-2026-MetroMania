@@ -1,6 +1,7 @@
 using MetroMania.Application.Auth.Commands;
 using MetroMania.Application.Auth.Queries;
 using MetroMania.Application.DTOs;
+using MetroMania.Application.Submissions.Queries;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
 using MetroMania.Domain.Extensions;
@@ -198,6 +199,24 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         SetAuthHeader();
         return (await httpClient.GetFromJsonAsync<List<SubmissionRenderDto>>(
             $"/api/submissions/{submissionId}/levels/{levelId}/renders", JsonOptions))!;
+    }
+
+    public async Task<SubmissionRenderInfoDto?> GetSubmissionRenderInfoAsync(Guid submissionId, Guid levelId)
+    {
+        SetAuthHeader();
+        var response = await httpClient.GetAsync($"/api/submissions/{submissionId}/levels/{levelId}/render-info");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<SubmissionRenderInfoDto>(JsonOptions);
+    }
+
+    public async Task<string?> GetSubmissionRenderFrameAsync(Guid submissionId, Guid levelId, int hour)
+    {
+        SetAuthHeader();
+        var response = await httpClient.GetAsync($"/api/submissions/{submissionId}/levels/{levelId}/renders/{hour}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync();
     }
 
     public string GetSubmissionLevelZipUrl(Guid submissionId, Guid levelId)

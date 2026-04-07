@@ -192,6 +192,17 @@ app.MapGet("/api/downloads/submissions/{submissionId:guid}/levels/{levelId:guid}
     return Results.File(zipBytes, "application/zip", $"{submissionId}_{levelId}.zip");
 }).RequireAuthorization();
 
+// Individual SVG frame proxy — serves a single render frame through cookie auth.
+app.MapGet("/api/renders/{submissionId:guid}/{levelId:guid}/{hour:int}.svg",
+    async (Guid submissionId, Guid levelId, int hour, MetroManiaApiClient apiClient) =>
+{
+    var svg = await apiClient.GetSubmissionRenderFrameAsync(submissionId, levelId, hour);
+    if (svg is null)
+        return Results.NotFound();
+
+    return Results.Content(svg, "image/svg+xml");
+}).RequireAuthorization();
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

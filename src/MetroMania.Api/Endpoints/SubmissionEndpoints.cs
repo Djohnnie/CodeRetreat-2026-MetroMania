@@ -37,6 +37,20 @@ public static class SubmissionEndpoints
             return Results.Ok(renders);
         });
 
+        group.MapGet("/{submissionId:guid}/levels/{levelId:guid}/render-info", async (Guid submissionId, Guid levelId, IMediator mediator) =>
+        {
+            var info = await mediator.Send(new GetSubmissionRenderInfoQuery(submissionId, levelId));
+            return info is null ? Results.NotFound() : Results.Ok(info);
+        });
+
+        group.MapGet("/{submissionId:guid}/levels/{levelId:guid}/renders/{hour:int}", async (Guid submissionId, Guid levelId, int hour, IMediator mediator) =>
+        {
+            var svg = await mediator.Send(new GetSubmissionRenderFrameQuery(submissionId, levelId, hour));
+            return svg is null
+                ? Results.NotFound()
+                : Results.Content(svg, "image/svg+xml");
+        });
+
         group.MapGet("/{submissionId:guid}/levels/{levelId:guid}/zip", async (Guid submissionId, Guid levelId, IMediator mediator) =>
         {
             var zipBytes = await mediator.Send(new GetSubmissionLevelZipQuery(submissionId, levelId));

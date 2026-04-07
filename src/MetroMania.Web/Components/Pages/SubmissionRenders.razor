@@ -1,6 +1,6 @@
 @page "/play/renders"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
-@using MetroMania.Application.DTOs
+@using MetroMania.Application.Submissions.Queries
 @using MetroMania.Web.Services
 @implements IAsyncDisposable
 @inject MetroManiaApiClient ApiClient
@@ -23,7 +23,7 @@
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
 }
-else if (_renders.Count == 0)
+else if (_totalFrames == 0)
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
         @Loc["NoRendersAvailable"]
@@ -43,7 +43,7 @@ else
                 <MudTooltip Text="@Loc["PreviousDay"]">
                     <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
                                    Color="Color.Primary"
-                                   Disabled="_currentIndex <= 0"
+                                   Disabled="_currentHour <= 1"
                                    OnClick="Previous" />
                 </MudTooltip>
 
@@ -60,7 +60,7 @@ else
                     <MudTooltip Text="@Loc["Play"]">
                         <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
                                        Color="Color.Success"
-                                       Disabled="_currentIndex >= _renders.Count - 1"
+                                       Disabled="_currentHour >= _totalFrames"
                                        OnClick="StartPlayback" />
                     </MudTooltip>
                 }
@@ -68,7 +68,7 @@ else
                 <MudTooltip Text="@Loc["NextDay"]">
                     <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
                                    Color="Color.Primary"
-                                   Disabled="_currentIndex >= _renders.Count - 1"
+                                   Disabled="_currentHour >= _totalFrames"
                                    OnClick="Next" />
                 </MudTooltip>
             </div>
@@ -100,28 +100,28 @@ else
                            @onblur="@(() => { if (int.TryParse(_hourInputStr, out var h)) JumpToHour(h); })"
                            style="width: 56px; text-align: center; background: transparent; border: none; border-bottom: 1px solid var(--mud-palette-text-primary); color: var(--mud-palette-text-primary); font-size: 1rem; font-weight: 600; font-family: inherit; outline: none;" />
                     <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: inline;">
-                        / @_renders[^1].Hour
+                        / @_totalFrames
                     </MudText>
                 </span>
 
-                <MudProgressLinear Value="@((_currentIndex + 1.0) / _renders.Count * 100)"
+                <MudProgressLinear Value="@((double)_currentHour / _totalFrames * 100)"
                                    Color="Color.Primary" Rounded="true"
                                    Style="width: 100px;" />
             </div>
 
             @* Slider *@
             <div style="width: 100%; margin-top: 4px;">
-                <MudSlider T="int" Value="_currentIndex" ValueChanged="OnSliderChanged"
-                           Min="0" Max="_renders.Count - 1" Step="1"
+                <MudSlider T="int" Value="_currentHour" ValueChanged="OnSliderChanged"
+                           Min="1" Max="_totalFrames" Step="1"
                            Color="Color.Primary" />
             </div>
         </MudPaper>
 
-        @* SVG frame *@
+        @* SVG frame — loaded directly from server endpoint *@
         <MudPaper Elevation="2" Class="pa-2"
                   Style="border-radius: 12px; overflow: auto;">
             <div style="display: inline-block;">
-                @((MarkupString)_renders[_currentIndex].SvgContent)
+                <img src="@FrameUrl" alt="@($"Frame {_currentHour}")" />
             </div>
         </MudPaper>
 
@@ -132,25 +132,28 @@ else
     [Parameter, SupplyParameterFromQuery(Name = "submissionId")] public Guid SubmissionId { get; set; }
     [Parameter, SupplyParameterFromQuery(Name = "levelId")] public Guid LevelId { get; set; }
 
-    private List<SubmissionRenderDto> _renders = [];
-    private int _currentIndex;
-    private string _hourInputStr = "0";
+    private int _totalFrames;
+    private int _currentHour = 1;
+    private string _hourInputStr = "1";
     private bool _loading = true;
     private bool _isPlaying;
     private CancellationTokenSource? _playCts;
     private ElementReference _containerRef;
 
+    private string FrameUrl => $"/api/renders/{SubmissionId}/{LevelId}/{_currentHour}.svg";
+
     protected override async Task OnInitializedAsync()
     {
-        _renders = await ApiClient.GetSubmissionRendersAsync(SubmissionId, LevelId);
+        var info = await ApiClient.GetSubmissionRenderInfoAsync(SubmissionId, LevelId);
+        _totalFrames = info?.TotalFrames ?? 0;
         _loading = false;
-        if (_renders.Count > 0)
-            _hourInputStr = _renders[0].Hour.ToString();
+        if (_totalFrames > 0)
+            _hourInputStr = "1";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && _renders.Count > 0)
+        if (firstRender && _totalFrames > 0)
             await _containerRef.FocusAsync();
     }
 
@@ -188,8 +191,8 @@ else
     {
         get
         {
-            if (_renders.Count == 0) return string.Empty;
-            int absoluteHour = Math.Max(0, _renders[_currentIndex].Hour - 1);
+            if (_totalFrames == 0) return string.Empty;
+            int absoluteHour = Math.Max(0, _currentHour - 1);
             int day = absoluteHour / 24 + 1;
             int hourOfDay = absoluteHour % 24;
             string dowKey = ((DayOfWeek)((absoluteHour / 24 + 1) % 7)) switch
@@ -207,41 +210,26 @@ else
         }
     }
 
-    private void SetCurrentIndex(int index)
+    private void SetCurrentHour(int hour)
     {
-        _currentIndex = index;
-        if (_renders.Count > 0)
-            _hourInputStr = _renders[_currentIndex].Hour.ToString();
+        _currentHour = Math.Clamp(hour, 1, _totalFrames);
+        _hourInputStr = _currentHour.ToString();
     }
 
-    private void JumpToHour(int hour)
-    {
-        int bestIndex = 0;
-        int bestDiff = int.MaxValue;
-        for (int i = 0; i < _renders.Count; i++)
-        {
-            int diff = Math.Abs(_renders[i].Hour - hour);
-            if (diff < bestDiff)
-            {
-                bestDiff = diff;
-                bestIndex = i;
-            }
-        }
-        SetCurrentIndex(bestIndex);
-    }
+    private void JumpToHour(int hour) => SetCurrentHour(hour);
 
-    private void OnSliderChanged(int value) => SetCurrentIndex(value);
+    private void OnSliderChanged(int value) => SetCurrentHour(value);
 
     private void Previous()
     {
-        if (_currentIndex > 0)
-            SetCurrentIndex(_currentIndex - 1);
+        if (_currentHour > 1)
+            SetCurrentHour(_currentHour - 1);
     }
 
     private void Next()
     {
-        if (_currentIndex < _renders.Count - 1)
-            SetCurrentIndex(_currentIndex + 1);
+        if (_currentHour < _totalFrames)
+            SetCurrentHour(_currentHour + 1);
     }
 
     private void StartPlayback()
@@ -262,10 +250,10 @@ else
     {
         try
         {
-            while (!ct.IsCancellationRequested && _currentIndex < _renders.Count - 1)
+            while (!ct.IsCancellationRequested && _currentHour < _totalFrames)
             {
                 await Task.Delay(250, ct);
-                SetCurrentIndex(_currentIndex + 1);
+                SetCurrentHour(_currentHour + 1);
                 await InvokeAsync(StateHasChanged);
             }
         }
