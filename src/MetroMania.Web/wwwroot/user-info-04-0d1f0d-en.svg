@@ -1,109 +1,140 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
   <defs>
-    <radialGradient id="bg" cx="40%" cy="50%" r="60%">
-      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.07"/>
+    <radialGradient id="gl" cx="25%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.18"/>
       <stop offset="100%" stop-color="#0d1f0d" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4ecca3"/>
+    <radialGradient id="gr" cx="75%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#f9a825" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#0d1f0d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gc" cx="50%" cy="28%" r="40%">
+      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#0d1f0d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e94560"/>
       <stop offset="50%" stop-color="#f9a825"/>
-      <stop offset="100%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
     </linearGradient>
     <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4ecca3"/>
-      <stop offset="50%" stop-color="#f9a825"/>
-      <stop offset="100%" stop-color="#60a5fa"/>
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="50%" stop-color="#4ecca3"/>
+      <stop offset="100%" stop-color="#f9a825"/>
     </linearGradient>
+    <filter id="neon" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#000000" opacity="0.06"/>
+    </pattern>
   </defs>
+
   <rect width="1280" height="720" fill="#0d1f0d"/>
-  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" fill="url(#gl)"/>
+  <rect width="1280" height="720" fill="url(#gr)"/>
+  <rect width="1280" height="720" fill="url(#gc)"/>
+  <rect width="1280" height="720" fill="url(#scanlines)"/>
   <rect width="1280" height="4" fill="url(#tb)"/>
 
-  <text x="640" y="66" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="52" font-weight="900" fill="url(#tg)" letter-spacing="-1">CODE YOUR BOT</text>
-  <line x1="120" y1="80" x2="1160" y2="80" stroke="#4ecca3" stroke-width="1" opacity="0.15"/>
+  <g opacity="0.06">
+    <line x1="0" y1="480" x2="1280" y2="480" stroke="#4ecca3" stroke-width="1"/>
+    <line x1="0" y1="496" x2="1280" y2="496" stroke="#4ecca3" stroke-width="0.8"/>
+    <line x1="0" y1="514" x2="1280" y2="514" stroke="#4ecca3" stroke-width="0.6"/>
+    <line x1="0" y1="534" x2="1280" y2="534" stroke="#4ecca3" stroke-width="0.5"/>
+    <line x1="0" y1="556" x2="1280" y2="556" stroke="#4ecca3" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="640" y2="576" stroke="#4ecca3" stroke-width="0.8"/>
+    <line x1="640" y1="480" x2="440" y2="576" stroke="#4ecca3" stroke-width="0.5"/>
+    <line x1="640" y1="480" x2="840" y2="576" stroke="#4ecca3" stroke-width="0.5"/>
+    <line x1="640" y1="480" x2="200" y2="576" stroke="#4ecca3" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="1080" y2="576" stroke="#4ecca3" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="-80" y2="576" stroke="#4ecca3" stroke-width="0.3"/>
+    <line x1="640" y1="480" x2="1360" y2="576" stroke="#4ecca3" stroke-width="0.3"/>
+  </g>
 
-  <!-- Column headers -->
-  <text x="310" y="102" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="14" fill="#4a7a4a" letter-spacing="2" font-weight="600">CALLBACKS</text>
-  <text x="960" y="102" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="14" fill="#4a7a4a" letter-spacing="2" font-weight="600">ACTIONS</text>
+  <g stroke-width="2" fill="none" opacity="0.25">
+    <polyline points="80,60 80,30 110,30" stroke="#4ecca3"/>
+    <polyline points="1200,60 1200,30 1170,30" stroke="#e94560"/>
+    <polyline points="80,520 80,550 110,550" stroke="#e94560"/>
+    <polyline points="1200,520 1200,550 1170,550" stroke="#4ecca3"/>
+  </g>
+  <text x="640" y="68" text-anchor="middle" font-family="Arial,Helvetica,sans-serif"
+    font-size="28" font-weight="700" fill="url(#tg)" letter-spacing="3">CODE YOUR BOT</text>
 
-  <!-- Panel divider -->
-  <line x1="626" y1="92" x2="626" y2="625" stroke="#ffffff" stroke-width="1" opacity="0.05"/>
+  <line x1="320" y1="82" x2="960" y2="82" stroke="url(#tb)" stroke-width="1" opacity="0.3"/>
 
-  
-  <rect x="28" y="118" width="568" height="58" rx="10"
-    fill="#f9a825" fill-opacity="0.18" stroke="#f9a825" stroke-width="1.5" stroke-opacity="0.5"/>
-  <text x="48" y="153" font-family="monospace,Arial,sans-serif"
-    font-size="15" fill="#f9a825" font-weight="700">OnHourTick  ★  returns PlayerAction</text>
-  <rect x="28" y="190" width="568" height="58" rx="10"
-    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
-  <text x="48" y="225" font-family="monospace,Arial,sans-serif"
-    font-size="14" fill="#8888aa" font-weight="400">OnDayStart</text>
-  <rect x="28" y="262" width="568" height="58" rx="10"
-    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
-  <text x="48" y="297" font-family="monospace,Arial,sans-serif"
-    font-size="14" fill="#8888aa" font-weight="400">OnWeeklyGift</text>
-  <rect x="28" y="334" width="568" height="58" rx="10"
-    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
-  <text x="48" y="369" font-family="monospace,Arial,sans-serif"
-    font-size="14" fill="#8888aa" font-weight="400">OnStationSpawned</text>
-  <rect x="28" y="406" width="568" height="58" rx="10"
-    fill="#8888aa" fill-opacity="0.05" stroke="#8888aa" stroke-width="0.8" stroke-opacity="0.5"/>
-  <text x="48" y="441" font-family="monospace,Arial,sans-serif"
-    font-size="14" fill="#8888aa" font-weight="400">OnPassengerWaiting</text>
-  <rect x="28" y="478" width="568" height="58" rx="10"
-    fill="#e94560" fill-opacity="0.05" stroke="#e94560" stroke-width="0.8" stroke-opacity="0.5"/>
-  <text x="48" y="513" font-family="monospace,Arial,sans-serif"
-    font-size="14" fill="#e94560" font-weight="400">OnStationOverrun</text>
-  <rect x="28" y="550" width="568" height="58" rx="10"
-    fill="#e94560" fill-opacity="0.05" stroke="#e94560" stroke-width="0.8" stroke-opacity="0.5"/>
-  <text x="48" y="585" font-family="monospace,Arial,sans-serif"
-    font-size="14" fill="#e94560" font-weight="400">OnGameOver</text>
-  
-  <rect x="660" y="118" width="195" height="58" rx="10"
-    fill="#4ecca3" fill-opacity="0.10" stroke="#4ecca3" stroke-width="1.2"/>
-  <text x="757" y="153" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#4ecca3" font-weight="600">CreateLine</text>
-  <rect x="870" y="118" width="195" height="58" rx="10"
-    fill="#4ecca3" fill-opacity="0.10" stroke="#4ecca3" stroke-width="1.2"/>
-  <text x="967" y="153" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#4ecca3" font-weight="600">ExtendLine</text>
-  <rect x="1080" y="118" width="195" height="58" rx="10"
-    fill="#4ecca3" fill-opacity="0.10" stroke="#4ecca3" stroke-width="1.2"/>
-  <text x="1177" y="153" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#4ecca3" font-weight="600">InsertStationInLine</text>
-  <rect x="660" y="200" width="195" height="58" rx="10"
-    fill="#e94560" fill-opacity="0.10" stroke="#e94560" stroke-width="1.2"/>
-  <text x="757" y="235" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#e94560" font-weight="600">RemoveLine</text>
-  <rect x="870" y="200" width="195" height="58" rx="10"
-    fill="#60a5fa" fill-opacity="0.10" stroke="#60a5fa" stroke-width="1.2"/>
-  <text x="967" y="235" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#60a5fa" font-weight="600">AddVehicleToLine</text>
-  <rect x="1080" y="200" width="195" height="58" rx="10"
-    fill="#60a5fa" fill-opacity="0.10" stroke="#60a5fa" stroke-width="1.2"/>
-  <text x="1177" y="235" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#60a5fa" font-weight="600">RemoveVehicle</text>
-  <rect x="660" y="282" width="195" height="58" rx="10"
-    fill="#a78bfa" fill-opacity="0.10" stroke="#a78bfa" stroke-width="1.2"/>
-  <text x="757" y="317" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#a78bfa" font-weight="600">AddWagonToTrain</text>
-  <rect x="870" y="282" width="195" height="58" rx="10"
-    fill="#a78bfa" fill-opacity="0.10" stroke="#a78bfa" stroke-width="1.2"/>
-  <text x="967" y="317" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#a78bfa" font-weight="600">MoveWagonBetweenTrains</text>
-  <rect x="1080" y="282" width="195" height="58" rx="10"
-    fill="#8888aa" fill-opacity="0.10" stroke="#8888aa" stroke-width="1.2"/>
-  <text x="1177" y="317" text-anchor="middle" font-family="monospace,Arial,sans-serif"
-    font-size="13" fill="#8888aa" font-weight="600">NoAction</text>
+  <!-- Code editor panel -->
+  <rect x="140" y="90" width="1000" height="132" rx="8"
+    fill="#081408" stroke="#4ecca3" stroke-width="0.8" opacity="0.9"/>
 
-  <!-- Footer bar -->
-  <rect x="55" y="634" width="1170" height="52" rx="10"
-    fill="#f9a825" fill-opacity="0.08" stroke="#f9a825" stroke-width="1.2"/>
-  <text x="640" y="666" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c8a030">OnHourTick fires every hour and returns one PlayerAction — your main control loop</text>
+  <!-- Editor title bar -->
+  <rect x="140" y="90" width="1000" height="18" rx="8" fill="#162216"/>
+  <rect x="140" y="100" width="1000" height="8" fill="#162216"/>
+  <circle cx="158" cy="99" r="4" fill="#e94560" opacity="0.7"/>
+  <circle cx="172" cy="99" r="4" fill="#f9a825" opacity="0.7"/>
+  <circle cx="186" cy="99" r="4" fill="#4ecca3" opacity="0.7"/>
 
-  <text x="640" y="706" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#1a3a1a">Slide 4 / 4  —  Your Bot</text>
+  <!-- Line 1: public interface IMetroManiaRunner { -->
+  <text x="165" y="127" font-family="Consolas,monospace" font-size="14">
+    <tspan fill="#406040">1</tspan>
+    <tspan dx="12" fill="#569cd6">public interface</tspan>
+    <tspan fill="#4ecca3"> IMetroManiaRunner</tspan>
+    <tspan fill="#808080"> {</tspan>
+  </text>
+
+  <!-- Line 2: PlayerAction OnHourTicked(GameSnapshot snapshot); -->
+  <text x="165" y="145" font-family="Consolas,monospace" font-size="14">
+    <tspan fill="#406040">2</tspan>
+    <tspan dx="12" fill="#4ec9b0">    PlayerAction</tspan>
+    <tspan fill="#dcdcaa"> OnHourTicked</tspan><tspan fill="#808080">(</tspan><tspan fill="#4ec9b0">GameSnapshot</tspan>
+    <tspan fill="#9cdcfe"> snapshot</tspan><tspan fill="#808080">);</tspan>
+  </text>
+
+  <!-- Line 3: void OnStationSpawned(...); -->
+  <text x="165" y="163" font-family="Consolas,monospace" font-size="14">
+    <tspan fill="#406040">3</tspan>
+    <tspan dx="12" fill="#569cd6">    void</tspan>
+    <tspan fill="#dcdcaa"> OnStationSpawned</tspan><tspan fill="#808080">(</tspan><tspan fill="#4ec9b0">GameSnapshot</tspan>
+    <tspan fill="#9cdcfe"> snapshot</tspan><tspan fill="#808080">, ...);</tspan>
+  </text>
+
+  <!-- Line 4: void OnPassengerSpawned(...); -->
+  <text x="165" y="181" font-family="Consolas,monospace" font-size="14">
+    <tspan fill="#406040">4</tspan>
+    <tspan dx="12" fill="#569cd6">    void</tspan>
+    <tspan fill="#dcdcaa"> OnPassengerSpawned</tspan><tspan fill="#808080">(</tspan><tspan fill="#4ec9b0">GameSnapshot</tspan>
+    <tspan fill="#9cdcfe"> snapshot</tspan><tspan fill="#808080">, ...);</tspan>
+  </text>
+
+  <!-- Line 5: void OnStationCrowded(...); -->
+  <text x="165" y="199" font-family="Consolas,monospace" font-size="14">
+    <tspan fill="#406040">5</tspan>
+    <tspan dx="12" fill="#569cd6">    void</tspan>
+    <tspan fill="#dcdcaa"> OnStationCrowded</tspan><tspan fill="#808080">(</tspan><tspan fill="#4ec9b0">GameSnapshot</tspan>
+    <tspan fill="#9cdcfe"> snapshot</tspan><tspan fill="#808080">, ...);</tspan>
+  </text>
+
+  <!-- Line 6: } -->
+  <text x="165" y="217" font-family="Consolas,monospace" font-size="14">
+    <tspan fill="#406040">6</tspan>
+    <tspan dx="12" fill="#808080">}</tspan>
+  </text>
+
+  <line x1="200" y1="234" x2="1080" y2="234" stroke="url(#tb)" stroke-width="1.5" opacity="0.25"/>
+  <circle cx="230" cy="300" r="6" fill="#e94560" opacity="0.9"/>
+  <text x="252" y="307" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Get notified of every hour passed in the simulation</text>
+
+  <circle cx="230" cy="365" r="6" fill="#4ecca3" opacity="0.9"/>
+  <text x="252" y="372" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Respond with an action to create lines, extend lines and deploy trains</text>
+
+  <circle cx="230" cy="430" r="6" fill="#f9a825" opacity="0.9"/>
+  <text x="252" y="437" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Get notified of spawning passengers and overcrowding stations</text>
+
+  <circle cx="230" cy="495" r="6" fill="#4ecca3" opacity="0.9"/>
+  <text x="252" y="502" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Write your C# algorithm to manage your metro network efficiently</text>
 </svg>

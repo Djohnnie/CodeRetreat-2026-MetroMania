@@ -1,98 +1,147 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
   <defs>
-    <radialGradient id="bg" cx="30%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.07"/>
+    <!-- Ambient glow: warm pink from upper-left -->
+    <radialGradient id="gl" cx="25%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#e94560" stop-opacity="0.20"/>
       <stop offset="100%" stop-color="#0a2a3c" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4ecca3"/>
-      <stop offset="100%" stop-color="#60a5fa"/>
+    <!-- Ambient glow: cool teal from upper-right -->
+    <radialGradient id="gr" cx="75%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#0a2a3c" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Central spotlight -->
+    <radialGradient id="gc" cx="50%" cy="28%" r="40%">
+      <stop offset="0%" stop-color="#f9a825" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#0a2a3c" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Title text gradient (red → gold → teal) -->
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="50%" stop-color="#f9a825"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
     </linearGradient>
+    <!-- Horizontal bar gradient -->
     <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4ecca3"/>
-      <stop offset="50%" stop-color="#60a5fa"/>
-      <stop offset="100%" stop-color="#a78bfa"/>
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="50%" stop-color="#f9a825"/>
+      <stop offset="100%" stop-color="#4ecca3"/>
     </linearGradient>
+    <!-- Neon glow filter -->
+    <filter id="neon" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Station icon glow -->
+    <filter id="sg" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- CRT scanline pattern -->
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#000000" opacity="0.06"/>
+    </pattern>
   </defs>
+
+  <!-- ── Background ── -->
   <rect width="1280" height="720" fill="#0a2a3c"/>
-  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" fill="url(#gl)"/>
+  <rect width="1280" height="720" fill="url(#gr)"/>
+  <rect width="1280" height="720" fill="url(#gc)"/>
+
+  <!-- CRT scanline overlay -->
+  <rect width="1280" height="720" fill="url(#scanlines)"/>
+
+  <!-- Top neon accent bar -->
   <rect width="1280" height="4" fill="url(#tb)"/>
 
-  <text x="640" y="68" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="52" font-weight="900" fill="url(#tg)" letter-spacing="-1">CONNECT THE CITY</text>
-  <line x1="160" y1="82" x2="1120" y2="82" stroke="#4ecca3" stroke-width="1" opacity="0.18"/>
+  <!-- ── Retro perspective grid (synthwave horizon) ── -->
+  <g opacity="0.06">
+    <line x1="0" y1="480" x2="1280" y2="480" stroke="#e94560" stroke-width="1"/>
+    <line x1="0" y1="496" x2="1280" y2="496" stroke="#e94560" stroke-width="0.8"/>
+    <line x1="0" y1="514" x2="1280" y2="514" stroke="#e94560" stroke-width="0.6"/>
+    <line x1="0" y1="534" x2="1280" y2="534" stroke="#e94560" stroke-width="0.5"/>
+    <line x1="0" y1="556" x2="1280" y2="556" stroke="#e94560" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="640" y2="576" stroke="#e94560" stroke-width="0.8"/>
+    <line x1="640" y1="480" x2="440" y2="576" stroke="#e94560" stroke-width="0.5"/>
+    <line x1="640" y1="480" x2="840" y2="576" stroke="#e94560" stroke-width="0.5"/>
+    <line x1="640" y1="480" x2="200" y2="576" stroke="#e94560" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="1080" y2="576" stroke="#e94560" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="-80" y2="576" stroke="#e94560" stroke-width="0.3"/>
+    <line x1="640" y1="480" x2="1360" y2="576" stroke="#e94560" stroke-width="0.3"/>
+  </g>
 
-  <!-- Station type label -->
-  <text x="225" y="102" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="14" fill="#5a7a9a" letter-spacing="2" font-weight="600">STATION TYPES</text>
-  
-  <rect x="30" y="108" width="175" height="130" rx="12"
-    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-  <circle cx="117" cy="168" r="28" fill="none" stroke="#e94560" stroke-width="4"/>
-  <text x="117" y="212" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Circle</text>
-  <rect x="220" y="108" width="175" height="130" rx="12"
-    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-  <rect x="294" y="146" width="56" height="44" fill="none" stroke="#60a5fa" stroke-width="4"/>
-  <text x="322" y="212" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Rectangle</text>
-  <rect x="30" y="260" width="175" height="130" rx="12"
-    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-  <polygon points="117,290 141,332 93,332" fill="none" stroke="#4ecca3" stroke-width="4"/>
-  <text x="117" y="362" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Triangle</text>
-  <rect x="220" y="260" width="175" height="130" rx="12"
-    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-  <polygon points="322,290 350,318 322,346 294,318" fill="none" stroke="#f9a825" stroke-width="4"/>
-  <text x="322" y="362" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Diamond</text>
-  <rect x="30" y="412" width="175" height="130" rx="12"
-    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-  <polygon points="117.0,461.0 142.7,479.7 132.9,509.8 101.1,509.8 91.3,479.7" fill="none" stroke="#a78bfa" stroke-width="4"/>
-  <text x="117" y="532" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Pentagon</text>
-  <rect x="220" y="412" width="175" height="130" rx="12"
-    fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-  <polygon points="322.0,461.0 327.5,478.5 345.4,474.5 333.0,488.0 345.4,501.5 327.5,497.5 322.0,515.0 316.5,497.5 298.6,501.5 311.0,488.0 298.6,474.5 316.5,478.5" fill="none" stroke="#f9a825" stroke-width="4"/>
-  <text x="322" y="532" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="15" fill="#c0c0d8">Star</text>
+  <!-- ── Decorative corner brackets (80s UI frame) ── -->
+  <g stroke-width="2" fill="none" opacity="0.25">
+    <polyline points="80,60 80,30 110,30" stroke="#e94560"/>
+    <polyline points="1200,60 1200,30 1170,30" stroke="#4ecca3"/>
+    <polyline points="80,520 80,550 110,550" stroke="#4ecca3"/>
+    <polyline points="1200,520 1200,550 1170,550" stroke="#e94560"/>
+  </g>
 
-  <!-- Panel divider -->
-  <line x1="418" y1="95" x2="418" y2="620" stroke="#ffffff" stroke-width="1" opacity="0.06"/>
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── Metro line visualization (mini-metro game style)     ── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
 
-  <!-- How it works label -->
-  <text x="855" y="102" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="14" fill="#5a8a7a" letter-spacing="2" font-weight="600">HOW IT WORKS</text>
+  <!-- Soft neon glow beneath the metro line -->
+  <line x1="180" y1="130" x2="1100" y2="130"
+    stroke="#e94560" stroke-width="32" stroke-linecap="round" opacity="0.08"/>
 
-  <!-- Step 1 -->
-  <circle cx="448" cy="180" r="16" fill="#e94560" fill-opacity="0.20" stroke="#e94560" stroke-width="2"/>
-  <text x="448" y="186" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#e94560" font-weight="700">1</text>
-  <text x="476" y="174" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Passengers spawn at stations</text>
-  <text x="476" y="196" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Each wants a matching destination shape</text>
+  <!-- Red metro line (thick, round-capped, game style) -->
+  <line x1="200" y1="130" x2="1080" y2="130"
+    stroke="#e94560" stroke-width="12" stroke-linecap="round"/>
 
-  <!-- Step 2 -->
-  <circle cx="448" cy="260" r="16" fill="#4ecca3" fill-opacity="0.20" stroke="#4ecca3" stroke-width="2"/>
-  <text x="448" y="266" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#4ecca3" font-weight="700">2</text>
-  <text x="476" y="254" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Your lines connect stations</text>
-  <text x="476" y="276" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Trains carry passengers toward their goal</text>
+  <!-- Station 1: Circle — white fill, dark stroke (game-accurate) -->
+  <circle cx="320" cy="130" r="20" fill="white" stroke="#0d1b2a" stroke-width="3"/>
 
-  <!-- Step 3 -->
-  <circle cx="448" cy="340" r="16" fill="#f9a825" fill-opacity="0.20" stroke="#f9a825" stroke-width="2"/>
-  <text x="448" y="346" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#f9a825" font-weight="700">3</text>
-  <text x="476" y="334" font-family="Arial,sans-serif" font-size="16" fill="#e8e8f0" font-weight="600">Deliver — or fall behind</text>
-  <text x="476" y="356" font-family="Arial,sans-serif" font-size="14" fill="#7888a0">Undelivered passengers accumulate fast</text>
+  <!-- Waiting passengers above Circle station (square + triangle destinations) -->
+  <rect x="308" y="93" width="9" height="9" fill="white" opacity="0.80"/>
+  <polygon points="327,93 332,102 322,102" fill="white" opacity="0.80"/>
 
-  <!-- Warning box -->
-  <rect x="430" y="392" width="820" height="76" rx="10"
-    fill="#f9a825" fill-opacity="0.08" stroke="#f9a825" stroke-width="1.5"/>
-  <text x="458" y="420" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">&#x26A0;  OVERRUN WARNING</text>
-  <text x="458" y="448" font-family="Arial,sans-serif" font-size="14" fill="#b0a060">10+ passengers at a station triggers OnStationOverrun — act now!</text>
+  <!-- Station 2: Square — white fill, dark stroke -->
+  <rect x="618" y="108" width="44" height="44" fill="white" stroke="#0d1b2a" stroke-width="3"/>
 
-  <!-- Game over box -->
-  <rect x="430" y="484" width="820" height="76" rx="10"
-    fill="#e94560" fill-opacity="0.08" stroke="#e94560" stroke-width="1.5"/>
-  <text x="458" y="512" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">&#x2716;  GAME OVER</text>
-  <text x="458" y="540" font-family="Arial,sans-serif" font-size="14" fill="#a06070">20+ passengers at any station = immediate game over</text>
+  <!-- Waiting passenger above Square station (circle destination) -->
+  <circle cx="640" cy="95" r="5" fill="white" opacity="0.80"/>
 
-  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#2a4a5a">Slide 2 / 4  —  Stations &amp; Passengers</text>
+  <!-- Station 3: Triangle — white fill, dark stroke -->
+  <polygon points="960,108 982,152 938,152" fill="white" stroke="#0d1b2a" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Waiting passenger above Triangle station (square destination) -->
+  <rect x="956" y="88" width="9" height="9" fill="white" opacity="0.80"/>
+
+  <!-- Train — game-accurate pointy-front shape, traveling station 1→2 -->
+  <g transform="translate(485,130) scale(2.8)">
+    <path d="M-9,-6 L8,-6 L11,0 L8,6 L-9,6 A2,2 0 0 1 -11,4 L-11,-4 A2,2 0 0 1 -9,-6 Z"
+      fill="#e94560" stroke="white" stroke-width="1.2"/>
+    <rect x="-5" y="-2" width="3.5" height="3.5" fill="white" opacity="0.85"/>
+    <circle cx="2" cy="0" r="1.8" fill="white" opacity="0.85"/>
+  </g>
+
+  <!-- ── Separator line ── -->
+  <line x1="200" y1="230" x2="1080" y2="230" stroke="url(#tb)" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── Info paragraphs                                     ── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <!-- Bullet 1 -->
+  <circle cx="230" cy="300" r="6" fill="#e94560" opacity="0.9"/>
+  <text x="252" y="307" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Build your own metro network by connecting stations using lines</text>
+
+  <!-- Bullet 2 -->
+  <circle cx="230" cy="365" r="6" fill="#4ecca3" opacity="0.9"/>
+  <text x="252" y="372" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Deploy trains to pickup and dropoff passengers</text>
+
+  <!-- Bullet 3 -->
+  <circle cx="230" cy="430" r="6" fill="#f9a825" opacity="0.9"/>
+  <text x="252" y="437" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Keep your stations from overcrowding</text>
+
+  <!-- Bullet 4 -->
+  <circle cx="230" cy="495" r="6" fill="#e94560" opacity="0.9"/>
+  <text x="252" y="502" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#d0d0e8" font-weight="400">Score points for every delivered passenger</text>
 </svg>

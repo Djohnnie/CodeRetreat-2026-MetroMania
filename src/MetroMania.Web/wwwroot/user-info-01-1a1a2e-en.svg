@@ -1,92 +1,127 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
   <defs>
-    <radialGradient id="gl" cx="18%" cy="52%" r="52%">
-      <stop offset="0%" stop-color="#e94560" stop-opacity="0.18"/>
+    <!-- Ambient glow: warm pink from upper-left -->
+    <radialGradient id="gl" cx="25%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#e94560" stop-opacity="0.20"/>
       <stop offset="100%" stop-color="#1a1a2e" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="gr" cx="82%" cy="48%" r="52%">
-      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.10"/>
+    <!-- Ambient glow: cool teal from upper-right -->
+    <radialGradient id="gr" cx="75%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#4ecca3" stop-opacity="0.13"/>
       <stop offset="100%" stop-color="#1a1a2e" stop-opacity="0"/>
     </radialGradient>
+    <!-- Central spotlight behind title -->
+    <radialGradient id="gc" cx="50%" cy="42%" r="38%">
+      <stop offset="0%" stop-color="#f9a825" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#1a1a2e" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Title text gradient (red → gold → teal) -->
     <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#e94560"/>
-      <stop offset="55%" stop-color="#f9a825"/>
+      <stop offset="50%" stop-color="#f9a825"/>
       <stop offset="100%" stop-color="#4ecca3"/>
     </linearGradient>
+    <!-- Horizontal bar gradient -->
     <linearGradient id="tb" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#e94560"/>
       <stop offset="50%" stop-color="#f9a825"/>
       <stop offset="100%" stop-color="#4ecca3"/>
     </linearGradient>
-    <filter id="gf" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="7" result="b"/>
+    <!-- Neon glow filter -->
+    <filter id="neon" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <!-- Soft wide glow for background text shadow -->
+    <filter id="neon-wide" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="20" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Station icon glow -->
+    <filter id="sg" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- CRT scanline pattern -->
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#000000" opacity="0.06"/>
+    </pattern>
   </defs>
+
+  <!-- ── Background ── -->
   <rect width="1280" height="720" fill="#1a1a2e"/>
   <rect width="1280" height="720" fill="url(#gl)"/>
   <rect width="1280" height="720" fill="url(#gr)"/>
+  <rect width="1280" height="720" fill="url(#gc)"/>
+
+  <!-- CRT scanline overlay -->
+  <rect width="1280" height="720" fill="url(#scanlines)"/>
+
+  <!-- Top neon accent bar -->
   <rect width="1280" height="4" fill="url(#tb)"/>
 
-  <!-- Metro network art (left panel 0-640) -->
-  <polyline points="40,230 170,230 300,350 460,350 575,230 630,230"
-    stroke="#e94560" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.80"/>
-  <polyline points="40,450 145,450 250,535 400,535 510,450 630,450"
-    stroke="#4ecca3" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.80"/>
-  <line x1="300" y1="350" x2="250" y2="535" stroke="#f9a825" stroke-width="5" stroke-linecap="round" opacity="0.80"/>
-  <line x1="460" y1="350" x2="400" y2="535" stroke="#f9a825" stroke-width="5" stroke-linecap="round" opacity="0.80"/>
+  <!-- ── Retro perspective grid (synthwave horizon) ── -->
+  <g opacity="0.08">
+    <!-- Horizontal grid lines converging toward horizon -->
+    <line x1="0" y1="480" x2="1280" y2="480" stroke="#e94560" stroke-width="1"/>
+    <line x1="0" y1="496" x2="1280" y2="496" stroke="#e94560" stroke-width="0.8"/>
+    <line x1="0" y1="514" x2="1280" y2="514" stroke="#e94560" stroke-width="0.6"/>
+    <line x1="0" y1="534" x2="1280" y2="534" stroke="#e94560" stroke-width="0.5"/>
+    <line x1="0" y1="556" x2="1280" y2="556" stroke="#e94560" stroke-width="0.4"/>
+    <!-- Vertical grid lines radiating from center -->
+    <line x1="640" y1="480" x2="640" y2="576" stroke="#e94560" stroke-width="0.8"/>
+    <line x1="640" y1="480" x2="440" y2="576" stroke="#e94560" stroke-width="0.5"/>
+    <line x1="640" y1="480" x2="840" y2="576" stroke="#e94560" stroke-width="0.5"/>
+    <line x1="640" y1="480" x2="200" y2="576" stroke="#e94560" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="1080" y2="576" stroke="#e94560" stroke-width="0.4"/>
+    <line x1="640" y1="480" x2="-80" y2="576" stroke="#e94560" stroke-width="0.3"/>
+    <line x1="640" y1="480" x2="1360" y2="576" stroke="#e94560" stroke-width="0.3"/>
+  </g>
 
-  <!-- Stations: red line -->
-  <circle cx="170" cy="230" r="13" fill="#1a1a2e" stroke="#e94560" stroke-width="3" filter="url(#gf)"/>
-  <rect x="287" y="337" width="26" height="26" fill="#1a1a2e" stroke="#f9a825" stroke-width="3" filter="url(#gf)"/>
-  <circle cx="460" cy="350" r="13" fill="#1a1a2e" stroke="#e94560" stroke-width="3" filter="url(#gf)"/>
-  <polygon points="575,216 590,244 560,244" fill="#1a1a2e" stroke="#e94560" stroke-width="3" filter="url(#gf)"/>
+  <!-- ── Decorative corner brackets (80s UI frame) ── -->
+  <g stroke-width="2" fill="none" opacity="0.25">
+    <polyline points="80,60 80,30 110,30" stroke="#e94560"/>
+    <polyline points="1200,60 1200,30 1170,30" stroke="#4ecca3"/>
+    <polyline points="80,520 80,550 110,550" stroke="#4ecca3"/>
+    <polyline points="1200,520 1200,550 1170,550" stroke="#e94560"/>
+  </g>
 
-  <!-- Stations: teal line -->
-  <polygon points="145,436 159,450 145,464 131,450" fill="#1a1a2e" stroke="#4ecca3" stroke-width="3" filter="url(#gf)"/>
-  <circle cx="250" cy="535" r="13" fill="#1a1a2e" stroke="#4ecca3" stroke-width="3" filter="url(#gf)"/>
-  <polygon points="400,521 414,535 400,549 386,535" fill="#1a1a2e" stroke="#f9a825" stroke-width="3" filter="url(#gf)"/>
-  <polygon points="510,436 524,464 496,464" fill="#1a1a2e" stroke="#4ecca3" stroke-width="3" filter="url(#gf)"/>
+  <!-- ── Floating decorative station shapes ── -->
+  <!-- Circle station — top-left area -->
+  <circle cx="165" cy="155" r="14" fill="none" stroke="#e94560" stroke-width="2.5" opacity="0.18" filter="url(#sg)"/>
+  <!-- Triangle station — top-right area -->
+  <polygon points="1110,140 1124,168 1096,168" fill="none" stroke="#4ecca3" stroke-width="2.5" opacity="0.18" filter="url(#sg)"/>
+  <!-- Rectangle station — left middle -->
+  <rect x="94" y="368" width="24" height="24" fill="none" stroke="#f9a825" stroke-width="2.5" opacity="0.15" filter="url(#sg)"/>
+  <!-- Diamond station — right middle -->
+  <polygon points="1175,340 1189,354 1175,368 1161,354" fill="none" stroke="#e94560" stroke-width="2.5" opacity="0.15" filter="url(#sg)"/>
+  <!-- Pentagon station — lower-left -->
+  <polygon points="210,478 222,472 231,481 226,494 214,494" fill="none" stroke="#4ecca3" stroke-width="2" opacity="0.12" filter="url(#sg)"/>
+  <!-- Star station — lower-right -->
+  <polygon points="1070,470 1074,482 1087,482 1077,490 1081,502 1070,495 1059,502 1063,490 1053,482 1066,482" fill="none" stroke="#f9a825" stroke-width="1.8" opacity="0.12" filter="url(#sg)"/>
 
-  <!-- Train cars -->
-  <rect x="196" y="221" width="48" height="18" rx="9" fill="#e94560" opacity="0.95"/>
-  <circle cx="207" cy="230" r="4" fill="#ff8888" opacity="0.7"/>
-  <rect x="295" y="441" width="48" height="18" rx="9" fill="#4ecca3" opacity="0.95"/>
-  <circle cx="306" cy="450" r="4" fill="#aafff0" opacity="0.7"/>
+  <!-- ── Horizontal neon accent lines ── -->
+  <line x1="200" y1="130" x2="1080" y2="130" stroke="#e94560" stroke-width="1" opacity="0.15"/>
+  <line x1="280" y1="440" x2="1000" y2="440" stroke="#4ecca3" stroke-width="1" opacity="0.12"/>
 
-  <!-- Passenger dots -->
-  <circle cx="158" cy="213" r="6" fill="#e0e0f0" opacity="0.55"/>
-  <circle cx="168" cy="208" r="6" fill="#e0e0f0" opacity="0.55"/>
-  <circle cx="238" cy="517" r="6" fill="#e0e0f0" opacity="0.55"/>
-  <circle cx="249" cy="512" r="6" fill="#e0e0f0" opacity="0.55"/>
-  <circle cx="389" cy="517" r="6" fill="#e0e0f0" opacity="0.55"/>
+  <!-- ── Title glow shadow layer (large soft bloom behind text) ── -->
+  <text x="640" y="270" text-anchor="middle" font-family="Arial Black,Impact,sans-serif"
+    font-size="130" font-weight="900" fill="#e94560" opacity="0.10" filter="url(#neon-wide)">METRO</text>
+  <text x="640" y="400" text-anchor="middle" font-family="Arial Black,Impact,sans-serif"
+    font-size="130" font-weight="900" fill="#4ecca3" opacity="0.10" filter="url(#neon-wide)">MANIA</text>
 
-  <!-- Panel divider -->
-  <line x1="658" y1="30" x2="658" y2="690" stroke="#ffffff" stroke-width="1" opacity="0.05"/>
+  <!-- ── Title: METRO ── -->
+  <text x="640" y="270" text-anchor="middle" font-family="Arial Black,Impact,sans-serif"
+    font-size="130" font-weight="900" fill="url(#tg)" letter-spacing="6" filter="url(#neon)">METRO</text>
 
-  <!-- Right panel: Title -->
-  <text x="964" y="258" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="96" font-weight="900" fill="url(#tg)" letter-spacing="-2">METRO</text>
-  <text x="964" y="362" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-    font-size="96" font-weight="900" fill="url(#tg)" letter-spacing="-2">MANIA</text>
+  <!-- ── Title: MANIA ── -->
+  <text x="640" y="400" text-anchor="middle" font-family="Arial Black,Impact,sans-serif"
+    font-size="130" font-weight="900" fill="url(#tg)" letter-spacing="6" filter="url(#neon)">MANIA</text>
 
-  <line x1="700" y1="384" x2="1228" y2="384" stroke="#e94560" stroke-width="1" opacity="0.30"/>
+  <!-- ── Gradient separator line ── -->
+  <line x1="340" y1="428" x2="940" y2="428" stroke="url(#tb)" stroke-width="2" opacity="0.35"/>
 
-  <text x="964" y="420" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="17" fill="#7878a0" letter-spacing="3" font-weight="600">A C# CODING CHALLENGE</text>
-  <text x="964" y="462" text-anchor="middle" font-family="Arial,sans-serif"
-    font-size="21" fill="#c0c0d8">Build a bot. Connect stations. Deliver passengers.</text>
-
-  <!-- Stat pills -->
-  <rect x="670" y="496" width="158" height="46" rx="23" fill="#e94560" fill-opacity="0.14" stroke="#e94560" stroke-width="1.5"/>
-  <text x="749" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#e94560" font-weight="700">6 SHAPES</text>
-
-  <rect x="843" y="496" width="188" height="46" rx="23" fill="#4ecca3" fill-opacity="0.14" stroke="#4ecca3" stroke-width="1.5"/>
-  <text x="937" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#4ecca3" font-weight="700">3 RESOURCES</text>
-
-  <rect x="1046" y="496" width="158" height="46" rx="23" fill="#f9a825" fill-opacity="0.14" stroke="#f9a825" stroke-width="1.5"/>
-  <text x="1125" y="524" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#f9a825" font-weight="700">9 ACTIONS</text>
-
-  <!-- Bottom indicator -->
-  <text x="640" y="694" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" fill="#3a3a5a">Slide 1 / 4  —  Introduction</text>
+  <!-- ── Subtitle ── -->
+  <text x="640" y="472" text-anchor="middle" font-family="Arial,Helvetica,sans-serif"
+    font-size="22" fill="#9898b8" letter-spacing="2.5" font-weight="400">An Involved Code Retreat by Johnny Hooyberghs</text>
 </svg>
