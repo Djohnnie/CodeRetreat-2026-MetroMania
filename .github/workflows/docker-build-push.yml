@@ -90,7 +90,7 @@ jobs:
             az containerapp update \
               --name metromania-worker-runner \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-runner-worker:${{ github.sha }}
+              --image ${{ env.REGISTRY }}/metromania-worker-runner:${{ github.sha }}
 
       - name: Restart metromania-worker-renderer
         uses: azure/cli@v2
@@ -100,7 +100,7 @@ jobs:
             az containerapp update \
               --name metromania-worker-renderer \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-renderer-worker:${{ github.sha }}
+              --image ${{ env.REGISTRY }}/metromania-worker-renderer:${{ github.sha }}
 
       - name: Update metromania-cleanup-processor job
         uses: azure/cli@v2

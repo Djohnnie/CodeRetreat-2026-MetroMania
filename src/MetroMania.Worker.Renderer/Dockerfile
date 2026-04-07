@@ -9,7 +9,7 @@ COPY src/MetroMania.Engine/MetroMania.Engine.csproj src/MetroMania.Engine/
 COPY src/MetroMania.Scripting/MetroMania.Scripting.csproj src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj src/MetroMania.Infrastructure.Sql/
 COPY src/MetroMania.Infrastructure.BlobStorage/MetroMania.Infrastructure.BlobStorage.csproj src/MetroMania.Infrastructure.BlobStorage/
-RUN dotnet restore src/MetroMania.Worker.Renderer/MetroMania.Worker.Renderer.csproj
+RUN dotnet restore src/MetroMania.Worker.Renderer/MetroMania.Worker.Renderer.csproj -p:UseAspire=false
 
 # Copy source and publish
 COPY src/MetroMania.Worker.Renderer/ src/MetroMania.Worker.Renderer/
@@ -19,7 +19,7 @@ COPY src/MetroMania.Engine/ src/MetroMania.Engine/
 COPY src/MetroMania.Scripting/ src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/ src/MetroMania.Infrastructure.Sql/
 COPY src/MetroMania.Infrastructure.BlobStorage/ src/MetroMania.Infrastructure.BlobStorage/
-RUN dotnet publish src/MetroMania.Worker.Renderer/MetroMania.Worker.Renderer.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/MetroMania.Worker.Renderer/MetroMania.Worker.Renderer.csproj -c Release -o /app/publish --no-restore -p:UseAspire=false
 
 FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
 

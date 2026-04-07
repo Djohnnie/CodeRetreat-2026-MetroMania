@@ -5,7 +5,9 @@ using MetroMania.Worker.Renderer;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+#if ASPIRE
 builder.AddServiceDefaults();
+#endif
 
 // Infrastructure (EF Core, repositories)
 var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")

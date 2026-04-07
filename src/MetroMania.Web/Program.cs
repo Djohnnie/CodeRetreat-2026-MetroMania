@@ -12,7 +12,9 @@ using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if ASPIRE
 builder.AddServiceDefaults();
+#endif
 
 // API HttpClient
 var apiBaseUrl = builder.Configuration.GetValue<string>("API_BASE_URL")
@@ -205,7 +207,9 @@ app.MapGet("/api/renders/{submissionId:guid}/{levelId:guid}/{hour:int}.svg",
     return Results.Content(svg, "image/svg+xml");
 }).RequireAuthorization();
 
+#if ASPIRE
 app.MapDefaultEndpoints();
+#endif
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

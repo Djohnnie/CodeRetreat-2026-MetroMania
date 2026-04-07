@@ -15,7 +15,9 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if ASPIRE
 builder.AddServiceDefaults();
+#endif
 
 // Infrastructure (EF Core, repositories, password hasher)
 var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION_STRING")
@@ -96,9 +98,11 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+#if ASPIRE
 app.MapDefaultEndpoints();
+#endif
 
-// SignalR hub for real-time submission notifications
+// SignalR hubfor real-time submission notifications
 app.MapHub<SubmissionHub>("/hubs/submissions");
 
 // Map all domain endpoints

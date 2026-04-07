@@ -8,7 +8,7 @@ COPY src/MetroMania.Domain/MetroMania.Domain.csproj src/MetroMania.Domain/
 COPY src/MetroMania.Engine/MetroMania.Engine.csproj src/MetroMania.Engine/
 COPY src/MetroMania.Scripting/MetroMania.Scripting.csproj src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj src/MetroMania.Infrastructure.Sql/
-RUN dotnet restore src/MetroMania.Worker.Runner/MetroMania.Worker.Runner.csproj
+RUN dotnet restore src/MetroMania.Worker.Runner/MetroMania.Worker.Runner.csproj -p:UseAspire=false
 
 # Copy source and publish
 COPY src/MetroMania.Worker.Runner/ src/MetroMania.Worker.Runner/
@@ -17,7 +17,7 @@ COPY src/MetroMania.Domain/ src/MetroMania.Domain/
 COPY src/MetroMania.Engine/ src/MetroMania.Engine/
 COPY src/MetroMania.Scripting/ src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/ src/MetroMania.Infrastructure.Sql/
-RUN dotnet publish src/MetroMania.Worker.Runner/MetroMania.Worker.Runner.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/MetroMania.Worker.Runner/MetroMania.Worker.Runner.csproj -c Release -o /app/publish --no-restore -p:UseAspire=false
 
 FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
 WORKDIR /app
