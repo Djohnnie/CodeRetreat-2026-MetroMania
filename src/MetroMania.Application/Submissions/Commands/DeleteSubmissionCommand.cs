@@ -22,7 +22,7 @@ public class DeleteSubmissionCommandHandler(
         {
             for (var hour = 1; hour <= render.TotalFrames; hour++)
             {
-                allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.svg");
+                allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.svgz");
                 allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.json");
             }
             allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}.zip");

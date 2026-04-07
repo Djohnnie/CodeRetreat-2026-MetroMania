@@ -1,4 +1,5 @@
 using MediatR;
+using MetroMania.Application.Helpers;
 using MetroMania.Application.Interfaces;
 
 namespace MetroMania.Application.Submissions.Queries;
@@ -10,10 +11,11 @@ public class GetSubmissionRenderFrameQueryHandler(IRenderBlobStorage blobStorage
 {
     public async Task<string?> Handle(GetSubmissionRenderFrameQuery request, CancellationToken cancellationToken)
     {
-        var blobName = $"{request.SubmissionId}_{request.LevelId}_{request.Hour:D4}.svg";
+        var blobName = $"{request.SubmissionId}_{request.LevelId}_{request.Hour:D4}.svgz";
         try
         {
-            return await blobStorage.DownloadAsync(blobName, cancellationToken);
+            var bytes = await blobStorage.DownloadBytesAsync(blobName, cancellationToken);
+            return SvgCompression.Decompress(bytes);
         }
         catch
         {

@@ -1,5 +1,6 @@
 using MediatR;
 using MetroMania.Application.DTOs;
+using MetroMania.Application.Helpers;
 using MetroMania.Application.Interfaces;
 using MetroMania.Domain.Interfaces;
 
@@ -19,14 +20,15 @@ public class GetSubmissionRendersQueryHandler(
             return [];
 
         var downloads = Enumerable.Range(1, render.TotalFrames)
-            .Select(hour => (hour, task: blobStorage.DownloadAsync(
-                $"{request.SubmissionId}_{request.LevelId}_{hour:D4}.svg", cancellationToken)))
+            .Select(hour => (hour, task: blobStorage.DownloadBytesAsync(
+                $"{request.SubmissionId}_{request.LevelId}_{hour:D4}.svgz", cancellationToken)))
             .ToList();
 
         await Task.WhenAll(downloads.Select(x => x.task));
 
         return downloads
-            .Select(x => new SubmissionRenderDto(render.Id, request.SubmissionId, request.LevelId, x.hour, x.task.Result))
+            .Select(x => new SubmissionRenderDto(render.Id, request.SubmissionId, request.LevelId, x.hour,
+                SvgCompression.Decompress(x.task.Result)))
             .ToList();
     }
 }

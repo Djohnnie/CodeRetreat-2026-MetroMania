@@ -1,14 +1,15 @@
 using System.IO.Compression;
 using System.Text;
 using MediatR;
+using MetroMania.Application.Helpers;
 using MetroMania.Application.Interfaces;
 using MetroMania.Engine;
 
 namespace MetroMania.Application.Submissions.Commands;
 
 /// <summary>
-/// Creates ZIP archives per level by downloading the already-uploaded individual SVG/JSON blobs.
-/// Called once after all render batches have been saved.
+/// Creates ZIP archives per level by downloading the already-uploaded individual SVGZ/JSON blobs.
+/// Called once after all render batches have been saved. ZIP contains decompressed .svg files.
 /// </summary>
 public record CreateSubmissionRenderZipsCommand(
     Guid SubmissionId,
@@ -29,14 +30,15 @@ public class CreateSubmissionRenderZipsCommandHandler(IRenderBlobStorage blobSto
             {
                 for (var hour = 1; hour <= level.TotalFrames; hour++)
                 {
-                    var svgBlobName = $"{request.SubmissionId}_{level.LevelId}_{hour:D4}.svg";
-                    var svgContent = await blobStorage.DownloadAsync(svgBlobName, cancellationToken);
+                    var svgzBytes = await blobStorage.DownloadBytesAsync(
+                        $"{request.SubmissionId}_{level.LevelId}_{hour:D4}.svgz", cancellationToken);
+                    var svgContent = SvgCompression.Decompress(svgzBytes);
                     var svgEntry = archive.CreateEntry($"{hour:D4}.svg", CompressionLevel.Optimal);
                     await using (var writer = new StreamWriter(svgEntry.Open(), Encoding.UTF8))
                         await writer.WriteAsync(svgContent);
 
-                    var jsonBlobName = $"{request.SubmissionId}_{level.LevelId}_{hour:D4}.json";
-                    var jsonContent = await blobStorage.DownloadAsync(jsonBlobName, cancellationToken);
+                    var jsonContent = await blobStorage.DownloadAsync(
+                        $"{request.SubmissionId}_{level.LevelId}_{hour:D4}.json", cancellationToken);
                     var jsonEntry = archive.CreateEntry($"{hour:D4}.json", CompressionLevel.Optimal);
                     await using (var writer = new StreamWriter(jsonEntry.Open(), Encoding.UTF8))
                         await writer.WriteAsync(jsonContent);
