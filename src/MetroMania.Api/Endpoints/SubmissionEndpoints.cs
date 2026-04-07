@@ -76,11 +76,12 @@ public static class SubmissionEndpoints
             return Results.NoContent();
         }).RequireAuthorization("Admin");
 
-        // Internal endpoint for the Worker to broadcast submission status changes via SignalR
+        // Internal endpoint for workers to broadcast submission status changes via SignalR
         group.MapPost("/notify", async (NotifySubmissionRequest request, IHubContext<SubmissionHub> hubContext) =>
         {
             await hubContext.Clients.Group(request.UserId.ToString())
-                .SendAsync("SubmissionStatusChanged", request.SubmissionId, request.Status.ToString());
+                .SendAsync("SubmissionStatusChanged", request.SubmissionId,
+                    request.RunStatus?.ToString() ?? "", request.RenderStatus?.ToString() ?? "");
             return Results.Ok();
         }).AllowAnonymous();
 
@@ -89,4 +90,4 @@ public static class SubmissionEndpoints
 }
 
 record SubmitCodeRequest(Guid UserId, string Code);
-record NotifySubmissionRequest(Guid SubmissionId, Guid UserId, SubmissionStatus Status);
+record NotifySubmissionRequest(Guid SubmissionId, Guid UserId, RunStatus? RunStatus, RenderStatus? RenderStatus);

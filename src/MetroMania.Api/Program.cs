@@ -1,16 +1,15 @@
-using Azure.Data.Tables;
 using MetroMania.Api.Endpoints;
 using MetroMania.Api.Hubs;
+using MetroMania.Application.Interfaces;
+using MetroMania.Application.Services;
 using MetroMania.Infrastructure.AzureOpenAI;
 using MetroMania.Infrastructure.BlobStorage;
-using MetroMania.Infrastructure.Orleans;
 using MetroMania.Infrastructure.ServiceBus;
 using MetroMania.Infrastructure.Sql;
 using MetroMania.Infrastructure.Sql.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Orleans.Configuration;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -28,28 +27,8 @@ var blobStorageConnectionString = Environment.GetEnvironmentVariable("AZURE_STOR
     ?? throw new InvalidOperationException("Set the AZURE_STORAGE_CONNECTION_STRING environment variable.");
 builder.Services.AddBlobStorage(blobStorageConnectionString);
 
-// Orleans client — connects to the Orleans cluster
-builder.UseOrleansClient(clientBuilder =>
-{
-    var azureStorageConnectionString = clientBuilder.Configuration.GetValue<string>("AZURE_STORAGE_CONNECTION_STRING");
-
-#if DEBUG
-    clientBuilder.UseLocalhostClustering();
-#else
-    clientBuilder.Configure<ClusterOptions>(options =>
-    {
-        options.ClusterId = "metromania-orleans";
-        options.ServiceId = "metromania-orleans";
-    });
-
-    clientBuilder.UseAzureStorageClustering(options =>
-    {
-        options.TableServiceClient = new TableServiceClient(azureStorageConnectionString);
-    });
-#endif
-});
-
-builder.Services.AddOrleansClient();
+// Script validation — runs directly in the API process via Roslyn
+builder.Services.AddSingleton<IScriptValidationService, ScriptValidationService>();
 
 // Service Bus
 builder.Services.AddServiceBus();

@@ -1,11 +1,17 @@
 namespace MetroMania.Domain.Enums;
 
-public enum SubmissionStatus
+public enum RunStatus
 {
     Waiting,
     Running,
+    Ran,
+    Failed
+}
+
+public enum RenderStatus
+{
+    Waiting,
     Rendering,
-    Finalizing,
-    Succeeded,
+    Rendered,
     Failed
 }

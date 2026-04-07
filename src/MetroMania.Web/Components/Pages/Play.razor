@@ -114,9 +114,27 @@ else
                             <MudText Typo="Typo.body2" Style="font-weight: 600;">
                                 @Loc["Submission"] #@submission.Version
                             </MudText>
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="GetStatusColor(submission.Status)">
-                                @Loc[submission.Status.ToString()]
-                            </MudChip>
+                            @if (submission.IsFinished)
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success">
+                                    @Loc["Finished"]
+                                </MudChip>
+                            }
+                            else if (submission.IsFailed)
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Error">
+                                    @Loc["Failed"]
+                                </MudChip>
+                            }
+                            else
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="GetRunStatusColor(submission.RunStatus)">
+                                    @Loc[submission.RunStatus.ToString()]
+                                </MudChip>
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="GetRenderStatusColor(submission.RenderStatus)">
+                                    @Loc[submission.RenderStatus.ToString()]
+                                </MudChip>
+                            }
                             @if (submission.Scores.Count > 0)
                             {
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
@@ -152,7 +170,7 @@ else
                             <HeaderContent>
                                 <MudTh>@Loc["LevelName"]</MudTh>
                                 <MudTh Style="text-align: right;">@Loc["Score"]</MudTh>
-                                @if (submission.Status == SubmissionStatus.Succeeded)
+                                @if (submission.RenderStatus == RenderStatus.Rendered)
                                 {
                                     <MudTh Style="width: 0;" />
                                     <MudTh Style="width: 0;" />
@@ -171,7 +189,7 @@ else
                                         @context.Score.ToString("N0")
                                     </MudChip>
                                 </MudTd>
-                                @if (submission.Status == SubmissionStatus.Succeeded)
+                                @if (submission.RenderStatus == RenderStatus.Rendered)
                                 {
                                     <MudTd>
                                         <MudTooltip Text="@Loc["WatchReplays"]">
@@ -200,7 +218,7 @@ else
                                             @submission.TotalScore.ToString("N0")
                                         </MudChip>
                                     </MudTd>
-                                    @if (submission.Status == SubmissionStatus.Succeeded)
+                                    @if (submission.RenderStatus == RenderStatus.Rendered)
                                     {
                                         <MudTd />
                                         <MudTd />
@@ -270,7 +288,7 @@ else
             .WithAutomaticReconnect()
             .Build();
 
-        _hubConnection.On<Guid, string>("SubmissionStatusChanged", async (submissionId, status) =>
+        _hubConnection.On<Guid, string, string>("SubmissionStatusChanged", async (submissionId, runStatus, renderStatus) =>
         {
             _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
             await InvokeAsync(StateHasChanged);
@@ -431,14 +449,21 @@ else
         await UpdateEditorHeight();
     }
 
-    private static Color GetStatusColor(SubmissionStatus status) => status switch
+    private static Color GetRunStatusColor(RunStatus status) => status switch
     {
-        SubmissionStatus.Waiting => Color.Default,
-        SubmissionStatus.Running => Color.Info,
-        SubmissionStatus.Rendering => Color.Info,
-        SubmissionStatus.Finalizing => Color.Info,
-        SubmissionStatus.Succeeded => Color.Success,
-        SubmissionStatus.Failed => Color.Error,
+        RunStatus.Waiting => Color.Default,
+        RunStatus.Running => Color.Info,
+        RunStatus.Ran => Color.Success,
+        RunStatus.Failed => Color.Error,
+        _ => Color.Default
+    };
+
+    private static Color GetRenderStatusColor(RenderStatus status) => status switch
+    {
+        RenderStatus.Waiting => Color.Default,
+        RenderStatus.Rendering => Color.Info,
+        RenderStatus.Rendered => Color.Success,
+        RenderStatus.Failed => Color.Error,
         _ => Color.Default
     };
 

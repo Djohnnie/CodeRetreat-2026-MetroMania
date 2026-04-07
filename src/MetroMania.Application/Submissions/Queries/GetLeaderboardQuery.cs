@@ -28,20 +28,20 @@ public class GetLeaderboardQueryHandler(
             if (userStats.Count == 0)
                 continue;
 
-            // Fetch all succeeded submissions and their scores in one batch
+            // Fetch all completed submissions (run finished) and their scores
             var submissions = await submissionRepository.GetByUserIdAsync(user.Id);
-            var succeededSubmissions = submissions
-                .Where(s => s.Status == SubmissionStatus.Succeeded)
+            var completedSubmissions = submissions
+                .Where(s => s.RunStatus == RunStatus.Ran)
                 .ToList();
 
-            if (succeededSubmissions.Count == 0)
+            if (completedSubmissions.Count == 0)
                 continue;
 
             var allScores = await scoreRepository.GetBySubmissionIdsAsync(
-                succeededSubmissions.Select(s => s.Id));
+                completedSubmissions.Select(s => s.Id));
 
             // Pick the submission with the highest total score
-            var bestSubmission = succeededSubmissions.MaxBy(s =>
+            var bestSubmission = completedSubmissions.MaxBy(s =>
                 allScores.Where(sc => sc.SubmissionId == s.Id).Sum(sc => sc.Score))!;
 
             var levelScores = allScores

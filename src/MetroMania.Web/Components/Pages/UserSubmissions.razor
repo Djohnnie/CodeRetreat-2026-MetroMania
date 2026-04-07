@@ -70,10 +70,18 @@ else
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="@Loc["Status"]">
-                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
-                             Color="@StatusColor(context.Status)">
-                        @context.Status
-                    </MudChip>
+                    @if (context.IsFinished)
+                    {
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success">@Loc["Finished"]</MudChip>
+                    }
+                    else if (context.IsFailed)
+                    {
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Error">@Loc["Failed"]</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Info">@Loc[context.RunStatus.ToString()] / @Loc[context.RenderStatus.ToString()]</MudChip>
+                    }
                 </MudTd>
                 <MudTd DataLabel="@Loc["TotalScore"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">
@@ -264,12 +272,4 @@ else
             _submissions = await ApiClient.GetUserSubmissionsAsync(UserId);
     }
 
-    private static Color StatusColor(SubmissionStatus status) => status switch
-    {
-        SubmissionStatus.Succeeded => Color.Success,
-        SubmissionStatus.Failed => Color.Error,
-        SubmissionStatus.Running or SubmissionStatus.Rendering or SubmissionStatus.Finalizing => Color.Warning,
-        SubmissionStatus.Waiting => Color.Default,
-        _ => Color.Default
-    };
 }

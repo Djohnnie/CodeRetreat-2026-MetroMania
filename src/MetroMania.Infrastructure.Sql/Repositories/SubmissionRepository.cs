@@ -1,4 +1,5 @@
 using MetroMania.Domain.Entities;
+using MetroMania.Domain.Enums;
 using MetroMania.Domain.Interfaces;
 using MetroMania.Infrastructure.Sql.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,21 @@ public class SubmissionRepository(AppDbContext db) : ISubmissionRepository
     {
         db.Submissions.Update(submission);
         await db.SaveChangesAsync();
+    }
+
+    public async Task UpdateStatusFieldsAsync(Guid id, RunStatus? runStatus, RenderStatus? renderStatus, string? message)
+    {
+        await db.Submissions
+            .Where(s => s.Id == id)
+            .ExecuteUpdateAsync(setters =>
+            {
+                if (runStatus.HasValue)
+                    setters = setters.SetProperty(s => s.RunStatus, runStatus.Value);
+                if (renderStatus.HasValue)
+                    setters = setters.SetProperty(s => s.RenderStatus, renderStatus.Value);
+                if (message is not null)
+                    setters = setters.SetProperty(s => s.Message, message);
+            });
     }
 
     public async Task DeleteAsync(Guid id) =>

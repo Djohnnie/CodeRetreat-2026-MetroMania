@@ -119,8 +119,9 @@
   <data name="Waiting" xml:space="preserve"><value>Waiting</value></data>
   <data name="Running" xml:space="preserve"><value>Running</value></data>
   <data name="Rendering" xml:space="preserve"><value>Rendering</value></data>
-  <data name="Finalizing" xml:space="preserve"><value>Finalizing</value></data>
-  <data name="Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="Ran" xml:space="preserve"><value>Ran</value></data>
+  <data name="Rendered" xml:space="preserve"><value>Rendered</value></data>
+  <data name="Finished" xml:space="preserve"><value>Finished</value></data>
   <data name="Failed" xml:space="preserve"><value>Failed</value></data>
 
   <!-- Not Found -->

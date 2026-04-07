@@ -1,25 +1,20 @@
-using Microsoft.CodeAnalysis;
+using MetroMania.Application.Interfaces;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine.Model;
 using MetroMania.Scripting;
-using MetroMania.Orleans.Contracts.Grains;
-using MetroMania.Orleans.Contracts.Models;
+using Microsoft.CodeAnalysis;
 
-namespace MetroMania.Orleans.ValidationHost.Grains;
+namespace MetroMania.Application.Services;
 
-public class GameRunnerValidationGrain : Grain, IGameRunnerValidationGrain
+public class ScriptValidationService : IScriptValidationService
 {
-    public Task<string> PingAsync() => Task.FromResult("pong");
-
-    public async Task<ScriptValidationResult> ValidateScriptAsync(string base64Code)
+    public async Task<ScriptValidationResult> ValidateAsync(string base64Code)
     {
         try
         {
-            // Wrap the player code in the outer script, just like MetroMania.Demo
             var wrappedScript = WrapInOuterScript(base64Code);
-
             var scriptCompiler = new ScriptCompiler<GameResult>();
 
             // Step 1: Check for compilation errors
@@ -30,7 +25,7 @@ public class GameRunnerValidationGrain : Grain, IGameRunnerValidationGrain
                 .ToList();
 
             if (errors.Count > 0)
-                return new ScriptValidationResult { Success = false, Errors = errors };
+                return new ScriptValidationResult(false, errors);
 
             // Step 2: Execute the script with a test level to catch runtime exceptions
             var testLevel = CreateTestLevel();
@@ -38,19 +33,11 @@ public class GameRunnerValidationGrain : Grain, IGameRunnerValidationGrain
             var script = await scriptCompiler.CompileForExecution(wrappedScript);
             await script.Invoke(globals);
 
-            return new ScriptValidationResult { Success = true };
+            return new ScriptValidationResult(true, []);
         }
         catch (Exception ex)
         {
-            return new ScriptValidationResult
-            {
-                Success = false,
-                Errors = [ex.InnerException?.Message ?? ex.Message]
-            };
-        }
-        finally
-        {
-            DeactivateOnIdle(); // Deactivate grain after processing
+            return new ScriptValidationResult(false, [ex.InnerException?.Message ?? ex.Message]);
         }
     }
 

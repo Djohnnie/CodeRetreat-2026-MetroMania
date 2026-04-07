@@ -119,8 +119,9 @@
   <data name="Waiting" xml:space="preserve"><value>Wachtend</value></data>
   <data name="Running" xml:space="preserve"><value>Bezig</value></data>
   <data name="Rendering" xml:space="preserve"><value>Renderen</value></data>
-  <data name="Finalizing" xml:space="preserve"><value>Afronden</value></data>
-  <data name="Succeeded" xml:space="preserve"><value>Geslaagd</value></data>
+  <data name="Ran" xml:space="preserve"><value>Uitgevoerd</value></data>
+  <data name="Rendered" xml:space="preserve"><value>Gerenderd</value></data>
+  <data name="Finished" xml:space="preserve"><value>Voltooid</value></data>
   <data name="Failed" xml:space="preserve"><value>Mislukt</value></data>
 
   <!-- Not Found -->

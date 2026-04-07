@@ -9,12 +9,17 @@ public record SubmissionDto(
     Guid UserId,
     int Version,
     string Code,
-    SubmissionStatus Status,
+    RunStatus RunStatus,
+    RenderStatus RenderStatus,
     string? Message,
     DateTime SubmittedAt,
     List<SubmissionScoreDto> Scores,
     int TotalScore)
 {
+    public bool IsFinished => RunStatus == RunStatus.Ran && RenderStatus == RenderStatus.Rendered;
+    public bool IsFailed => RunStatus == RunStatus.Failed || RenderStatus == RenderStatus.Failed;
+    public bool IsInProgress => !IsFinished && !IsFailed;
+
     public static SubmissionDto FromEntity(Submission submission) =>
         FromEntity(submission, [], []);
 
@@ -50,7 +55,8 @@ public record SubmissionDto(
             submission.UserId,
             submission.Version,
             submission.Code.Base64Decode(),
-            submission.Status,
+            submission.RunStatus,
+            submission.RenderStatus,
             submission.Message,
             submission.SubmittedAt,
             scoreDtos,

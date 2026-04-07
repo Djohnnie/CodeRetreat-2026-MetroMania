@@ -9,7 +9,8 @@ public class Submission
     public Guid UserId { get; set; }
     public int Version { get; set; }
     public string Code { get; set; } = string.Empty;
-    public SubmissionStatus Status { get; set; } = SubmissionStatus.Waiting;
+    public RunStatus RunStatus { get; set; } = RunStatus.Waiting;
+    public RenderStatus RenderStatus { get; set; } = RenderStatus.Waiting;
     public string? Message { get; set; }
     public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 

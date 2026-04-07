@@ -8,11 +8,9 @@ COPY src/MetroMania.Domain/MetroMania.Domain.csproj src/MetroMania.Domain/
 COPY src/MetroMania.Engine/MetroMania.Engine.csproj src/MetroMania.Engine/
 COPY src/MetroMania.Scripting/MetroMania.Scripting.csproj src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj src/MetroMania.Infrastructure.Sql/
-COPY src/MetroMania.Infrastructure.Orleans/MetroMania.Infrastructure.Orleans.csproj src/MetroMania.Infrastructure.Orleans/
 COPY src/MetroMania.Infrastructure.ServiceBus/MetroMania.Infrastructure.ServiceBus.csproj src/MetroMania.Infrastructure.ServiceBus/
 COPY src/MetroMania.Infrastructure.BlobStorage/MetroMania.Infrastructure.BlobStorage.csproj src/MetroMania.Infrastructure.BlobStorage/
 COPY src/MetroMania.Infrastructure.AzureOpenAI/MetroMania.Infrastructure.AzureOpenAI.csproj src/MetroMania.Infrastructure.AzureOpenAI/
-COPY src/MetroMania.Orleans.Contracts/MetroMania.Orleans.Contracts.csproj src/MetroMania.Orleans.Contracts/
 RUN dotnet restore src/MetroMania.Api/MetroMania.Api.csproj
 
 # Copy source and publish
@@ -22,11 +20,9 @@ COPY src/MetroMania.Domain/ src/MetroMania.Domain/
 COPY src/MetroMania.Engine/ src/MetroMania.Engine/
 COPY src/MetroMania.Scripting/ src/MetroMania.Scripting/
 COPY src/MetroMania.Infrastructure.Sql/ src/MetroMania.Infrastructure.Sql/
-COPY src/MetroMania.Infrastructure.Orleans/ src/MetroMania.Infrastructure.Orleans/
 COPY src/MetroMania.Infrastructure.ServiceBus/ src/MetroMania.Infrastructure.ServiceBus/
 COPY src/MetroMania.Infrastructure.BlobStorage/ src/MetroMania.Infrastructure.BlobStorage/
 COPY src/MetroMania.Infrastructure.AzureOpenAI/ src/MetroMania.Infrastructure.AzureOpenAI/
-COPY src/MetroMania.Orleans.Contracts/ src/MetroMania.Orleans.Contracts/
 RUN dotnet publish src/MetroMania.Api/MetroMania.Api.csproj -c Release -o /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

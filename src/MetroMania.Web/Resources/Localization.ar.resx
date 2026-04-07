@@ -119,8 +119,9 @@
   <data name="Waiting" xml:space="preserve"><value>قيد الانتظار</value></data>
   <data name="Running" xml:space="preserve"><value>قيد التشغيل</value></data>
   <data name="Rendering" xml:space="preserve"><value>جاري العرض</value></data>
-  <data name="Finalizing" xml:space="preserve"><value>جاري الإنهاء</value></data>
-  <data name="Succeeded" xml:space="preserve"><value>نجح</value></data>
+  <data name="Ran" xml:space="preserve"><value>تم التنفيذ</value></data>
+  <data name="Rendered" xml:space="preserve"><value>تم العرض</value></data>
+  <data name="Finished" xml:space="preserve"><value>مكتمل</value></data>
   <data name="Failed" xml:space="preserve"><value>فشل</value></data>
 
   <!-- Errors / Not Found -->

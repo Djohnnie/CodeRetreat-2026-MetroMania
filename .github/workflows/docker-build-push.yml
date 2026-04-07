@@ -19,14 +19,10 @@ jobs:
             dockerfile: src/MetroMania.Web/Dockerfile
           - image: metromania-api
             dockerfile: src/MetroMania.Api/Dockerfile
-          - image: metromania-worker
-            dockerfile: src/MetroMania.Worker/Dockerfile
-          - image: metromania-orleans-host
-            dockerfile: src/MetroMania.Orleans.Host/Dockerfile
-          - image: metromania-orleans-validationhost
-            dockerfile: src/MetroMania.Orleans.ValidationHost/Dockerfile
-          - image: metromania-orleans-renderhost
-            dockerfile: src/MetroMania.Orleans.RendererHost/Dockerfile
+          - image: metromania-worker-runner
+            dockerfile: src/MetroMania.Worker.Runner/Dockerfile
+          - image: metromania-worker-renderer
+            dockerfile: src/MetroMania.Worker.Renderer/Dockerfile
           - image: metromania-cleanup-processor
             dockerfile: src/MetroMania.CleanupProcessor/Dockerfile
 
@@ -86,45 +82,25 @@ jobs:
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --image ${{ env.REGISTRY }}/metromania-api:${{ github.sha }}
 
-      - name: Restart metromania-worker
+      - name: Restart metromania-worker-runner
         uses: azure/cli@v2
         with:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
-              --name metromania-worker \
+              --name metromania-worker-runner \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-worker:${{ github.sha }}
+              --image ${{ env.REGISTRY }}/metromania-worker-runner:${{ github.sha }}
 
-      - name: Restart metromania-orleans-host
+      - name: Restart metromania-worker-renderer
         uses: azure/cli@v2
         with:
           azcliversion: latest
           inlineScript: |
             az containerapp update \
-              --name metromania-orleans-host \
+              --name metromania-worker-renderer \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-orleans-host:${{ github.sha }}
-
-      - name: Restart metromania-orleans-vhost
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az containerapp update \
-              --name metromania-orleans-vhost \
-              --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-orleans-validationhost:${{ github.sha }}
-
-      - name: Restart metromania-orleans-rhost
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az containerapp update \
-              --name metromania-orleans-rhost \
-              --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/metromania-orleans-renderhost:${{ github.sha }}
+              --image ${{ env.REGISTRY }}/metromania-worker-renderer:${{ github.sha }}
 
       - name: Update metromania-cleanup-processor job
         uses: azure/cli@v2

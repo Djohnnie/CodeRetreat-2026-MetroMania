@@ -35,14 +35,14 @@ public class SubmitCodeCommandHandler(
             UserId = request.UserId,
             Version = nextVersion,
             Code = base64Code,
-            Status = SubmissionStatus.Waiting,
             SubmittedAt = DateTime.UtcNow
         };
 
         await submissionRepository.AddAsync(submission);
 
-        // Enqueue submission for async processing
-        await submissionQueueService.EnqueueSubmissionAsync(submission.Id, cancellationToken);
+        // Enqueue submission for async processing on both queues
+        await submissionQueueService.EnqueueRunAsync(submission.Id, cancellationToken);
+        await submissionQueueService.EnqueueRenderAsync(submission.Id, cancellationToken);
 
         return new SubmitCodeResult(true, null, SubmissionDto.FromEntity(submission));
     }

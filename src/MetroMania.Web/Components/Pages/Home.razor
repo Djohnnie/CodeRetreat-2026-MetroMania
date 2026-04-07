@@ -185,7 +185,7 @@
             _totalSubmissions = submissions.Count;
 
             var succeededScores = submissions
-                .Where(s => s.Status == SubmissionStatus.Succeeded && s.TotalScore > 0)
+                .Where(s => s.RunStatus == RunStatus.Ran && s.TotalScore > 0)
                 .Select(s => s.TotalScore)
                 .ToList();
 

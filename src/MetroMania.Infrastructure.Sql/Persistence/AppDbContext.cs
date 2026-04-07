@@ -63,7 +63,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.SysId).UseIdentityColumn().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
             entity.HasIndex(e => e.SysId).IsUnique().IsClustered(true);
             entity.Property(e => e.Code).IsRequired();
-            entity.Property(e => e.Status).HasConversion<string>();
+            entity.Property(e => e.RunStatus).HasConversion<string>();
+            entity.Property(e => e.RenderStatus).HasConversion<string>();
             entity.Property(e => e.Message).HasMaxLength(4000);
             entity.HasIndex(e => new { e.UserId, e.Version }).IsUnique();
             entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);

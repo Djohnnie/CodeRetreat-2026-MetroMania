@@ -11,15 +11,11 @@
 		<PackageReference Include="MediatR" Version="14.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="*" />
-		<PackageReference Include="Microsoft.Orleans.Client" Version="10.0.1" />
-		<PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="10.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\MetroMania.Application\MetroMania.Application.csproj" />
 		<ProjectReference Include="..\MetroMania.Infrastructure.BlobStorage\MetroMania.Infrastructure.BlobStorage.csproj" />
-		<ProjectReference Include="..\MetroMania.Infrastructure.Orleans\MetroMania.Infrastructure.Orleans.csproj" />
-		<ProjectReference Include="..\MetroMania.Infrastructure.ServiceBus\MetroMania.Infrastructure.ServiceBus.csproj" />
 		<ProjectReference Include="..\MetroMania.Infrastructure.Sql\MetroMania.Infrastructure.Sql.csproj" />
 	</ItemGroup>
 
