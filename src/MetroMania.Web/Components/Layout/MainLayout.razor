@@ -118,14 +118,6 @@
                         <MudNavLink Href="/admin/chats" Icon="@Icons.Material.Filled.Forum">
                             @Loc["ChatHistory"]
                         </MudNavLink>
-                        @if (!string.IsNullOrEmpty(Configuration["ORLEANS_DASHBOARD_URL"]))
-                        {
-                            <MudNavLink Href="@Configuration["ORLEANS_DASHBOARD_URL"]"
-                                        Target="_blank"
-                                        Icon="@Icons.Material.Filled.Monitor">
-                                @Loc["OrleansDashboard"]
-                            </MudNavLink>
-                        }
                     </Authorized>
                 </AuthorizeView>
             </MudNavMenu>

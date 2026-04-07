@@ -277,6 +277,5 @@
   <data name="DownloadZip" xml:space="preserve"><value>ZIP downloaden</value></data>
   <data name="DownloadPlayerProject" xml:space="preserve"><value>Project downloaden</value></data>
 
-  <!-- Orleans Dashboard -->
-  <data name="OrleansDashboard" xml:space="preserve"><value>Orleans Dashboard</value></data>
+
 </root>

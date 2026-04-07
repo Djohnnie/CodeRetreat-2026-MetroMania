@@ -282,6 +282,5 @@
   <data name="DownloadZip" xml:space="preserve"><value>تحميل ZIP</value></data>
   <data name="DownloadPlayerProject" xml:space="preserve"><value>تحميل المشروع</value></data>
 
-  <!-- Orleans Dashboard -->
-  <data name="OrleansDashboard" xml:space="preserve"><value>لوحة تحكم Orleans</value></data>
+
 </root>
