@@ -9,30 +9,22 @@ public record DeleteSubmissionCommand(Guid SubmissionId) : IRequest;
 public class DeleteSubmissionCommandHandler(
     ISubmissionRepository submissionRepository,
     ISubmissionRenderRepository renderRepository,
-    IRenderBlobStorage blobStorage)
+    ICleanupQueueService cleanupQueueService)
     : IRequestHandler<DeleteSubmissionCommand>
 {
     public async Task Handle(DeleteSubmissionCommand request, CancellationToken cancellationToken)
     {
-        // Fetch render info before deleting from SQL so we can derive blob names for cleanup
+        // Fetch render info before deleting from SQL so we can derive blob names for async cleanup
         var renders = await renderRepository.GetBySubmissionIdAsync(request.SubmissionId);
-
-        var allBlobNames = new List<string>();
-        foreach (var render in renders)
-        {
-            for (var hour = 1; hour <= render.TotalFrames; hour++)
-            {
-                allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.svgz");
-                allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}_{hour:D4}.json");
-            }
-            allBlobNames.Add($"{request.SubmissionId}_{render.LevelId}.zip");
-        }
+        var renderInfos = renders
+            .Select(r => (r.LevelId, r.TotalFrames))
+            .ToList();
 
         // Delete the submission — SQL cascade removes SubmissionScores and SubmissionRenders
         await submissionRepository.DeleteAsync(request.SubmissionId);
 
-        // Clean up blobs (best-effort: orphaned blobs are preferable to dangling DB records)
-        if (allBlobNames.Count > 0)
-            await Task.WhenAll(allBlobNames.Select(name => blobStorage.DeleteAsync(name, cancellationToken)));
+        // Enqueue async blob cleanup (svgz, json, zip) — processed by CleanupProcessor
+        if (renderInfos.Count > 0)
+            await cleanupQueueService.EnqueueCleanupAsync(request.SubmissionId, renderInfos, cancellationToken);
     }
 }

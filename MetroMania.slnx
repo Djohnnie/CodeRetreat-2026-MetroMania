@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/src/3. Infrastructure/">
     <Project Path="src/MetroMania.Api/MetroMania.Api.csproj" />
+    <Project Path="src/MetroMania.CleanupProcessor/MetroMania.CleanupProcessor.csproj" />
     <Project Path="src/MetroMania.Infrastructure.AzureOpenAI/MetroMania.Infrastructure.AzureOpenAI.csproj" />
     <Project Path="src/MetroMania.Infrastructure.BlobStorage/MetroMania.Infrastructure.BlobStorage.csproj" />
     <Project Path="src/MetroMania.Infrastructure.Orleans/MetroMania.Infrastructure.Orleans.csproj" />

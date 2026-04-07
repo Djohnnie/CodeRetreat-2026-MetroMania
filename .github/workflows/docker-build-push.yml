@@ -27,6 +27,8 @@ jobs:
             dockerfile: src/MetroMania.Orleans.ValidationHost/Dockerfile
           - image: metromania-orleans-renderhost
             dockerfile: src/MetroMania.Orleans.RendererHost/Dockerfile
+          - image: metromania-cleanup-processor
+            dockerfile: src/MetroMania.CleanupProcessor/Dockerfile
 
     steps:
       - name: Checkout
@@ -123,3 +125,13 @@ jobs:
               --name metromania-orleans-rhost \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --image ${{ env.REGISTRY }}/metromania-orleans-renderhost:${{ github.sha }}
+
+      - name: Update metromania-cleanup-processor job
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp job update \
+              --name metromania-cleanup-processor \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --image ${{ env.REGISTRY }}/metromania-cleanup-processor:${{ github.sha }}
