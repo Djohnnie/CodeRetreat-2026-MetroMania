@@ -49,13 +49,26 @@ jobs:
           # Replace binaries with freshly obfuscated DLLs from the SDK build
           cp output/PlayerSdk/*.dll "$ROOT/src/MetroMania.PlayerTemplate/binaries/"
 
-      - name: Create zip
-        run: cd stage && zip -r ../MetroMania.PlayerTemplate.zip MetroMania.PlayerTemplate/
+      - name: Zip player package
+        run: |
+          cd stage
+          zip -r ../MetroMania.PlayerTemplate.zip MetroMania.PlayerTemplate/
 
-      - name: Upload player package
+      - name: Upload player package artifact
         uses: actions/upload-artifact@v4
         with:
           name: MetroMania.PlayerTemplate
           path: MetroMania.PlayerTemplate.zip
           if-no-files-found: error
           retention-days: 90
+
+      - name: Upload to Azure Blob Storage
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az storage blob upload \
+              --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+              --container-name downloads \
+              --name MetroMania.PlayerTemplate.zip \
+              --file MetroMania.PlayerTemplate.zip \
+              --overwrite true
