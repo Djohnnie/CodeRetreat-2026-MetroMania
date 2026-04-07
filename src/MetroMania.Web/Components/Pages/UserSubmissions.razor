@@ -3,6 +3,7 @@
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using MetroMania.Application.DTOs
+@using MetroMania.Domain.Enums
 @using MetroMania.Web.Services
 @inject MetroManiaApiClient ApiClient
 @inject NavigationManager Navigation
@@ -51,6 +52,7 @@ else
             <HeaderContent>
                 <MudTh Style="width: 0;" />
                 <MudTh>@Loc["Version"]</MudTh>
+                <MudTh>@Loc["Status"]</MudTh>
                 <MudTh>@Loc["TotalScore"]</MudTh>
                 <MudTh>@Loc["SubmittedAt"]</MudTh>
                 <MudTh>@Loc["CodePreview"]</MudTh>
@@ -65,6 +67,12 @@ else
                 <MudTd DataLabel="@Loc["Version"]">
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
                         v@(context.Version)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="@Loc["Status"]">
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
+                             Color="@StatusColor(context.Status)">
+                        @context.Status
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="@Loc["TotalScore"]">
@@ -93,7 +101,7 @@ else
                 @if (_expandedRows.Contains(context.Id))
                 {
                     <MudTr>
-                        <td colspan="6" style="padding: 0;">
+                        <td colspan="7" style="padding: 0;">
                             <div class="pa-4" style="background: var(--mud-palette-background-grey);">
                                 @if (!string.IsNullOrWhiteSpace(context.Message))
                                 {
@@ -255,4 +263,13 @@ else
         if (success)
             _submissions = await ApiClient.GetUserSubmissionsAsync(UserId);
     }
+
+    private static Color StatusColor(SubmissionStatus status) => status switch
+    {
+        SubmissionStatus.Succeeded => Color.Success,
+        SubmissionStatus.Failed => Color.Error,
+        SubmissionStatus.Running or SubmissionStatus.Rendering or SubmissionStatus.Finalizing => Color.Warning,
+        SubmissionStatus.Waiting => Color.Default,
+        _ => Color.Default
+    };
 }
