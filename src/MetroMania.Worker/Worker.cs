@@ -110,6 +110,16 @@ public class ServiceBusWorker(
             runSw.Stop();
             logger.LogInformation("Ran scripts for {LevelCount} levels in {ElapsedMs}ms", levels.Count, runSw.ElapsedMilliseconds);
 
+            // Save scores immediately so the player can see them while rendering continues
+            var scores = levels.Zip(results, (level, result) =>
+                new SaveSubmissionScoresCommand.LevelScore(level.Id, result.Success ? result.Score : 0))
+                .ToList();
+
+            var saveScoresSw = Stopwatch.StartNew();
+            await sender.Send(new SaveSubmissionScoresCommand(submissionId, scores), ct);
+            saveScoresSw.Stop();
+            logger.LogInformation("Saved scores for {LevelCount} levels in {ElapsedMs}ms", levels.Count, saveScoresSw.ElapsedMilliseconds);
+
             // Phase 2: Render scripts in batches (one level at a time to limit memory)
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Rendering), ct);
             await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Rendering);
@@ -167,19 +177,9 @@ public class ServiceBusWorker(
             renderSw.Stop();
             logger.LogInformation("Rendered {LevelCount} levels in {ElapsedMs}ms", levels.Count, renderSw.ElapsedMilliseconds);
 
-            // Phase 3: Save scores and create ZIPs
+            // Phase 3: Create ZIPs
             await sender.Send(new UpdateSubmissionStatusCommand(submissionId, SubmissionStatus.Finalizing), ct);
             await NotifyStatusChangeAsync(submissionId, submission.UserId, SubmissionStatus.Finalizing);
-
-            // Build scores from results (score = 0 for failed levels)
-            var scores = levels.Zip(results, (level, result) =>
-                new SaveSubmissionScoresCommand.LevelScore(level.Id, result.Success ? result.Score : 0))
-                .ToList();
-
-            var saveScoresSw = Stopwatch.StartNew();
-            await sender.Send(new SaveSubmissionScoresCommand(submissionId, scores), ct);
-            saveScoresSw.Stop();
-            logger.LogInformation("Saved scores for {LevelCount} levels in {ElapsedMs}ms", levels.Count, saveScoresSw.ElapsedMilliseconds);
 
             // Create ZIP archives per level (downloads individual blobs, creates ZIP, uploads)
             if (renderedLevelInfos.Count > 0)
