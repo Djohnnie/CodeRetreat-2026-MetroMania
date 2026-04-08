@@ -64,7 +64,7 @@ public class GetLeaderboardQueryHandler(
                         localizedTitles,
                         localizedDescriptions);
                 })
-                .OrderBy(s => s.LevelTitle)
+                .OrderBy(s => s.SortOrder)
                 .ToList();
 
             entries.Add(new LeaderboardEntryDto(
