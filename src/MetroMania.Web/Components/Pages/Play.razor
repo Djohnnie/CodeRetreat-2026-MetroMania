@@ -294,6 +294,19 @@ else
             await InvokeAsync(StateHasChanged);
         });
 
+        // Re-join group after automatic reconnect (new connection ID loses group membership)
+        _hubConnection.Reconnected += async _ =>
+        {
+            await _hubConnection.InvokeAsync("JoinUserGroup", _userId.ToString());
+        };
+
+        // When automatic reconnect gives up, mark for manual reconnect on next submit
+        _hubConnection.Closed += _ =>
+        {
+            _hubConnection = null;
+            return Task.CompletedTask;
+        };
+
         try
         {
             await _hubConnection.StartAsync();
@@ -301,8 +314,21 @@ else
         }
         catch
         {
-            // Hub connection is best-effort; page still works without it
+            _hubConnection = null;
         }
+    }
+
+    private async Task EnsureHubConnectionAsync()
+    {
+        if (_hubConnection is { State: HubConnectionState.Connected }) return;
+
+        if (_hubConnection is not null)
+        {
+            try { await _hubConnection.DisposeAsync(); } catch { }
+            _hubConnection = null;
+        }
+
+        await StartHubConnectionAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -409,6 +435,8 @@ else
         StateHasChanged();
         try
         {
+            await EnsureHubConnectionAsync();
+
             var result = await ApiClient.SubmitCodeAsync(_userId, code);
 
             if (!result.Success)
