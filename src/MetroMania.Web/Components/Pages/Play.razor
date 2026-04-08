@@ -376,7 +376,7 @@ else
         });
     }
 
-    private static async Task EditorInteropWithRetryAsync(Func<Task> action, int maxRetries = 50)
+    private static async Task EditorInteropWithRetryAsync(Func<Task> action, int maxRetries = 5)
     {
         for (var i = 0; i < maxRetries; i++)
         {
@@ -388,6 +388,11 @@ else
             catch (JSException) when (i < maxRetries - 1)
             {
                 await Task.Delay(100 * (i + 1));
+            }
+            catch
+            {
+                // Give up after max retries
+                return;
             }
         }
     }
