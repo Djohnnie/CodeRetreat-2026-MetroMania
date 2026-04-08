@@ -37,6 +37,7 @@ var levelRunnerPairs = new (Level Level, IMetroManiaRunner Runner, string? Tag)[
     (Level7.Level, new RemoveLineDemoRunner(), null),
     (Level8.Level, new PassThroughDemoRunner(), null),
     (Level9.Level, new InsertStationDemoRunner(), null),
+    (Level10.Level, new MiddleInsertUpDemoRunner(), null),
 
     // Optimal runner — same levels, best general-purpose strategy
     (Level1.Level, new OptimalRunner(), "optimal"),
