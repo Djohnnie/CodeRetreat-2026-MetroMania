@@ -376,7 +376,7 @@ else
         });
     }
 
-    private static async Task EditorInteropWithRetryAsync(Func<Task> action, int maxRetries = 5)
+    private static async Task EditorInteropWithRetryAsync(Func<Task> action, int maxRetries = 50)
     {
         for (var i = 0; i < maxRetries; i++)
         {

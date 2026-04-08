@@ -68,7 +68,6 @@ else
                                 Placeholder="@Loc["BackgroundColor"]"
                                 PickerVariant="PickerVariant.Inline"
                                 ColorPickerMode="ColorPickerMode.HEX"
-                                Style="max-width: 140px;"
                                 Variant="Variant.Outlined" />
             </div>
             <MudDivider Vertical="true" FlexItem="true" />
@@ -79,10 +78,15 @@ else
                                 Placeholder="@Loc["WaterColor"]"
                                 PickerVariant="PickerVariant.Inline"
                                 ColorPickerMode="ColorPickerMode.HEX"
-                                Style="max-width: 140px;"
                                 Variant="Variant.Outlined" />
             </div>
-            <MudDivider Vertical="true" FlexItem="true" />
+        </MudPaper>
+    </div>
+
+    <!-- Game settings toolbar -->
+    <div class="d-flex justify-center mb-4">
+        <MudPaper Class="pa-3 d-flex align-center gap-4 flex-wrap" Elevation="0"
+                  Style="border: 1px solid var(--mud-palette-lines-default); display: inline-flex;">
             <div class="d-flex align-center gap-2">
                 <MudText Typo="Typo.body2" Style="font-weight: 600;">@Loc["VehicleCapacity"]:</MudText>
                 <MudNumericField Value="_vehicleCapacity" ValueChanged="OnVehicleCapacityChanged" T="int"
