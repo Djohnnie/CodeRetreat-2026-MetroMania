@@ -38,7 +38,7 @@ Je begint elke run met een beperkte voorraad middelen:
 - **1 Lijn** — definieert een metroroute tussen stations
 - **1 Trein** — een voertuig om op een lijn te plaatsen
 
-Elke **maandag om middernacht** (begin van elke spelweek) ontvangt je bot een **wekelijks cadeau**: één extra middel willekeurig gekozen — ofwel een **Lijn** of een **Trein**.
+Elke **maandag om middernacht** (begin van elke spelweek) controleert de engine of er een **wekelijks cadeau-override** is voor die week. Als die bestaat, ontvangt je bot dat middel via `OnWeeklyGiftReceived`. Als er geen override is gedefinieerd voor die week, wordt er geen cadeau gegeven.
 
 | Middel | Doel |
 |--------|------|
@@ -61,7 +61,7 @@ Je bot is een C#-klasse die `IMetroManiaRunner` implementeert. De spelmotor roep
 |---------|---------------------|-------------|
 | `OnHourTick(snapshot)` | Elk uur | `PlayerAction` |
 | `OnDayStart(snapshot)` | Om middernacht elke dag | — |
-| `OnWeeklyGift(snapshot, gift)` | Elke maandag om middernacht | — |
+| `OnWeeklyGift(snapshot, gift)` | Maandag om middernacht (alleen als override gedefinieerd) | — |
 | `OnStationSpawned(snapshot, id, location, type)` | Nieuw station verschijnt | — |
 | `OnPassengerWaiting(snapshot, location, passengers)` | Reiziger begint te wachten | — |
 | `OnStationOverrun(snapshot, location, passengers)` | 10+ reizigers op een station | — |
@@ -195,6 +195,6 @@ Je score stijgt elke keer dat een reiziger succesvol wordt afgeleverd bij een st
 - **Reageer meteen op `OnStationOverrun`** — bij 10 reizigers heb je nog ongeveer 10 uur voor game over.
 - **Verbind elk station** — een niet-verbonden station stapelt reizigers op zonder ontsnappingsroute. Prioriteer altijd nieuwe stations.
 - **Denk na over lijntopologie** — hub-and-spoke- of lus-netwerken presteren meestal beter dan één lange keten.
-- **Gebruik wekelijkse cadeaus meteen** — zet nieuwe middelen zo snel mogelijk in.
+- **Gebruik cadeaus meteen** — wanneer je een middel ontvangt via `OnWeeklyGiftReceived`, zet het zo snel mogelijk in.
 - **Reizigersroutering is slim** — reizigers stappen alleen in als de lijn naar hun bestemmingstype leidt. Willekeurig stations verbinden helpt niet.
 - **Verwijder en herbouw** — een slecht geplande lijn slopen en opnieuw bouwen is soms de beste zet, ondanks de tijdelijke verstoring.

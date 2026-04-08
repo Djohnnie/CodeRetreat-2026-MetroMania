@@ -13,6 +13,7 @@ Feature: Event Ordering
 
     Scenario: First-tick event sequence on an empty level is OnDayStart, OnWeeklyGiftReceived, OnHourTicked
         Given an empty level
+        And a weekly gift override for week 1 with resource type Line
         When the simulation runs for 1 hour
         Then the event log should be "OnDayStart", "OnWeeklyGiftReceived", "OnHourTicked"
 
@@ -24,6 +25,7 @@ Feature: Event Ordering
 
     Scenario: First-tick event sequence with a delay-0 station is OnDayStart, OnStationSpawned, OnWeeklyGiftReceived, OnHourTicked
         Given a level with a Circle station at (0,0) with a spawn delay of 0 days
+        And a weekly gift override for week 1 with resource type Line
         When the simulation runs for 1 hour
         Then the last 4 events should be "OnDayStart", "OnStationSpawned", "OnWeeklyGiftReceived", "OnHourTicked"
 
@@ -36,6 +38,7 @@ Feature: Event Ordering
 
     Scenario: OnDayStart does not fire on the second tick (hour 1)
         Given an empty level
+        And a weekly gift override for week 1 with resource type Line
         When the simulation runs for 2 hours
         Then the event log should start with "OnDayStart", "OnWeeklyGiftReceived", "OnHourTicked"
 
@@ -46,28 +49,33 @@ Feature: Event Ordering
 
     Scenario: Weekly gift fires after OnDayStart and before OnHourTicked on Monday
         Given an empty level
+        And a weekly gift override for week 1 with resource type Line
         When the simulation runs for 1 hour
         Then "OnDayStart" should have fired before "OnWeeklyGiftReceived"
         And "OnWeeklyGiftReceived" should have fired before "OnHourTicked"
 
-    Scenario: Weekly gift fires exactly once in the first week
+    Scenario: Weekly gift fires exactly once in the first week when overridden
         Given an empty level
+        And a weekly gift override for week 1 with resource type Line
         When the simulation runs for 48 hours
         Then "OnWeeklyGiftReceived" should have fired exactly 1 time
 
     Scenario: Monday tick sequence on an empty level is OnDayStart, OnWeeklyGiftReceived, OnHourTicked
         Given an empty level
+        And a weekly gift override for week 1 with resource type Line
         When the simulation runs for 1 hour
         Then the last 3 events should be "OnDayStart", "OnWeeklyGiftReceived", "OnHourTicked"
 
     Scenario: When a station spawns on Monday the full sequence includes all four events
         Given a level with a Circle station at (0,0) with a spawn delay of 7 days
+        And a weekly gift override for week 2 with resource type Line
         When the simulation runs for 169 hours
         Then the last 4 events should be "OnDayStart", "OnStationSpawned", "OnWeeklyGiftReceived", "OnHourTicked"
 
     Scenario: Passenger spawn event falls between station spawn and weekly gift on a Monday spawn tick
         Given a level with a Circle station at (0,0) with a spawn delay of 7 days and passengers every 24 hours
         And a level with a Triangle station at (9,0) with a spawn delay of 0 days and no passenger spawn phases
+        And a weekly gift override for week 2 with resource type Line
         When the simulation runs for 169 hours
         Then the last 5 events should be "OnDayStart", "OnStationSpawned", "OnPassengerSpawned", "OnWeeklyGiftReceived", "OnHourTicked"
 

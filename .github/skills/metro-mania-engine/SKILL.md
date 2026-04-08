@@ -35,7 +35,7 @@ The `IMetroManiaRunner` interface allows players to implement their bot logic fo
 - `OnDayStart(GameState gameState)`: Called at the start of each day (hour 0). Players can use this to plan their actions for the day based on the current game state.
 - `OnStationSpawned(GameState gameState, Guid stationId, Location location, StationType stationType)`: Called whenever a new station is spawned at the end of the day. Players can use this to react to new stations appearing on the map.
 - `OnPassengerSpawned(GameState gameState, Guid stationId, Guid passengerId)`: Called whenever a new passenger is spawned at a station. Players can use this to react to new passengers appearing and plan their routes accordingly.
-- `OnWeeklyGiftReceived(GameState gameState, ResourceType resourceType)`: Called every Monday when the player receives a weekly gift. Players can use this to react to the new resource and plan their strategy for the week.
+- `OnWeeklyGiftReceived(GameState gameState, ResourceType resourceType)`: Called on Monday at Hour 0 when the level has a weekly gift override for that week. Only fires if the level designer has defined a gift for the current week — weeks without an override are silently skipped.
 - `OnHourTicked(GameState gameState)`: Called at the end of every hour after all other events and movements have been processed. Players return a `PlayerAction` from this method, which the engine then applies to the game state.
 
 ## Player actions
@@ -54,7 +54,7 @@ The simulation progresses in a deterministic, tick-based manner. Each day consis
 1. **Day Start**: The engine calls `OnDayStart` for the player's bot, allowing them to plan their actions for the day.
 2. **Station Spawns**: At the end of the day, new stations may spawn on the map. The engine calls `OnStationSpawned` for each new station, allowing the player to react to the new stations.
 3. **Passenger Spawns**: Whenever new passengers spawn at stations, the engine calls `OnPassengerSpawned` for each new passenger, allowing the player to react to the new passengers.
-4. **Weekly Gift**: Every Monday, the player receives a weekly gift of resources. The engine calls `OnWeeklyGiftReceived`, allowing the player to react to the new resources.
+4. **Weekly Gift**: Every Monday, the engine checks if a `WeeklyGiftOverride` is defined for the current week. If so, the player receives that resource and the engine calls `OnWeeklyGiftReceived`. If no override exists, no gift is given.
 5. **Hour Tick**: At the end of every hour, after all events and movements have been processed, the engine calls `OnHourTicked`, allowing the player to return a `PlayerAction` that will be applied to the game state.
 
 The engine then updates the `GameState` based on the player's actions and the movements of passengers and trains, and the simulation continues to the next hour.

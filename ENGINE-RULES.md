@@ -210,8 +210,7 @@ Every Monday at midnight, the player receives a new resource. This is the primar
 | Timing | Every Monday at Hour 0 (ticks 0, 168, 336, 504, …). |
 | Week numbering | Week 1 starts at tick 0. `weekNumber = TotalHoursElapsed / (24 × 7) + 1`. |
 | Override gifts | If a `WeeklyGiftOverride` exists for the current week, that resource type is used. |
-| Random gifts | Without an override: seeded RNG picks `Line` (50%) or `Train` (50%). |
-| Random seed | `new Random(level.Seed + weekNumber)` → `rng.Next(2) == 0 ? Line : Train`. |
+| No override = no gift | Without an override, no gift is awarded. Level designers have full control over the gifting schedule. |
 | Initial resources are week-1 gifts | If `InitialResources` is non-empty, those are the week-1 gifts (already in the snapshot). The engine notifies the runner for each one without creating new resources. |
 | Gift arrives before OnHourTicked | The resource is added to the snapshot before the player's callback, so it can be used immediately. |
 
@@ -687,9 +686,8 @@ The simulation is **fully deterministic**: the same level configuration and bot 
 
 | Rule | Detail |
 |------|--------|
-| All randomness is seeded | The level's `Seed` value drives all RNG (passengers, gifts). |
+| All randomness is seeded | The level's `Seed` value drives all RNG (passenger destinations). |
 | Per-station RNG isolation | Each station has its own RNG seed per tick. Adding/removing stations elsewhere doesn't affect other stations' passenger destinations. |
-| Per-week RNG for gifts | `new Random(level.Seed + weekNumber)` — independent per week. |
 | No external state | The engine holds no mutable state between invocations. |
 | Immutable snapshot history | Each tick produces a fresh shallow copy. Mutations never retroactively alter stored snapshots. |
 | Reproducible across runs | Running the same level with the same bot twice produces identical snapshot sequences. |

@@ -31,7 +31,7 @@ Every tick fires events in this exact sequence:
 4. Passenger spawning → `OnPassengerSpawned`
 5. Train movement (3-phase pipeline: decision → collision → apply)
 5b. Finalize pending removals → `OnVehicleRemoved` → `OnLineRemoved`
-6. Weekly gift (Monday 00:00 only) → `OnWeeklyGiftReceived`
+6. Weekly gift (Monday 00:00 only, if override exists) → `OnWeeklyGiftReceived`
 7. `OnHourTicked` → Player returns their action
 8. Apply player action (invalid → `OnInvalidPlayerAction`)
 8b. Finalize pending removals → `OnVehicleRemoved` → `OnLineRemoved`
@@ -64,9 +64,9 @@ There are 6 station types: `Circle`, `Rectangle`, `Triangle`, `Diamond`, `Pentag
 
 ## Weekly Gifts
 
-- Every Monday at Hour 0, the player receives a resource.
-- If a `WeeklyGiftOverride` exists for the current week, that type is used.
-- Otherwise: seeded RNG picks `Line` (50%) or `Train` (50%).
+- Every Monday at Hour 0, the engine checks for a `WeeklyGiftOverride` for the current week.
+- If an override exists, the player receives that resource type.
+- If no override exists, no gift is awarded — the level designer has full control over the gifting schedule.
 - Week 1 = Day 1, Week 2 = Day 8, etc.
 - Initial resources (typically 1 Line + 1 Train) serve as the Week 1 gift.
 
@@ -159,7 +159,7 @@ A train does at most one operation per tick (1 drop or 1 pickup).
 | `OnDayStart(snapshot)` | Hour 0 of each day | `void` |
 | `OnStationSpawned(snapshot, stationId, location, stationType)` | A station appears on the map | `void` |
 | `OnPassengerSpawned(snapshot, stationId, passengerId)` | A passenger appears at a station | `void` |
-| `OnWeeklyGiftReceived(snapshot, gift)` | Monday at Hour 0 | `void` |
+| `OnWeeklyGiftReceived(snapshot, gift)` | Monday at Hour 0 (only if an override is defined for that week) | `void` |
 | `OnStationCrowded(snapshot, stationId, count)` | Each tick a station has ≥ 10 passengers | `void` |
 | `OnGameOver(snapshot, stationId)` | A station reaches ≥ 20 passengers | `void` |
 | `OnHourTicked(snapshot)` | Every tick (always the last event before action) | `PlayerAction` |

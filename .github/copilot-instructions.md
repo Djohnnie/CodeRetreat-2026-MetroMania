@@ -96,7 +96,7 @@ The core game simulation engine, decoupled from web/API/database concerns:
 - **Scripting:** `ScriptCompiler<TResult>` compiles user C# scripts via Roslyn. `StarterCode` provides the template `IMetroManiaRunner` implementation. `ScriptGlobals` exposes the `Level` property to scripts.
 - **Game rules:**
   - Initial resources: 1 Line + 1 Train
-  - Weekly gifts: random (or overridden) resource every Monday (Line/Train)
+  - Weekly gifts: only awarded when a `WeeklyGiftOverride` is defined for that week — no random gifts
   - Station overrun alert at 10+ passengers; game over at 20+ passengers
   - Vehicle capacity: configurable per level (default 6)
   - Deterministic gameplay via seed-based RNG

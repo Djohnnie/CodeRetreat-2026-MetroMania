@@ -38,7 +38,7 @@ You start each run with a limited pool of resources:
 - **1 Line** — defines a metro route between stations
 - **1 Train** — a vehicle to place on a line
 
-Every **Monday at midnight** (the start of each in-game week), your bot receives a **weekly gift**: one additional resource chosen at random — either a **Line** or a **Train**.
+Every **Monday at midnight** (the start of each in-game week), the engine checks for a **weekly gift override** defined by the level designer. If one exists, your bot receives that resource via `OnWeeklyGiftReceived`. If no override is defined for that week, no gift is awarded.
 
 | Resource | Purpose |
 |----------|---------|
@@ -61,7 +61,7 @@ Your bot is a C# class that implements `IMetroManiaRunner`. The game engine call
 |--------|--------------|---------|
 | `OnHourTick(snapshot)` | Every hour | `PlayerAction` |
 | `OnDayStart(snapshot)` | At midnight each day | — |
-| `OnWeeklyGift(snapshot, gift)` | Every Monday at midnight | — |
+| `OnWeeklyGift(snapshot, gift)` | Monday at midnight (only if override defined) | — |
 | `OnStationSpawned(snapshot, id, location, type)` | A new station appears | — |
 | `OnPassengerWaiting(snapshot, location, passengers)` | A passenger begins waiting | — |
 | `OnStationOverrun(snapshot, location, passengers)` | 10+ passengers at a station | — |
@@ -195,6 +195,6 @@ Your score increases each time a passenger is successfully delivered to a statio
 - **React immediately to `OnStationOverrun`** — at 10 passengers you have roughly 10 more hours before game over.
 - **Connect every station** — an unlinked station accumulates passengers with no escape route. Always prioritize new stations.
 - **Think about line topology** — hub-and-spoke or loop networks typically outperform a single long chain.
-- **Use weekly gifts immediately** — try to deploy new resources the same tick you receive them.
+- **Use gifts immediately** — when you receive a resource via `OnWeeklyGiftReceived`, try to deploy it the same tick.
 - **Passenger routing is intelligent** — passengers only board when the line leads toward their destination type. Randomly connecting stations does not help.
 - **Remove and rebuild** — dismantling a poorly planned line and rebuilding it with a better route is often worth the temporary disruption.

@@ -16,16 +16,6 @@ public class WeeklyGiftStepDefinitions(EngineTestContext ctx)
         Assert.Equal(expected, ctx.WeeklyGiftCalls[giftNumber - 1].Gift);
     }
 
-    [Then(@"all weekly gifts should be of type Line or Train")]
-    public void ThenAllWeeklyGiftsAreLineOrTrain()
-    {
-        Assert.NotEmpty(ctx.WeeklyGiftCalls);
-        Assert.All(ctx.WeeklyGiftCalls, gift =>
-            Assert.True(
-                gift.Gift == ResourceType.Line || gift.Gift == ResourceType.Train,
-                $"Expected gift to be Line or Train but was {gift.Gift}"));
-    }
-
     [Then(@"both runs should have produced the same weekly gift sequence")]
     public void ThenBothRunsProducedSameGiftSequence()
     {
