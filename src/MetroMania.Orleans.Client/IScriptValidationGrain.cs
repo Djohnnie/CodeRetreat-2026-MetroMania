@@ -11,4 +11,4 @@ public interface IScriptValidationGrain : IGrainWithGuidKey
 [Alias("MetroMania.Orleans.Client.OrleansValidationResult")]
 public record OrleansValidationResult(
     [property: Id(0)] bool Success,
-    [property: Id(1)] IReadOnlyList<string> Errors);
+    [property: Id(1)] List<string> Errors);

@@ -31,7 +31,19 @@ public class ScriptValidationGrain : Grain, IScriptValidationGrain
             var testLevel = CreateTestLevel();
             var globals = new ScriptGlobals(testLevel);
             var script = await scriptCompiler.CompileForExecution(wrappedScript);
-            await script.Invoke(globals);
+
+            var executionTask = Task.Run(() =>
+            {
+                _ = script.Invoke(globals);
+            });
+            
+            var completedTask = await Task.WhenAny(executionTask, Task.Delay(TimeSpan.FromSeconds(10)));
+
+            if (completedTask != executionTask)
+                return new OrleansValidationResult(false, ["Script execution timed out after 10 seconds. Check for infinite loops in your code..."]);
+
+            // Observe the task to surface any runtime exceptions
+            await executionTask;
 
             return new OrleansValidationResult(true, []);
         }
