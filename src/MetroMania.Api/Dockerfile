@@ -11,6 +11,7 @@ COPY src/MetroMania.Infrastructure.Sql/MetroMania.Infrastructure.Sql.csproj src/
 COPY src/MetroMania.Infrastructure.ServiceBus/MetroMania.Infrastructure.ServiceBus.csproj src/MetroMania.Infrastructure.ServiceBus/
 COPY src/MetroMania.Infrastructure.BlobStorage/MetroMania.Infrastructure.BlobStorage.csproj src/MetroMania.Infrastructure.BlobStorage/
 COPY src/MetroMania.Infrastructure.AzureOpenAI/MetroMania.Infrastructure.AzureOpenAI.csproj src/MetroMania.Infrastructure.AzureOpenAI/
+COPY src/MetroMania.Orleans.Client/MetroMania.Orleans.Client.csproj src/MetroMania.Orleans.Client/
 RUN dotnet restore src/MetroMania.Api/MetroMania.Api.csproj -p:UseAspire=false
 
 # Copy source and publish
@@ -23,6 +24,7 @@ COPY src/MetroMania.Infrastructure.Sql/ src/MetroMania.Infrastructure.Sql/
 COPY src/MetroMania.Infrastructure.ServiceBus/ src/MetroMania.Infrastructure.ServiceBus/
 COPY src/MetroMania.Infrastructure.BlobStorage/ src/MetroMania.Infrastructure.BlobStorage/
 COPY src/MetroMania.Infrastructure.AzureOpenAI/ src/MetroMania.Infrastructure.AzureOpenAI/
+COPY src/MetroMania.Orleans.Client/ src/MetroMania.Orleans.Client/
 RUN dotnet publish src/MetroMania.Api/MetroMania.Api.csproj -c Release -o /app/publish --no-restore -p:UseAspire=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
