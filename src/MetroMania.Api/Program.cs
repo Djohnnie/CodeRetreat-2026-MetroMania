@@ -1,12 +1,11 @@
 using MetroMania.Api.Endpoints;
 using MetroMania.Api.Hubs;
-using MetroMania.Application.Interfaces;
-using MetroMania.Application.Services;
 using MetroMania.Infrastructure.AzureOpenAI;
 using MetroMania.Infrastructure.BlobStorage;
 using MetroMania.Infrastructure.ServiceBus;
 using MetroMania.Infrastructure.Sql;
 using MetroMania.Infrastructure.Sql.Persistence;
+using MetroMania.Orleans.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -31,8 +30,12 @@ var blobStorageConnectionString = Environment.GetEnvironmentVariable("AZURE_STOR
     ?? throw new InvalidOperationException("Set the AZURE_STORAGE_CONNECTION_STRING environment variable.");
 builder.Services.AddBlobStorage(blobStorageConnectionString);
 
-// Script validation — runs directly in the API process via Roslyn
-builder.Services.AddSingleton<IScriptValidationService, ScriptValidationService>();
+// Script validation — runs in an isolated Orleans silo to protect the API from bad scripts
+#if ASPIRE
+builder.AddOrleansValidationClient(useLocalhostClustering: true);
+#else
+builder.AddOrleansValidationClient();
+#endif
 
 // Service Bus
 builder.Services.AddServiceBus();

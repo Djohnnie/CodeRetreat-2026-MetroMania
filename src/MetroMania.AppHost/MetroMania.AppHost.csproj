@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MetroMania.Api\MetroMania.Api.csproj" />
+    <ProjectReference Include="..\MetroMania.Orleans.Validation\MetroMania.Orleans.Validation.csproj" />
     <ProjectReference Include="..\MetroMania.Web\MetroMania.Web.csproj" />
     <ProjectReference Include="..\MetroMania.Worker.Runner\MetroMania.Worker.Runner.csproj" />
     <ProjectReference Include="..\MetroMania.Worker.Renderer\MetroMania.Worker.Renderer.csproj" />

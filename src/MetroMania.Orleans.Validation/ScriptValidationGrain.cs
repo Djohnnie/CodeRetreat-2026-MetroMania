@@ -1,16 +1,16 @@
-using MetroMania.Application.Interfaces;
 using MetroMania.Domain.Entities;
 using MetroMania.Domain.Enums;
 using MetroMania.Domain.Extensions;
 using MetroMania.Engine.Model;
+using MetroMania.Orleans.Client;
 using MetroMania.Scripting;
 using Microsoft.CodeAnalysis;
 
-namespace MetroMania.Application.Services;
+namespace MetroMania.Orleans.Validation;
 
-public class ScriptValidationService : IScriptValidationService
+public class ScriptValidationGrain : Grain, IScriptValidationGrain
 {
-    public async Task<ScriptValidationResult> ValidateAsync(string base64Code)
+    public async Task<OrleansValidationResult> ValidateScriptAsync(string base64Code)
     {
         try
         {
@@ -25,7 +25,7 @@ public class ScriptValidationService : IScriptValidationService
                 .ToList();
 
             if (errors.Count > 0)
-                return new ScriptValidationResult(false, errors);
+                return new OrleansValidationResult(false, errors);
 
             // Step 2: Execute the script with a test level to catch runtime exceptions
             var testLevel = CreateTestLevel();
@@ -33,11 +33,15 @@ public class ScriptValidationService : IScriptValidationService
             var script = await scriptCompiler.CompileForExecution(wrappedScript);
             await script.Invoke(globals);
 
-            return new ScriptValidationResult(true, []);
+            return new OrleansValidationResult(true, []);
         }
         catch (Exception ex)
         {
-            return new ScriptValidationResult(false, [ex.InnerException?.Message ?? ex.Message]);
+            return new OrleansValidationResult(false, [ex.InnerException?.Message ?? ex.Message]);
+        }
+        finally
+        {
+            DeactivateOnIdle();
         }
     }
 
