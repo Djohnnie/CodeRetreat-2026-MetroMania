@@ -61,14 +61,14 @@ jobs:
 
       - name: Zip player package
         run: |
-          cd stage
-          zip -r ../MetroMania.PlayerTemplate.zip MetroMania.PlayerTemplate/
+          cd stage/MetroMania.PlayerTemplate
+          zip -r ../../MetroMania.PlayerTemplate.zip .
 
       - name: Upload player package artifact
         uses: actions/upload-artifact@v4
         with:
           name: MetroMania.PlayerTemplate
-          path: MetroMania.PlayerTemplate.zip
+          path: stage/MetroMania.PlayerTemplate/
           if-no-files-found: error
           retention-days: 90
 
