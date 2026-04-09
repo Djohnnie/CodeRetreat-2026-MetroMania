@@ -1,5 +1,8 @@
 ﻿namespace MetroMania.Engine.Model;
 
+/// <summary>
+/// Represents a train (vehicle) moving along a metro line, picking up and dropping off passengers.
+/// </summary>
 public record Train
 {
     /// <summary>Copied from the consumed Train resource Id.</summary>

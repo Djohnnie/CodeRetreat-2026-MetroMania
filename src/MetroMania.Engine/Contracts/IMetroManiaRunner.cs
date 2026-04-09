@@ -3,6 +3,10 @@ using MetroMania.Engine.Model;
 
 namespace MetroMania.Engine.Contracts;
 
+/// <summary>
+/// Callback interface that player bots must implement.
+/// The engine invokes these methods during the simulation to notify the bot of events and request actions.
+/// </summary>
 public interface IMetroManiaRunner
 {
     /// <summary>

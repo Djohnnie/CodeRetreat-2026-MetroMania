@@ -1,7 +1,11 @@
 namespace MetroMania.Engine.Model;
 
+/// <summary>
+/// Base type for all player actions that can be returned from <see cref="Contracts.IMetroManiaRunner.OnHourTicked"/>.
+/// </summary>
 public abstract record PlayerAction
 {
+    /// <summary>A convenience instance representing no action for the current tick.</summary>
     public static PlayerAction None => new NoAction();
 }
 
