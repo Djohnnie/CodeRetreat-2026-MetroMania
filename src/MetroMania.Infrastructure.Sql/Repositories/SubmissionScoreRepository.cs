@@ -25,4 +25,9 @@ public class SubmissionScoreRepository(AppDbContext db) : ISubmissionScoreReposi
         db.SubmissionScores.AddRange(scores);
         await db.SaveChangesAsync();
     }
+
+    public async Task DeleteByLevelIdAsync(Guid levelId) =>
+        await db.SubmissionScores
+            .Where(s => s.LevelId == levelId)
+            .ExecuteDeleteAsync();
 }

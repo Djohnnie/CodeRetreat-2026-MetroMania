@@ -16,6 +16,11 @@ public class SubmissionRenderRepository(AppDbContext db) : ISubmissionRenderRepo
             .Where(r => r.SubmissionId == submissionId)
             .ToListAsync();
 
+    public async Task DeleteByLevelIdAsync(Guid levelId) =>
+        await db.SubmissionRenders
+            .Where(r => r.LevelId == levelId)
+            .ExecuteDeleteAsync();
+
     public async Task AddAsync(SubmissionRender render)
     {
         db.SubmissionRenders.Add(render);

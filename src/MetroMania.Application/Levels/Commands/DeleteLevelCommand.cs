@@ -5,7 +5,10 @@ namespace MetroMania.Application.Levels.Commands;
 
 public record DeleteLevelCommand(Guid Id) : IRequest<bool>;
 
-public class DeleteLevelCommandHandler(ILevelRepository levelRepository)
+public class DeleteLevelCommandHandler(
+    ILevelRepository levelRepository,
+    ISubmissionScoreRepository submissionScoreRepository,
+    ISubmissionRenderRepository submissionRenderRepository)
     : IRequestHandler<DeleteLevelCommand, bool>
 {
     public async Task<bool> Handle(DeleteLevelCommand request, CancellationToken cancellationToken)
@@ -14,6 +17,11 @@ public class DeleteLevelCommandHandler(ILevelRepository levelRepository)
         if (level is null) return false;
 
         var allLevels = await levelRepository.GetAllAsync();
+
+        // Remove all dependent rows before deleting the level
+        await submissionScoreRepository.DeleteByLevelIdAsync(request.Id);
+        await submissionRenderRepository.DeleteByLevelIdAsync(request.Id);
+
         await levelRepository.DeleteAsync(request.Id);
 
         // Re-sequence remaining levels
