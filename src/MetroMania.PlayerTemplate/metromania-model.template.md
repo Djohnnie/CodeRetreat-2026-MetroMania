@@ -22,29 +22,13 @@ This document describes every type your bot interacts with. The engine passes th
 
 Each station on the map has a shape. Passengers want to travel to a station whose shape matches their `DestinationType`.
 
-```csharp
-public enum StationType
-{
-    Circle,
-    Rectangle,
-    Triangle,
-    Diamond,
-    Pentagon,
-    Star
-}
-```
+<!-- CODE:src/MetroMania.Domain/Enums/StationType.cs -->
 
 ### ResourceType
 
 The two kinds of deployable resources the player receives throughout the game.
 
-```csharp
-public enum ResourceType
-{
-    Line,
-    Train
-}
-```
+<!-- CODE:src/MetroMania.Domain/Enums/ResourceType.cs -->
 
 ---
 
@@ -54,9 +38,7 @@ public enum ResourceType
 
 A position on the game grid expressed as integer tile coordinates.
 
-```csharp
-public record struct Location(int X, int Y);
-```
+<!-- CODE:src/MetroMania.Engine/Model/Location.cs#Location -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -67,9 +49,7 @@ public record struct Location(int X, int Y);
 
 The current point in game time, provided in every `GameSnapshot`.
 
-```csharp
-public readonly record struct GameTime(int Day, int Hour, DayOfWeek DayOfWeek);
-```
+<!-- CODE:src/MetroMania.Engine/Model/GameTime.cs -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -85,14 +65,7 @@ public readonly record struct GameTime(int Day, int Hour, DayOfWeek DayOfWeek);
 
 A metro station placed on the game grid. Stations spawn over time; your bot is notified via `OnStationSpawned`.
 
-```csharp
-public record Station
-{
-    public Guid Id { get; init; }
-    public Location Location { get; init; }
-    public StationType StationType { get; init; }
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/Station.cs -->
 
 | Property | Description |
 |----------|-------------|
@@ -104,13 +77,7 @@ public record Station
 
 A passenger waiting at a station or riding a train. Passengers want to reach a station whose shape matches their `DestinationType`. They are delivered (and score a point) when a train drops them at such a station.
 
-```csharp
-public record Passenger(StationType DestinationType, int SpawnedAtHour)
-{
-    public Guid Id { get; init; } = Guid.NewGuid();
-    public Guid? StationId { get; init; }
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/Passenger.cs -->
 
 | Property | Description |
 |----------|-------------|
@@ -123,14 +90,7 @@ public record Passenger(StationType DestinationType, int SpawnedAtHour)
 
 A deployable resource (line or train) available to the player. You start with initial resources and receive more via weekly gifts.
 
-```csharp
-public record Resource
-{
-    public Guid Id { get; init; } = Guid.NewGuid();
-    public ResourceType Type { get; init; }
-    public bool InUse { get; init; }
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/Resource.cs -->
 
 | Property | Description |
 |----------|-------------|
@@ -142,15 +102,7 @@ public record Resource
 
 A metro line connecting a sequence of stations. Trains travel back and forth along the line's station order.
 
-```csharp
-public record Line
-{
-    public Guid LineId { get; init; }
-    public int OrderId { get; init; }
-    public IReadOnlyList<Guid> StationIds { get; init; } = [];
-    public bool PendingRemoval { get; init; }
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/Line.cs -->
 
 | Property | Description |
 |----------|-------------|
@@ -163,18 +115,7 @@ public record Line
 
 A train (vehicle) moving along a metro line, picking up and dropping off passengers automatically.
 
-```csharp
-public record Train
-{
-    public Guid TrainId { get; init; }
-    public Guid LineId { get; init; }
-    public Location TilePosition { get; init; }
-    public int Direction { get; init; } = 1;
-    public int PathIndex { get; init; } = -1;
-    public IReadOnlyList<Passenger> Passengers { get; init; } = [];
-    public bool PendingRemoval { get; init; }
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/Train.cs -->
 
 | Property | Description |
 |----------|-------------|
@@ -194,23 +135,7 @@ public record Train
 
 An immutable snapshot of the entire game state at a specific point in time. Every `IMetroManiaRunner` callback receives one of these as its first parameter.
 
-```csharp
-public record GameSnapshot
-{
-    public required GameTime Time { get; init; }
-    public required int TotalHoursElapsed { get; init; }
-    public required int Score { get; init; }
-
-    public required IReadOnlyList<Resource> Resources { get; init; }
-    public required Dictionary<Location, Station> Stations { get; init; }
-    public required IReadOnlyList<Line> Lines { get; init; }
-    public required IReadOnlyList<Train> Trains { get; init; }
-    public required IReadOnlyList<Passenger> Passengers { get; init; }
-
-    public int NextLineOrderId { get; init; }
-    public PlayerAction? LastAction { get; init; }
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/GameSnapshot.cs -->
 
 | Property | Description |
 |----------|-------------|
@@ -233,28 +158,19 @@ Your bot returns a `PlayerAction` from `OnHourTicked` to tell the engine what to
 
 ### PlayerAction (base)
 
-```csharp
-public abstract record PlayerAction
-{
-    public static PlayerAction None => new NoAction();
-}
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#PlayerAction -->
 
 ### NoAction
 
 Do nothing this tick.
 
-```csharp
-public sealed record NoAction : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#NoAction -->
 
 ### CreateLine
 
 Create a new metro line by consuming an available line resource and connecting two stations.
 
-```csharp
-public sealed record CreateLine(Guid LineId, Guid FromStationId, Guid ToStationId) : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#CreateLine -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -266,9 +182,7 @@ public sealed record CreateLine(Guid LineId, Guid FromStationId, Guid ToStationI
 
 Extend an existing line from one of its terminal (first or last) stations to a new station.
 
-```csharp
-public sealed record ExtendLineFromTerminal(Guid LineId, Guid TerminalStationId, Guid ToStationId) : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#ExtendLineFromTerminal -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -280,9 +194,7 @@ public sealed record ExtendLineFromTerminal(Guid LineId, Guid TerminalStationId,
 
 Insert a station between two consecutive stations on an existing line.
 
-```csharp
-public sealed record ExtendLineInBetween(Guid LineId, Guid FromStationId, Guid NewStationId, Guid ToStationId) : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#ExtendLineInBetween -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -295,9 +207,7 @@ public sealed record ExtendLineInBetween(Guid LineId, Guid FromStationId, Guid N
 
 Remove an entire metro line and release its resource along with all vehicle resources on it.
 
-```csharp
-public sealed record RemoveLine(Guid LineId) : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#RemoveLine -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -309,9 +219,7 @@ public sealed record RemoveLine(Guid LineId) : PlayerAction;
 
 Deploy an available train resource onto an existing line at a specific station.
 
-```csharp
-public sealed record AddVehicleToLine(Guid VehicleId, Guid LineId, Guid StationId) : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#AddVehicleToLine -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -323,9 +231,7 @@ public sealed record AddVehicleToLine(Guid VehicleId, Guid LineId, Guid StationI
 
 Remove a train from its line and release the vehicle resource.
 
-```csharp
-public sealed record RemoveVehicle(Guid VehicleId) : PlayerAction;
-```
+<!-- CODE:src/MetroMania.Engine/Model/PlayerAction.cs#RemoveVehicle -->
 
 | Parameter | Description |
 |-----------|-------------|
@@ -341,21 +247,7 @@ public sealed record RemoveVehicle(Guid VehicleId) : PlayerAction;
 
 This is the interface your bot must implement. The engine calls these methods during the simulation.
 
-```csharp
-public interface IMetroManiaRunner
-{
-    PlayerAction OnHourTicked(GameSnapshot snapshot);
-    void OnDayStart(GameSnapshot snapshot);
-    void OnWeeklyGiftReceived(GameSnapshot snapshot, ResourceType gift);
-    void OnStationSpawned(GameSnapshot snapshot, Guid stationId, Location location, StationType stationType);
-    void OnPassengerSpawned(GameSnapshot snapshot, Guid stationId, Guid passengerId);
-    void OnStationCrowded(GameSnapshot snapshot, Guid stationId, int numberOfPassengersWaiting);
-    void OnGameOver(GameSnapshot snapshot, Guid stationId);
-    void OnInvalidPlayerAction(GameSnapshot snapshot, int code, string description);
-    void OnVehicleRemoved(GameSnapshot snapshot, Guid vehicleId);
-    void OnLineRemoved(GameSnapshot snapshot, Guid lineId);
-}
-```
+<!-- CODE:src/MetroMania.Engine/Contracts/IMetroManiaRunner.cs -->
 
 | Method | When It Is Called |
 |--------|-------------------|
@@ -378,43 +270,7 @@ public interface IMetroManiaRunner
 
 When your bot returns an invalid action from `OnHourTicked`, the engine calls `OnInvalidPlayerAction` with one of these error codes. Use them to debug your bot logic.
 
-```csharp
-public static class PlayerActionError
-{
-    // ── CreateLine ──────────────────────────────────────────────
-    public const int LineResourceNotFound        = 100;
-    public const int LineResourceAlreadyInUse    = 101;
-    public const int LineStationsSameStation      = 102;
-    public const int LineSegmentAlreadyExists     = 103;
-
-    // ── ExtendLineFromTerminal ──────────────────────────────────
-    public const int LineExtendLineNotFound       = 104;
-    public const int LineExtendFromNotTerminal    = 105;
-    public const int LineExtendToAlreadyOnLine    = 106;
-
-    // ── ExtendLineInBetween ─────────────────────────────────────
-    public const int LineInsertLineNotFound           = 107;
-    public const int LineInsertStationsNotConsecutive  = 108;
-    public const int LineInsertStationAlreadyOnLine    = 109;
-    public const int LineInsertStationNotSpawned       = 110;
-
-    // ── AddVehicleToLine ────────────────────────────────────────
-    public const int TrainResourceNotFound    = 200;
-    public const int TrainLineNotFound        = 201;
-    public const int TrainStationNotOnLine    = 202;
-    public const int TrainStationNotSpawned   = 203;
-    public const int TrainLineAtCapacity      = 204;
-    public const int TrainTileOccupied        = 205;
-
-    // ── RemoveVehicle ───────────────────────────────────────────
-    public const int RemoveVehicleNotFound        = 300;
-    public const int RemoveVehicleAlreadyPending  = 301;
-
-    // ── RemoveLine ──────────────────────────────────────────────
-    public const int RemoveLineNotFound        = 400;
-    public const int RemoveLineAlreadyPending  = 401;
-}
-```
+<!-- CODE:src/MetroMania.Engine/Contracts/PlayerActionError.cs -->
 
 | Code | Constant | Meaning |
 |------|----------|---------|

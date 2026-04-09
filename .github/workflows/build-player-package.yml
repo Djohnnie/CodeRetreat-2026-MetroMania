@@ -8,6 +8,7 @@ on:
       - 'src/MetroMania.Domain/**'
       - 'src/MetroMania.PlayerSdk/**'
       - 'src/MetroMania.PlayerTemplate/**'
+      - 'tools/generate-model-docs.ps1'
       - 'MetroMania.PlayerTemplate.slnx'
   workflow_dispatch:
 
@@ -38,16 +39,25 @@ jobs:
           # Solution file at package root
           cp MetroMania.PlayerTemplate.slnx "$ROOT/"
 
-          # Project source files — exclude build outputs and the stale pre-built binaries
+          # Project source files — exclude build outputs, stale binaries, and the template source
           rsync -a \
             --exclude='bin/' \
             --exclude='obj/' \
             --exclude='binaries/' \
+            --exclude='*.template.md' \
             src/MetroMania.PlayerTemplate/ \
             "$ROOT/src/MetroMania.PlayerTemplate/"
 
           # Replace binaries with freshly obfuscated DLLs from the SDK build
           cp output/PlayerSdk/*.dll "$ROOT/src/MetroMania.PlayerTemplate/binaries/"
+
+      - name: Generate model documentation
+        shell: pwsh
+        run: |
+          ./tools/generate-model-docs.ps1 `
+            -TemplatePath src/MetroMania.PlayerTemplate/metromania-model.template.md `
+            -OutputPath   stage/MetroMania.PlayerTemplate/src/MetroMania.PlayerTemplate/metromania-model.md `
+            -RepoRoot     .
 
       - name: Zip player package
         run: |
