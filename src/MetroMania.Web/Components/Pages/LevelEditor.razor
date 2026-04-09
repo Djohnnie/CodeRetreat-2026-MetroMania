@@ -55,7 +55,47 @@ else
             @_level.GridWidth x @_level.GridHeight
         </MudChip>
     </div>
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["EditGridSubtitle"]</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@Loc["EditGridSubtitle"]</MudText>
+
+    @* Level navigation bar *@
+    @if (_allLevels.Count > 1)
+    {
+        <MudPaper Elevation="0" Class="mb-6 pa-2"
+                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
+
+            <div style="display: flex; justify-content: flex-start;">
+                <MudTooltip Text="@Loc["PreviousLevel"]">
+                    <MudButton StartIcon="@Icons.Material.Filled.ArrowBackIos"
+                               Variant="Variant.Text"
+                               Color="Color.Primary"
+                               OnClick="NavigateToPreviousLevel">
+                        @PrevLevelTitle
+                    </MudButton>
+                </MudTooltip>
+            </div>
+
+            <div style="text-align: center; padding: 0 12px; white-space: nowrap;">
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @(_currentLevelIndex + 1) / @_allLevels.Count
+                </MudText>
+                <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">
+                    @_level.GetLocalizedTitle()
+                </MudText>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <MudTooltip Text="@Loc["NextLevel"]">
+                    <MudButton EndIcon="@Icons.Material.Filled.ArrowForwardIos"
+                               Variant="Variant.Text"
+                               Color="Color.Primary"
+                               OnClick="NavigateToNextLevel">
+                        @NextLevelTitle
+                    </MudButton>
+                </MudTooltip>
+            </div>
+
+        </MudPaper>
+    }
 
     <!-- Color pickers -->
     <div class="d-flex justify-center mb-4">
@@ -344,6 +384,8 @@ else
     private enum ToolMode { Station, Water, Eraser }
 
     private LevelDto? _level;
+    private List<LevelDto> _allLevels = [];
+    private Guid _loadedLevelId;
     private List<MetroStation> _stations = [];
     private List<Water> _waterTiles = [];
     private List<WeeklyGiftOverride> _weeklyGiftOverrides = [];
@@ -376,8 +418,57 @@ else
     private Dictionary<string, string> _rawSvgCache = new();
     private Dictionary<string, string> _colorizedSvgCache = new();
 
+    private int _currentLevelIndex => _allLevels.FindIndex(l => l.Id == LevelId);
+
+    private string PrevLevelTitle
+    {
+        get
+        {
+            if (_allLevels.Count == 0) return string.Empty;
+            var idx = (_currentLevelIndex - 1 + _allLevels.Count) % _allLevels.Count;
+            return _allLevels[idx].GetLocalizedTitle();
+        }
+    }
+
+    private string NextLevelTitle
+    {
+        get
+        {
+            if (_allLevels.Count == 0) return string.Empty;
+            var idx = (_currentLevelIndex + 1) % _allLevels.Count;
+            return _allLevels[idx].GetLocalizedTitle();
+        }
+    }
+
+    private void NavigateToPreviousLevel()
+    {
+        if (_allLevels.Count == 0) return;
+        var idx = (_currentLevelIndex - 1 + _allLevels.Count) % _allLevels.Count;
+        Navigation.NavigateTo($"/admin/levels/{_allLevels[idx].Id}");
+    }
+
+    private void NavigateToNextLevel()
+    {
+        if (_allLevels.Count == 0) return;
+        var idx = (_currentLevelIndex + 1) % _allLevels.Count;
+        Navigation.NavigateTo($"/admin/levels/{_allLevels[idx].Id}");
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        _allLevels = (await ApiClient.GetAllLevelsAsync()).OrderBy(l => l.SortOrder).ToList();
+        await LoadLevelAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedLevelId != LevelId && _loadedLevelId != default)
+            await LoadLevelAsync();
+    }
+
+    private async Task LoadLevelAsync()
+    {
+        _loadedLevelId = LevelId;
         _level = await ApiClient.GetLevelAsync(LevelId);
         if (_level is not null)
         {
