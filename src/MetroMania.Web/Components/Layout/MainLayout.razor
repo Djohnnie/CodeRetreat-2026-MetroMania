@@ -118,6 +118,12 @@
                         <MudNavLink Href="/admin/chats" Icon="@Icons.Material.Filled.Forum">
                             @Loc["ChatHistory"]
                         </MudNavLink>
+                        @if (!string.IsNullOrEmpty(_orleansDashboardUrl))
+                        {
+                            <MudNavLink Href="@_orleansDashboardUrl" Target="_blank" Icon="@Icons.Material.Filled.Speed">
+                                Orleans Dashboard
+                            </MudNavLink>
+                        }
                     </Authorized>
                 </AuthorizeView>
             </MudNavMenu>
@@ -223,6 +229,7 @@
     private ElementReference _conductorScrollAnchor;
     private List<ConductorMessage> _conductorMessages = [];
     private string _currentLanguage = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    private string? _orleansDashboardUrl;
 
     private readonly MudTheme _theme = new()
     {
@@ -267,6 +274,7 @@
     {
         if (firstRender)
         {
+            _orleansDashboardUrl = Configuration["ORLEANS_DASHBOARD_URL"];
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
             if (user.Identity?.IsAuthenticated == true)
