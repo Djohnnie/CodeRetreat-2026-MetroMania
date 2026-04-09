@@ -1,5 +1,6 @@
 @page "/leaderboard"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@implements IAsyncDisposable
 @using MetroMania.Application.DTOs
 @using MetroMania.Web.Services
 @inject MetroManiaApiClient ApiClient
@@ -138,10 +139,39 @@ else
 @code {
     private List<LeaderboardEntryDto>? _entries;
     private readonly HashSet<Guid> _expandedRows = [];
+    private PeriodicTimer? _timer;
+    private Task? _refreshLoop;
+    private CancellationTokenSource? _cts;
 
     protected override async Task OnInitializedAsync()
     {
         _entries = await ApiClient.GetLeaderboardAsync();
+
+        _cts = new CancellationTokenSource();
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        _refreshLoop = RefreshLoopAsync(_cts.Token);
+    }
+
+    private async Task RefreshLoopAsync(CancellationToken ct)
+    {
+        try
+        {
+            while (await _timer!.WaitForNextTickAsync(ct))
+            {
+                _entries = await ApiClient.GetLeaderboardAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _cts?.Cancel();
+        _timer?.Dispose();
+        if (_refreshLoop is not null)
+            await _refreshLoop;
+        _cts?.Dispose();
     }
 
     private void ToggleRow(Guid userId)
