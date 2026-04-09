@@ -209,25 +209,57 @@ else
                         var cy = y;
                         var station = GetStationAt(cx, cy);
                         var isWater = IsWaterAt(cx, cy);
-                        <div class="grid-tile" style="width: @(TileSize)px; height: @(TileSize)px;"
-                             @onclick="() => OnTileClick(cx, cy)">
-                            @((MarkupString)GetTileSvg("background"))
-                            @if (isWater)
-                            {
-                                bool n = IsWaterAt(cx, cy - 1);
-                                bool e = IsWaterAt(cx + 1, cy);
-                                bool s = IsWaterAt(cx, cy + 1);
-                                bool w = IsWaterAt(cx - 1, cy);
-                                bool ne = n && e && IsWaterAt(cx + 1, cy - 1);
-                                bool se = e && s && IsWaterAt(cx + 1, cy + 1);
-                                bool sw = s && w && IsWaterAt(cx - 1, cy + 1);
-                                bool nw = w && n && IsWaterAt(cx - 1, cy - 1);
-                                @((MarkupString)GetTileSvg(GetWaterTileName(n, ne, e, se, s, sw, w, nw)))
-                            }
+                        <div class="grid-tile-wrapper">
+                            <div class="grid-tile" style="width: @(TileSize)px; height: @(TileSize)px;"
+                                 @onclick="() => OnTileClick(cx, cy)">
+                                @((MarkupString)GetTileSvg("background"))
+                                @if (isWater)
+                                {
+                                    bool n = IsWaterAt(cx, cy - 1);
+                                    bool e = IsWaterAt(cx + 1, cy);
+                                    bool s = IsWaterAt(cx, cy + 1);
+                                    bool w = IsWaterAt(cx - 1, cy);
+                                    bool ne = n && e && IsWaterAt(cx + 1, cy - 1);
+                                    bool se = e && s && IsWaterAt(cx + 1, cy + 1);
+                                    bool sw = s && w && IsWaterAt(cx - 1, cy + 1);
+                                    bool nw = w && n && IsWaterAt(cx - 1, cy - 1);
+                                    @((MarkupString)GetTileSvg(GetWaterTileName(n, ne, e, se, s, sw, w, nw)))
+                                }
+                                @if (station is not null)
+                                {
+                                    @((MarkupString)GetTileSvg(GetStationTileSvgName(station.StationType)))
+                                    <span class="spawn-delay-badge">@station.SpawnDelayDays</span>
+                                }
+                            </div>
                             @if (station is not null)
                             {
-                                @((MarkupString)GetTileSvg(GetStationTileSvgName(station.StationType)))
-                                <span class="spawn-delay-badge">@station.SpawnDelayDays</span>
+                                <div class="station-popup">
+                                    <div class="station-popup-header">
+                                        <div style="position:relative;display:inline-block;width:16px;height:16px;flex-shrink:0;">@((MarkupString)GetTileSvg(GetStationTileSvgName(station.StationType)))</div>
+                                        <span>@Loc[station.StationType.ToString()]</span>
+                                    </div>
+                                    <div class="station-popup-divider"></div>
+                                    <div class="station-popup-row">
+                                        <span class="station-popup-label">@Loc["SpawnDelay"]</span>
+                                        <strong>@station.SpawnDelayDays d</strong>
+                                    </div>
+                                    @if (station.PassengerSpawnPhases.Count > 0)
+                                    {
+                                        <div class="station-popup-section">@Loc["SpawnFrequency"]</div>
+                                        @foreach (var phase in station.PassengerSpawnPhases.OrderBy(p => p.AfterDays))
+                                        {
+                                            <div class="station-popup-row">
+                                                <span class="station-popup-label">@Loc["AfterDays"] @phase.AfterDays</span>
+                                                <span>/ @phase.FrequencyInHours h</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="station-popup-section">@Loc["SpawnFrequency"]</div>
+                                        <div class="station-popup-row"><span class="station-popup-label" style="font-style: italic;">—</span></div>
+                                    }
+                                </div>
                             }
                         </div>
                     }
@@ -349,6 +381,12 @@ else
 }
 
 <style>
+    .grid-tile-wrapper {
+        position: relative;
+    }
+    .grid-tile-wrapper:hover .station-popup {
+        display: block;
+    }
     .grid-tile {
         position: relative;
         cursor: pointer;
@@ -371,6 +409,55 @@ else
         line-height: 1;
         pointer-events: none;
         z-index: 2;
+    }
+    .station-popup {
+        display: none;
+        position: absolute;
+        left: calc(100% + 8px);
+        top: 0;
+        z-index: 200;
+        min-width: 190px;
+        background: rgba(18, 18, 18, 0.96);
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 13px;
+        font-size: 12px;
+        line-height: 1.5;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+        pointer-events: none;
+        white-space: nowrap;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .station-popup-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    .station-popup-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.15);
+        margin: 6px 0;
+    }
+    .station-popup-section {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        opacity: 0.55;
+        margin: 8px 0 3px;
+    }
+    .station-popup-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 20px;
+        padding: 1px 0;
+    }
+    .station-popup-label {
+        opacity: 0.65;
     }
 </style>
 
