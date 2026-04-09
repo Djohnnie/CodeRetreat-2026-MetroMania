@@ -33,11 +33,10 @@ jobs:
 
       - name: Stage player package
         run: |
-          ROOT=stage/MetroMania.PlayerTemplate
-          mkdir -p "$ROOT/src/MetroMania.PlayerTemplate/binaries"
+          mkdir -p stage/src/MetroMania.PlayerTemplate/binaries
 
           # Solution file at package root
-          cp MetroMania.PlayerTemplate.slnx "$ROOT/"
+          cp MetroMania.PlayerTemplate.slnx stage/
 
           # Project source files — exclude build outputs, stale binaries, and the template source
           rsync -a \
@@ -46,29 +45,29 @@ jobs:
             --exclude='binaries/' \
             --exclude='*.template.md' \
             src/MetroMania.PlayerTemplate/ \
-            "$ROOT/src/MetroMania.PlayerTemplate/"
+            stage/src/MetroMania.PlayerTemplate/
 
           # Replace binaries with freshly obfuscated DLLs from the SDK build
-          cp output/PlayerSdk/*.dll "$ROOT/src/MetroMania.PlayerTemplate/binaries/"
+          cp output/PlayerSdk/*.dll stage/src/MetroMania.PlayerTemplate/binaries/
 
       - name: Generate model documentation
         shell: pwsh
         run: |
           ./tools/generate-model-docs.ps1 `
             -TemplatePath src/MetroMania.PlayerTemplate/metromania-model.template.md `
-            -OutputPath   stage/MetroMania.PlayerTemplate/src/MetroMania.PlayerTemplate/metromania-model.md `
+            -OutputPath   stage/src/MetroMania.PlayerTemplate/metromania-model.md `
             -RepoRoot     .
 
       - name: Zip player package
         run: |
-          cd stage/MetroMania.PlayerTemplate
-          zip -r ../../MetroMania.PlayerTemplate.zip .
+          cd stage
+          zip -r ../MetroMania.PlayerTemplate.zip .
 
       - name: Upload player package artifact
         uses: actions/upload-artifact@v4
         with:
           name: MetroMania.PlayerTemplate
-          path: stage/MetroMania.PlayerTemplate/
+          path: stage/
           if-no-files-found: error
           retention-days: 90
 
