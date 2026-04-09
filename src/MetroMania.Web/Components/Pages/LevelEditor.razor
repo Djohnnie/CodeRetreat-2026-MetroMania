@@ -81,6 +81,12 @@ else
                 <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">
                     @_level.GetLocalizedTitle()
                 </MudText>
+                @if (!string.IsNullOrWhiteSpace(_level.GetLocalizedDescription()))
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @_level.GetLocalizedDescription()
+                    </MudText>
+                }
             </div>
 
             <div style="display: flex; justify-content: flex-end;">
