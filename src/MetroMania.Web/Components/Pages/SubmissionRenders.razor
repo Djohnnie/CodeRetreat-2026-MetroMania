@@ -1,5 +1,6 @@
 @page "/play/renders"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using MetroMania.Application.DTOs
 @using MetroMania.Application.Submissions.Queries
 @using MetroMania.Web.Services
 @implements IAsyncDisposable
@@ -18,6 +19,46 @@
     <MudText Typo="Typo.h4" Style="font-weight: 700;">@Loc["Replay"]</MudText>
 </div>
 <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">@Loc["ReplaysSubtitle"]</MudText>
+
+@* Level navigation bar *@
+@if (_renderLevels.Count > 1)
+{
+    <MudPaper Elevation="0" Class="mb-3 pa-2"
+              Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 12px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
+
+        <div style="display: flex; justify-content: flex-start;">
+            <MudTooltip Text="@PrevLevelLabel">
+                <MudButton StartIcon="@Icons.Material.Filled.ArrowBackIos"
+                           Variant="Variant.Text"
+                           Color="Color.Primary"
+                           OnClick="NavigateToPreviousLevel">
+                    @PrevLevelTitle
+                </MudButton>
+            </MudTooltip>
+        </div>
+
+        <div style="text-align: center; padding: 0 12px; white-space: nowrap;">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                @(_currentLevelIndex + 1) / @_renderLevels.Count
+            </MudText>
+            <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">
+                @CurrentLevelTitle
+            </MudText>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+            <MudTooltip Text="@NextLevelLabel">
+                <MudButton EndIcon="@Icons.Material.Filled.ArrowForwardIos"
+                           Variant="Variant.Text"
+                           Color="Color.Primary"
+                           OnClick="NavigateToNextLevel">
+                    @NextLevelTitle
+                </MudButton>
+            </MudTooltip>
+        </div>
+
+    </MudPaper>
+}
 
 @if (_loading)
 {
@@ -140,21 +181,81 @@ else
     private CancellationTokenSource? _playCts;
     private ElementReference _containerRef;
 
+    private List<SubmissionRenderLevelDto> _renderLevels = [];
+    private Guid _loadedLevelId;
+
+    private int _currentLevelIndex => _renderLevels.FindIndex(l => l.LevelId == LevelId);
+
+    private string CurrentLevelTitle =>
+        _currentLevelIndex >= 0 ? _renderLevels[_currentLevelIndex].GetLocalizedTitle() : string.Empty;
+
+    private string PrevLevelTitle
+    {
+        get
+        {
+            if (_renderLevels.Count == 0) return string.Empty;
+            var idx = (_currentLevelIndex - 1 + _renderLevels.Count) % _renderLevels.Count;
+            return _renderLevels[idx].GetLocalizedTitle();
+        }
+    }
+
+    private string NextLevelTitle
+    {
+        get
+        {
+            if (_renderLevels.Count == 0) return string.Empty;
+            var idx = (_currentLevelIndex + 1) % _renderLevels.Count;
+            return _renderLevels[idx].GetLocalizedTitle();
+        }
+    }
+
+    private string PrevLevelLabel => Loc["PreviousLevel"].ToString();
+    private string NextLevelLabel => Loc["NextLevel"].ToString();
+
     private string FrameUrl => $"/api/renders/{SubmissionId}/{LevelId}/{_currentHour}.svg";
 
     protected override async Task OnInitializedAsync()
     {
-        var info = await ApiClient.GetSubmissionRenderInfoAsync(SubmissionId, LevelId);
-        _totalFrames = info?.TotalFrames ?? 0;
-        _loading = false;
-        if (_totalFrames > 0)
-            _hourInputStr = "1";
+        _renderLevels = await ApiClient.GetSubmissionRenderLevelsAsync(SubmissionId);
+        await LoadFrameDataAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedLevelId != LevelId && _loadedLevelId != default)
+            await LoadFrameDataAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && _totalFrames > 0)
             await _containerRef.FocusAsync();
+    }
+
+    private async Task LoadFrameDataAsync()
+    {
+        StopPlayback();
+        _loading = true;
+        _currentHour = 1;
+        _hourInputStr = "1";
+        _loadedLevelId = LevelId;
+        var info = await ApiClient.GetSubmissionRenderInfoAsync(SubmissionId, LevelId);
+        _totalFrames = info?.TotalFrames ?? 0;
+        _loading = false;
+    }
+
+    private void NavigateToPreviousLevel()
+    {
+        if (_renderLevels.Count == 0) return;
+        var idx = (_currentLevelIndex - 1 + _renderLevels.Count) % _renderLevels.Count;
+        Navigation.NavigateTo($"/play/renders?submissionId={SubmissionId}&levelId={_renderLevels[idx].LevelId}");
+    }
+
+    private void NavigateToNextLevel()
+    {
+        if (_renderLevels.Count == 0) return;
+        var idx = (_currentLevelIndex + 1) % _renderLevels.Count;
+        Navigation.NavigateTo($"/play/renders?submissionId={SubmissionId}&levelId={_renderLevels[idx].LevelId}");
     }
 
     private void HandleKeyDown(KeyboardEventArgs e)

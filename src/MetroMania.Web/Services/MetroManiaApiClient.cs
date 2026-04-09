@@ -194,6 +194,13 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
 
     // ── Renders ───────────────────────────────────────────────────
 
+    public async Task<List<SubmissionRenderLevelDto>> GetSubmissionRenderLevelsAsync(Guid submissionId)
+    {
+        SetAuthHeader();
+        return (await httpClient.GetFromJsonAsync<List<SubmissionRenderLevelDto>>(
+            $"/api/submissions/{submissionId}/render-levels", JsonOptions))!;
+    }
+
     public async Task<List<SubmissionRenderDto>> GetSubmissionRendersAsync(Guid submissionId, Guid levelId)
     {
         SetAuthHeader();

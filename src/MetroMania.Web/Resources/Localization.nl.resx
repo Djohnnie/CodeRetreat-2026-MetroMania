@@ -265,6 +265,8 @@
   <data name="StopPlayback" xml:space="preserve"><value>Stop</value></data>
   <data name="PreviousDay" xml:space="preserve"><value>Vorig uur</value></data>
   <data name="NextDay" xml:space="preserve"><value>Volgend uur</value></data>
+  <data name="PreviousLevel" xml:space="preserve"><value>Vorig level</value></data>
+  <data name="NextLevel" xml:space="preserve"><value>Volgend level</value></data>
 
   <!-- Leaderboard -->
   <data name="Leaderboard" xml:space="preserve"><value>Klassement</value></data>

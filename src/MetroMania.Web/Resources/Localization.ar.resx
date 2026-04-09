@@ -270,6 +270,8 @@
   <data name="StopPlayback" xml:space="preserve"><value>إيقاف</value></data>
   <data name="PreviousDay" xml:space="preserve"><value>الساعة السابقة</value></data>
   <data name="NextDay" xml:space="preserve"><value>الساعة التالية</value></data>
+  <data name="PreviousLevel" xml:space="preserve"><value>المستوى السابق</value></data>
+  <data name="NextLevel" xml:space="preserve"><value>المستوى التالي</value></data>
 
   <!-- Leaderboard -->
   <data name="Leaderboard" xml:space="preserve"><value>لوحة المتصدرين</value></data>
