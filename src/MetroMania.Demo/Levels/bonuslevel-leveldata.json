@@ -1,0 +1,875 @@
+{
+  "backgroundColor": "#A8A49D",
+  "waterColor": "#BDEC99",
+  "seed": 974427613,
+  "vehicleCapacity": 8,
+  "maxDays": 365,
+  "localizedContent": {
+    "en": {
+      "title": "Bonus Level",
+      "description": "The ultimate mega level of chaos"
+    },
+    "nl": {
+      "title": "Bonuslevel",
+      "description": "Het ultieme meganiveau van chaos"
+    },
+    "ar": {
+      "title": "\u0645\u0631\u062D\u0644\u0629 \u0625\u0636\u0627\u0641\u064A\u0629",
+      "description": "\u0627\u0644\u0645\u0631\u062D\u0644\u0629 \u0627\u0644\u0636\u062E\u0645\u0629 \u0627\u0644\u0646\u0647\u0627\u0626\u064A\u0629 \u0644\u0644\u0641\u0648\u0636\u0649"
+    }
+  },
+  "stations": [
+    {
+      "gridX": 12,
+      "gridY": 10,
+      "stationType": "Circle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 25,
+      "gridY": 8,
+      "stationType": "Triangle",
+      "spawnDelayDays": 0,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 3,
+      "gridY": 2,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 4,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 21,
+      "gridY": 11,
+      "stationType": "Diamond",
+      "spawnDelayDays": 8,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 9,
+      "gridY": 4,
+      "stationType": "Triangle",
+      "spawnDelayDays": 12,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 6,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 27,
+      "gridY": 18,
+      "stationType": "Rectangle",
+      "spawnDelayDays": 16,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 28,
+      "gridY": 1,
+      "stationType": "Circle",
+      "spawnDelayDays": 20,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 28,
+      "gridY": 12,
+      "stationType": "Circle",
+      "spawnDelayDays": 24,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 5,
+      "gridY": 7,
+      "stationType": "Circle",
+      "spawnDelayDays": 28,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 3,
+      "gridY": 18,
+      "stationType": "Star",
+      "spawnDelayDays": 32,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 14,
+      "gridY": 17,
+      "stationType": "Triangle",
+      "spawnDelayDays": 36,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    },
+    {
+      "gridX": 17,
+      "gridY": 2,
+      "stationType": "Pentagon",
+      "spawnDelayDays": 40,
+      "passengerSpawnPhases": [
+        {
+          "afterDays": 0,
+          "frequencyInHours": 12
+        }
+      ]
+    }
+  ],
+  "waterTiles": [
+    {
+      "gridX": 0,
+      "gridY": 14
+    },
+    {
+      "gridX": 1,
+      "gridY": 14
+    },
+    {
+      "gridX": 2,
+      "gridY": 14
+    },
+    {
+      "gridX": 3,
+      "gridY": 13
+    },
+    {
+      "gridX": 3,
+      "gridY": 14
+    },
+    {
+      "gridX": 0,
+      "gridY": 15
+    },
+    {
+      "gridX": 1,
+      "gridY": 15
+    },
+    {
+      "gridX": 2,
+      "gridY": 15
+    },
+    {
+      "gridX": 4,
+      "gridY": 14
+    },
+    {
+      "gridX": 2,
+      "gridY": 13
+    },
+    {
+      "gridX": 4,
+      "gridY": 13
+    },
+    {
+      "gridX": 5,
+      "gridY": 14
+    },
+    {
+      "gridX": 6,
+      "gridY": 14
+    },
+    {
+      "gridX": 5,
+      "gridY": 13
+    },
+    {
+      "gridX": 6,
+      "gridY": 13
+    },
+    {
+      "gridX": 7,
+      "gridY": 13
+    },
+    {
+      "gridX": 7,
+      "gridY": 14
+    },
+    {
+      "gridX": 8,
+      "gridY": 14
+    },
+    {
+      "gridX": 8,
+      "gridY": 13
+    },
+    {
+      "gridX": 9,
+      "gridY": 13
+    },
+    {
+      "gridX": 9,
+      "gridY": 14
+    },
+    {
+      "gridX": 9,
+      "gridY": 15
+    },
+    {
+      "gridX": 10,
+      "gridY": 15
+    },
+    {
+      "gridX": 10,
+      "gridY": 14
+    },
+    {
+      "gridX": 10,
+      "gridY": 13
+    },
+    {
+      "gridX": 11,
+      "gridY": 14
+    },
+    {
+      "gridX": 11,
+      "gridY": 15
+    },
+    {
+      "gridX": 3,
+      "gridY": 15
+    },
+    {
+      "gridX": 12,
+      "gridY": 15
+    },
+    {
+      "gridX": 12,
+      "gridY": 14
+    },
+    {
+      "gridX": 12,
+      "gridY": 16
+    },
+    {
+      "gridX": 13,
+      "gridY": 16
+    },
+    {
+      "gridX": 14,
+      "gridY": 16
+    },
+    {
+      "gridX": 15,
+      "gridY": 16
+    },
+    {
+      "gridX": 13,
+      "gridY": 15
+    },
+    {
+      "gridX": 15,
+      "gridY": 15
+    },
+    {
+      "gridX": 14,
+      "gridY": 15
+    },
+    {
+      "gridX": 11,
+      "gridY": 16
+    },
+    {
+      "gridX": 16,
+      "gridY": 16
+    },
+    {
+      "gridX": 16,
+      "gridY": 15
+    },
+    {
+      "gridX": 17,
+      "gridY": 15
+    },
+    {
+      "gridX": 17,
+      "gridY": 16
+    },
+    {
+      "gridX": 19,
+      "gridY": 16
+    },
+    {
+      "gridX": 18,
+      "gridY": 16
+    },
+    {
+      "gridX": 18,
+      "gridY": 15
+    },
+    {
+      "gridX": 19,
+      "gridY": 15
+    },
+    {
+      "gridX": 20,
+      "gridY": 16
+    },
+    {
+      "gridX": 20,
+      "gridY": 17
+    },
+    {
+      "gridX": 21,
+      "gridY": 17
+    },
+    {
+      "gridX": 21,
+      "gridY": 16
+    },
+    {
+      "gridX": 20,
+      "gridY": 15
+    },
+    {
+      "gridX": 21,
+      "gridY": 15
+    },
+    {
+      "gridX": 22,
+      "gridY": 16
+    },
+    {
+      "gridX": 22,
+      "gridY": 17
+    },
+    {
+      "gridX": 23,
+      "gridY": 17
+    },
+    {
+      "gridX": 24,
+      "gridY": 17
+    },
+    {
+      "gridX": 26,
+      "gridY": 17
+    },
+    {
+      "gridX": 25,
+      "gridY": 17
+    },
+    {
+      "gridX": 27,
+      "gridY": 17
+    },
+    {
+      "gridX": 28,
+      "gridY": 17
+    },
+    {
+      "gridX": 29,
+      "gridY": 17
+    },
+    {
+      "gridX": 29,
+      "gridY": 16
+    },
+    {
+      "gridX": 28,
+      "gridY": 16
+    },
+    {
+      "gridX": 27,
+      "gridY": 16
+    },
+    {
+      "gridX": 26,
+      "gridY": 16
+    },
+    {
+      "gridX": 25,
+      "gridY": 16
+    },
+    {
+      "gridX": 24,
+      "gridY": 16
+    },
+    {
+      "gridX": 23,
+      "gridY": 16
+    },
+    {
+      "gridX": 18,
+      "gridY": 14
+    },
+    {
+      "gridX": 18,
+      "gridY": 13
+    },
+    {
+      "gridX": 18,
+      "gridY": 12
+    },
+    {
+      "gridX": 18,
+      "gridY": 11
+    },
+    {
+      "gridX": 18,
+      "gridY": 10
+    },
+    {
+      "gridX": 18,
+      "gridY": 9
+    },
+    {
+      "gridX": 19,
+      "gridY": 8
+    },
+    {
+      "gridX": 18,
+      "gridY": 8
+    },
+    {
+      "gridX": 20,
+      "gridY": 8
+    },
+    {
+      "gridX": 21,
+      "gridY": 8
+    },
+    {
+      "gridX": 22,
+      "gridY": 8
+    },
+    {
+      "gridX": 22,
+      "gridY": 7
+    },
+    {
+      "gridX": 22,
+      "gridY": 9
+    },
+    {
+      "gridX": 23,
+      "gridY": 9
+    },
+    {
+      "gridX": 23,
+      "gridY": 8
+    },
+    {
+      "gridX": 23,
+      "gridY": 7
+    },
+    {
+      "gridX": 23,
+      "gridY": 6
+    },
+    {
+      "gridX": 24,
+      "gridY": 6
+    },
+    {
+      "gridX": 23,
+      "gridY": 10
+    },
+    {
+      "gridX": 24,
+      "gridY": 10
+    },
+    {
+      "gridX": 24,
+      "gridY": 9
+    },
+    {
+      "gridX": 24,
+      "gridY": 8
+    },
+    {
+      "gridX": 24,
+      "gridY": 7
+    },
+    {
+      "gridX": 25,
+      "gridY": 6
+    },
+    {
+      "gridX": 25,
+      "gridY": 7
+    },
+    {
+      "gridX": 26,
+      "gridY": 7
+    },
+    {
+      "gridX": 26,
+      "gridY": 8
+    },
+    {
+      "gridX": 26,
+      "gridY": 9
+    },
+    {
+      "gridX": 25,
+      "gridY": 9
+    },
+    {
+      "gridX": 25,
+      "gridY": 10
+    },
+    {
+      "gridX": 26,
+      "gridY": 10
+    },
+    {
+      "gridX": 27,
+      "gridY": 10
+    },
+    {
+      "gridX": 27,
+      "gridY": 9
+    },
+    {
+      "gridX": 27,
+      "gridY": 8
+    },
+    {
+      "gridX": 27,
+      "gridY": 7
+    },
+    {
+      "gridX": 27,
+      "gridY": 6
+    },
+    {
+      "gridX": 26,
+      "gridY": 6
+    },
+    {
+      "gridX": 28,
+      "gridY": 8
+    },
+    {
+      "gridX": 29,
+      "gridY": 8
+    },
+    {
+      "gridX": 28,
+      "gridY": 7
+    },
+    {
+      "gridX": 28,
+      "gridY": 9
+    },
+    {
+      "gridX": 0,
+      "gridY": 0
+    },
+    {
+      "gridX": 0,
+      "gridY": 1
+    },
+    {
+      "gridX": 0,
+      "gridY": 2
+    },
+    {
+      "gridX": 1,
+      "gridY": 2
+    },
+    {
+      "gridX": 1,
+      "gridY": 1
+    },
+    {
+      "gridX": 1,
+      "gridY": 0
+    },
+    {
+      "gridX": 2,
+      "gridY": 0
+    },
+    {
+      "gridX": 2,
+      "gridY": 1
+    },
+    {
+      "gridX": 2,
+      "gridY": 2
+    },
+    {
+      "gridX": 3,
+      "gridY": 0
+    },
+    {
+      "gridX": 0,
+      "gridY": 3
+    },
+    {
+      "gridX": 4,
+      "gridY": 0
+    },
+    {
+      "gridX": 0,
+      "gridY": 4
+    },
+    {
+      "gridX": 1,
+      "gridY": 3
+    },
+    {
+      "gridX": 3,
+      "gridY": 1
+    },
+    {
+      "gridX": 5,
+      "gridY": 0
+    },
+    {
+      "gridX": 0,
+      "gridY": 5
+    }
+  ],
+  "weeklyGiftOverrides": [
+    {
+      "week": 2,
+      "resourceType": "Train"
+    },
+    {
+      "week": 3,
+      "resourceType": "Line"
+    },
+    {
+      "week": 4,
+      "resourceType": "Train"
+    },
+    {
+      "week": 5,
+      "resourceType": "Train"
+    },
+    {
+      "week": 6,
+      "resourceType": "Line"
+    },
+    {
+      "week": 7,
+      "resourceType": "Train"
+    },
+    {
+      "week": 8,
+      "resourceType": "Train"
+    },
+    {
+      "week": 9,
+      "resourceType": "Line"
+    },
+    {
+      "week": 10,
+      "resourceType": "Train"
+    },
+    {
+      "week": 11,
+      "resourceType": "Train"
+    },
+    {
+      "week": 12,
+      "resourceType": "Line"
+    },
+    {
+      "week": 13,
+      "resourceType": "Train"
+    },
+    {
+      "week": 14,
+      "resourceType": "Train"
+    },
+    {
+      "week": 15,
+      "resourceType": "Line"
+    },
+    {
+      "week": 16,
+      "resourceType": "Train"
+    },
+    {
+      "week": 17,
+      "resourceType": "Train"
+    },
+    {
+      "week": 18,
+      "resourceType": "Train"
+    },
+    {
+      "week": 19,
+      "resourceType": "Line"
+    },
+    {
+      "week": 20,
+      "resourceType": "Train"
+    },
+    {
+      "week": 21,
+      "resourceType": "Train"
+    },
+    {
+      "week": 22,
+      "resourceType": "Train"
+    },
+    {
+      "week": 23,
+      "resourceType": "Train"
+    },
+    {
+      "week": 24,
+      "resourceType": "Train"
+    },
+    {
+      "week": 25,
+      "resourceType": "Train"
+    },
+    {
+      "week": 26,
+      "resourceType": "Train"
+    },
+    {
+      "week": 27,
+      "resourceType": "Train"
+    },
+    {
+      "week": 28,
+      "resourceType": "Train"
+    },
+    {
+      "week": 29,
+      "resourceType": "Train"
+    },
+    {
+      "week": 30,
+      "resourceType": "Train"
+    },
+    {
+      "week": 31,
+      "resourceType": "Train"
+    },
+    {
+      "week": 32,
+      "resourceType": "Train"
+    },
+    {
+      "week": 33,
+      "resourceType": "Train"
+    },
+    {
+      "week": 34,
+      "resourceType": "Train"
+    },
+    {
+      "week": 35,
+      "resourceType": "Train"
+    },
+    {
+      "week": 36,
+      "resourceType": "Train"
+    },
+    {
+      "week": 37,
+      "resourceType": "Train"
+    },
+    {
+      "week": 38,
+      "resourceType": "Train"
+    },
+    {
+      "week": 39,
+      "resourceType": "Train"
+    },
+    {
+      "week": 40,
+      "resourceType": "Train"
+    },
+    {
+      "week": 41,
+      "resourceType": "Train"
+    },
+    {
+      "week": 42,
+      "resourceType": "Train"
+    },
+    {
+      "week": 43,
+      "resourceType": "Train"
+    },
+    {
+      "week": 44,
+      "resourceType": "Train"
+    },
+    {
+      "week": 45,
+      "resourceType": "Train"
+    },
+    {
+      "week": 46,
+      "resourceType": "Train"
+    },
+    {
+      "week": 47,
+      "resourceType": "Train"
+    },
+    {
+      "week": 48,
+      "resourceType": "Train"
+    },
+    {
+      "week": 49,
+      "resourceType": "Train"
+    },
+    {
+      "week": 50,
+      "resourceType": "Train"
+    }
+  ],
+  "initialResources": [
+    "Line",
+    "Train"
+  ]
+}

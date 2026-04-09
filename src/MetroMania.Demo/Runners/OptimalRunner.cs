@@ -7,30 +7,36 @@ namespace MetroMania.Demo.Runners;
 /// <summary>
 /// A general-purpose, adaptive runner that maximises score on any level layout.
 ///
-/// Strategy — "Backbone + Hub" pattern:
+/// Strategy — "Closest-first + Type-diverse" pattern:
 ///
-///   The first line created becomes the **backbone**. Its head station (index 0)
-///   acts as a hub. Every new station is connected in two steps:
+///   The first line (backbone) connects the **closest pair** of stations,
+///   preferring a pair with different station types so passengers can route
+///   from the very first tick.
 ///
-///     1. If a spare Line resource is available, create a NEW line from the
-///        backbone head → new station. This gives the station a direct connection
-///        to the hub and creates an interchange when the backbone is later extended
-///        to include it.
+///   New stations are connected **closest-first**: the unconnected station
+///   nearest to the existing backbone is always connected next (crowded
+///   stations override this for safety). Extension uses the shortest-distance
+///   option — terminal head/tail or mid-line insertion — whichever adds the
+///   least travel distance.
 ///
-///     2. When no spare Line resource exists, extend the backbone from its tail
-///        (index ^1) → new station. This adds the station to the backbone and —
-///        if step 1 already ran — creates a dual-line interchange.
+///   When spare Line resources exist, a spoke line is created from the
+///   backbone to the target. The anchor station is chosen to maximise
+///   **type diversity** — preferring a backbone station whose type differs
+///   from the target's — while staying as close as possible. This ensures
+///   every new line bridges different station types so passengers reach
+///   their destination types faster.
 ///
-///   The result is a hub-and-spoke topology where every station sits on the
-///   backbone AND (often) has a secondary spoke line back to the hub.
-///
-///   After all stations are connected to the backbone, excess Line resources
-///   (keeping 1 in reserve for future stations) are used to create shortcut
-///   lines between stations whose network distance significantly exceeds their
-///   direct distance.
+///   After all stations are on the backbone, excess lines create shortcut
+///   connections scored by network-vs-direct distance ratio, type diversity,
+///   and current passenger load.
 ///
 ///   Trains are deployed greedily: trainless lines first, then lines with the
 ///   most spare capacity, at the station with the most waiting passengers.
+///
+///   **Train rebalancing**: When no idle trains are available but a station is
+///   building up passengers dangerously (≥7 waiting), the runner removes the
+///   least-valuable train from a low-demand line with surplus trains. The freed
+///   resource is then naturally redeployed by TryDeployTrain to the neediest line.
 /// </summary>
 internal class OptimalRunner : IMetroManiaRunner
 {
@@ -38,6 +44,12 @@ internal class OptimalRunner : IMetroManiaRunner
     private readonly List<Guid> _spawnOrder = [];
     private readonly HashSet<Guid> _crowdedStationIds = new();
     private Guid _backboneLineId;
+
+    /// <summary>
+    /// Tracks the train being removed for rebalancing. While set, no further
+    /// rebalance removals are issued. Cleared once the train is fully removed.
+    /// </summary>
+    private Guid? _rebalanceTrainId;
 
     // ════════════════════════════════════════════════════════════════════════════
     // Main decision loop
@@ -47,6 +59,7 @@ internal class OptimalRunner : IMetroManiaRunner
     {
         return TryConnectToBackbone(snapshot)
             ?? TryDeployTrain(snapshot)
+            ?? TryRebalanceTrain(snapshot)
             ?? TryCreateShortcutLine(snapshot)
             ?? PlayerAction.None;
     }
@@ -70,32 +83,48 @@ internal class OptimalRunner : IMetroManiaRunner
 
         // Connectivity is checked against the BACKBONE only — a station on a
         // secondary spoke line is still "unconnected" until the backbone reaches it.
-        // This is the key to creating dual-line interchanges.
         var backboneStationIds = backbone.StationIds.ToHashSet();
         var unconnected = _stations.Keys.Where(id => !backboneStationIds.Contains(id)).ToList();
 
         if (unconnected.Count == 0)
             return null;
 
-        // Prioritise crowded stations (safety), then use spawn order to match the
-        // natural station progression — this avoids zigzag backbones.
+        // Prioritise crowded stations (safety), then closest to backbone so
+        // the network grows outward in tight, efficient segments.
         var target = unconnected
             .Where(id => _crowdedStationIds.Contains(id))
+            .OrderBy(id => MinDistToLine(backbone.StationIds, id))
             .FirstOrDefault();
 
         target = target != default
             ? target
-            : unconnected.OrderBy(id => _spawnOrder.IndexOf(id)).First();
+            : unconnected
+                .OrderBy(id => MinDistToLine(backbone.StationIds, id))
+                .First();
 
-        // If a spare Line resource exists, create a spoke: backbone HEAD → target.
+        // If a spare Line resource exists, create a spoke from the best backbone
+        // anchor to the target. Prefer an anchor with a different station type
+        // for better passenger routing, then pick the closest.
         var idleLine = snapshot.Resources
             .FirstOrDefault(r => r.Type == ResourceType.Line && !r.InUse);
 
         if (idleLine is not null)
-            return new CreateLine(idleLine.Id, backbone.StationIds[0], target);
+        {
+            var targetType = _stations[target].Type;
+            var targetLoc = _stations[target].Location;
 
-        // No spare resource — extend the backbone from its TAIL → target.
-        return new ExtendLineFromTerminal(backbone.LineId, backbone.StationIds[^1], target);
+            var anchor = backbone.StationIds
+                .Where(sid => _stations.ContainsKey(sid))
+                .OrderByDescending(sid => _stations[sid].Type != targetType ? 1 : 0)
+                .ThenBy(sid => Chebyshev(_stations[sid].Location, targetLoc))
+                .First();
+
+            return new CreateLine(idleLine.Id, anchor, target);
+        }
+
+        // No spare resource — extend the backbone using the shortest-distance option:
+        // terminal extension (head or tail) vs mid-line insertion between consecutive stations.
+        return BestBackboneExtension(backbone, target);
     }
 
     private PlayerAction? CreateBackbone(GameSnapshot snapshot)
@@ -108,10 +137,34 @@ internal class OptimalRunner : IMetroManiaRunner
         if (lineResource is null)
             return null;
 
-        // Use the first two spawned stations — this produces natural, linear
-        // backbones that grow well as new stations appear.
+        // Pick the closest pair of stations, preferring different types so
+        // passengers can route between types from the very first line.
+        Guid bestA = default, bestB = default;
+        int bestDist = int.MaxValue;
+        bool bestDiffType = false;
+
+        for (int i = 0; i < _spawnOrder.Count; i++)
+        for (int j = i + 1; j < _spawnOrder.Count; j++)
+        {
+            var a = _spawnOrder[i];
+            var b = _spawnOrder[j];
+            int dist = Chebyshev(_stations[a].Location, _stations[b].Location);
+            bool diffType = _stations[a].Type != _stations[b].Type;
+
+            bool isBetter = (!bestDiffType && diffType)
+                         || (diffType == bestDiffType && dist < bestDist);
+
+            if (isBetter)
+            {
+                bestA = a;
+                bestB = b;
+                bestDist = dist;
+                bestDiffType = diffType;
+            }
+        }
+
         _backboneLineId = lineResource.Id;
-        return new CreateLine(lineResource.Id, _spawnOrder[0], _spawnOrder[1]);
+        return new CreateLine(lineResource.Id, bestA, bestB);
     }
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -166,7 +219,101 @@ internal class OptimalRunner : IMetroManiaRunner
     }
 
     // ════════════════════════════════════════════════════════════════════════════
-    // Priority 3 — Create shortcut lines when all stations are on the backbone
+    // Priority 3 — Rebalance: pull a train from a low-demand line to help a
+    //              high-demand station when no idle trains are available
+    // ════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Passenger threshold at a single station that triggers a rebalance attempt.
+    /// Chosen below the overrun warning (10) to give the removed train time to
+    /// finish its pending-removal cycle and be redeployed.
+    /// </summary>
+    private const int RebalancePassengerThreshold = 7;
+
+    private PlayerAction? TryRebalanceTrain(GameSnapshot snapshot)
+    {
+        // If a rebalance removal is in flight, wait for it to complete.
+        if (_rebalanceTrainId.HasValue)
+        {
+            bool stillExists = snapshot.Trains.Any(t => t.TrainId == _rebalanceTrainId.Value);
+            if (stillExists)
+                return null;
+            _rebalanceTrainId = null;
+        }
+
+        // Only rebalance when there are no idle trains — otherwise TryDeployTrain handles it.
+        if (snapshot.Resources.Any(r => r.Type == ResourceType.Train && !r.InUse))
+            return null;
+
+        var activeLines = snapshot.Lines.Where(l => !l.PendingRemoval).ToList();
+        if (activeLines.Count < 2)
+            return null;
+
+        var activeTrains = snapshot.Trains.Where(t => !t.PendingRemoval).ToList();
+        if (activeTrains.Count < 2)
+            return null;
+
+        var trainsByLine = activeTrains
+            .GroupBy(t => t.LineId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Check if any station on an active line is in danger.
+        bool hasNeedyStation = false;
+        foreach (var line in activeLines)
+        {
+            int lineTrainCount = trainsByLine.GetValueOrDefault(line.LineId)?.Count ?? 0;
+            foreach (var sid in line.StationIds)
+            {
+                int waiting = snapshot.Passengers.Count(p => p.StationId == sid);
+
+                // Trainless line with passengers waiting, or station nearing overrun.
+                if ((lineTrainCount == 0 && waiting > 0) || waiting >= RebalancePassengerThreshold)
+                {
+                    hasNeedyStation = true;
+                    break;
+                }
+            }
+            if (hasNeedyStation) break;
+        }
+
+        if (!hasNeedyStation)
+            return null;
+
+        // Find the best donor: a line with 2+ trains and the lowest demand-per-train.
+        Train? bestDonor = null;
+        double bestDonorScore = double.MaxValue;
+
+        foreach (var line in activeLines)
+        {
+            if (!trainsByLine.TryGetValue(line.LineId, out var lineTrains) || lineTrains.Count < 2)
+                continue;
+
+            int demand = line.StationIds
+                .Sum(sid => snapshot.Passengers.Count(p => p.StationId == sid));
+            double demandPerTrain = (double)demand / lineTrains.Count;
+
+            // Pick the train with the fewest passengers on board (quickest removal).
+            var candidate = lineTrains.OrderBy(t => t.Passengers.Count).First();
+
+            // Lower score = better donor (low demand, few passengers on board).
+            double score = demandPerTrain + candidate.Passengers.Count * 0.5;
+
+            if (score < bestDonorScore)
+            {
+                bestDonorScore = score;
+                bestDonor = candidate;
+            }
+        }
+
+        if (bestDonor is null)
+            return null;
+
+        _rebalanceTrainId = bestDonor.TrainId;
+        return new RemoveVehicle(bestDonor.TrainId);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // Priority 4 — Create shortcut lines when all stations are on the backbone
     // ════════════════════════════════════════════════════════════════════════════
 
     private PlayerAction? TryCreateShortcutLine(GameSnapshot snapshot)
@@ -252,6 +399,86 @@ internal class OptimalRunner : IMetroManiaRunner
 
     private static int Chebyshev(Location a, Location b)
         => Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
+
+    /// <summary>
+    /// Minimum Chebyshev distance from <paramref name="stationId"/> to any station on
+    /// the given line. Used for closest-first connection ordering.
+    /// </summary>
+    private int MinDistToLine(IReadOnlyList<Guid> lineStationIds, Guid stationId)
+    {
+        var loc = _stations[stationId].Location;
+        int min = int.MaxValue;
+        foreach (var sid in lineStationIds)
+        {
+            if (!_stations.TryGetValue(sid, out var info)) continue;
+            int d = Chebyshev(info.Location, loc);
+            if (d < min) min = d;
+        }
+        return min;
+    }
+
+    /// <summary>
+    /// Chooses the best way to add <paramref name="targetId"/> to the backbone:
+    /// terminal extension (head or tail) vs mid-line insertion between consecutive
+    /// stations, whichever adds the least total travel distance.
+    /// </summary>
+    private PlayerAction BestBackboneExtension(Line backbone, Guid targetId)
+    {
+        var targetLoc = _stations[targetId].Location;
+        var stationIds = backbone.StationIds;
+
+        // ── Terminal options ────────────────────────────────────────────────
+        int headDist = Chebyshev(_stations[stationIds[0]].Location, targetLoc);
+        int tailDist = Chebyshev(_stations[stationIds[^1]].Location, targetLoc);
+
+        Guid bestTerminal;
+        int bestTerminalCost;
+        if (headDist <= tailDist)
+        {
+            bestTerminal = stationIds[0];
+            bestTerminalCost = headDist;
+        }
+        else
+        {
+            bestTerminal = stationIds[^1];
+            bestTerminalCost = tailDist;
+        }
+
+        // ── Mid-insertion options ───────────────────────────────────────────
+        // For each consecutive pair A→B on the backbone, inserting the target
+        // replaces the direct A→B segment with A→target→B. The detour cost is:
+        //   Chebyshev(A, target) + Chebyshev(target, B) − Chebyshev(A, B)
+        Guid bestInsertFrom = default, bestInsertTo = default;
+        int bestDetourCost = int.MaxValue;
+
+        for (int i = 0; i < stationIds.Count - 1; i++)
+        {
+            var fromId = stationIds[i];
+            var toId = stationIds[i + 1];
+
+            if (!_stations.TryGetValue(fromId, out var fromInfo)
+             || !_stations.TryGetValue(toId, out var toInfo))
+                continue;
+
+            int directSegment = Chebyshev(fromInfo.Location, toInfo.Location);
+            int detour = Chebyshev(fromInfo.Location, targetLoc)
+                       + Chebyshev(targetLoc, toInfo.Location)
+                       - directSegment;
+
+            if (detour < bestDetourCost)
+            {
+                bestDetourCost = detour;
+                bestInsertFrom = fromId;
+                bestInsertTo = toId;
+            }
+        }
+
+        // Pick whichever approach adds less distance.
+        if (bestInsertFrom != default && bestDetourCost < bestTerminalCost)
+            return new ExtendLineInBetween(backbone.LineId, bestInsertFrom, targetId, bestInsertTo);
+
+        return new ExtendLineFromTerminal(backbone.LineId, bestTerminal, targetId);
+    }
 
     private static bool AlreadyDirectlyConnected(List<Line> lines, Guid a, Guid b)
         => lines.Any(l =>

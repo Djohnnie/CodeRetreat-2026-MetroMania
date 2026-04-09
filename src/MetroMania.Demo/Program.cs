@@ -28,25 +28,28 @@ var jsonOptions = new JsonSerializerOptions
 
 var levelRunnerPairs = new (Level Level, IMetroManiaRunner Runner, string? Tag)[]
 {
-    (Level1.Level, new SimpleRunner(), null),
-    (Level2.Level, new SimpleRunner(), null),
-    (Level3.Level, new SimpleRunner(), null),
-    (Level4.Level, new TransferDemoRunner(), null),
-    (Level5.Level, new ShortcutTransferRunner(), null),
-    (Level6.Level, new RemoveVehicleDemoRunner(), null),
-    (Level7.Level, new RemoveLineDemoRunner(), null),
-    (Level8.Level, new PassThroughDemoRunner(), null),
-    (Level9.Level, new InsertStationDemoRunner(), null),
-    (Level10.Level, new MiddleInsertUpDemoRunner(), null),
+    // (Level1.Level, new SimpleRunner(), null),
+    // (Level2.Level, new SimpleRunner(), null),
+    // (Level3.Level, new SimpleRunner(), null),
+    // (Level4.Level, new TransferDemoRunner(), null),
+    // (Level5.Level, new ShortcutTransferRunner(), null),
+    // (Level6.Level, new RemoveVehicleDemoRunner(), null),
+    // (Level7.Level, new RemoveLineDemoRunner(), null),
+    // (Level8.Level, new PassThroughDemoRunner(), null),
+    // (Level9.Level, new InsertStationDemoRunner(), null),
+    // (Level10.Level, new MiddleInsertUpDemoRunner(), null),
+    // (BonusLevel.Level, new OptimalRunner(), "optimal-baseline"),
+    (BonusLevel.Level, new BonusLevelRunner(), null),
+    (BonusLevel.Level, new UltraRunner(), "ultra"),
 
-    // Optimal runner — same levels, best general-purpose strategy
-    (Level1.Level, new OptimalRunner(), "optimal"),
-    (Level2.Level, new OptimalRunner(), "optimal"),
-    (Level3.Level, new OptimalRunner(), "optimal"),
-    (Level4.Level, new OptimalRunner(), "optimal"),
-    (Level5.Level, new OptimalRunner(), "optimal"),
-    (Level6.Level, new OptimalRunner(), "optimal"),
-    (Level7.Level, new OptimalRunner(), "optimal"),
+    // // Optimal runner — same levels, best general-purpose strategy
+    // (Level1.Level, new OptimalRunner(), "optimal"),
+    // (Level2.Level, new OptimalRunner(), "optimal"),
+    // (Level3.Level, new OptimalRunner(), "optimal"),
+    // (Level4.Level, new OptimalRunner(), "optimal"),
+    // (Level5.Level, new OptimalRunner(), "optimal"),
+    // (Level6.Level, new OptimalRunner(), "optimal"),
+    // (Level7.Level, new OptimalRunner(), "optimal"),
 };
 
 foreach (var (level, runner, tag) in levelRunnerPairs)
