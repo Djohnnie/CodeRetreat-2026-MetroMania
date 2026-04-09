@@ -201,7 +201,7 @@ Resources are consumable items that the player uses to build their metro network
 
 ## 5. Weekly Gifts
 
-Every Monday at midnight, the player receives a new resource. This is the primary way to grow the metro network.
+Every Monday at midnight, the player may receive one or more new resources. This is the primary way to grow the metro network.
 
 ### Rules
 
@@ -209,10 +209,10 @@ Every Monday at midnight, the player receives a new resource. This is the primar
 |------|--------|
 | Timing | Every Monday at Hour 0 (ticks 0, 168, 336, 504, …). |
 | Week numbering | Week 1 starts at tick 0. `weekNumber = TotalHoursElapsed / (24 × 7) + 1`. |
-| Override gifts | If a `WeeklyGiftOverride` exists for the current week, that resource type is used. |
+| Override gifts | All `WeeklyGiftOverride` entries matching the current week are awarded. Multiple entries for the same week grant multiple resources. |
 | No override = no gift | Without an override, no gift is awarded. Level designers have full control over the gifting schedule. |
 | Initial resources are week-1 gifts | If `InitialResources` is non-empty, those are the week-1 gifts (already in the snapshot). The engine notifies the runner for each one without creating new resources. |
-| Gift arrives before OnHourTicked | The resource is added to the snapshot before the player's callback, so it can be used immediately. |
+| Gift arrives before OnHourTicked | Resources are added to the snapshot before the player's callback, so they can be used immediately. |
 
 ### Gift Timing
 

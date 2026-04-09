@@ -108,3 +108,38 @@ Feature: Weekly Gifts
             | 337   | 3     |
             | 504   | 3     |
             | 505   | 4     |
+
+    Scenario: Multiple gifts in the same week are all awarded
+        Given an empty level with seed 42
+        And a weekly gift override for week 2 with resource type Line
+        And a weekly gift override for week 2 with resource type Train
+        When the simulation runs for 169 hours
+        Then "OnWeeklyGiftReceived" should have fired exactly 2 times
+        And weekly gift 1 should be of type Line
+        And weekly gift 2 should be of type Train
+
+    Scenario: Multiple gifts in the same week each add a resource to the snapshot
+        Given an empty level with seed 42
+        And a weekly gift override for week 1 with resource type Line
+        And a weekly gift override for week 1 with resource type Train
+        And a weekly gift override for week 1 with resource type Line
+        When the simulation runs for 1 hour
+        Then "OnWeeklyGiftReceived" should have fired exactly 3 times
+        And weekly gift 1 should be of type Line
+        And weekly gift 2 should be of type Train
+        And weekly gift 3 should be of type Line
+
+    Scenario: Weeks with multiple gifts and weeks with single gifts can coexist
+        Given an empty level with seed 42
+        And a weekly gift override for week 1 with resource type Line
+        And a weekly gift override for week 1 with resource type Train
+        And a weekly gift override for week 2 with resource type Line
+        And a weekly gift override for week 3 with resource type Train
+        And a weekly gift override for week 3 with resource type Line
+        When the simulation runs for 337 hours
+        Then "OnWeeklyGiftReceived" should have fired exactly 5 times
+        And weekly gift 1 should be of type Line
+        And weekly gift 2 should be of type Train
+        And weekly gift 3 should be of type Line
+        And weekly gift 4 should be of type Train
+        And weekly gift 5 should be of type Line

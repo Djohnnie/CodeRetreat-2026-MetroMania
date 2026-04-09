@@ -110,7 +110,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/WeeklyGifts.feature.ndjson", 20);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/WeeklyGifts.feature.ndjson", 23);
         }
         
         async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
@@ -613,6 +613,168 @@ namespace MetroMania.Engine.Tests.Features
 #line hidden
 #line 99
         await testRunner.ThenAsync(string.Format("\"OnWeeklyGiftReceived\" should have fired exactly {0} times", gifts), ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Multiple gifts in the same week are all awarded")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Weekly Gifts")]
+        [global::Xunit.TraitAttribute("Description", "Multiple gifts in the same week are all awarded")]
+        public async global::System.Threading.Tasks.Task MultipleGiftsInTheSameWeekAreAllAwarded()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "18";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Multiple gifts in the same week are all awarded", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 112
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 113
+        await testRunner.GivenAsync("an empty level with seed 42", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 114
+        await testRunner.AndAsync("a weekly gift override for week 2 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 115
+        await testRunner.AndAsync("a weekly gift override for week 2 with resource type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 116
+        await testRunner.WhenAsync("the simulation runs for 169 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 117
+        await testRunner.ThenAsync("\"OnWeeklyGiftReceived\" should have fired exactly 2 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 118
+        await testRunner.AndAsync("weekly gift 1 should be of type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 119
+        await testRunner.AndAsync("weekly gift 2 should be of type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Multiple gifts in the same week each add a resource to the snapshot")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Weekly Gifts")]
+        [global::Xunit.TraitAttribute("Description", "Multiple gifts in the same week each add a resource to the snapshot")]
+        public async global::System.Threading.Tasks.Task MultipleGiftsInTheSameWeekEachAddAResourceToTheSnapshot()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "19";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Multiple gifts in the same week each add a resource to the snapshot", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 121
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 122
+        await testRunner.GivenAsync("an empty level with seed 42", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 123
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 124
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 125
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 126
+        await testRunner.WhenAsync("the simulation runs for 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 127
+        await testRunner.ThenAsync("\"OnWeeklyGiftReceived\" should have fired exactly 3 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 128
+        await testRunner.AndAsync("weekly gift 1 should be of type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 129
+        await testRunner.AndAsync("weekly gift 2 should be of type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 130
+        await testRunner.AndAsync("weekly gift 3 should be of type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Weeks with multiple gifts and weeks with single gifts can coexist")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Weekly Gifts")]
+        [global::Xunit.TraitAttribute("Description", "Weeks with multiple gifts and weeks with single gifts can coexist")]
+        public async global::System.Threading.Tasks.Task WeeksWithMultipleGiftsAndWeeksWithSingleGiftsCanCoexist()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "20";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Weeks with multiple gifts and weeks with single gifts can coexist", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 132
+    this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 133
+        await testRunner.GivenAsync("an empty level with seed 42", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 134
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 135
+        await testRunner.AndAsync("a weekly gift override for week 1 with resource type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 136
+        await testRunner.AndAsync("a weekly gift override for week 2 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 137
+        await testRunner.AndAsync("a weekly gift override for week 3 with resource type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 138
+        await testRunner.AndAsync("a weekly gift override for week 3 with resource type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 139
+        await testRunner.WhenAsync("the simulation runs for 337 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 140
+        await testRunner.ThenAsync("\"OnWeeklyGiftReceived\" should have fired exactly 5 times", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 141
+        await testRunner.AndAsync("weekly gift 1 should be of type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 142
+        await testRunner.AndAsync("weekly gift 2 should be of type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 143
+        await testRunner.AndAsync("weekly gift 3 should be of type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 144
+        await testRunner.AndAsync("weekly gift 4 should be of type Train", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 145
+        await testRunner.AndAsync("weekly gift 5 should be of type Line", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

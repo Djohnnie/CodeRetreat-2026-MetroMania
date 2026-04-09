@@ -198,14 +198,14 @@ public class MetroManiaEngine
                 }
                 else
                 {
-                    var weeklyGift = GetWeeklyGift(level, snapshot);
-                    if (weeklyGift is not null)
+                    var weeklyGifts = GetWeeklyGifts(level, snapshot);
+                    foreach (var gift in weeklyGifts)
                     {
                         snapshot = snapshot with
                         {
-                            Resources = [.. snapshot.Resources, new Resource { Type = weeklyGift.Value, InUse = false }]
+                            Resources = [.. snapshot.Resources, new Resource { Type = gift, InUse = false }]
                         };
-                        runner.OnWeeklyGiftReceived(snapshot, weeklyGift.Value);
+                        runner.OnWeeklyGiftReceived(snapshot, gift);
                     }
                 }
             }
@@ -867,19 +867,21 @@ public class MetroManiaEngine
     }
 
     /// <summary>
-    /// Returns the resource type that should be awarded as the weekly gift on the
+    /// Returns all resource types that should be awarded as weekly gifts on the
     /// given week number (1-based, where week 1 is days 1–7).
     ///
-    /// If the level designer has placed a <see cref="WeeklyGiftOverride"/> for the
-    /// current week, that override takes effect unconditionally.  Otherwise no gift
+    /// If the level designer has placed one or more <see cref="WeeklyGiftOverride"/>
+    /// entries for the current week, all of them take effect.  Otherwise no gift
     /// is awarded — the level designer has full control over the gifting schedule.
     /// </summary>
-    private static ResourceType? GetWeeklyGift(Level level, GameSnapshot snapshot)
+    private static List<ResourceType> GetWeeklyGifts(Level level, GameSnapshot snapshot)
     {
         var weekNumber = snapshot.TotalHoursElapsed / (24 * 7) + 1;
 
-        var overrride = level.LevelData.WeeklyGiftOverrides.FirstOrDefault(x => x.Week == weekNumber);
-        return overrride?.ResourceType;
+        return level.LevelData.WeeklyGiftOverrides
+            .Where(x => x.Week == weekNumber)
+            .Select(x => x.ResourceType)
+            .ToList();
     }
 
     /// <summary>

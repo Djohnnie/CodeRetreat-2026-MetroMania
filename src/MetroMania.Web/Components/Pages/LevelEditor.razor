@@ -233,9 +233,7 @@ else
                 {
                     <MudTd>
                         <MudNumericField Value="context.Week" ValueChanged="(int v) => OnGiftWeekChanged(context, v)"
-                                         Min="1" Variant="Variant.Text" Margin="Margin.Dense"
-                                         Style="@(IsDuplicateWeek(context) ? "color: var(--mud-palette-error);" : "")"
-                                         Error="IsDuplicateWeek(context)" />
+                                         Min="1" Variant="Variant.Text" Margin="Margin.Dense" />
                     </MudTd>
                     <MudTd>
                         <MudSelect Value="context.ResourceType" ValueChanged="(ResourceType v) => OnGiftResourceTypeChanged(context, v)"
@@ -664,22 +662,7 @@ else
 
     private async Task OnGiftWeekChanged(WeeklyGiftOverride item, int newWeek)
     {
-        int oldWeek = item.Week;
-        newWeek = Math.Max(1, newWeek);
-
-        var usedWeeks = new HashSet<int>(_weeklyGiftOverrides.Where(g => g != item).Select(g => g.Week));
-
-        if (usedWeeks.Contains(newWeek))
-        {
-            int direction = newWeek >= oldWeek ? 1 : -1;
-            int candidate = newWeek;
-            while (usedWeeks.Contains(candidate) && candidate > 1)
-                candidate += direction;
-            // Use resolved candidate, or keep newWeek (duplicate) when decreasing hits floor
-            newWeek = candidate >= 1 ? candidate : newWeek;
-        }
-
-        item.Week = newWeek;
+        item.Week = Math.Max(1, newWeek);
         SortGiftOverrides();
         await DebouncedSaveLevelData();
     }
@@ -692,11 +675,8 @@ else
 
     private async Task AddGiftOverride()
     {
-        var usedWeeks = new HashSet<int>(_weeklyGiftOverrides.Select(g => g.Week));
-        int nextWeek = 1;
-        while (usedWeeks.Contains(nextWeek))
-            nextWeek++;
-        _weeklyGiftOverrides.Add(new WeeklyGiftOverride { Week = nextWeek, ResourceType = ResourceType.Line });
+        int maxWeek = _weeklyGiftOverrides.Count > 0 ? _weeklyGiftOverrides.Max(g => g.Week) : 0;
+        _weeklyGiftOverrides.Add(new WeeklyGiftOverride { Week = maxWeek + 1, ResourceType = ResourceType.Line });
         SortGiftOverrides();
         await SaveLevelData();
     }
@@ -708,10 +688,7 @@ else
     }
 
     private void SortGiftOverrides() =>
-        _weeklyGiftOverrides = [.. _weeklyGiftOverrides.OrderBy(g => g.Week)];
-
-    private bool IsDuplicateWeek(WeeklyGiftOverride item) =>
-        _weeklyGiftOverrides.Any(g => g != item && g.Week == item.Week);
+        _weeklyGiftOverrides = [.. _weeklyGiftOverrides.OrderBy(g => g.Week).ThenBy(g => g.ResourceType)];
 
     // --- SVG tile rendering ---
 
