@@ -10,7 +10,7 @@
 @inject IConfiguration Configuration
 @inject CodeEditorBridge EditorBridge
 
-<MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="_isDarkMode" />
+<MudThemeProvider @ref="_themeProvider" Theme="@(_currentLanguage == "ar" ? _themeArabic : _theme)" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -256,6 +256,45 @@
             DrawerBackground = "#1e293b",
             DrawerText = "#cbd5e1",
             TableStriped = "#1e293b"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["'Inter'", "'Roboto'", "'Helvetica'", "'Arial'", "sans-serif"]
+            }
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "12px"
+        }
+    };
+
+    private readonly MudTheme _themeArabic = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#2563eb",
+            Secondary = "#f59e0b",
+            AppbarBackground = "rgba(255, 255, 255, 0.8)",
+            AppbarText = "#1e293b",
+            Background = "#f8fafc",
+            Surface = "#ffffff",
+            DrawerBackground = "#ffffff",
+            DrawerText = "#334155",
+            TableStriped = "#f1f5f9"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#60a5fa",
+            Secondary = "#fbbf24",
+            AppbarBackground = "rgba(26, 13, 7, 0.85)",
+            AppbarText = "#e2d8d0",
+            Background = "#1a0d07",
+            Surface = "#2c1810",
+            DrawerBackground = "#2c1810",
+            DrawerText = "#d4b8a8",
+            TableStriped = "#2c1810"
         },
         Typography = new Typography
         {
