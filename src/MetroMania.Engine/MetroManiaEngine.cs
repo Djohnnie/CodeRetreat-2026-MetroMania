@@ -184,29 +184,25 @@ public class MetroManiaEngine
             // ── Weekly gift — granted on the first tick of every Monday ──────────
             // The gift is added before the player's OnHourTicked call so the runner
             // can immediately use the new resource in the same turn it was received.
-            // Week 1 (absoluteHour == 0) is special: if the level has InitialResources,
-            // those ARE the week-1 gifts (already in the snapshot); we notify the runner
-            // for each one without adding new resources. If InitialResources is empty,
-            // a regular RNG/override gift fires as normal.
+            // On the very first tick (week 1), initial resources are already seeded in
+            // the snapshot; the runner is notified for each one without adding duplicates.
+            // Weekly gift overrides always fire independently, including on week 1.
             if (dayOfWeek == DayOfWeek.Monday && hourOfDay == 0)
             {
-                var initialResources = level.LevelData.InitialResources;
-                if (absoluteHour == 0 && initialResources.Count > 0)
+                if (absoluteHour == 0)
                 {
-                    foreach (var resourceType in initialResources)
+                    foreach (var resourceType in level.LevelData.InitialResources)
                         runner.OnWeeklyGiftReceived(snapshot, resourceType);
                 }
-                else
+
+                var weeklyGifts = GetWeeklyGifts(level, snapshot);
+                foreach (var gift in weeklyGifts)
                 {
-                    var weeklyGifts = GetWeeklyGifts(level, snapshot);
-                    foreach (var gift in weeklyGifts)
+                    snapshot = snapshot with
                     {
-                        snapshot = snapshot with
-                        {
-                            Resources = [.. snapshot.Resources, new Resource { Type = gift, InUse = false }]
-                        };
-                        runner.OnWeeklyGiftReceived(snapshot, gift);
-                    }
+                        Resources = [.. snapshot.Resources, new Resource { Type = gift, InUse = false }]
+                    };
+                    runner.OnWeeklyGiftReceived(snapshot, gift);
                 }
             }
 

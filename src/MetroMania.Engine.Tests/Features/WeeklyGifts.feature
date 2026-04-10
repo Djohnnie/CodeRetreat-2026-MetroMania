@@ -129,6 +129,36 @@ Feature: Weekly Gifts
         And weekly gift 2 should be of type Train
         And weekly gift 3 should be of type Line
 
+    Scenario: InitialResources and week 1 override both gift resources on day 1
+        Given an empty level with seed 42
+        And the level has 1 initial Line and 1 initial Train
+        And a weekly gift override for week 1 with resource type Line
+        And a weekly gift override for week 1 with resource type Train
+        When the simulation runs for 1 hour
+        Then "OnWeeklyGiftReceived" should have fired exactly 4 times
+        And weekly gift 1 should be of type Line
+        And weekly gift 2 should be of type Train
+        And weekly gift 3 should be of type Line
+        And weekly gift 4 should be of type Train
+        And weekly gift 1 should have been received on day 1 at hour 0
+        And the last snapshot should contain 4 resources
+
+    Scenario: Week 1 with 2 lines and 2 trains gifts all 4 resources on day 1
+        Given an empty level with seed 42
+        And a weekly gift override for week 1 with resource type Line
+        And a weekly gift override for week 1 with resource type Line
+        And a weekly gift override for week 1 with resource type Train
+        And a weekly gift override for week 1 with resource type Train
+        When the simulation runs for 1 hour
+        Then "OnWeeklyGiftReceived" should have fired exactly 4 times
+        And weekly gift 1 should be of type Line
+        And weekly gift 2 should be of type Line
+        And weekly gift 3 should be of type Train
+        And weekly gift 4 should be of type Train
+        And weekly gift 1 should have been received on day 1 at hour 0
+        And weekly gift 4 should have been received on day 1 at hour 0
+        And the last snapshot should contain 4 resources
+
     Scenario: Weeks with multiple gifts and weeks with single gifts can coexist
         Given an empty level with seed 42
         And a weekly gift override for week 1 with resource type Line
