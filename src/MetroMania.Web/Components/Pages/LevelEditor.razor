@@ -286,9 +286,10 @@ else
     <div class="d-flex flex-column align-center mt-6 mb-3">
         <MudText Typo="Typo.subtitle2" Class="mb-2">@Loc["WeeklyGiftOverrides"]</MudText>
         <MudTable T="WeeklyGiftOverride" Items="@AllGiftRows" Dense="true" Elevation="0" Class="mb-3"
-                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 4px; max-width: 500px; width: 100%;">
+                  Style="border: 1px solid var(--mud-palette-lines-default); border-radius: 4px; max-width: 600px; width: 100%;">
             <HeaderContent>
                 <MudTh>@Loc["Week"]</MudTh>
+                <MudTh>@Loc["AfterDays"]</MudTh>
                 <MudTh>@Loc["ResourceType"]</MudTh>
                 <MudTh Style="width: 48px;"></MudTh>
             </HeaderContent>
@@ -297,6 +298,9 @@ else
                 {
                     <MudTd>
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Style="padding-left: 6px;">1</MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Style="padding-left: 6px;">0</MudText>
                     </MudTd>
                     <MudTd>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">@Loc[context.ResourceType.ToString()]</MudText>
@@ -312,6 +316,9 @@ else
                     <MudTd>
                         <MudNumericField Value="context.Week" ValueChanged="(int v) => OnGiftWeekChanged(context, v)"
                                          Min="1" Variant="Variant.Text" Margin="Margin.Dense" />
+                    </MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Style="padding-left: 6px;">@GiftDays(context.Week)</MudText>
                     </MudTd>
                     <MudTd>
                         <MudSelect Value="context.ResourceType" ValueChanged="(ResourceType v) => OnGiftResourceTypeChanged(context, v)"
@@ -843,6 +850,8 @@ else
     }
 
     // --- Weekly gift override helpers ---
+
+    private static int GiftDays(int week) => (week - 1) * 7;
 
     private async Task OnGiftWeekChanged(WeeklyGiftOverride item, int newWeek)
     {
