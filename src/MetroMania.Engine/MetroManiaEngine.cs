@@ -141,7 +141,7 @@ public class MetroManiaEngine
             // ── Station crowding / game-over check ────────────────────────────
             // Evaluated after day-start so the runner sees the state before new
             // stations or passengers appear.  Thresholds: 10+ crowded, 20+ game over.
-            const int CrowdedThreshold  = 10;
+            const int CrowdedThreshold = 10;
             const int GameOverThreshold = 20;
 
             bool gameOver = false;
@@ -388,27 +388,23 @@ public class MetroManiaEngine
         int pointsScored = 0;
 
         // ── Precompute tile paths once – reused across all three phases ────────────
-        var tilePaths = trains
-            .Select(t =>
-            {
-                var line = snapshot.Lines.FirstOrDefault(l => l.LineId == t.LineId);
-                return line is null ? (List<Location>)[] : LinePathHelper.ComputeTilePath(line, stationLocations);
-            })
+        var trainLines = trains
+            .Select(t => snapshot.Lines.FirstOrDefault(l => l.LineId == t.LineId))
+            .ToArray();
+
+        var tilePaths = trainLines
+            .Select(line => line is null ? (List<Location>)[] : LinePathHelper.ComputeTilePath(line, stationLocations))
             .ToArray();
 
         // Station IDs belonging to each train's line — used to skip pass-through stations.
-        var lineStationSets = trains
-            .Select(t =>
-            {
-                var line = snapshot.Lines.FirstOrDefault(l => l.LineId == t.LineId);
-                return line is null ? new HashSet<Guid>() : new HashSet<Guid>(line.StationIds);
-            })
+        var lineStationSets = trainLines
+            .Select(line => line is null ? new HashSet<Guid>() : new HashSet<Guid>(line.StationIds))
             .ToArray();
 
         // ── Station graph for optimal-route decisions ─────────────────────────────
         // Built once per tick; used by the boarding and transfer-drop checks below.
         var stationById = snapshot.Stations.ToDictionary(kvp => kvp.Value.Id, kvp => kvp.Value);
-        var stationAdj  = BuildStationAdjacency(stationById, stationLocations, snapshot.Lines);
+        var stationAdj = BuildStationAdjacency(stationById, stationLocations, snapshot.Lines);
 
         // Cache Dijkstra results keyed by (fromStation, destType) to avoid recomputing
         // the same shortest-path query for multiple passengers or trains in one tick.
@@ -486,17 +482,38 @@ public class MetroManiaEngine
 
                 // Pre-compute the next station the train will visit — shared by both
                 // the transfer-drop check and the boarding check below.
+                //
+                // We resolve the intended next station from the line's station order rather
+                // than scanning the tile path for any station tile.  This is necessary because
+                // a segment's tile path can physically pass through the grid location of another
+                // station on the same line (e.g. Triangle→Circle whose diagonal crosses the
+                // Rectangle tile), which would make the boarding check incorrectly conclude that
+                // the "next station" is the mid-segment pass-through rather than the real neighbour.
                 int effStep = effectiveDir > 0 ? 1 : -1;
                 Guid nextStationId = Guid.Empty;
-                int  nextPathIdx   = -1;
-                for (int i = idx + effStep; i >= 0 && i < tilePath.Count; i += effStep)
+                int nextPathIdx = -1;
+                var trainLine = trainLines[t];
+                if (trainLine is not null)
                 {
-                    if (snapshot.Stations.TryGetValue(tilePath[i], out var ns)
-                        && lineStationSets[t].Contains(ns.Id))
+                    int stationLineIdx = trainLine.StationIds
+                        .Select((id, i) => (id, i))
+                        .FirstOrDefault(x => x.id == currentStation.Id, (id: Guid.Empty, i: -1)).i;
+                    int nextLineIdx = stationLineIdx + (effectiveDir > 0 ? 1 : -1);
+                    if (nextLineIdx >= 0 && nextLineIdx < trainLine.StationIds.Count)
                     {
-                        nextStationId = ns.Id;
-                        nextPathIdx   = i;
-                        break;
+                        var intendedNextId = trainLine.StationIds[nextLineIdx];
+                        // Find this specific station in the tile path, scanning in the travel
+                        // direction.  Skips any mid-segment pass-throughs of other stations.
+                        for (int i = idx + effStep; i >= 0 && i < tilePath.Count; i += effStep)
+                        {
+                            if (snapshot.Stations.TryGetValue(tilePath[i], out var ns)
+                                && ns.Id == intendedNextId)
+                            {
+                                nextStationId = intendedNextId;
+                                nextPathIdx = i;
+                                break;
+                            }
+                        }
                     }
                 }
                 int stepsToNext = nextPathIdx >= 0 ? Math.Abs(nextPathIdx - idx) : int.MaxValue;
@@ -622,7 +639,7 @@ public class MetroManiaEngine
                     // A lower-index train already claimed this station — block this one.
                     ticks[t] = tick with
                     {
-                        FinalTile      = trains[t].TilePosition,
+                        FinalTile = trains[t].TilePosition,
                         FinalDirection = trains[t].Direction,
                         FinalPathIndex = trains[t].PathIndex
                     };
@@ -642,7 +659,7 @@ public class MetroManiaEngine
                 {
                     ticks[t] = tick with
                     {
-                        FinalTile      = trains[t].TilePosition,
+                        FinalTile = trains[t].TilePosition,
                         FinalDirection = trains[t].Direction,
                         FinalPathIndex = trains[t].PathIndex
                     };
@@ -655,7 +672,7 @@ public class MetroManiaEngine
                 {
                     ticks[t] = tick with
                     {
-                        FinalTile      = trains[t].TilePosition,
+                        FinalTile = trains[t].TilePosition,
                         FinalDirection = trains[t].Direction,
                         FinalPathIndex = trains[t].PathIndex
                     };
@@ -671,7 +688,7 @@ public class MetroManiaEngine
         // ══════════════════════════════════════════════════════════════════════════
         for (int t = 0; t < trains.Count; t++)
         {
-            var tick  = ticks[t];
+            var tick = ticks[t];
             var train = trains[t];
 
             if (tick.HasWork)
@@ -682,7 +699,7 @@ public class MetroManiaEngine
                     trains[t] = train with
                     {
                         Passengers = train.Passengers.Where(p => p.Id != dropped.Id).ToList(),
-                        PathIndex  = tick.FinalPathIndex,
+                        PathIndex = tick.FinalPathIndex,
                     };
 
                     // Award a point only for final delivery (destination type matches this station).
@@ -705,7 +722,7 @@ public class MetroManiaEngine
                     trains[t] = train with
                     {
                         Passengers = [.. train.Passengers, tick.PickUp with { StationId = null }],
-                        PathIndex  = tick.FinalPathIndex,
+                        PathIndex = tick.FinalPathIndex,
                     };
                 }
                 else
@@ -721,17 +738,17 @@ public class MetroManiaEngine
                 trains[t] = train with
                 {
                     TilePosition = tick.FinalTile,
-                    Direction    = tick.FinalDirection,
-                    PathIndex    = tick.FinalPathIndex,
+                    Direction = tick.FinalDirection,
+                    PathIndex = tick.FinalPathIndex,
                 };
             }
         }
 
         return snapshot with
         {
-            Trains    = trains,
+            Trains = trains,
             Passengers = waitingPassengers,
-            Score     = snapshot.Score + pointsScored,
+            Score = snapshot.Score + pointsScored,
         };
     }
 
@@ -754,12 +771,12 @@ public class MetroManiaEngine
             for (int i = 0; i < ids.Count - 1; i++)
             {
                 if (!adj.ContainsKey(ids[i]) || !adj.ContainsKey(ids[i + 1])) continue;
-                if (!stationLocations.TryGetValue(ids[i],     out var locA)) continue;
+                if (!stationLocations.TryGetValue(ids[i], out var locA)) continue;
                 if (!stationLocations.TryGetValue(ids[i + 1], out var locB)) continue;
 
                 int cost = Math.Max(Math.Abs(locA.X - locB.X), Math.Abs(locA.Y - locB.Y));
-                adj[ids[i]    ].Add((ids[i + 1], cost));
-                adj[ids[i + 1]].Add((ids[i],     cost));
+                adj[ids[i]].Add((ids[i + 1], cost));
+                adj[ids[i + 1]].Add((ids[i], cost));
             }
         }
         return adj;
@@ -781,7 +798,7 @@ public class MetroManiaEngine
             return 0;
 
         var dist = new Dictionary<Guid, int> { [fromStationId] = 0 };
-        var pq   = new PriorityQueue<Guid, int>();
+        var pq = new PriorityQueue<Guid, int>();
         pq.Enqueue(fromStationId, 0);
 
         while (pq.TryDequeue(out var cur, out int d))
@@ -843,8 +860,8 @@ public class MetroManiaEngine
 
         // ── Backward: reach the forward terminal first, then traverse back ──────
         // This gives access to stations on the opposite side of the current position.
-        int terminalFwd   = direction > 0 ? lineStations.Count - 1 : 0;
-        int stepsToTerm   = Math.Abs(lineStations[terminalFwd].PathIdx - lineStations[curPos].PathIdx);
+        int terminalFwd = direction > 0 ? lineStations.Count - 1 : 0;
+        int stepsToTerm = Math.Abs(lineStations[terminalFwd].PathIdx - lineStations[curPos].PathIdx);
 
         for (int k = terminalFwd - step; k >= 0 && k < lineStations.Count; k -= step)
         {
@@ -951,13 +968,13 @@ public class MetroManiaEngine
 
         var (newSnapshot, errorCode, errorDescription) = snapshot.LastAction switch
         {
-            CreateLine createLine                     => ApplyCreateLine(snapshot, createLine),
-            ExtendLineFromTerminal extendLine        => ApplyExtendLineFromTerminal(snapshot, extendLine),
-            ExtendLineInBetween insertStation        => ApplyExtendLineInBetween(snapshot, insertStation),
+            CreateLine createLine => ApplyCreateLine(snapshot, createLine),
+            ExtendLineFromTerminal extendLine => ApplyExtendLineFromTerminal(snapshot, extendLine),
+            ExtendLineInBetween insertStation => ApplyExtendLineInBetween(snapshot, insertStation),
             AddVehicleToLine addVehicle => ApplyAddVehicleToLine(snapshot, addVehicle),
             RemoveVehicle removeVehicle => ApplyRemoveVehicle(snapshot, removeVehicle),
-            RemoveLine removeLine       => ApplyRemoveLine(snapshot, removeLine),
-            _                           => (snapshot, -1, "Action type not recognised or not yet implemented.")
+            RemoveLine removeLine => ApplyRemoveLine(snapshot, removeLine),
+            _ => (snapshot, -1, "Action type not recognised or not yet implemented.")
         };
 
         // Notify the player when their action had no effect.
@@ -1161,8 +1178,8 @@ public class MetroManiaEngine
 
         var newTrain = new Train
         {
-            TrainId   = action.VehicleId,
-            LineId    = action.LineId,
+            TrainId = action.VehicleId,
+            LineId = action.LineId,
             TilePosition = stationEntry.Key,
             Direction = 1,
             PathIndex = pathIndex,
