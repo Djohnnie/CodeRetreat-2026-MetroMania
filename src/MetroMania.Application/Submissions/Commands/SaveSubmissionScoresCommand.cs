@@ -14,6 +14,8 @@ public class SaveSubmissionScoresCommandHandler(ISubmissionScoreRepository score
 {
     public async Task Handle(SaveSubmissionScoresCommand request, CancellationToken cancellationToken)
     {
+        await scoreRepository.DeleteBySubmissionIdAsync(request.SubmissionId);
+
         var entities = request.Scores.Select(s => new SubmissionScore
         {
             Id = Guid.NewGuid(),
