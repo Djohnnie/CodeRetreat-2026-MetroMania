@@ -146,6 +146,15 @@ else
                             <MudText Typo="Typo.caption" Color="Color.Secondary">
                                 @submission.SubmittedAt.ToLocalTime().ToString("g")
                             </MudText>
+                            @if (!submission.IsInProgress)
+                            {
+                                <MudTooltip Text="@Loc["Rerun"]">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Replay"
+                                                   Size="Size.Small"
+                                                   Color="Color.Secondary"
+                                                   OnClick="() => RerunSubmission(submission)" />
+                                </MudTooltip>
+                            }
                             <MudTooltip Text="@Loc["LoadToEditor"]">
                                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                                Size="Size.Small"
@@ -474,6 +483,13 @@ else
     {
         await _editor.SetValue(_starterCode);
         await UpdateEditorHeight();
+    }
+
+    private async Task RerunSubmission(SubmissionDto submission)
+    {
+        await ApiClient.RerunSubmissionAsync(submission.Id);
+        _submissions = await ApiClient.GetUserSubmissionsAsync(_userId);
+        await EnsureHubConnectionAsync();
     }
 
     private async Task RevertToSubmission(SubmissionDto submission)

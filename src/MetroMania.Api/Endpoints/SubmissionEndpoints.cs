@@ -76,6 +76,12 @@ public static class SubmissionEndpoints
             return Results.Created($"/api/submissions/{result.Submission!.Id}", result.Submission);
         });
 
+        group.MapPost("/{id:guid}/rerun", async (Guid id, IMediator mediator) =>
+        {
+            var found = await mediator.Send(new RerunSubmissionCommand(id));
+            return found ? Results.NoContent() : Results.NotFound();
+        });
+
         group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             await mediator.Send(new DeleteSubmissionCommand(id));

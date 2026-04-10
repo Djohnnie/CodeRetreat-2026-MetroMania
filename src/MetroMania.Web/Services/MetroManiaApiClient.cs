@@ -245,6 +245,13 @@ public class MetroManiaApiClient(HttpClient httpClient, JwtTokenProvider tokenPr
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<bool> RerunSubmissionAsync(Guid submissionId)
+    {
+        SetAuthHeader();
+        var response = await httpClient.PostAsync($"/api/submissions/{submissionId}/rerun", null);
+        return response.IsSuccessStatusCode;
+    }
+
     // ── Leaderboard ──────────────────────────────────────────────
     public async Task<List<LeaderboardEntryDto>> GetLeaderboardAsync()
     {

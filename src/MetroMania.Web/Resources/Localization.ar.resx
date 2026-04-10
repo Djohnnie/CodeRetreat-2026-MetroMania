@@ -113,6 +113,7 @@
   <data name="Submission" xml:space="preserve"><value>تقديم</value></data>
   <data name="RevertToThis" xml:space="preserve"><value>العودة إلى هذا الإصدار</value></data>
   <data name="LoadToEditor" xml:space="preserve"><value>تحميل في المحرر</value></data>
+  <data name="Rerun" xml:space="preserve"><value>إعادة التشغيل</value></data>
   <data name="FailureDetails" xml:space="preserve"><value>تفاصيل الفشل</value></data>
 
   <!-- Submission status -->

@@ -114,6 +114,7 @@
   <data name="Submission" xml:space="preserve"><value>Submission</value></data>
   <data name="RevertToThis" xml:space="preserve"><value>Revert to this version</value></data>
   <data name="LoadToEditor" xml:space="preserve"><value>Load into editor</value></data>
+  <data name="Rerun" xml:space="preserve"><value>Rerun</value></data>
   <data name="FailureDetails" xml:space="preserve"><value>Failure Details</value></data>
   <!-- SubmissionStatus enum values -->
   <data name="Waiting" xml:space="preserve"><value>Waiting</value></data>
