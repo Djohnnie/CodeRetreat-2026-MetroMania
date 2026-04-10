@@ -108,7 +108,7 @@ namespace MetroMania.Engine.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/CollisionResolution.feature.ndjson", 5);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/CollisionResolution.feature.ndjson", 6);
         }
         
         async System.Threading.Tasks.ValueTask Xunit.IAsyncLifetime.InitializeAsync()
@@ -190,18 +190,21 @@ namespace MetroMania.Engine.Tests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Two trains claiming the same station — lower index wins (Rule C)")]
+        [global::Xunit.FactAttribute(DisplayName="Two trains on the same line simultaneously targeting the same station — lower ind" +
+            "ex wins (Rule C)")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Collision Resolution")]
-        [global::Xunit.TraitAttribute("Description", "Two trains claiming the same station — lower index wins (Rule C)")]
-        public async global::System.Threading.Tasks.Task TwoTrainsClaimingTheSameStationLowerIndexWinsRuleC()
+        [global::Xunit.TraitAttribute("Description", "Two trains on the same line simultaneously targeting the same station — lower ind" +
+            "ex wins (Rule C)")]
+        public async global::System.Threading.Tasks.Task TwoTrainsOnTheSameLineSimultaneouslyTargetingTheSameStationLowerIndexWinsRuleC()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Two trains claiming the same station — lower index wins (Rule C)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Two trains on the same line simultaneously targeting the same station — lower ind" +
+                    "ex wins (Rule C)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 36
+#line 38
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -211,55 +214,58 @@ namespace MetroMania.Engine.Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 37
-    await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and no passen" +
-                        "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 39
+    await testRunner.GivenAsync("a level with a Triangle station at (0,0) with a spawn delay of 0 days and no pass" +
+                        "enger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 38
+#line 40
     await testRunner.AndAsync("a level with a Rectangle station at (4,0) with a spawn delay of 0 days and no pas" +
                         "senger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 39
-    await testRunner.AndAsync("a level with a Triangle station at (7,0) with a spawn delay of 0 days and no pass" +
-                        "enger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 40
-    await testRunner.AndAsync("the level has 2 initial Lines and 2 initial Trains", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 41
-    await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("a level with a Circle station at (7,0) with a spawn delay of 0 days and no passen" +
+                        "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 42
-    await testRunner.AndAsync("the runner will create a second line between stations at (7,0) and (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the level has 1 initial Line and 2 initial Trains", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 43
-    await testRunner.AndAsync("the runner will deploy a train on line 1 at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 44
-    await testRunner.AndAsync("the runner will deploy a train on line 2 at station (7,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will extend line 1 from station (4,0) to station (7,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 45
-    await testRunner.WhenAsync("the simulation runs for 7 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("the runner will deploy a train on line 1 at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 46
-    await testRunner.ThenAsync("train 1 should be at tile (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the runner will deploy a train on line 1 at station (7,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 47
+    await testRunner.WhenAsync("the simulation runs for 7 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 48
+    await testRunner.ThenAsync("train 1 should be at tile (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 49
     await testRunner.AndAsync("train 2 should not be at tile (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.FactAttribute(DisplayName="Blocking cascades from station to trailing train on open track (Rules A + B)")]
+        [global::Xunit.FactAttribute(DisplayName="Trains on different lines may simultaneously occupy the same station (cross-line " +
+            "independence)")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Collision Resolution")]
-        [global::Xunit.TraitAttribute("Description", "Blocking cascades from station to trailing train on open track (Rules A + B)")]
-        public async global::System.Threading.Tasks.Task BlockingCascadesFromStationToTrailingTrainOnOpenTrackRulesAB()
+        [global::Xunit.TraitAttribute("Description", "Trains on different lines may simultaneously occupy the same station (cross-line " +
+            "independence)")]
+        public async global::System.Threading.Tasks.Task TrainsOnDifferentLinesMaySimultaneouslyOccupyTheSameStationCross_LineIndependence()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Blocking cascades from station to trailing train on open track (Rules A + B)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Trains on different lines may simultaneously occupy the same station (cross-line " +
+                    "independence)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 63
@@ -277,41 +283,102 @@ namespace MetroMania.Engine.Tests.Features
                         "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 65
-    await testRunner.AndAsync("a level with a Rectangle station at (3,0) with a spawn delay of 0 days and passen" +
-                        "gers every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("a level with a Rectangle station at (4,0) with a spawn delay of 0 days and no pas" +
+                        "senger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 66
-    await testRunner.AndAsync("a level with a Triangle station at (6,0) with a spawn delay of 0 days and no pass" +
+    await testRunner.AndAsync("a level with a Triangle station at (7,0) with a spawn delay of 0 days and no pass" +
                         "enger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 67
-    await testRunner.AndAsync("the level has 1 initial Line and 3 initial Trains", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the level has 2 initial Lines and 2 initial Trains", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 68
-    await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 69
-    await testRunner.AndAsync("the runner will extend the first line from station (3,0) to station (6,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will create a second line between stations at (7,0) and (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 70
-    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will deploy a train on line 1 at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 71
-    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the runner will deploy a train on line 2 at station (7,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 72
-    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 73
     await testRunner.WhenAsync("the simulation runs for 7 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
+#line 73
+    await testRunner.ThenAsync("train 1 should be at tile (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
 #line 74
+    await testRunner.AndAsync("train 2 should be at tile (4,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.FactAttribute(DisplayName="Blocking cascades from station to trailing train on open track (Rules A + B)")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Collision Resolution")]
+        [global::Xunit.TraitAttribute("Description", "Blocking cascades from station to trailing train on open track (Rules A + B)")]
+        public async global::System.Threading.Tasks.Task BlockingCascadesFromStationToTrailingTrainOnOpenTrackRulesAB()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "3";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Blocking cascades from station to trailing train on open track (Rules A + B)", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 90
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 91
+    await testRunner.GivenAsync("a level with a Circle station at (0,0) with a spawn delay of 0 days and no passen" +
+                        "ger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 92
+    await testRunner.AndAsync("a level with a Rectangle station at (3,0) with a spawn delay of 0 days and passen" +
+                        "gers every 1 hour", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 93
+    await testRunner.AndAsync("a level with a Triangle station at (6,0) with a spawn delay of 0 days and no pass" +
+                        "enger spawn phases", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 94
+    await testRunner.AndAsync("the level has 1 initial Line and 3 initial Trains", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 95
+    await testRunner.AndAsync("the runner will create a line between stations at (0,0) and (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 96
+    await testRunner.AndAsync("the runner will extend the first line from station (3,0) to station (6,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 97
+    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 98
+    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 99
+    await testRunner.AndAsync("the runner will deploy a train on the first line at station (0,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 100
+    await testRunner.WhenAsync("the simulation runs for 7 hours", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 101
     await testRunner.ThenAsync("train 1 should be at tile (3,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 75
+#line 102
     await testRunner.AndAsync("train 2 should be at tile (2,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 76
+#line 103
     await testRunner.AndAsync("train 3 should be at tile (1,0)", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

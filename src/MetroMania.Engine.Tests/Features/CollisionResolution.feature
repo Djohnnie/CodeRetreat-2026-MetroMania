@@ -25,15 +25,42 @@ Feature: Collision Resolution
     And train 2 should not be at tile (2,0)
 
   # ──────────────────────────────────────────────────────────────────────
-  # Rule C: simultaneous station arrival — lower index wins
+  # Rule C: simultaneous station arrival on the same line — lower index wins
   #
-  # Line 1: Circle(0,0) → Rectangle(4,0).  Line 2: Triangle(7,0) → Rectangle(4,0).
-  # Train 1 at (0,0) on Line 1 — 4 tiles from Rectangle.
-  # Train 2 at (7,0) on Line 2 — 3 tiles from Rectangle, deployed 1 tick later.
-  # Both arrive at (4,0) on the same tick. Train 1 (lower index) wins.
+  # Line 1: Triangle(0,0) → Rectangle(4,0) → Circle(7,0).
+  # Train 1 deployed at Triangle(0,0) — 4 tiles from Rectangle.
+  # Train 2 deployed at Circle(7,0) 1 tick later — immediately reverses (dir=-1) —
+  #   3 tiles from Rectangle.
+  # Both trains are on the same line and arrive at Rectangle(4,0) on the same tick.
+  # Train 1 (lower index) wins; Train 2 is blocked at (5,0).
   # ──────────────────────────────────────────────────────────────────────
 
-  Scenario: Two trains claiming the same station — lower index wins (Rule C)
+  Scenario: Two trains on the same line simultaneously targeting the same station — lower index wins (Rule C)
+    Given a level with a Triangle station at (0,0) with a spawn delay of 0 days and no passenger spawn phases
+    And a level with a Rectangle station at (4,0) with a spawn delay of 0 days and no passenger spawn phases
+    And a level with a Circle station at (7,0) with a spawn delay of 0 days and no passenger spawn phases
+    And the level has 1 initial Line and 2 initial Trains
+    And the runner will create a line between stations at (0,0) and (4,0)
+    And the runner will extend line 1 from station (4,0) to station (7,0)
+    And the runner will deploy a train on line 1 at station (0,0)
+    And the runner will deploy a train on line 1 at station (7,0)
+    When the simulation runs for 7 hours
+    Then train 1 should be at tile (4,0)
+    And train 2 should not be at tile (4,0)
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Cross-line independence: trains on different lines share tile segments
+  # independently (like separate tracks) and must NOT block each other.
+  #
+  # Line 1: Circle(0,0) → Rectangle(4,0). Line 2: Triangle(7,0) → Rectangle(4,0).
+  # Both share the Rectangle(4,0) endpoint.
+  # Train 1 (Line 1, from (0,0), 4 tiles away) and Train 2 (Line 2, from (7,0),
+  # 3 tiles away, deployed 1 tick later) both arrive at Rectangle on the same tick.
+  # Because they are on different lines they are independent — both stop at the
+  # shared station simultaneously without blocking each other.
+  # ──────────────────────────────────────────────────────────────────────
+
+  Scenario: Trains on different lines may simultaneously occupy the same station (cross-line independence)
     Given a level with a Circle station at (0,0) with a spawn delay of 0 days and no passenger spawn phases
     And a level with a Rectangle station at (4,0) with a spawn delay of 0 days and no passenger spawn phases
     And a level with a Triangle station at (7,0) with a spawn delay of 0 days and no passenger spawn phases
@@ -44,7 +71,7 @@ Feature: Collision Resolution
     And the runner will deploy a train on line 2 at station (7,0)
     When the simulation runs for 7 hours
     Then train 1 should be at tile (4,0)
-    And train 2 should not be at tile (4,0)
+    And train 2 should be at tile (4,0)
 
   # ──────────────────────────────────────────────────────────────────────
   # Rules A + B cascade: 3 trains on one line. Train 1 does pickup work

@@ -365,13 +365,14 @@ public class MetroManiaEngine
     ///   Phase 3 – Results are applied: passenger operations execute and trains move.
     ///
     /// Collision rules enforced:
-    ///   A. Station occupation (direction-agnostic): only one train at a station tile at a time.
-    ///      A train that would enter an occupied station is held at its current tile.
-    ///   B. Non-station same-direction: a blocked (held) train on open track prevents
-    ///      trains behind it (same direction) from advancing into its tile.
-    ///      Trains going in the opposite direction may cross freely.
-    ///   C. Simultaneous station arrival: when two moving trains target the same station
-    ///      in the same tick the lower-index train wins; the other is blocked.
+    ///   A. Station occupation (direction-agnostic): only one train per line at a station tile at a time.
+    ///      Trains from different lines are on independent tracks and coexist freely at stations.
+    ///   B. Non-station same-direction (same-line only): a blocked (held) train on open track prevents
+    ///      trains on the same line behind it (same direction) from advancing into its tile.
+    ///      Trains going in the opposite direction, or trains on other lines, may cross freely.
+    ///   C. Simultaneous station arrival (same-line only): when two moving trains on the same line
+    ///      target the same station in the same tick the lower-index train wins; the other is blocked.
+    ///      Trains on different lines may both arrive at the same station simultaneously.
     /// </summary>
     private static GameSnapshot ProcessTrains(Level level, GameSnapshot snapshot)
     {
@@ -607,8 +608,13 @@ public class MetroManiaEngine
             // ── Build the current occupied-tile sets from all staying trains ────
             // A staying train is one whose FinalTile equals its starting position
             // (it is either working at a station or was blocked in a previous pass).
-            var occupiedStations = new HashSet<Location>();
-            var occupiedNonStationByDir = new HashSet<(Location Tile, int Dir)>();
+            //
+            // Collision rules are scoped per line: trains on different lines share
+            // physical tile segments independently (like separate tracks) and must
+            // never block each other, otherwise a cross-line deadlock can occur when
+            // two lines share the same tile segment.
+            var occupiedStationsByLine = new Dictionary<Location, HashSet<Guid>>();
+            var occupiedNonStationByDirAndLine = new HashSet<(Location Tile, int Dir, Guid LineId)>();
 
             for (int t = 0; t < trains.Count; t++)
             {
@@ -616,27 +622,35 @@ public class MetroManiaEngine
                 bool isStaying = tick.FinalTile == trains[t].TilePosition;
                 if (!isStaying) continue;
 
+                var lineId = trains[t].LineId;
                 if (stationTiles.Contains(tick.FinalTile))
-                    // Rule A: station tiles block all trains regardless of direction.
-                    occupiedStations.Add(tick.FinalTile);
+                {
+                    // Rule A: station tiles block same-line trains.
+                    if (!occupiedStationsByLine.TryGetValue(tick.FinalTile, out var lineSet))
+                        occupiedStationsByLine[tick.FinalTile] = lineSet = [];
+                    lineSet.Add(lineId);
+                }
                 else
-                    // Rule B: non-station tiles only block trains going the same way.
-                    occupiedNonStationByDir.Add((tick.FinalTile, trains[t].Direction));
+                {
+                    // Rule B: non-station tiles only block same-line trains going the same way.
+                    occupiedNonStationByDirAndLine.Add((tick.FinalTile, trains[t].Direction, lineId));
+                }
             }
 
-            // ── Rule C: two moving trains targeting the same station ─────────────
+            // ── Rule C: two moving trains on the same line targeting the same station ──
             // Trains are processed in list order; the first to claim a station wins.
             // The loser is blocked at its current tile.
-            var stationClaims = new Dictionary<Location, int>(); // tile → winning train index
+            // Trains on different lines may both arrive at the same station independently.
+            var stationClaims = new Dictionary<(Location Tile, Guid LineId), int>();
             for (int t = 0; t < trains.Count; t++)
             {
                 var tick = ticks[t];
                 bool isMoving = tick.FinalTile != trains[t].TilePosition;
                 if (!isMoving || !stationTiles.Contains(tick.FinalTile)) continue;
 
-                if (!stationClaims.TryAdd(tick.FinalTile, t))
+                if (!stationClaims.TryAdd((tick.FinalTile, trains[t].LineId), t))
                 {
-                    // A lower-index train already claimed this station — block this one.
+                    // A lower-index train on the same line already claimed this station.
                     ticks[t] = tick with
                     {
                         FinalTile = trains[t].TilePosition,
@@ -654,8 +668,11 @@ public class MetroManiaEngine
                 bool isMoving = tick.FinalTile != trains[t].TilePosition;
                 if (!isMoving) continue; // already staying — nothing to do
 
-                // Rule A: target station is held by a working or previously blocked train.
-                if (occupiedStations.Contains(tick.FinalTile))
+                var lineId = trains[t].LineId;
+
+                // Rule A: target station is held by a same-line working or blocked train.
+                if (occupiedStationsByLine.TryGetValue(tick.FinalTile, out var lineSet)
+                    && lineSet.Contains(lineId))
                 {
                     ticks[t] = tick with
                     {
@@ -667,8 +684,8 @@ public class MetroManiaEngine
                     continue;
                 }
 
-                // Rule B: target non-station tile is held by a same-direction train.
-                if (occupiedNonStationByDir.Contains((tick.FinalTile, tick.FinalDirection)))
+                // Rule B: target non-station tile is held by a same-line same-direction train.
+                if (occupiedNonStationByDirAndLine.Contains((tick.FinalTile, tick.FinalDirection, lineId)))
                 {
                     ticks[t] = tick with
                     {
@@ -718,12 +735,22 @@ public class MetroManiaEngine
                 else if (tick.PickUp is not null)
                 {
                     // Passenger boarded — remove from the platform and add to the train.
-                    waitingPassengers.Remove(tick.PickUp);
-                    trains[t] = train with
+                    // Guard against duplicate pickup: two trains from different lines may
+                    // simultaneously be at the same station and both select the same passenger
+                    // in Phase 1. Only the first train to process in Phase 3 boards them.
+                    if (waitingPassengers.Remove(tick.PickUp))
                     {
-                        Passengers = [.. train.Passengers, tick.PickUp with { StationId = null }],
-                        PathIndex = tick.FinalPathIndex,
-                    };
+                        trains[t] = train with
+                        {
+                            Passengers = [.. train.Passengers, tick.PickUp with { StationId = null }],
+                            PathIndex = tick.FinalPathIndex,
+                        };
+                    }
+                    else
+                    {
+                        // Passenger already taken by an earlier train this tick — treat as idle.
+                        trains[t] = train with { PathIndex = tick.FinalPathIndex };
+                    }
                 }
                 else
                 {
