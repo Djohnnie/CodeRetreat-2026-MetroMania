@@ -87,6 +87,11 @@ builder.Services.AddDataProtection()
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSignalR(e =>
+{
+    e.MaximumReceiveMessageSize = long.MaxValue;
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
